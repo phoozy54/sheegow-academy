@@ -52,3 +52,21 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# Database files (local SQLite — contains user data, never commit)
+db/*.db
+db/*.db-journal
+
+# Mini-service build artifacts & logs
+mini-services/*/node_modules
+mini-services/*/chat.log
+mini-services/*/server.log
+
+# Agent context
+/agent-ctx/
+
+# Generated images helper
+gen-images.sh
+
+# Uploaded files
+/upload/
