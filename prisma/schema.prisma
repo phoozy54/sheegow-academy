@@ -1,12 +1,13 @@
 // SHEEGOW ACADEMY - Prisma Schema
 // Live English Learning Platform
+// Uses PostgreSQL in production (Vercel + Neon) and locally.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
