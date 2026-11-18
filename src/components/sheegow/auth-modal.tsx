@@ -1,0 +1,322 @@
+"use client";
+
+import { useState } from "react";
+import { useStore } from "@/lib/store";
+import { api, ApiError } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { GraduationCap, Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
+import { toast } from "sonner";
+
+export function AuthModal() {
+  const { authModal, closeAuthModal, openAuthModal, setUser, navigate } =
+    useStore();
+  const isLogin = authModal === "login";
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Login fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
+
+  // Register fields
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [agree, setAgree] = useState(false);
+
+  const passwordScore = scorePassword(password);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (isLogin) {
+        const { user } = await api.login({ email, password });
+        setUser(user);
+        toast.success(`Welcome back, ${user.fullName.split(" ")[0]}!`);
+        closeAuthModal();
+        resetForm();
+        if (user.role === "admin" || user.role === "teacher") navigate("admin");
+        else navigate("dashboard");
+      } else {
+        if (!agree) {
+          toast.error("Please accept the terms to continue.");
+          setLoading(false);
+          return;
+        }
+        const { user } = await api.register({
+          fullName,
+          email,
+          phone,
+          password,
+        });
+        setUser(user);
+        toast.success("Account created! Welcome to SHEEGOW ACADEMY.");
+        closeAuthModal();
+        resetForm();
+        navigate("dashboard");
+      }
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : "Something went wrong";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function resetForm() {
+    setEmail("");
+    setPassword("");
+    setFullName("");
+    setPhone("");
+    setAgree(false);
+    setShowPassword(false);
+  }
+
+  return (
+    <Dialog
+      open={authModal !== null}
+      onOpenChange={(open) => {
+        if (!open) {
+          closeAuthModal();
+          resetForm();
+        }
+      }}
+    >
+      <DialogContent className="max-w-md overflow-hidden p-0">
+        {/* Header banner */}
+        <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 px-6 py-7 text-white">
+          <div className="hero-mesh absolute inset-0 opacity-60" />
+          <div className="relative flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+              <GraduationCap className="h-6 w-6" />
+            </span>
+            <div>
+              <p className="text-lg font-extrabold leading-tight">
+                {isLogin ? "Welcome Back" : "Join SHEEGOW ACADEMY"}
+              </p>
+              <p className="text-xs text-indigo-200">
+                {isLogin
+                  ? "Log in to continue learning English"
+                  : "Start learning English with LIVE classes today"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 pt-5">
+          <DialogHeader className="mb-4 space-y-1">
+            <DialogTitle className="text-xl">
+              {isLogin ? "Log in to your account" : "Create your free account"}
+            </DialogTitle>
+            <DialogDescription>
+              {isLogin
+                ? "Enter your credentials below to access your dashboard."
+                : "Fill in your details to get started with live English classes."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-3.5">
+            {!isLogin && (
+              <div className="space-y-1.5">
+                <Label htmlFor="fullName">Full Name</Label>
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Ahmed Hassan"
+                    className="pl-9"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="pl-9"
+                  required
+                />
+              </div>
+            </div>
+
+            {!isLogin && (
+              <div className="space-y-1.5">
+                <Label htmlFor="phone">Phone Number</Label>
+                <div className="relative">
+                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+252 61 2345678"
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="pl-9 pr-9"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              {!isLogin && password.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="flex h-1.5 flex-1 gap-1">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className={`h-full flex-1 rounded-full transition-colors ${
+                          passwordScore >= i
+                            ? passwordScore <= 1
+                              ? "bg-red-500"
+                              : passwordScore <= 2
+                                ? "bg-amber-500"
+                                : passwordScore <= 3
+                                  ? "bg-yellow-500"
+                                  : "bg-emerald-500"
+                            : "bg-muted"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {["Weak", "Fair", "Good", "Strong"][passwordScore - 1] ||
+                      "Weak"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {isLogin ? (
+              <div className="flex items-center justify-between">
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={remember}
+                    onCheckedChange={(v) => setRemember(!!v)}
+                  />
+                  Remember me
+                </label>
+                <button
+                  type="button"
+                  className="text-sm font-medium text-indigo-600 hover:underline"
+                  onClick={() => toast.info("Password reset link sent (demo).")}
+                >
+                  Forgot password?
+                </button>
+              </div>
+            ) : (
+              <label className="flex cursor-pointer items-start gap-2 text-sm">
+                <Checkbox
+                  checked={agree}
+                  onCheckedChange={(v) => setAgree(!!v)}
+                  className="mt-0.5"
+                />
+                <span className="text-muted-foreground">
+                  I agree to the{" "}
+                  <span className="font-medium text-indigo-600">
+                    Terms of Service
+                  </span>{" "}
+                  and{" "}
+                  <span className="font-medium text-indigo-600">
+                    Privacy Policy
+                  </span>
+                </span>
+              </label>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+            >
+              {loading
+                ? "Please wait..."
+                : isLogin
+                  ? "Log In"
+                  : "Create Account"}
+            </Button>
+          </form>
+
+          <div className="my-4 flex items-center gap-3">
+            <Separator className="flex-1" />
+            <span className="text-xs text-muted-foreground">OR</span>
+            <Separator className="flex-1" />
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground">
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            <button
+              type="button"
+              onClick={() => openAuthModal(isLogin ? "register" : "login")}
+              className="font-semibold text-indigo-600 hover:underline"
+            >
+              {isLogin ? "Sign up free" : "Log in"}
+            </button>
+          </p>
+
+          {!isLogin && (
+            <p className="mt-3 rounded-lg bg-indigo-50 px-3 py-2 text-center text-xs text-indigo-700">
+              Demo: use <strong>student@sheegow.academy / student123</strong> or{" "}
+              <strong>admin@sheegow.academy / admin123</strong>
+            </p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function scorePassword(pw: string): number {
+  if (!pw) return 0;
+  let score = 0;
+  if (pw.length >= 6) score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw) || /[^A-Za-z0-9]/.test(pw)) score++;
+  return Math.min(score, 4);
+}
