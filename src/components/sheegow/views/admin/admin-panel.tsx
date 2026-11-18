@@ -387,7 +387,7 @@ interface ContactMessage {
   createdAt: string;
 }
 
-function AdminMessages() {
+export function AdminMessages() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);

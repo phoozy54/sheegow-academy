@@ -79,3 +79,5 @@ export const useStore = create<AppState>((set) => ({
   setAuthLoading: (authLoading) => set({ authLoading }),
   setMobileMenuOpen: (mobileMenuOpen) => set({ mobileMenuOpen }),
 }));
+
+

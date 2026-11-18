@@ -47,8 +47,8 @@ export function AuthModal() {
         toast.success(`Welcome back, ${user.fullName.split(" ")[0]}!`);
         closeAuthModal();
         resetForm();
-        if (user.role === "admin" || user.role === "teacher") navigate("admin");
-        else navigate("dashboard");
+        // All roles (student, teacher, admin) land on the unified dashboard.
+        navigate("dashboard");
       } else {
         if (!agree) {
           toast.error("Please accept the terms to continue.");

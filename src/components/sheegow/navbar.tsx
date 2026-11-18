@@ -27,7 +27,6 @@ import {
   BookOpen,
   User as UserIcon,
   LogOut,
-  ShieldCheck,
   ChevronDown,
 } from "lucide-react";
 import { AuthModal } from "./auth-modal";
@@ -190,14 +189,6 @@ export function Navbar() {
                   <DropdownMenuItem onClick={() => go("profile")}>
                     <UserIcon className="mr-2 h-4 w-4" /> Profile Settings
                   </DropdownMenuItem>
-                  {(user.role === "admin" || user.role === "teacher") && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => go("admin")}>
-                        <ShieldCheck className="mr-2 h-4 w-4" /> Admin Panel
-                      </DropdownMenuItem>
-                    </>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -300,17 +291,6 @@ export function Navbar() {
                         <BookOpen className="mr-2 h-4 w-4" /> My Courses
                       </Button>
                     </SheetClose>
-                    {(user.role === "admin" || user.role === "teacher") && (
-                      <SheetClose asChild>
-                        <Button
-                          variant="outline"
-                          className="justify-start"
-                          onClick={() => go("admin")}
-                        >
-                          <ShieldCheck className="mr-2 h-4 w-4" /> Admin
-                        </Button>
-                      </SheetClose>
-                    )}
                     <Button
                       variant="destructive"
                       className="justify-start"

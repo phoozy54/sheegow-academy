@@ -10,14 +10,17 @@ import { LiveClassesView } from "@/components/sheegow/views/live-classes-view";
 import { LiveRoomView } from "@/components/sheegow/views/live-room-view";
 import { AboutView } from "@/components/sheegow/views/about-view";
 import { ContactView } from "@/components/sheegow/views/contact-view";
-import { DashboardView } from "@/components/sheegow/views/dashboard-view";
+import { UnifiedDashboard } from "@/components/sheegow/views/unified-dashboard";
 import { MyCoursesView } from "@/components/sheegow/views/my-courses-view";
 import { ProfileView } from "@/components/sheegow/views/profile-view";
 import { CheckoutView } from "@/components/sheegow/views/checkout-view";
-import { AdminPanel } from "@/components/sheegow/views/admin/admin-panel";
 
 export default function Home() {
   const { view } = useStore();
+
+  // The dashboard and admin views both render the UnifiedDashboard — a single
+  // portal where students, teachers, and admins all access their tools.
+  const isDashboard = view === "dashboard" || view === "admin";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -30,13 +33,12 @@ export default function Home() {
         {view === "live-room" && <LiveRoomView />}
         {view === "about" && <AboutView />}
         {view === "contact" && <ContactView />}
-        {view === "dashboard" && <DashboardView />}
+        {isDashboard && <UnifiedDashboard />}
         {view === "my-courses" && <MyCoursesView />}
         {view === "profile" && <ProfileView />}
         {view === "checkout" && <CheckoutView />}
-        {view === "admin" && <AdminPanel />}
       </main>
-      <Footer />
+      {isDashboard ? null : <Footer />}
     </div>
   );
 }
