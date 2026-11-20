@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CourseCard } from "../course-card";
+import { useMyEnrollments } from "@/lib/use-my-enrollments";
 import { Search, ChevronLeft, ChevronRight, BookOpen, Loader2 } from "lucide-react";
 import { cn } from "@/lib/ui";
 
@@ -21,6 +22,7 @@ const PAGE_SIZE = 9;
 
 export function CoursesView() {
   const navigate = useStore((s) => s.navigate);
+  const { byCourse } = useMyEnrollments();
   const { isMobile, isTablet } = useDevice();
   const padClass = isMobile
     ? "px-3"
@@ -202,7 +204,7 @@ export function CoursesView() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((c) => (
-              <CourseCard key={c.id} course={c} />
+              <CourseCard key={c.id} course={c} enrollment={byCourse.get(c.id)} />
             ))}
           </div>
         )}

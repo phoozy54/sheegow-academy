@@ -8,7 +8,9 @@ import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { CourseCard } from "../course-card";
+import { useMyEnrollments } from "@/lib/use-my-enrollments";
 import {
   Video,
   Users,
@@ -17,6 +19,7 @@ import {
   Award,
   Globe2,
   ArrowRight,
+  BookOpen,
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
@@ -61,7 +64,8 @@ const FEATURES = [
 ];
 
 export function HomeView() {
-  const { navigate, openAuthModal, user } = useStore();
+  const { navigate, openAuthModal, openPlayer, user } = useStore();
+  const { enrollments, byCourse, loading: loadingEnrollments } = useMyEnrollments();
   const { isMobile, isTablet } = useDevice();
   const padClass = isMobile
     ? "px-3"
@@ -167,6 +171,55 @@ export function HomeView() {
         </div>
       </section>
 
+      {/* ─── CONTINUE LEARNING ─────────────────────── */}
+      {!loadingEnrollments && enrollments.length > 0 && (
+        <section className={`mx-auto max-w-7xl pt-12 ${padClass}`}>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <Badge
+                variant="outline"
+                className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+              >
+                <BookOpen className="h-3 w-3" /> Continue learning
+              </Badge>
+              <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                Pick up where you left off
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              onClick={() => navigate("dashboard")}
+              className="gap-1.5"
+            >
+              My dashboard <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {enrollments.slice(0, 3).map((enrollment) => (
+              <Card key={enrollment.id} className="card-lift flex flex-col p-5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-indigo-500">
+                  {enrollment.course?.level || "Your course"}
+                </p>
+                <h3 className="mt-1 line-clamp-2 text-base font-bold text-foreground">
+                  {enrollment.course?.title || "Course"}
+                </h3>
+                <div className="mb-1.5 mt-4 flex justify-between text-xs text-muted-foreground">
+                  <span>Progress</span>
+                  <span className="font-bold text-foreground">{enrollment.progress}%</span>
+                </div>
+                <Progress value={enrollment.progress} className="h-1.5" />
+                <Button
+                  className="mt-4 w-full gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+                  onClick={() => openPlayer(enrollment.courseId)}
+                >
+                  Continue lesson <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ─── FEATURES ──────────────────────────────── */}
       <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <div className="mx-auto mb-12 max-w-2xl text-center">
@@ -245,7 +298,9 @@ export function HomeView() {
                     </div>
                   </Card>
                 ))
-              : courses.map((c) => <CourseCard key={c.id} course={c} />)}
+              : courses.map((c) => (
+                  <CourseCard key={c.id} course={c} enrollment={byCourse.get(c.id)} />
+                ))}
           </div>
         </div>
       </section>

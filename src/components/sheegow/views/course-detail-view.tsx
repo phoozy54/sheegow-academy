@@ -4,11 +4,13 @@ import { useEffect, useState, useCallback } from "react";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Review } from "@/lib/types";
+import type { Course, Enrollment, Review } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useMyEnrollments } from "@/lib/use-my-enrollments";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -90,6 +92,7 @@ export function CourseDetailView() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { byCourse } = useMyEnrollments();
 
   const loadCourse = useCallback(async () => {
     if (!courseId) {
@@ -166,6 +169,7 @@ export function CourseDetailView() {
     user?.role === "teacher" ||
     user?.role === "admin" ||
     user?.role === "super_admin";
+  const enrollment = byCourse.get(course.id);
 
   const handleEnroll = () => {
     if (!user) {
@@ -277,6 +281,12 @@ export function CourseDetailView() {
                     onEdit={() => openDashboard("courses")}
                     onContent={() => openDashboard("content-builder")}
                     onOpen={() => openPlayer(course.id)}
+                  />
+                ) : enrollment ? (
+                  <EnrolledCourseCard
+                    course={course}
+                    enrollment={enrollment}
+                    onContinue={() => openPlayer(course.id)}
                   />
                 ) : (
                   <EnrollmentCard
@@ -458,6 +468,54 @@ function TeacherCourseCard({
         <p className="pt-1 text-center text-xs text-muted-foreground">
           {course.title}
         </p>
+      </div>
+    </Card>
+  );
+}
+
+/* ─── Enrolled student card ─────────────────────────────── */
+
+function EnrolledCourseCard({
+  course,
+  enrollment,
+  onContinue,
+}: {
+  course: Course;
+  enrollment: Enrollment;
+  onContinue: () => void;
+}) {
+  const complete = enrollment.status === "completed" || enrollment.progress >= 100;
+
+  return (
+    <Card className="card-lift overflow-hidden p-0 shadow-xl">
+      <div className="bg-gradient-to-br from-emerald-600 to-indigo-800 p-6 text-white">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-100">
+          <CheckCircle2 className="h-4 w-4" />
+          {complete ? "Course complete" : "You're enrolled"}
+        </div>
+        <p className="mt-2 text-lg font-extrabold leading-tight">
+          {complete ? "Review your course anytime" : "Pick up where you left off"}
+        </p>
+        <p className="mt-1 text-xs text-emerald-100">
+          Your lessons, tests and homework are ready.
+        </p>
+      </div>
+
+      <div className="p-6">
+        <div className="mb-1.5 flex justify-between text-xs">
+          <span className="font-medium text-muted-foreground">Course progress</span>
+          <span className="font-bold text-foreground">{enrollment.progress}%</span>
+        </div>
+        <Progress value={enrollment.progress} className="h-2" />
+        <Button
+          onClick={onContinue}
+          size="lg"
+          className="mt-5 w-full gap-2 bg-indigo-600 shadow-lg shadow-indigo-500/30 hover:bg-indigo-700"
+        >
+          <BookOpen className="h-4 w-4" />
+          {complete ? "Open course" : "Continue learning"}
+        </Button>
+        <p className="pt-3 text-center text-xs text-muted-foreground">{course.title}</p>
       </div>
     </Card>
   );

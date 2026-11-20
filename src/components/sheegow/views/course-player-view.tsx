@@ -27,6 +27,7 @@ import {
   ClipboardList,
   Hammer,
   Pencil,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,7 +44,7 @@ const TYPE_ICONS: Record<string, typeof BookOpen> = {
 };
 
 export function CoursePlayerView() {
-  const { selectedCourseId, user, authLoading, navigate, openAuthModal, openPlayer, openDashboard } = useStore();
+  const { selectedCourseId, user, authLoading, navigate, openAuthModal, openPlayer, openDashboard, openCheckout } = useStore();
   const [data, setData] = useState<CurriculumData | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -168,7 +169,7 @@ export function CoursePlayerView() {
       ) : data && roadmap ? (
         <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
           {/* ─── Roadmap sidebar ─── */}
-          <aside className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+          <aside className="order-2 lg:order-1 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
             <Card className="p-4">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
@@ -226,7 +227,7 @@ export function CoursePlayerView() {
           </aside>
 
           {/* ─── Lesson panel ─── */}
-          <section className="min-w-0">
+          <section className="order-1 min-w-0 lg:order-2">
             {activeLesson ? (
               <LessonPanel
                 key={activeLesson.id}
@@ -234,11 +235,15 @@ export function CoursePlayerView() {
                 hasAccess={data.hasAccess || activeLesson.isPreview}
                 courseId={selectedCourseId!}
                 onRefresh={refresh}
+                onEnroll={() => openCheckout(selectedCourseId!)}
                 onNext={() => {
                   const index = allLessons.findIndex((l) => l.id === activeLesson.id);
                   const next = allLessons[index + 1];
-                  if (next) setActiveId(next.id);
-                  else toast.success("You reached the end of this course.");
+                  if (next) {
+                    setActiveId(next.id);
+                    return true;
+                  }
+                  return false;
                 }}
               />
             ) : (
@@ -267,20 +272,27 @@ function LessonPanel({
   hasAccess,
   courseId,
   onRefresh,
+  onEnroll,
   onNext,
 }: {
   lesson: RoadmapLesson;
   hasAccess: boolean;
   courseId: string;
   onRefresh: () => Promise<void>;
-  onNext: () => void;
+  onEnroll: () => void;
+  onNext: () => boolean;
 }) {
   const [saving, setSaving] = useState(false);
   const lastSave = useRef(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [finished, setFinished] = useState(false);
 
-  const save = async (status?: "in_progress" | "completed", position?: number) => {
+  const save = async (
+    status?: "in_progress" | "completed",
+    position?: number,
+    advance = false
+  ) => {
     setSaving(true);
     try {
       await api.saveProgress(lesson.id, {
@@ -289,12 +301,19 @@ function LessonPanel({
         secondsWatched: position,
       });
       await onRefresh();
-      if (status === "completed") toast.success("Lesson completed!");
+      if (status === "completed") {
+        toast.success("Lesson completed!");
+        if (advance && !onNext()) setFinished(true);
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save progress");
     } finally {
       setSaving(false);
     }
+  };
+
+  const goNext = () => {
+    if (!onNext()) setFinished(true);
   };
 
   const onTimeUpdate = () => {
@@ -337,6 +356,12 @@ function LessonPanel({
               <p className="mt-1 text-sm text-amber-800">
                 Enroll and complete payment to unlock the full course.
               </p>
+              <Button
+                className="mt-4 gap-2 bg-indigo-600 hover:bg-indigo-700"
+                onClick={onEnroll}
+              >
+                <Sparkles className="h-4 w-4" /> Enroll to unlock
+              </Button>
             </div>
           ) : (
             <>
@@ -348,7 +373,9 @@ function LessonPanel({
                   className="mb-5 aspect-video w-full rounded-lg bg-black"
                   src={lesson.videoUrl}
                   onTimeUpdate={onTimeUpdate}
-                  onEnded={() => void save("completed", Math.floor(videoRef.current?.duration || 0))}
+                  onEnded={() =>
+                    void save("completed", Math.floor(videoRef.current?.duration || 0), true)
+                  }
                 />
               )}
               {lesson.type === "video" && !lesson.videoUrl && (
@@ -390,16 +417,24 @@ function LessonPanel({
               )}
 
               {lesson.type === "quiz" && lesson.quiz && (
-                <QuizPanel quizId={lesson.quiz.id} onPassed={() => void save("completed")} />
+                <QuizPanel
+                  quizId={lesson.quiz.id}
+                  onPassed={() => void save("completed")}
+                  onNext={goNext}
+                />
               )}
               {lesson.type === "assignment" && lesson.assignment && (
-                <AssignmentPanel assignmentId={lesson.assignment.id} courseId={courseId} />
+                <AssignmentPanel
+                  assignmentId={lesson.assignment.id}
+                  courseId={courseId}
+                  onSubmitted={() => void save("completed")}
+                />
               )}
 
               <div className="flex flex-wrap items-center gap-2 border-t pt-5">
                 {lesson.type !== "quiz" && (
                   <Button
-                    onClick={() => void save("completed")}
+                    onClick={() => void save("completed", undefined, true)}
                     disabled={saving || done}
                     className="gap-2 bg-indigo-600 hover:bg-indigo-700"
                   >
@@ -407,7 +442,7 @@ function LessonPanel({
                     {done ? "Completed" : "Mark complete"}
                   </Button>
                 )}
-                <Button variant="outline" onClick={onNext} className="gap-2">
+                <Button variant="outline" onClick={goNext} className="gap-2">
                   Next lesson <ArrowLeft className="h-4 w-4 rotate-180" />
                 </Button>
                 <Button
@@ -429,6 +464,22 @@ function LessonPanel({
         </CardContent>
       </Card>
 
+      {finished && (
+        <Card className="border-emerald-200 bg-emerald-50 p-6 text-center">
+          <Award className="mx-auto mb-2 h-8 w-8 text-emerald-600" />
+          <h3 className="text-lg font-bold text-emerald-900">You reached the end of this course</h3>
+          <p className="mt-1 text-sm text-emerald-800">
+            Check your certificate eligibility, or review any lesson from the roadmap.
+          </p>
+          <Button
+            className="mt-4 gap-2 bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => setShowCertificate(true)}
+          >
+            <Award className="h-4 w-4" /> View certificate options
+          </Button>
+        </Card>
+      )}
+
       {showCertificate && (
         <CertificateQuickPanel courseId={courseId} onClose={() => setShowCertificate(false)} />
       )}
@@ -438,7 +489,15 @@ function LessonPanel({
 
 /* ─── Quiz in the player ─────────────────────────────────────────── */
 
-function QuizPanel({ quizId, onPassed }: { quizId: string; onPassed: () => void }) {
+function QuizPanel({
+  quizId,
+  onPassed,
+  onNext,
+}: {
+  quizId: string;
+  onPassed: () => void;
+  onNext: () => void;
+}) {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
@@ -490,7 +549,24 @@ function QuizPanel({ quizId, onPassed }: { quizId: string; onPassed: () => void 
     return (
       <div className={`rounded-lg border p-5 text-center ${result.passed ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
         <p className="text-3xl font-extrabold">{result.score}%</p>
-        <p className="mt-1 font-semibold">{result.passed ? "You passed the test!" : "Try again — you can retake it."}</p>
+        <p className="mt-1 font-semibold">
+          {result.passed ? "You passed the test!" : "Try again — you can retake it."}
+        </p>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => void start()}
+            disabled={busy}
+          >
+            <ClipboardList className="h-4 w-4" /> {result.passed ? "Retake test" : "Try again"}
+          </Button>
+          {result.passed && (
+            <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={onNext}>
+              Next lesson <ArrowLeft className="h-4 w-4 rotate-180" />
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
@@ -558,7 +634,15 @@ function QuizPanel({ quizId, onPassed }: { quizId: string; onPassed: () => void 
 
 /* ─── Homework in the player ─────────────────────────────────────── */
 
-function AssignmentPanel({ assignmentId, courseId }: { assignmentId: string; courseId: string }) {
+function AssignmentPanel({
+  assignmentId,
+  courseId,
+  onSubmitted,
+}: {
+  assignmentId: string;
+  courseId: string;
+  onSubmitted: () => void;
+}) {
   const [data, setData] = useState<Awaited<ReturnType<typeof api.assignment>> | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -602,7 +686,8 @@ function AssignmentPanel({ assignmentId, courseId }: { assignmentId: string; cou
             await api.submitAssignment(assignmentId, { note });
             const r = await api.assignment(assignmentId);
             setData(r);
-            toast.success("Homework submitted");
+            onSubmitted();
+            toast.success("Homework submitted — lesson marked complete. Your certificate still awaits teacher grading.");
           } catch (e) {
             toast.error(e instanceof Error ? e.message : "Could not submit homework");
           } finally {

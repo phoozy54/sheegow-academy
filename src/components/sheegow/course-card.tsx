@@ -1,21 +1,29 @@
 "use client";
 
 import { useStore } from "@/lib/store";
-import type { Course } from "@/lib/types";
+import type { Course, Enrollment } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Clock, Users, Play } from "lucide-react";
 import { levelBadgeClass, formatPrice } from "@/lib/ui";
 
-export function CourseCard({ course }: { course: Course }) {
-  const { openCourse, openCheckout, openDashboard, user, openAuthModal } = useStore();
+export function CourseCard({
+  course,
+  enrollment,
+}: {
+  course: Course;
+  enrollment?: Enrollment | null;
+}) {
+  const { openCourse, openCheckout, openDashboard, openPlayer, user, openAuthModal } = useStore();
 
   const isManager =
     user?.role === "teacher" ||
     user?.role === "admin" ||
     user?.role === "super_admin";
+  const canContinue = !isManager && !!enrollment;
 
   const handleEnroll = () => {
     if (!user) {
@@ -107,7 +115,17 @@ export function CourseCard({ course }: { course: Course }) {
           </div>
         </div>
 
-        {/* Price + enroll */}
+        {canContinue && (
+          <div className="mb-3">
+            <div className="mb-1 flex justify-between text-[11px] font-medium text-muted-foreground">
+              <span>Your progress</span>
+              <span>{enrollment!.progress}%</span>
+            </div>
+            <Progress value={enrollment!.progress} className="h-1.5" />
+          </div>
+        )}
+
+        {/* Price + enroll / continue */}
         <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
           <div>
             <span className="text-lg font-extrabold text-foreground">
@@ -119,10 +137,16 @@ export function CourseCard({ course }: { course: Course }) {
           </div>
           <Button
             size="sm"
-            onClick={isManager ? () => openDashboard("courses") : handleEnroll}
+            onClick={
+              isManager
+                ? () => openDashboard("courses")
+                : canContinue
+                  ? () => openPlayer(course.id)
+                  : handleEnroll
+            }
             className="bg-indigo-600 hover:bg-indigo-700"
           >
-            {isManager ? "Manage" : "Enroll"}
+            {isManager ? "Manage" : canContinue ? "Continue" : "Enroll"}
           </Button>
         </div>
       </div>
