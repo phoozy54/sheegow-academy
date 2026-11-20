@@ -130,8 +130,13 @@ export function AdminCourses() {
 
   async function fetchTeachers() {
     try {
-      const r = await api.users({ role: "teacher" });
-      setTeachers(r.users);
+      const r = await api.users();
+      // The founder (super admin) and admins can teach courses too.
+      setTeachers(
+        r.users.filter((u) =>
+          ["teacher", "admin", "super_admin"].includes(u.role)
+        )
+      );
     } catch {
       // silent — teachers list is best-effort
     }

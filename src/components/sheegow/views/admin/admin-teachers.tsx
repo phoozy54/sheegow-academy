@@ -83,10 +83,16 @@ export function AdminTeachers() {
     setLoading(true);
     try {
       const [teacherRes, courseRes] = await Promise.all([
-        api.users({ role: "teacher" }),
+        api.users(),
         api.courses({ limit: 50 }).catch(() => ({ items: [] as Course[] })),
       ]);
-      setTeachers(teacherRes.users);
+      // The founder/super admin also teaches every course. Show all teaching
+      // roles so the teacher directory never looks empty.
+      setTeachers(
+        teacherRes.users.filter((u) =>
+          ["teacher", "admin", "super_admin"].includes(u.role)
+        )
+      );
       setCourses(courseRes.items);
     } catch (err) {
       const msg =

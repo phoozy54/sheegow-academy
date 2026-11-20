@@ -64,33 +64,11 @@ const VALUES = [
   },
 ];
 
-const TEACHERS = [
-  {
-    name: "Yusuf Ali",
-    bio: "TESOL-certified instructor focused on business English and grammar. Former corporate trainer at international firms with a passion for clear, professional communication.",
-    image: "/images/teacher-1.png",
-    specialty: "Business English · Grammar",
-  },
-  {
-    name: "Amina Mohamed",
-    bio: "Certified English teacher with 8+ years of experience. Specializes in conversation and IELTS preparation. Loves helping Somali students gain confidence in speaking English.",
-    image: "/images/teacher-2.png",
-    specialty: "Conversation · IELTS Prep",
-  },
-  {
-    name: "Fatima Ibrahim",
-    bio: "Specialist in teaching English to children and beginners. Creates fun, engaging lessons for young Somali learners using games, songs, and stories.",
-    image: "/images/teacher-3.png",
-    specialty: "Kids · Beginners",
-  },
-];
-
-const STATS = [
-  { label: "Active Students", value: "2,400+", icon: Users },
-  { label: "Live Classes Held", value: "150+", icon: Video },
-  { label: "Expert Teachers", value: "25+", icon: GraduationCap },
-  { label: "Success Rate", value: "94%", icon: Award },
-];
+const TEACHER = {
+  name: "Ciise Mohamed Sheeq (SHEEGOW)",
+  bio: "English language expert educated at a university in London, with multiple language certifications and 15 years of teaching experience. He personally leads every live course at SHEEGOW ACADEMY.",
+  specialty: "English Language Expert · 15+ Years",
+};
 
 /* ─── Main view ──────────────────────────────────────────── */
 
@@ -208,11 +186,11 @@ export function AboutView() {
               English out loud from day one.
             </p>
             <p>
-              Today, thousands of Somali students learn with us — from absolute
-              beginners in Hargeisa to IELTS candidates preparing for
-              university abroad. We pay with Zaad Service and Edahab. We learn on
-              phones and laptops. We come from different cities, but we share one
-              goal: to speak English with confidence.
+              Today, Somali students learn with us — from absolute beginners in
+              Hargeisa to IELTS candidates preparing for university abroad. We
+              pay with Zaad Service and Edahab. We learn on phones and laptops.
+              We come from different cities, but we share one goal: to speak
+              English with confidence.
             </p>
             <p>
               That&apos;s the SHEEGOW difference. <span className="font-semibold text-foreground">Live classes, not recorded videos.</span>
@@ -336,81 +314,49 @@ export function AboutView() {
               variant="outline"
               className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
             >
-              <GraduationCap className="h-3 w-3" /> Meet the Teachers
+              <GraduationCap className="h-3 w-3" /> Meet Your Teacher
             </Badge>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Certified, caring, and Somali-speaking
+              One expert. Every class live.
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              Led by founder Ciise Mohamed Sheeq (SHEEGOW), our teachers specialize
-              in teaching English to Somali learners. Every one of them runs live,
-              interactive classes.
+              All courses are taught by founder Ciise Mohamed Sheeq (SHEEGOW),
+              an English language expert with 15 years of experience — live and
+              interactive, never recorded.
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            {TEACHERS.map((t) => (
-              <Card key={t.name} className="card-lift flex flex-col overflow-hidden p-0">
-                <div className="relative aspect-[4/3] w-full overflow-hidden">
-                  <img loading="lazy" decoding="async"
-                    src={t.image}
-                    alt={t.name}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
-                  <Badge
-                    variant="outline"
-                    className="absolute left-3 top-3 border-white/30 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur"
-                  >
-                    Teacher
-                  </Badge>
+          <div className="mx-auto max-w-2xl">
+            <Card className="card-lift flex flex-col overflow-hidden p-0 sm:flex-row">
+              <div className="flex min-h-40 items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 sm:w-56">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white/30 text-2xl font-extrabold text-white">
+                  CS
                 </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h3 className="text-lg font-bold text-foreground">{t.name}</h3>
-                  <p className="mt-1 text-xs font-semibold text-indigo-600">
-                    {t.specialty}
-                  </p>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-                    {t.bio}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate("courses")}
-                    className="mt-4 gap-1.5 self-start"
-                  >
-                    <BookOpen className="h-3.5 w-3.5" /> View Courses
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── STATS STRIP ──────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border bg-card p-8 shadow-sm sm:p-10">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-              Trusted by thousands of Somali learners
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Real numbers from real students learning with SHEEGOW ACADEMY.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {STATS.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
-                  <s.icon className="h-7 w-7" />
-                </div>
-                <p className="text-3xl font-extrabold text-foreground">{s.value}</p>
-                <p className="mt-1 text-xs font-medium text-muted-foreground">
-                  {s.label}
-                </p>
               </div>
-            ))}
+              <div className="flex flex-1 flex-col p-6">
+                <Badge
+                  variant="outline"
+                  className="mb-3 w-fit border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700"
+                >
+                  Founder &amp; Teacher
+                </Badge>
+                <h3 className="text-lg font-bold text-foreground">{TEACHER.name}</h3>
+                <p className="mt-1 text-xs font-semibold text-indigo-600">
+                  {TEACHER.specialty}
+                </p>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                  {TEACHER.bio}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("courses")}
+                  className="mt-4 gap-1.5 self-start"
+                >
+                  <BookOpen className="h-3.5 w-3.5" /> View Courses
+                </Button>
+              </div>
+            </Card>
           </div>
         </div>
       </section>

@@ -93,11 +93,16 @@ export function AdminLive() {
       const [liveRes, courseRes, teacherRes] = await Promise.all([
         api.liveClasses().catch(() => ({ classes: [] as LiveClass[] })),
         api.courses({ limit: 50 }).catch(() => ({ items: [] as Course[] })),
-        api.users({ role: "teacher" }).catch(() => ({ users: [] as User[] })),
+        api.users().catch(() => ({ users: [] as User[] })),
       ]);
       setClasses(liveRes.classes);
       setCourses(courseRes.items);
-      setTeachers(teacherRes.users);
+      // Include teaching admins so classes can be assigned to the founder.
+      setTeachers(
+        teacherRes.users.filter((u) =>
+          ["teacher", "admin", "super_admin"].includes(u.role)
+        )
+      );
     } catch (err) {
       const msg =
         err instanceof ApiError ? err.message : "Failed to load live classes";

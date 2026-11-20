@@ -8,7 +8,6 @@ import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CourseCard } from "../course-card";
 import {
   Video,
@@ -17,11 +16,9 @@ import {
   MessageSquare,
   Award,
   Globe2,
-  Star,
   ArrowRight,
   CheckCircle2,
   Sparkles,
-  Quote,
 } from "lucide-react";
 
 const FEATURES = [
@@ -39,8 +36,8 @@ const FEATURES = [
   },
   {
     icon: GraduationCap,
-    title: "Expert Teachers",
-    desc: "TESOL-certified instructors who specialize in teaching English to Somali speakers.",
+    title: "Expert Teacher",
+    desc: "Learn with Ciise Mohamed Sheeq (SHEEGOW) — London-educated English expert with 15 years of teaching experience.",
     color: "from-amber-500 to-orange-600",
   },
   {
@@ -61,44 +58,6 @@ const FEATURES = [
     desc: "Join from Somaliland or anywhere in the diaspora. Pay easily with Card, Zaad Service or Edahab.",
     color: "from-sky-500 to-blue-600",
   },
-];
-
-const TESTIMONIALS = [
-  {
-    name: "Hodan Abdi",
-    role: "Student, Hargeisa",
-    rating: 5,
-    text: "I joined SHEEGOW ACADEMY with zero English. After 8 weeks of live classes, I can have full conversations. The teachers are so patient and the live classes make it real.",
-    avatar: null,
-  },
-  {
-    name: "Mahamed Yusuf",
-    role: "University Applicant",
-    rating: 5,
-    text: "The IELTS course helped me score Band 7.5! The live speaking practice with Amina was exactly what I needed to build confidence. Highly recommend.",
-    avatar: null,
-  },
-  {
-    name: "Fadumo Cali",
-    role: "Mother of two",
-    rating: 5,
-    text: "My kids love the English for Kids course. The live video classes are fun and engaging. They actually look forward to learning English now!",
-    avatar: null,
-  },
-  {
-    name: "Abdullahi Farah",
-    role: "Business Owner",
-    rating: 4,
-    text: "The Business English course improved my emails and meetings with international clients. The live roleplay sessions were incredibly practical.",
-    avatar: null,
-  },
-];
-
-const STATS = [
-  { label: "Active Students", value: "2,400+", icon: Users },
-  { label: "Live Classes", value: "150+", icon: Video },
-  { label: "Expert Teachers", value: "25+", icon: GraduationCap },
-  { label: "Success Rate", value: "94%", icon: Award },
 ];
 
 export function HomeView() {
@@ -192,7 +151,7 @@ export function HomeView() {
                         English Conversation
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Live with Teacher Amina
+                        Live with SHEEGOW
                       </p>
                     </div>
                   </div>
@@ -202,35 +161,9 @@ export function HomeView() {
                 </div>
               </div>
 
-              {/* Floating stats */}
-              <div className="absolute -left-3 top-8 hidden rounded-2xl border bg-card p-3 shadow-xl sm:block">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
-                    <Star className="h-5 w-5 fill-current" />
-                  </span>
-                  <div>
-                    <p className="text-lg font-extrabold leading-none">4.9</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Avg. rating
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* Stats bar */}
-          <div className="mt-16 grid grid-cols-2 gap-4 rounded-2xl border bg-card p-6 shadow-sm sm:grid-cols-4">
-            {STATS.map((s) => (
-              <div key={s.label} className="text-center">
-                <s.icon className="mx-auto mb-2 h-6 w-6 text-indigo-500" />
-                <p className="text-2xl font-extrabold text-foreground">
-                  {s.value}
-                </p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -317,54 +250,49 @@ export function HomeView() {
         </div>
       </section>
 
-      {/* ─── TESTIMONIALS ─────────────────────────── */}
+      {/* ─── HOW IT WORKS ─────────────────────────── */}
       <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <Badge
             variant="outline"
             className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
           >
-            <Quote className="h-3 w-3" /> Student Stories
+            <CheckCircle2 className="h-3 w-3" /> How it works
           </Badge>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Real students. Real progress.
+            Three steps to confident English
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Thousands of Somali learners have improved their English with our
-            live classes. Here&apos;s what they say.
+            Every class is live with your teacher — no recorded videos.
           </p>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {TESTIMONIALS.map((t) => (
-            <Card key={t.name} className="card-lift flex flex-col p-6">
-              <div className="mb-3 flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < t.rating
-                        ? "fill-amber-400 text-amber-400"
-                        : "fill-muted text-muted"
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="mb-4 flex-1 text-sm leading-relaxed text-foreground">
-                &ldquo;{t.text}&rdquo;
+        <div className="grid gap-5 sm:grid-cols-3">
+          {[
+            {
+              n: "1",
+              title: "Choose your course",
+              desc: "Pick the level that fits you — beginner, intermediate, IELTS, business or kids.",
+            },
+            {
+              n: "2",
+              title: "Join the live class",
+              desc: "See your teacher, speak, use chat and raise your hand — all in real time.",
+            },
+            {
+              n: "3",
+              title: "Earn your certificate",
+              desc: "Complete the lessons and quizzes to receive a verification certificate.",
+            },
+          ].map((step) => (
+            <Card key={step.n} className="card-lift flex flex-col p-6">
+              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-lg font-extrabold text-white shadow-lg shadow-indigo-500/30">
+                {step.n}
+              </span>
+              <h3 className="text-lg font-bold text-foreground">{step.title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                {step.desc}
               </p>
-              <div className="flex items-center gap-3 border-t pt-4">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={t.avatar || undefined} />
-                  <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
-                    {t.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-bold text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
             </Card>
           ))}
         </div>
