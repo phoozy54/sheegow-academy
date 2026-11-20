@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger"
 import { requireAdmin, requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
@@ -57,7 +58,7 @@ export async function GET(_req: Request, { params }: RouteContext) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[courses/get] error:", e);
+    logger.error("[courses/get]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }
@@ -102,7 +103,7 @@ export async function PUT(req: Request, { params }: RouteContext) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[courses/update] error:", e);
+    logger.error("[courses/update]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }
@@ -125,7 +126,7 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[courses/delete] error:", e);
+    logger.error("[courses/delete]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

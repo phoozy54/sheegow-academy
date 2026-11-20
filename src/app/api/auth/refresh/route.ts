@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger"
 import { db } from "@/lib/db";
 import { setAuthCookies, verifyRefreshToken } from "@/lib/auth";
 import { jsonError, handleAuthError } from "@/lib/api-helpers";
@@ -50,7 +51,7 @@ export async function POST() {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[auth/refresh] error:", e);
+    logger.error("[auth/refresh]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

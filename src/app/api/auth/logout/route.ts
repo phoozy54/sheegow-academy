@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clearAuthCookies } from "@/lib/auth";
+import { logger } from "@/lib/logger"
 import { jsonError, handleAuthError } from "@/lib/api-helpers";
 
 /**
@@ -13,7 +14,7 @@ export async function POST() {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[auth/logout] error:", e);
+    logger.error("[auth/logout]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

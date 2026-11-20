@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger"
 import { requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
@@ -38,7 +39,7 @@ export async function GET() {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[live/list] error:", e);
+    logger.error("[live/list]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[live/create] error:", e);
+    logger.error("[live/create]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

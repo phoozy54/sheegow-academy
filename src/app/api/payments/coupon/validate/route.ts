@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger"
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
 interface ValidateBody {
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[payments/coupon/validate] error:", e);
+    logger.error("[payments/coupon/validate]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

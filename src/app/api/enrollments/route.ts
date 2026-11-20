@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger"
 import { requireAuth } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
@@ -69,7 +70,7 @@ export async function POST(req: Request) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[enrollments/create] error:", e);
+    logger.error("[enrollments/create]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

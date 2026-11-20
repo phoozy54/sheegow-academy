@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { logger } from "@/lib/logger"
 import { jsonError, handleAuthError } from "@/lib/api-helpers";
 
 /**
@@ -14,7 +15,7 @@ export async function GET() {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[auth/me] error:", e);
+    logger.error("[auth/me]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

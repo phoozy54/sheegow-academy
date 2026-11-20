@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger"
 import { requireAdmin } from "@/lib/auth";
 import { jsonError, handleAuthError } from "@/lib/api-helpers";
 
@@ -131,7 +132,7 @@ export async function GET() {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[stats] error:", e);
+    logger.error("[stats]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

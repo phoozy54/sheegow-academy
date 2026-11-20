@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger"
 import { requireAuth } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
@@ -36,7 +37,7 @@ export async function GET(_req: Request, { params }: RouteContext) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[live/messages/get] error:", e);
+    logger.error("[live/messages/get]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }
@@ -68,7 +69,7 @@ export async function POST(req: Request, { params }: RouteContext) {
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
-    console.error("[live/messages/create] error:", e);
+    logger.error("[live/messages/create]", "request failed", e);
     return jsonError("Internal server error", 500);
   }
 }

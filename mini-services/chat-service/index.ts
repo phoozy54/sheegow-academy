@@ -104,7 +104,9 @@ const broadcastOnlineCount = (classId: string) => {
 // ----------------------------------------------------------------------------
 
 io.on('connection', (socket) => {
-  console.log(`[chat] socket connected: ${socket.id}`)
+  if (process.env.LOG_LEVEL !== 'quiet') {
+    console.log(`[chat] connect: ${socket.id}`)
+  }
 
   // ------------------------------------------------------------------
   // join-class
@@ -164,9 +166,9 @@ io.on('connection', (socket) => {
       onlineCount,
     })
 
-    console.log(
-      `[chat] ${userName} (${userId}) joined class ${classId} — online: ${onlineCount}`,
-    )
+    if (process.env.LOG_LEVEL !== 'quiet') {
+      console.log(`[chat] join: ${userName} -> ${classId} (online: ${onlineCount})`)
+    }
   })
 
   // ------------------------------------------------------------------
@@ -194,9 +196,9 @@ io.on('connection', (socket) => {
     // Broadcast to everyone in the room, including the sender
     io.to(classId).emit('new-message', message)
 
-    console.log(
-      `[chat] message in ${classId} from ${userName} (${userId}): ${text}`,
-    )
+    if (process.env.LOG_LEVEL === 'debug') {
+      console.log(`[chat] msg in ${classId} from ${userName}`)
+    }
   })
 
   // ------------------------------------------------------------------
@@ -213,7 +215,7 @@ io.on('connection', (socket) => {
 
     io.to(classId).emit('hand-raised', { userId, userName })
 
-    console.log(`[chat] ${userName} (${userId}) raised hand in ${classId}`)
+    // raise-hand events are noisy — only log at debug level
   })
 
   // ------------------------------------------------------------------
@@ -229,7 +231,9 @@ io.on('connection', (socket) => {
 
       io.to(classId).emit('class-status', { classId, status })
 
-      console.log(`[chat] class ${classId} status -> ${status}`)
+      if (process.env.LOG_LEVEL !== 'quiet') {
+        console.log(`[chat] class ${classId} -> ${status}`)
+      }
     }
   }
 
@@ -242,7 +246,9 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     const entry = socketIndex.get(socket.id)
     if (!entry) {
-      console.log(`[chat] socket disconnected: ${socket.id}`)
+      if (process.env.LOG_LEVEL !== 'quiet') {
+        console.log(`[chat] disconnect: ${socket.id} (no class)`)
+      }
       return
     }
 
@@ -267,13 +273,13 @@ io.on('connection', (socket) => {
     })
     broadcastOnlineCount(classId)
 
-    console.log(
-      `[chat] ${user.userName} (${user.userId}) left class ${classId} — online: ${onlineCount}`,
-    )
+    if (process.env.LOG_LEVEL !== 'quiet') {
+      console.log(`[chat] leave: ${user.userName} <- ${classId} (online: ${onlineCount})`)
+    }
   })
 
   socket.on('error', (error: Error) => {
-    console.error(`[chat] socket error (${socket.id}):`, error)
+    console.error(`[chat] socket error (${socket.id}):`, error.message)
   })
 })
 
@@ -282,7 +288,7 @@ io.on('connection', (socket) => {
 // ----------------------------------------------------------------------------
 
 httpServer.listen(PORT, () => {
-  console.log(`Chat service running on port ${PORT}`)
+  console.log(`[chat] service running on port ${PORT}`)
 })
 
 // ----------------------------------------------------------------------------
