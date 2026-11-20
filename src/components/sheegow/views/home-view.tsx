@@ -124,13 +124,10 @@ export function HomeView() {
             <div className="text-center lg:text-left">
               <Badge
                 variant="outline"
-                className="mb-5 inline-flex items-center gap-2 rounded-full border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+                className="mb-5 inline-flex items-center gap-1.5 rounded-full border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
               >
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
-                </span>
-                LIVE class happening now
+                <Video className="h-3 w-3" />
+                Live English classes with expert teachers
               </Badge>
 
               <h1 className="mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
