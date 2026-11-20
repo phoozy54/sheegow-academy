@@ -1,5 +1,6 @@
 // SHEEGOW ACADEMY — frontend API client
 import type {
+  AdminCourseOverview,
   Assignment,
   Certificate,
   CertificateEligibility,
@@ -92,6 +93,7 @@ export const api = {
   register: (body: {
     fullName: string;
     email: string;
+    username?: string;
     phone: string;
     password: string;
   }) =>
@@ -100,7 +102,14 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  login: (body: { email: string; password: string }) =>
+  /** One identifier is enough: username, email or Somali phone number. */
+  login: (body: {
+    identifier?: string;
+    email?: string;
+    username?: string;
+    phone?: string;
+    password: string;
+  }) =>
     request<{ user: User }>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify(body),
@@ -140,6 +149,10 @@ export const api = {
   },
 
   course: (id: string) => request<{ course: Course }>(`/api/courses/${id}`),
+
+  /** Admin/super-admin control center: courses, their work, students and all live classes. */
+  adminCourseOverview: () =>
+    request<AdminCourseOverview>("/api/admin/course-overview"),
 
   createCourse: (body: Partial<Course>) =>
     request<{ course: Course }>("/api/courses", {
@@ -314,6 +327,7 @@ export const api = {
 
   updateMyProfile: (body: Partial<{
     fullName: string;
+    username: string;
     phone: string;
     level: string;
     bio: string;
@@ -330,6 +344,7 @@ export const api = {
   createUser: (body: {
     fullName: string;
     email: string;
+    username?: string;
     phone?: string;
     password: string;
     role: "student" | "teacher" | "admin" | "super_admin";

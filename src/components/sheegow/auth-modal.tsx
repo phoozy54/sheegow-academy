@@ -29,12 +29,15 @@ export function AuthModal() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Login fields
-  const [email, setEmail] = useState("");
+  // Login accepts one identifier: username, email or Somali phone number.
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
 
   // Register fields
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [agree, setAgree] = useState(false);
 
@@ -45,7 +48,7 @@ export function AuthModal() {
     setLoading(true);
     try {
       if (isLogin) {
-        const { user } = await api.login({ email, password });
+        const { user } = await api.login({ identifier, password });
         setUser(user);
         toast.success(`Welcome back, ${user.fullName.split(" ")[0]}!`);
         closeAuthModal();
@@ -66,6 +69,7 @@ export function AuthModal() {
         const { user } = await api.register({
           fullName,
           email,
+          username: username || undefined,
           phone,
           password,
         });
@@ -85,9 +89,11 @@ export function AuthModal() {
   }
 
   function resetForm() {
+    setIdentifier("");
     setEmail("");
     setPassword("");
     setFullName("");
+    setUsername("");
     setPhone("");
     setAgree(false);
     setShowPassword(false);
@@ -140,7 +146,7 @@ export function AuthModal() {
             </DialogTitle>
             <DialogDescription>
               {isLogin
-                ? "Enter your credentials below to access your dashboard."
+                ? "Enter your username, email or phone number and password."
                 : "Fill in your details to get started with live English classes."}
             </DialogDescription>
           </DialogHeader>
@@ -163,21 +169,68 @@ export function AuthModal() {
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-9"
-                  required
-                />
+            {!isLogin && (
+              <div className="space-y-1.5">
+                <Label htmlFor="username">Username (optional)</Label>
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="ahmed.hassan"
+                    minLength={3}
+                    maxLength={30}
+                    autoComplete="username"
+                    className="pl-9"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  3–30 small letters, numbers, dots or underscores. Leave blank
+                  and we will create one for you.
+                </p>
               </div>
-            </div>
+            )}
+
+            {isLogin ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="identifier">Username, Email or Phone</Label>
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="identifier"
+                    type="text"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder="ahmed.hassan / you@example.com / 634085151"
+                    autoComplete="username"
+                    className="pl-9"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Use the username, email or phone number linked to your account.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    className="pl-9"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
             {!isLogin && (
               <div className="space-y-1.5">

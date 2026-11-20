@@ -167,17 +167,17 @@ The Socket.io chat server needs its own host (Vercel can't run long-lived server
 
 1. Go to **Vercel** → your project → **Settings** → **Domains**
 2. Click **Add** → type `sheegowacademy.com` → click Add
-3. Add `www.sheegowacademy.com` too → set it to redirect to `sheegowacademy.com`
+3. Add `www.sheegowacademy.com` as the primary domain. Set `sheegowacademy.com` to redirect **to www** (the canonical origin used by every `rel="canonical"` tag and the sitemap).
 4. Vercel will show "Invalid Configuration" for a few minutes — that's normal, it's waiting for DNS to propagate.
 5. Wait 5-10 min, refresh → it should show **Valid Configuration** with a green checkmark.
-6. Vercel issues the SSL certificate automatically. Your site is now live at `https://sheegowacademy.com`!
+6. Vercel issues the SSL certificate automatically. Your site is now live at `https://www.sheegowacademy.com`!
 
 ---
 
 ## Step 8 — Verify everything works
 
-Visit **https://sheegowacademy.com** and test:
-- [ ] Home page loads with hero, courses, testimonials
+Visit **https://www.sheegowacademy.com** and test:
+- [ ] Home page loads with hero and real courses (no fake testimonials/stats)
 - [ ] Click "Log in" → sign in with `superadmin@sheegow.academy` and your
       `SUPER_ADMIN_PASSWORD` → lands in the dashboard
 - [ ] Admin → Teachers → create a teacher (only the super admin can do this)

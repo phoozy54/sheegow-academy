@@ -76,9 +76,11 @@ export function LiveClassesView() {
     setLoading(true);
     setError(null);
     try {
-      // The api.upcomingClasses() signature claims {classes} but the actual
-      // endpoint returns {items}. Read both shapes to be robust.
-      const r = await api.upcomingClasses();
+      // Managers see EVERY class (including ended); students see only the
+      // public upcoming/live window. Read both response shapes to be robust.
+      const r = isManager
+        ? await api.liveClasses()
+        : await api.upcomingClasses();
       const list =
         (r as unknown as { items?: LiveClass[] }).items ??
         r.classes ??
@@ -91,7 +93,7 @@ export function LiveClassesView() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isManager]);
 
   useEffect(() => {
     load();
@@ -151,9 +153,16 @@ export function LiveClassesView() {
     onRequest: handleRequestTrial,
   });
 
-  // Partition into "live now" and "scheduled"
+  // Partition into "live now" and "scheduled". Managers also get ended
+  // classes, which are sorted to the bottom instead of the top of the list.
   const liveNow = classes.filter((c) => isLiveNow(c.scheduledAt, c.duration, c.status));
-  const upcoming = classes.filter((c) => !isLiveNow(c.scheduledAt, c.duration, c.status));
+  const upcoming = classes
+    .filter((c) => !isLiveNow(c.scheduledAt, c.duration, c.status))
+    .sort((a, b) => {
+      if (a.status === "ended" && b.status !== "ended") return 1;
+      if (b.status === "ended" && a.status !== "ended") return -1;
+      return new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime();
+    });
 
   // Sum of attendees across all live classes
   const totalOnline = liveNow.reduce((sum, c) => sum + (c.attendeeCount || 0), 0);
@@ -202,16 +211,20 @@ export function LiveClassesView() {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
           <Video className="h-8 w-8 text-indigo-500" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">No live classes scheduled</h2>
+        <h2 className="text-2xl font-bold text-foreground">
+          {isManager ? "No live classes yet" : "No live classes scheduled"}
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Check back soon — new LIVE English classes are added every week.
+          {isManager
+            ? "Create a class from the live class manager — it will appear here for you and students."
+            : "Check back soon — new LIVE English classes are added every week."}
         </p>
         <Button
-          onClick={() => navigate("courses")}
+          onClick={() => (isManager ? openDashboard("live") : navigate("courses"))}
           variant="outline"
           className="mt-6 gap-1.5"
         >
-          Browse Courses
+          {isManager ? "Open class manager" : "Browse Courses"}
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
@@ -259,7 +272,9 @@ export function LiveClassesView() {
                 <p className="text-lg font-extrabold leading-none text-foreground">
                   {classes.length}
                 </p>
-                <p className="text-xs text-muted-foreground">upcoming classes</p>
+                <p className="text-xs text-muted-foreground">
+                  {isManager ? "classes total" : "upcoming classes"}
+                </p>
               </div>
             </div>
           </div>
@@ -267,6 +282,28 @@ export function LiveClassesView() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Manager banner — admins see all statuses plus the management tools */}
+        {isManager && (
+          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-foreground">
+                Admin view — all {classes.length} classes are visible
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Live, scheduled and ended sessions. Use the manager to create,
+                edit, start or end classes.
+              </p>
+            </div>
+            <Button
+              onClick={() => openDashboard("live")}
+              className="self-start gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:self-auto"
+              size="sm"
+            >
+              <Pencil className="h-3.5 w-3.5" /> Manage all classes
+            </Button>
+          </div>
+        )}
+
         {/* ─── LIVE NOW HIGHLIGHT ─────────────────────── */}
         {liveNow.length > 0 && (
           <section className="mb-12">
@@ -302,10 +339,12 @@ export function LiveClassesView() {
             <div className="mb-5 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-indigo-600" />
-                <h2 className="text-xl font-bold text-foreground">Upcoming classes</h2>
+                <h2 className="text-xl font-bold text-foreground">
+                  {isManager ? "All classes" : "Upcoming classes"}
+                </h2>
               </div>
               <span className="text-sm text-muted-foreground">
-                {upcoming.length} scheduled
+                {upcoming.length} {isManager ? "listed" : "scheduled"}
               </span>
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

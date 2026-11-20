@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
-import type { Stats } from "@/lib/types";
+import { useStore } from "@/lib/store";
+import type { LiveClass, Stats } from "@/lib/types";
 import {
   cn,
   formatPrice,
   formatDate,
+  formatDateTime,
   timeAgo,
 } from "@/lib/ui";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -90,7 +93,9 @@ const STAT_CARDS: {
 ];
 
 export function AdminDashboard() {
+  const openDashboard = useStore((s) => s.openDashboard);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -110,6 +115,14 @@ export function AdminDashboard() {
       })
       .finally(() => {
         if (active) setLoading(false);
+      });
+    api
+      .liveClasses()
+      .then((r) => {
+        if (active) setLiveClasses(r.classes.slice(0, 5));
+      })
+      .catch(() => {
+        // Non-fatal: the stat card above still reports the class count.
       });
     return () => {
       active = false;
@@ -381,6 +394,64 @@ export function AdminDashboard() {
           </TableBody>
         </Table>
         </div>
+      </Card>
+
+      {/* Live classes — visible on the admin overview too */}
+      <Card className="p-4 sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground sm:text-base">
+              Live Classes
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Scheduled, live and ended sessions
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => openDashboard("live")}
+            className="shrink-0 gap-1.5"
+          >
+            <Video className="h-3.5 w-3.5" /> Manage
+          </Button>
+        </div>
+        {liveClasses.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            No classes scheduled yet.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {liveClasses.map((lc) => (
+              <div
+                key={lc.id}
+                className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {lc.title}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {lc.course?.title ?? "No course"} · {formatDateTime(lc.scheduledAt)} · {lc.duration}m
+                  </p>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "w-fit shrink-0",
+                    lc.status === "live"
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : lc.status === "ended"
+                        ? "border-muted bg-muted text-muted-foreground"
+                        : "border-indigo-200 bg-indigo-50 text-indigo-700"
+                  )}
+                >
+                  {lc.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   );

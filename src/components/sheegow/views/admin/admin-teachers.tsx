@@ -45,6 +45,7 @@ const LEVELS = ["Beginner", "Intermediate", "Advanced", "IELTS", "Kids"];
 interface TeacherForm {
   fullName: string;
   email: string;
+  username: string;
   phone: string;
   password: string;
   bio: string;
@@ -54,6 +55,7 @@ interface TeacherForm {
 const EMPTY_FORM: TeacherForm = {
   fullName: "",
   email: "",
+  username: "",
   phone: "",
   password: "",
   bio: "",
@@ -122,6 +124,7 @@ export function AdminTeachers() {
     setForm({
       fullName: t.fullName,
       email: t.email,
+      username: t.username ?? "",
       phone: normalizeSomaliPhone(t.phone ?? ""),
       password: "",
       bio: t.bio ?? "",
@@ -142,6 +145,7 @@ export function AdminTeachers() {
       await api.updateUser(editing.id, {
         fullName: form.fullName.trim(),
         email: form.email.trim(),
+        username: form.username.trim() || undefined,
         phone: form.phone.trim() || null,
         bio: form.bio.trim() || null,
         level: form.level,
@@ -178,6 +182,7 @@ export function AdminTeachers() {
       await api.createUser({
         fullName: addForm.fullName.trim(),
         email: addForm.email.trim(),
+        username: addForm.username.trim() || undefined,
         phone: addForm.phone.trim() || undefined,
         password: addForm.password,
         role: "teacher",
@@ -272,6 +277,12 @@ export function AdminTeachers() {
                     <Mail className="h-3.5 w-3.5" />
                     <span className="truncate">{t.email}</span>
                   </div>
+                  {t.username && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <UserCircle className="h-3.5 w-3.5" />
+                      <span className="truncate">@{t.username}</span>
+                    </div>
+                  )}
                   {t.phone && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Phone className="h-3.5 w-3.5" />
@@ -347,6 +358,22 @@ export function AdminTeachers() {
                 }
                 required
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="username">Login Username</Label>
+              <Input
+                id="username"
+                value={form.username}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, username: e.target.value }))
+                }
+                placeholder="ahmed.hassan"
+                minLength={3}
+                maxLength={30}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Used to log in alongside email and phone.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email Address</Label>
@@ -438,7 +465,7 @@ export function AdminTeachers() {
             </DialogDescription>
           </DialogHeader>
           <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
-            The teacher can log in immediately with the email and password set here.
+            The teacher can log in with the username, email or phone number set here.
           </div>
           <form onSubmit={handleAddSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
@@ -451,6 +478,22 @@ export function AdminTeachers() {
                 }
                 required
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="add-username">Login Username (optional)</Label>
+              <Input
+                id="add-username"
+                value={addForm.username}
+                onChange={(e) =>
+                  setAddForm((f) => ({ ...f, username: e.target.value }))
+                }
+                placeholder="ahmed.hassan"
+                minLength={3}
+                maxLength={30}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Leave blank to generate one from the name.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="add-email">Email Address</Label>
@@ -579,6 +622,12 @@ export function AdminTeachers() {
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span>{viewing.email}</span>
                 </div>
+                {viewing.username && (
+                  <div className="flex items-center gap-2">
+                    <UserCircle className="h-4 w-4 text-muted-foreground" />
+                    <span>@{viewing.username}</span>
+                  </div>
+                )}
                 {viewing.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />

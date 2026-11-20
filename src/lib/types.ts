@@ -7,6 +7,7 @@ export interface User {
   id: string;
   fullName: string;
   email: string;
+  username?: string | null;
   phone?: string | null;
   role: Role;
   profilePicture?: string | null;
@@ -311,4 +312,93 @@ export interface Poll {
   endedAt?: string | null;
   voted?: boolean;
   results?: { optionIndex: number; votes: number }[];
+}
+
+// ─── ADMIN COURSE OVERVIEW ─────────────────────────────────
+// Admin/super-admin management view: real work and real student state.
+
+export interface AdminLiveClass extends Omit<LiveClass, "course" | "teacher"> {
+  course?: Pick<Course, "id" | "title" | "level" | "image"> | null;
+  teacher?: Pick<User, "id" | "fullName" | "profilePicture"> | null;
+  /** Recorded attendances, as opposed to the live attendee counter. */
+  attendanceCount: number;
+}
+
+export interface CourseWorkItem {
+  id: string;
+  title: string;
+  kind: "lesson" | "quiz" | "assignment";
+  moduleTitle?: string | null;
+  isPublished: boolean;
+  dueAt?: string | null;
+}
+
+export interface CourseWorkCounts {
+  modules: number;
+  publishedModules: number;
+  lessons: number;
+  publishedLessons: number;
+  quizzes: number;
+  assignments: number;
+  materials: number;
+  liveClasses: number;
+  certificates: number;
+}
+
+export interface CourseStudentRow {
+  enrollmentId: string;
+  studentId: string;
+  fullName: string;
+  username?: string | null;
+  email: string;
+  profilePicture?: string | null;
+  status: string;
+  progress: number;
+  enrolledAt: string;
+  completedAt?: string | null;
+  lessonsCompleted: number;
+  lessonsTotal: number;
+  quizzesAttempted: number;
+  quizzesPassed: number;
+  submissions: number;
+  gradedSubmissions: number;
+  certificateIssuedAt?: string | null;
+  lastActivityAt?: string | null;
+}
+
+export interface AdminCourseRow {
+  id: string;
+  title: string;
+  description: string;
+  level: string;
+  price: number;
+  duration: number;
+  image?: string | null;
+  isActive: boolean;
+  teacherName?: string | null;
+  work: CourseWorkCounts;
+  /** The actual lessons, quizzes and assignments that make up the course. */
+  workItems: CourseWorkItem[];
+  enrolledCount: number;
+  activeCount: number;
+  completedCount: number;
+  students: CourseStudentRow[];
+}
+
+export interface AdminCourseOverview {
+  summary: {
+    totalCourses: number;
+    activeCourses: number;
+    totalStudents: number;
+    totalEnrollments: number;
+    activeEnrollments: number;
+    completedEnrollments: number;
+    certificatesIssued: number;
+    liveClasses: number;
+    liveNow: number;
+    scheduled: number;
+    ended: number;
+  };
+  courses: AdminCourseRow[];
+  liveClasses: AdminLiveClass[];
 }

@@ -73,7 +73,8 @@ export function pageMeta({
   const safeTitle = seoTitle(title);
   const safeDescription = seoDescription(description);
   return {
-    title: safeTitle,
+    // `absolute` prevents the root title template from appending the site name twice.
+    title: { absolute: safeTitle },
     description: safeDescription,
     alternates: { canonical: path },
     openGraph: {

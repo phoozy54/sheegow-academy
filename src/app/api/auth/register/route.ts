@@ -5,10 +5,16 @@ import { hashPassword, setAuthCookies } from "@/lib/auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import {
+  allocateUsername,
+  ensureUsernameSchema,
+  usernameErrorResponse,
+} from "@/lib/username";
 
 interface RegisterBody {
   fullName?: string;
   email?: string;
+  username?: string;
   phone?: string;
   password?: string;
 }
@@ -34,6 +40,7 @@ export async function POST(req: Request) {
     const fullName = body.fullName?.trim();
     const email = body.email?.trim().toLowerCase();
     const phone = normalizeSomaliPhone(body.phone || "");
+    const preferredUsername = body.username?.trim() || null;
     const password = body.password;
 
     // ── Validate inputs ──
@@ -52,12 +59,28 @@ export async function POST(req: Request) {
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) return jsonError("Email already registered", 409);
 
+    await ensureUsernameSchema();
+
+    let username: string;
+    try {
+      username = await allocateUsername({
+        fullName,
+        role: "student",
+        preferred: preferredUsername,
+      });
+    } catch (e) {
+      const err = usernameErrorResponse(e);
+      if (err) return jsonError(err.message, err.status);
+      throw e;
+    }
+
     const hashed = await hashPassword(password);
 
     const user = await db.user.create({
       data: {
         fullName,
         email,
+        username,
         phone,
         password: hashed,
         role: "student",
@@ -66,6 +89,7 @@ export async function POST(req: Request) {
         id: true,
         fullName: true,
         email: true,
+        username: true,
         phone: true,
         role: true,
         profilePicture: true,

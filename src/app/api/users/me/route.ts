@@ -4,11 +4,13 @@ import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { allocateUsername, usernameErrorResponse } from "@/lib/username";
 
 const profileSelect = {
   id: true,
   fullName: true,
   email: true,
+  username: true,
   phone: true,
   role: true,
   profilePicture: true,
@@ -20,6 +22,7 @@ const profileSelect = {
 
 interface UpdateProfileBody {
   fullName?: string;
+  username?: string;
   phone?: string;
   level?: string;
   bio?: string;
@@ -69,6 +72,22 @@ export async function PATCH(req: Request) {
       if (!v) return jsonError("Full name cannot be empty", 400);
       if (v.length > 120) return jsonError("Full name is too long", 400);
       data.fullName = v;
+    }
+    if (body.username !== undefined) {
+      const preferred = body.username.trim();
+      if (!preferred) return jsonError("Username cannot be empty", 400);
+      try {
+        data.username = await allocateUsername({
+          fullName: (body.fullName ?? user.fullName).trim(),
+          role: user.role,
+          preferred,
+          userId: user.id,
+        });
+      } catch (e) {
+        const err = usernameErrorResponse(e);
+        if (err) return jsonError(err.message, err.status);
+        throw e;
+      }
     }
     if (body.phone !== undefined) {
       const phone = normalizeSomaliPhone(body.phone);

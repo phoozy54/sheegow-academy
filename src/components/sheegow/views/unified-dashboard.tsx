@@ -62,6 +62,7 @@ import { toast } from "sonner";
 // Reuse existing admin sub-views
 import { AdminDashboard } from "./admin/admin-dashboard";
 import { AdminCourses } from "./admin/admin-courses";
+import { AdminCourseOverview } from "./admin/admin-course-overview";
 import { AdminStudents } from "./admin/admin-students";
 import { AdminLive } from "./admin/admin-live";
 import { AdminTeachers } from "./admin/admin-teachers";
@@ -375,9 +376,8 @@ export function UnifiedDashboard() {
         >
           {section === "overview" && <RoleOverview role={role} />}
           {section === "courses" && role === "student" && <StudentMyCourses />}
-          {section === "courses" && (role === "teacher" || isAdmin) && (
-            <AdminCourses />
-          )}
+          {section === "courses" && role === "teacher" && <AdminCourses />}
+          {section === "courses" && isAdmin && <AdminCoursesSection />}
           {section === "library" && role === "student" && <LibraryView />}
           {section === "content-builder" && (role === "teacher" || isAdmin) && (
             <ContentBuilderView />
@@ -498,6 +498,43 @@ function SidebarContent({
           Back to site
         </Button>
       </div>
+    </div>
+  );
+}
+
+/* ─── Admin Courses: overview + management ─────────────── */
+
+function AdminCoursesSection() {
+  const [tab, setTab] = useState<"overview" | "manage">("overview");
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant={tab === "overview" ? "default" : "outline"}
+          aria-pressed={tab === "overview"}
+          onClick={() => setTab("overview")}
+          className={cn(
+            "gap-1.5",
+            tab === "overview" && "bg-indigo-600 hover:bg-indigo-700"
+          )}
+        >
+          <LayoutDashboard className="h-4 w-4" /> Overview
+        </Button>
+        <Button
+          size="sm"
+          variant={tab === "manage" ? "default" : "outline"}
+          aria-pressed={tab === "manage"}
+          onClick={() => setTab("manage")}
+          className={cn(
+            "gap-1.5",
+            tab === "manage" && "bg-indigo-600 hover:bg-indigo-700"
+          )}
+        >
+          <BookOpen className="h-4 w-4" /> Manage courses
+        </Button>
+      </div>
+      {tab === "overview" ? <AdminCourseOverview /> : <AdminCourses />}
     </div>
   );
 }

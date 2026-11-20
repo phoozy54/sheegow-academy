@@ -4,10 +4,12 @@ import { logger } from "@/lib/logger"
 import { requireAdmin, isAdminRole } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { allocateUsername, usernameErrorResponse } from "@/lib/username";
 
 interface UpdateUserBody {
   fullName?: string;
   email?: string;
+  username?: string;
   phone?: string;
   role?: string;
   level?: string;
@@ -29,6 +31,7 @@ const userSelect = {
   id: true,
   fullName: true,
   email: true,
+  username: true,
   phone: true,
   role: true,
   profilePicture: true,
@@ -70,6 +73,22 @@ export async function PUT(req: Request, { params }: RouteContext) {
       if (dup && dup.id !== id)
         return jsonError("Email already in use", 409);
       data.email = v;
+    }
+    if (body.username !== undefined) {
+      const preferred = body.username.trim();
+      if (!preferred) return jsonError("Username cannot be empty", 400);
+      try {
+        data.username = await allocateUsername({
+          fullName: (body.fullName ?? existing.fullName).trim(),
+          role: (body.role ?? existing.role).trim(),
+          preferred,
+          userId: id,
+        });
+      } catch (e) {
+        const err = usernameErrorResponse(e);
+        if (err) return jsonError(err.message, err.status);
+        throw e;
+      }
     }
     if (body.phone !== undefined) {
       const phone = normalizeSomaliPhone(body.phone);

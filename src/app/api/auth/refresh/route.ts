@@ -26,6 +26,7 @@ export async function POST() {
         id: true,
         fullName: true,
         email: true,
+        username: true,
         phone: true,
         role: true,
         profilePicture: true,

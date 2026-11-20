@@ -4,11 +4,13 @@ import { logger } from "@/lib/logger"
 import { requireAdmin, hashPassword } from "@/lib/auth";
 import { jsonError, handleAuthError, nonEmpty } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { allocateUsername, usernameErrorResponse } from "@/lib/username";
 
 const userSelect = {
   id: true,
   fullName: true,
   email: true,
+  username: true,
   phone: true,
   role: true,
   profilePicture: true,
@@ -86,6 +88,7 @@ export async function POST(req: Request) {
 
     const fullName = String(body.fullName ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
+    const preferredUsername = String(body.username ?? "").trim() || null;
     const normalizedPhone = normalizeSomaliPhone(String(body.phone ?? ""));
     const phone = normalizedPhone || null;
     const password = String(body.password ?? "");
@@ -116,10 +119,26 @@ export async function POST(req: Request) {
     const duplicate = await db.user.findUnique({ where: { email } });
     if (duplicate) return jsonError("Email already in use", 409);
 
+    // Every account gets a login handle. Role handles are assigned only by
+    // this allocator; a caller-chosen handle is validated and uniqueness-checked.
+    let username: string;
+    try {
+      username = await allocateUsername({
+        fullName,
+        role,
+        preferred: preferredUsername,
+      });
+    } catch (e) {
+      const err = usernameErrorResponse(e);
+      if (err) return jsonError(err.message, err.status);
+      throw e;
+    }
+
     const user = await db.user.create({
       data: {
         fullName,
         email,
+        username,
         phone,
         password: await hashPassword(password),
         role,

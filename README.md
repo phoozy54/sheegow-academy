@@ -16,7 +16,7 @@ Built with Next.js 16, TypeScript, Prisma (SQLite locally / PostgreSQL in produc
 - **Course catalog** — courses are created by teachers/admins (no seeded demo courses)
 - **Enrollment & payments** — Cards, Zaad Service (Telesom) and Edahab (E-Dahab) mobile wallets with coupon codes; paid classes require enrollment + completed payment before joining
 - **Admin panel** — course CRUD, user management, live class scheduling, revenue charts
-- **Auth** — short-lived access + refresh JWTs in scoped httpOnly cookies, bcrypt hashing, rate-limited login/register
+- **Auth** — short-lived access + refresh JWTs in scoped httpOnly cookies, bcrypt hashing, rate-limited login/register; username, email or Somali phone login
 - **Responsive** — mobile-first design with larger drawers/dashboards that work on phones
 
 ### Roles & access rules
@@ -90,7 +90,12 @@ The app runs at `http://localhost:3002`.
 Sign in at `superadmin@sheegow.academy` with the `SUPER_ADMIN_PASSWORD` you set
 in `.env`. All roles log in through the same auth modal and land in the
 **unified dashboard**, which adapts its sidebar and content to the user's role.
-Students self-register through the same modal.
+Students self-register through the same modal. Every account has a unique
+username; the founder is assigned `@superadmin`, the first admin `@admin`, and
+all other accounts get a generated handle. Anyone can log in with their
+**username, email or Somali phone number** (plus password), and can change their
+username under Profile Settings. After a schema push, run `bun run db:usernames`
+once to add usernames to existing accounts.
 
 ## Project Structure
 
@@ -220,7 +225,7 @@ openssl rand -hex 32  # for JWT_REFRESH_SECRET (a DIFFERENT value)
 | `JWT_SECRET` | Yes (prod) | App **fails closed** without it. Must be the **same** value on the chat service. |
 | `JWT_REFRESH_SECRET` | Yes (prod) | Separate secret for refresh tokens |
 | `SUPER_ADMIN_PASSWORD` | Yes (seed) | Bootstrap super admin password; `db:superadmin` also rotates it |
-| `NEXT_PUBLIC_APP_URL` | Yes | e.g. `https://sheegowacademy.com` |
+| `NEXT_PUBLIC_APP_URL` | Yes | Canonical origin: `https://www.sheegowacademy.com` |
 | `APP_ORIGIN` | No | Comma-separated CORS allowlist for the chat service |
 | `NEXT_PUBLIC_CHAT_URL` | Yes (prod) | HTTPS Render chat URL; falls back to `https://sheegow-chat.onrender.com` |
 | `DEMO_MODE` | No | Keep `false` in production — enables mock (no-charge) checkout |

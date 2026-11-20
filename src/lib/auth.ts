@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { randomBytes } from "crypto";
 import { db } from "@/lib/db";
+import { ensureUsernameSchema } from "@/lib/username";
 
 /**
  * Secrets are resolved lazily so `next build` doesn't require them, but any
@@ -150,6 +151,10 @@ export async function getCurrentUser() {
     const accessToken = cookieStore.get("sheegow_access")?.value;
     if (!accessToken) return null;
 
+    // Self-healing guard: the production DB may not have the username column
+    // yet during the first deploy. Idempotent and cached per server instance.
+    await ensureUsernameSchema();
+
     const payload = verifyAccessToken(accessToken);
     if (!payload) return null;
 
@@ -159,6 +164,7 @@ export async function getCurrentUser() {
         id: true,
         fullName: true,
         email: true,
+        username: true,
         phone: true,
         role: true,
         profilePicture: true,

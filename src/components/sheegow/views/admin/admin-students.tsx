@@ -75,6 +75,7 @@ type RoleFilter = "all" | "student" | "teacher" | "admin" | "super_admin";
 interface EditForm {
   fullName: string;
   email: string;
+  username: string;
   phone: string;
   level: string;
 }
@@ -93,6 +94,7 @@ export function AdminStudents() {
   const [editForm, setEditForm] = useState<EditForm>({
     fullName: "",
     email: "",
+    username: "",
     phone: "",
     level: "Beginner",
   });
@@ -129,6 +131,7 @@ export function AdminStudents() {
       (u) =>
         u.fullName.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
+        (u.username ?? "").toLowerCase().includes(q) ||
         (u.phone ?? "").toLowerCase().includes(q)
     );
   }, [users, search]);
@@ -138,6 +141,7 @@ export function AdminStudents() {
     setEditForm({
       fullName: u.fullName,
       email: u.email,
+      username: u.username ?? "",
       phone: normalizeSomaliPhone(u.phone ?? ""),
       level: u.level,
     });
@@ -156,6 +160,7 @@ export function AdminStudents() {
       const body: Partial<User> = {
         fullName: editForm.fullName.trim(),
         email: editForm.email.trim(),
+        username: editForm.username.trim() || undefined,
         phone: editForm.phone.trim() || null,
         level: editForm.level,
       };
@@ -327,6 +332,11 @@ export function AdminStudents() {
                           <p className="truncate text-xs text-muted-foreground">
                             {u.email}
                           </p>
+                          {u.username && (
+                            <p className="truncate text-xs font-medium text-indigo-600">
+                              @{u.username}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </TableCell>
@@ -458,6 +468,22 @@ export function AdminStudents() {
                 }
                 required
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="username">Login Username</Label>
+              <Input
+                id="username"
+                value={editForm.username}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, username: e.target.value }))
+                }
+                placeholder="ahmed.hassan"
+                minLength={3}
+                maxLength={30}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                The user can log in with this, their email or their phone.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email Address</Label>

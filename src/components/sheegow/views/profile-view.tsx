@@ -38,6 +38,7 @@ import {
 import {
   Camera,
   Mail,
+  User,
   Phone,
   Lock,
   Bell,
@@ -68,6 +69,7 @@ export function ProfileView() {
   // Account form
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [level, setLevel] = useState<string>("Beginner");
 
@@ -88,6 +90,7 @@ export function ProfileView() {
     if (!user) return;
     setFullName(user.fullName || "");
     setEmail(user.email || "");
+    setUsername(user.username || "");
     setPhone(normalizeSomaliPhone(user.phone || ""));
     setLevel(user.level || "Beginner");
   }, [user]);
@@ -141,6 +144,12 @@ export function ProfileView() {
         fullName: fullName.trim(),
         level,
       };
+      if (
+        username.trim() &&
+        username.trim() !== (user.username || "")
+      ) {
+        body.username = username.trim();
+      }
       if (phone !== (user.phone || "")) body.phone = phone;
       const { user: updated } = await api.updateMyProfile(body);
       setUser(updated);
@@ -254,6 +263,14 @@ export function ProfileView() {
             <dl className="w-full space-y-2 text-left text-sm">
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-2 text-muted-foreground">
+                  <User className="h-4 w-4" /> Username
+                </dt>
+                <dd className="max-w-[140px] truncate font-medium">
+                  {user.username || "Not set"}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" /> Email
                 </dt>
                 <dd className="max-w-[140px] truncate font-medium">
@@ -321,6 +338,22 @@ export function ProfileView() {
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Your full name"
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="username">Login Username</Label>
+                  <Input
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="ahmed.hassan"
+                    minLength={3}
+                    maxLength={30}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    3–30 small letters, numbers, dots or underscores. You can
+                    log in with this, your email or your phone number.
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">

@@ -12,7 +12,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "db:superadmin": "bun prisma/seed-super-admin.ts"
+    "db:superadmin": "bun prisma/seed-super-admin.ts",
+    "db:usernames": "bun prisma/backfill-usernames.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
