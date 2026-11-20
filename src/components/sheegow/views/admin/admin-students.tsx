@@ -220,7 +220,7 @@ export function AdminStudents() {
           value={roleFilter}
           onValueChange={(v) => setRoleFilter(v as RoleFilter)}
         >
-          <TabsList>
+          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
             <TabsTrigger value="all" className="gap-1.5">
               <Users className="h-3.5 w-3.5" />
               All
@@ -274,19 +274,20 @@ export function AdminStudents() {
             </p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-4">User</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Level</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="pr-4 text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[200px] pl-4">User</TableHead>
+                  <TableHead className="min-w-[120px]">Contact</TableHead>
+                  <TableHead className="min-w-[90px]">Role</TableHead>
+                  <TableHead className="min-w-[110px]">Level</TableHead>
+                  <TableHead className="min-w-[110px]">Joined</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="pr-4 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
               {filtered.map((u) => {
                 const isSelf = user?.id === u.id;
                 return (
@@ -420,6 +421,7 @@ export function AdminStudents() {
               })}
             </TableBody>
           </Table>
+          </div>
         )}
       </Card>
 
@@ -430,7 +432,7 @@ export function AdminStudents() {
           if (!open && !saving) setEditOpen(false);
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
             <DialogDescription>

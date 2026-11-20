@@ -72,3 +72,4 @@ gen-images.sh
 # Uploaded files
 /upload/
 .neon
+tool-results/

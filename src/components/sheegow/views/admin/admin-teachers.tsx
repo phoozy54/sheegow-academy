@@ -305,7 +305,7 @@ export function AdminTeachers() {
           if (!open && !saving) setEditOpen(false);
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Teacher</DialogTitle>
             <DialogDescription>
@@ -407,7 +407,7 @@ export function AdminTeachers() {
           if (!open && !adding) setAddOpen(false);
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Teacher</DialogTitle>
             <DialogDescription>
@@ -519,7 +519,7 @@ export function AdminTeachers() {
           if (!open) setViewing(null);
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Teacher Profile</DialogTitle>
           </DialogHeader>

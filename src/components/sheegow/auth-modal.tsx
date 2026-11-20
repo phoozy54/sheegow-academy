@@ -9,13 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { GraduationCap, Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
+import { GraduationCap, Eye, EyeOff, Mail, Lock, User, Phone, X } from "lucide-react";
 import { toast } from "sonner";
 
 export function AuthModal() {
@@ -95,15 +96,24 @@ export function AuthModal() {
         }
       }}
     >
-      <DialogContent className="max-w-md overflow-hidden p-0">
+      <DialogContent className="max-h-[92vh] max-w-md overflow-hidden p-0" showCloseButton={false}>
         {/* Header banner */}
-        <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 px-6 py-7 text-white">
+        <div className="relative shrink-0 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 px-6 py-7 text-white">
           <div className="hero-mesh absolute inset-0 opacity-60" />
-          <div className="relative flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+          <DialogClose asChild>
+            <button
+              type="button"
+              aria-label="Close"
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </DialogClose>
+          <div className="relative flex items-center gap-3 pr-8">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
               <GraduationCap className="h-6 w-6" />
             </span>
-            <div>
+            <div className="min-w-0">
               <p className="text-lg font-extrabold leading-tight">
                 {isLogin ? "Welcome Back" : "Join SHEEGOW ACADEMY"}
               </p>
@@ -116,7 +126,7 @@ export function AuthModal() {
           </div>
         </div>
 
-        <div className="px-6 pb-6 pt-5">
+        <div className="max-h-[calc(92vh-7rem)] overflow-y-auto px-6 pb-6 pt-5">
           <DialogHeader className="mb-4 space-y-1">
             <DialogTitle className="text-xl">
               {isLogin ? "Log in to your account" : "Create your free account"}
@@ -195,7 +205,8 @@ export function AuthModal() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />

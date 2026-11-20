@@ -295,11 +295,14 @@ export function LiveRoomView() {
   /* ─── Loading ───────────────────────────────────────── */
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="h-9 w-32 animate-pulse rounded bg-muted" />
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          <div className="aspect-video animate-pulse rounded-2xl bg-muted lg:col-span-2" />
-          <div className="h-96 animate-pulse rounded-2xl bg-muted" />
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <div className="aspect-video animate-pulse rounded-2xl bg-muted" />
+            <div className="mt-4 h-16 animate-pulse rounded-2xl bg-muted" />
+          </div>
+          <div className="h-[460px] animate-pulse rounded-2xl bg-muted sm:h-[520px] lg:h-[calc(100vh-12rem)] lg:max-h-[800px]" />
         </div>
       </div>
     );
@@ -334,20 +337,20 @@ export function LiveRoomView() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
           <button
             onClick={() => navigate("live")}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> Leave
+            <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Leave</span>
           </button>
           <div className="flex min-w-0 items-center gap-2">
-            <span className="flex h-2 w-2">
-              <span className="absolute h-2 w-2 animate-ping rounded-full bg-red-500 opacity-75" />
-              <span className="h-2 w-2 rounded-full bg-red-500" />
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
             </span>
             <span className="truncate text-sm font-bold text-foreground">
               {liveClass.title}
             </span>
           </div>
-          <Badge variant="outline" className="hidden border-red-200 bg-red-50 text-red-700 sm:inline-flex">
+          <Badge variant="outline" className="hidden shrink-0 border-red-200 bg-red-50 text-red-700 sm:inline-flex">
             <Radio className="mr-1 h-3 w-3" /> LIVE
           </Badge>
         </div>
@@ -426,32 +429,39 @@ function VideoArea({
   return (
     <Card className="overflow-hidden p-0">
       {/* Video surface (mock) */}
-      <div className="relative aspect-video w-full bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+      <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
         {/* Decorative grid */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage:
-            "radial-gradient(circle at 25% 25%, rgba(99,102,241,0.4) 0, transparent 35%), radial-gradient(circle at 75% 75%, rgba(245,158,11,0.3) 0, transparent 35%)",
-        }} />
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 25% 25%, rgba(99,102,241,0.4) 0, transparent 35%), radial-gradient(circle at 75% 75%, rgba(245,158,11,0.3) 0, transparent 35%)",
+          }}
+        />
 
         {/* Top bar: title + online count */}
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 p-3 sm:p-4">
           <span className="flex items-center gap-1.5 rounded-full bg-red-500/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg backdrop-blur">
-            <span className="h-1.5 w-1.5 animate-live-pulse rounded-full bg-white" />
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-live-pulse rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+            </span>
             LIVE
           </span>
-          <div className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+          <div className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-xs font-medium text-white backdrop-blur sm:gap-2 sm:px-3">
             <Users className="h-3.5 w-3.5" />
-            <span>Students online: {onlineCount}</span>
+            <span className="hidden sm:inline">Students online:</span>
+            <span className="font-semibold">{onlineCount}</span>
           </div>
         </div>
 
         {/* Center: teacher avatar + class info */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center sm:px-6">
           <div className="relative">
             <div className="absolute -inset-3 animate-pulse rounded-full bg-red-500/20 blur-xl" />
-            <Avatar className="relative h-24 w-24 border-4 border-white/30 shadow-2xl sm:h-32 sm:w-32">
+            <Avatar className="relative h-20 w-20 border-4 border-white/30 shadow-2xl sm:h-28 sm:w-28 lg:h-32 lg:w-32">
               <AvatarImage src={teacherAvatar || undefined} />
-              <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-2xl font-bold text-white">
+              <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-xl font-bold text-white sm:text-2xl">
                 {teacherName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -459,37 +469,39 @@ function VideoArea({
               <Radio className="h-3 w-3 text-white" />
             </span>
           </div>
-          <h3 className="mt-4 text-lg font-bold text-white sm:text-xl">{liveClass.title}</h3>
-          <p className="mt-1 text-sm text-indigo-200">
+          <h3 className="mt-4 line-clamp-2 text-base font-bold text-white sm:text-lg lg:text-xl">{liveClass.title}</h3>
+          <p className="mt-1 text-xs text-indigo-200 sm:text-sm">
             with <span className="font-semibold">{teacherName}</span>
           </p>
-          <p className="mt-3 max-w-md text-xs text-slate-300">
+          <p className="mt-3 line-clamp-3 max-w-md text-xs text-slate-300">
             {liveClass.description || "Live interactive English class in session."}
           </p>
         </div>
 
-        {/* Participant bubbles — bottom left */}
-        <div className="absolute bottom-20 left-4 flex flex-wrap gap-2 sm:bottom-20 sm:left-4">
-          {PARTICIPANT_NAMES.slice(0, 5).map((name, i) => (
-            <div
-              key={name}
-              className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-lg ring-2 ring-white/20",
-                PARTICIPANT_COLORS[i]
-              )}
-              title={`${name} (joined)`}
-            >
-              {name.slice(0, 2).toUpperCase()}
+        {/* Participant bubbles — bottom left, hidden on very small screens */}
+        <div className="absolute bottom-16 left-3 hidden sm:flex lg:bottom-20 lg:left-4">
+          <div className="flex flex-wrap gap-2">
+            {PARTICIPANT_NAMES.slice(0, 5).map((name, i) => (
+              <div
+                key={name}
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-lg ring-2 ring-white/20",
+                  PARTICIPANT_COLORS[i]
+                )}
+                title={`${name} (joined)`}
+              >
+                {name.slice(0, 2).toUpperCase()}
+              </div>
+            ))}
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800/80 text-xs font-bold text-white ring-2 ring-white/20">
+              +{Math.max(0, onlineCount - 5)}
             </div>
-          ))}
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800/80 text-xs font-bold text-white ring-2 ring-white/20">
-            +{Math.max(0, onlineCount - 5)}
           </div>
         </div>
       </div>
 
       {/* Control bar */}
-      <div className="flex items-center justify-center gap-2 border-t bg-card p-3 sm:gap-3">
+      <div className="flex items-center justify-center gap-2 overflow-x-auto border-t bg-card p-3 sm:gap-3 lg:overflow-visible">
         {/* Mic */}
         <ControlButton
           active={micOn}
@@ -511,7 +523,7 @@ function VideoArea({
         {/* Screen share — disabled */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <span>
+            <span className="shrink-0">
               <button
                 disabled
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-muted-foreground opacity-60"
@@ -533,7 +545,7 @@ function VideoArea({
             onRaiseHand();
           }}
           className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors",
             handRaised
               ? "bg-amber-500 text-white shadow-lg shadow-amber-500/40"
               : "bg-amber-100 text-amber-700 hover:bg-amber-200"
@@ -542,11 +554,11 @@ function VideoArea({
         >
           <Hand className="h-5 w-5" />
         </button>
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="hidden h-8 shrink-0 sm:block" />
         {/* Leave */}
         <button
           onClick={onLeave}
-          className="flex h-11 items-center gap-1.5 rounded-full bg-red-500 px-4 text-sm font-semibold text-white shadow-lg shadow-red-500/30 transition-colors hover:bg-red-600"
+          className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-red-500 px-4 text-sm font-semibold text-white shadow-lg shadow-red-500/30 transition-colors hover:bg-red-600"
           aria-label="Leave class"
         >
           <PhoneOff className="h-4 w-4" />
@@ -578,18 +590,20 @@ function ControlButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button
-          onClick={onClick}
-          className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
-            active
-              ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
-              : "bg-red-500 text-white shadow-lg shadow-red-500/30 hover:bg-red-600"
-          )}
-          aria-label={active ? activeLabel : inactiveLabel}
-        >
-          <Icon className="h-5 w-5" />
-        </button>
+        <span className="shrink-0">
+          <button
+            onClick={onClick}
+            className={cn(
+              "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+              active
+                ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                : "bg-red-500 text-white shadow-lg shadow-red-500/30 hover:bg-red-600"
+            )}
+            aria-label={active ? activeLabel : inactiveLabel}
+          >
+            <Icon className="h-5 w-5" />
+          </button>
+        </span>
       </TooltipTrigger>
       <TooltipContent>{active ? activeLabel : inactiveLabel}</TooltipContent>
     </Tooltip>
@@ -626,14 +640,14 @@ function ChatSidebar({
   }, [messages]);
 
   return (
-    <Card className="flex h-[600px] flex-col overflow-hidden p-0 lg:h-[calc(100vh-12rem)] lg:max-h-[800px]">
+    <Card className="flex h-[460px] flex-col overflow-hidden p-0 sm:h-[520px] lg:h-[calc(100vh-12rem)] lg:max-h-[800px]">
       {/* Header */}
-      <div className="flex items-center justify-between border-b bg-gradient-to-r from-indigo-50 to-background px-4 py-3">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-indigo-600" />
-          <span className="text-sm font-bold text-foreground">Live Chat</span>
+      <div className="flex items-center justify-between gap-2 border-b bg-gradient-to-r from-indigo-50 to-background px-4 py-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <MessageSquare className="h-4 w-4 shrink-0 text-indigo-600" />
+          <span className="truncate text-sm font-bold text-foreground">Live Chat</span>
         </div>
-        <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
+        <Badge variant="outline" className="shrink-0 border-indigo-200 bg-indigo-50 text-indigo-700">
           <Users className="mr-1 h-3 w-3" />
           {onlineCount} online
         </Badge>
@@ -682,14 +696,15 @@ function ChatSidebar({
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Type a message..."
               maxLength={500}
-              className="flex-1"
+              autoComplete="off"
+              className="flex-1 text-base"
               aria-label="Chat message"
             />
             <Button
               type="submit"
               size="icon"
               disabled={sending || !chatInput.trim()}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="h-10 w-10 shrink-0 bg-indigo-600 hover:bg-indigo-700"
               aria-label="Send message"
             >
               {sending ? (

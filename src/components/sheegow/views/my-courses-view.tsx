@@ -151,7 +151,7 @@ export function MyCoursesView() {
         onValueChange={(v) => setTab(v as TabValue)}
         className="mb-6"
       >
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="in-progress">In Progress</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
@@ -332,7 +332,7 @@ function CertificateDialog({
   const course = enrollment?.course;
   return (
     <Dialog open={enrollment !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg p-0">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>
             Certificate of Completion — {course?.title}

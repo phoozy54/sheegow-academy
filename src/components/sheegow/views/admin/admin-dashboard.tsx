@@ -350,15 +350,16 @@ export function AdminDashboard() {
             {stats.totalEnrollments.toLocaleString()} total
           </Badge>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Student</TableHead>
-              <TableHead>Course</TableHead>
-              <TableHead className="text-right">When</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[160px]">Student</TableHead>
+                <TableHead className="min-w-[200px]">Course</TableHead>
+                <TableHead className="text-right">When</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
             {recent.length === 0 ? (
               <TableRow>
                 <TableCell
@@ -392,6 +393,7 @@ export function AdminDashboard() {
             )}
           </TableBody>
         </Table>
+        </div>
       </Card>
     </div>
   );

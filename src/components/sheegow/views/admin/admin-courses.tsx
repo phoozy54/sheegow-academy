@@ -273,149 +273,151 @@ export function AdminCourses() {
             </p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-4">Course</TableHead>
-                <TableHead>Level</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Teacher</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="pr-4 text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="pl-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-14 shrink-0 overflow-hidden rounded-md border bg-muted">
-                        {c.image ? (
-                          <img
-                            src={c.image}
-                            alt={c.title}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center">
-                            <Play className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-foreground">
-                          {c.title}
-                        </p>
-                        <p className="line-clamp-1 text-xs text-muted-foreground">
-                          {c.description || "No description"}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={cn("border", levelBadgeClass(c.level))}
-                    >
-                      {c.level}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {c.price === 0 ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                        <Gift className="h-3 w-3" /> Free
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-foreground">
-                        <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                        {formatPrice(c.price).replace("$", "")}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {c.duration}w
-                  </TableCell>
-                  <TableCell>
-                    {c.teacher ? (
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage
-                            src={c.teacher.profilePicture || undefined}
-                          />
-                          <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
-                            {c.teacher.fullName.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="truncate text-xs">
-                          {c.teacher.fullName}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Unassigned
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        c.isActive
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-muted bg-muted text-muted-foreground"
-                      }
-                    >
-                      {c.isActive ? "Active" : "Hidden"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="pr-4 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4" />
-                          <span className="sr-only">Open course actions</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEdit(c)}>
-                          <Pencil className="h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setEditing(c);
-                            setForm({
-                              title: c.title,
-                              description: c.description,
-                              level: c.level,
-                              price: c.price === 0 ? 29 : c.price,
-                              duration: c.duration,
-                              image: c.image ?? "",
-                              teacherId: c.teacherId ?? "",
-                              whatYouLearn: c.whatYouLearn ?? "",
-                            });
-                            setFormOpen(true);
-                          }}
-                        >
-                          <DollarSign className="h-4 w-4" />
-                          {c.price === 0 ? "Set Price" : "Change Price"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
-                          onClick={() => setDeleteId(c.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[200px] pl-4">Course</TableHead>
+                  <TableHead className="min-w-[100px]">Level</TableHead>
+                  <TableHead className="min-w-[90px]">Price</TableHead>
+                  <TableHead className="min-w-[80px]">Duration</TableHead>
+                  <TableHead className="min-w-[140px]">Teacher</TableHead>
+                  <TableHead className="min-w-[90px]">Status</TableHead>
+                  <TableHead className="pr-4 text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="pl-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-14 shrink-0 overflow-hidden rounded-md border bg-muted">
+                          {c.image ? (
+                            <img
+                              src={c.image}
+                              alt={c.title}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <Play className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-foreground">
+                            {c.title}
+                          </p>
+                          <p className="line-clamp-1 text-xs text-muted-foreground">
+                            {c.description || "No description"}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={cn("border", levelBadgeClass(c.level))}
+                      >
+                        {c.level}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {c.price === 0 ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
+                          <Gift className="h-3 w-3" /> Free
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-foreground">
+                          <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                          {formatPrice(c.price).replace("$", "")}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {c.duration}w
+                    </TableCell>
+                    <TableCell>
+                      {c.teacher ? (
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage
+                              src={c.teacher.profilePicture || undefined}
+                            />
+                            <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                              {c.teacher.fullName.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="truncate text-xs">
+                            {c.teacher.fullName}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          Unassigned
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={
+                          c.isActive
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            : "border-muted bg-muted text-muted-foreground"
+                        }
+                      >
+                        {c.isActive ? "Active" : "Hidden"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="pr-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Open course actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEdit(c)}>
+                            <Pencil className="h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setEditing(c);
+                              setForm({
+                                title: c.title,
+                                description: c.description,
+                                level: c.level,
+                                price: c.price === 0 ? 29 : c.price,
+                                duration: c.duration,
+                                image: c.image ?? "",
+                                teacherId: c.teacherId ?? "",
+                                whatYouLearn: c.whatYouLearn ?? "",
+                              });
+                              setFormOpen(true);
+                            }}
+                          >
+                            <DollarSign className="h-4 w-4" />
+                            {c.price === 0 ? "Set Price" : "Change Price"}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => setDeleteId(c.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </Card>
 

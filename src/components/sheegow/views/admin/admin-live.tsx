@@ -247,7 +247,7 @@ export function AdminLive() {
           if (!open && !saving) setFormOpen(false);
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Schedule Live Class</DialogTitle>
             <DialogDescription>

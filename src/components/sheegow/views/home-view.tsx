@@ -58,7 +58,7 @@ const FEATURES = [
   {
     icon: Globe2,
     title: "Learn From Anywhere",
-    desc: "Join from Somalia or anywhere in the diaspora. Pay easily with EVC Plus or Zaad.",
+    desc: "Join from Somaliland or anywhere in the diaspora. Pay easily with EVC Plus or Zaad.",
     color: "from-sky-500 to-blue-600",
   },
 ];
@@ -66,7 +66,7 @@ const FEATURES = [
 const TESTIMONIALS = [
   {
     name: "Hodan Abdi",
-    role: "Student, Mogadishu",
+    role: "Student, Hargeisa",
     rating: 5,
     text: "I joined SHEEGOW ACADEMY with zero English. After 8 weeks of live classes, I can have full conversations. The teachers are so patient and the live classes make it real.",
     avatar: null,
@@ -126,9 +126,9 @@ export function HomeView() {
                 variant="outline"
                 className="mb-5 inline-flex items-center gap-2 rounded-full border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
               >
-                <span className="flex h-2 w-2">
-                  <span className="absolute h-2 w-2 animate-ping rounded-full bg-red-500 opacity-75" />
-                  <span className="h-2 w-2 rounded-full bg-red-500" />
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
                 </span>
                 LIVE class happening now
               </Badge>

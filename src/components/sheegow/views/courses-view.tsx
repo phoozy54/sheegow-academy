@@ -144,7 +144,7 @@ export function CoursesView() {
 
         {/* Result count */}
         <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-          <span>
+          <span className="min-w-0">
             {loading ? (
               <span className="inline-flex items-center gap-1.5">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading...
@@ -152,7 +152,7 @@ export function CoursesView() {
             ) : error ? (
               <span className="text-red-600">{error}</span>
             ) : (
-              <>
+              <span className="block truncate">
                 <span className="font-semibold text-foreground">{total}</span>{" "}
                 {total === 1 ? "course" : "courses"} found
                 {level !== "All" && (
@@ -165,7 +165,7 @@ export function CoursesView() {
                     {" "}matching &ldquo;<span className="font-semibold text-indigo-600">{debouncedSearch}</span>&rdquo;
                   </>
                 )}
-              </>
+              </span>
             )}
           </span>
         </div>

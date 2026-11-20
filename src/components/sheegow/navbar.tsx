@@ -109,10 +109,10 @@ export function Navbar() {
             : "bg-background/60 backdrop-blur-md"
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-8">
           <button
             onClick={() => go("home")}
-            className="flex items-center gap-2.5 transition-transform hover:scale-105"
+            className="flex shrink-0 items-center gap-2.5 transition-transform hover:scale-105 sm:gap-2.5"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
               <GraduationCap className="h-6 w-6" />
@@ -222,13 +222,13 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="h-10 w-10 md:hidden"
                 aria-label="Open menu"
               >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+            <SheetContent side="right" className="w-[300px] overflow-y-auto p-0 sm:w-[340px]">
               <SheetTitle className="mb-6 flex items-center gap-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
                   <GraduationCap className="h-5 w-5" />

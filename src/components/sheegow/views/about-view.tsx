@@ -34,7 +34,7 @@ const VALUES = [
   {
     icon: Globe2,
     title: "Accessible to all",
-    desc: "Quality English education should reach every Somali learner — in Mogadishu, Hargeisa, Kismayo, or the diaspora.",
+    desc: "Quality English education should reach every Somali learner — in Hargeisa, Mogadishu, Kismayo, or the diaspora.",
     color: "from-indigo-500 to-indigo-600",
   },
   {
@@ -142,7 +142,7 @@ export function AboutView() {
 
       {/* ─── MISSION & VISION ──────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           <Card className="card-lift relative overflow-hidden p-8">
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30">
               <Target className="h-6 w-6" />
@@ -163,7 +163,7 @@ export function AboutView() {
             </div>
             <h2 className="mb-3 text-xl font-bold text-foreground">Our Vision</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              A Somalia where every student — from primary school to working
+              A Somaliland where every student — from primary school to working
               professional — can speak English confidently. Where live classes
               replace lonely videos, where teachers know their students by name,
               and where a better future is just a live class away.
@@ -194,7 +194,7 @@ export function AboutView() {
               language stick.
             </p>
             <p>
-              Our founders — teachers and engineers from Mogadishu and the
+              Our founders — teachers and engineers from Hargeisa and the
               diaspora — decided to fix this. We built a platform where every
               single class is <span className="font-semibold text-foreground">LIVE</span>.
               Where you see your teacher, hear your classmates, raise your hand,
@@ -202,7 +202,7 @@ export function AboutView() {
             </p>
             <p>
               Today, thousands of Somali students learn with us — from absolute
-              beginners in Mogadishu to IELTS candidates preparing for
+              beginners in Hargeisa to IELTS candidates preparing for
               university abroad. We pay with EVC Plus and Zaad. We learn on
               phones and laptops. We come from different cities, but we share one
               goal: to speak English with confidence.
@@ -268,7 +268,7 @@ export function AboutView() {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3">
             {TEACHERS.map((t) => (
               <Card key={t.name} className="card-lift flex flex-col overflow-hidden p-0">
                 <div className="relative aspect-[4/3] w-full overflow-hidden">

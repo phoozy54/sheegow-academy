@@ -256,7 +256,7 @@ export function ProfileView() {
         <Card className="p-0 lg:col-span-2">
           <Tabs defaultValue="account" className="flex h-full flex-col">
             <CardHeader className="border-b p-0 pb-0">
-              <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b bg-transparent p-2">
+              <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b bg-transparent p-2">
                 <TabsTrigger
                   value="account"
                   className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
@@ -511,7 +511,7 @@ export function ProfileView() {
               </div>
 
               <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-red-700">
                       <AlertTriangle className="h-5 w-5" />

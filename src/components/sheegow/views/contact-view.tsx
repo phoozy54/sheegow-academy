@@ -55,7 +55,7 @@ const CONTACT_INFO = [
   {
     icon: MapPin,
     label: "Address",
-    value: "Mogadishu, Somalia",
+    value: "Hargeisa, Somaliland",
     href: "#map",
     hint: "Main campus & online classes",
     color: "from-amber-500 to-orange-600",
@@ -316,8 +316,8 @@ export function ContactView() {
             <Card id="map" className="overflow-hidden p-0">
               <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-indigo-100 to-amber-50">
                 <iframe
-                  title="SHEEGOW ACADEMY location — Mogadishu, Somalia"
-                  src="https://www.google.com/maps?q=Mogadishu,Somalia&output=embed"
+                  title="SHEEGOW ACADEMY location — Hargeisa, Somaliland"
+                  src="https://www.google.com/maps?q=Hargeisa,Somaliland&output=embed"
                   className="absolute inset-0 h-full w-full border-0"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
@@ -327,7 +327,7 @@ export function ContactView() {
               <div className="flex items-center gap-2 p-4 text-sm">
                 <MapPin className="h-4 w-4 text-indigo-600" />
                 <span className="font-medium text-foreground">
-                  Mogadishu, Somalia
+                  Hargeisa, Somaliland
                 </span>
                 <span className="text-muted-foreground">· Online classes worldwide</span>
               </div>

@@ -191,7 +191,7 @@ export function AdminPanel() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="h-10 w-10 lg:hidden"
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -481,17 +481,18 @@ export function AdminMessages() {
             </p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-4">From</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Received</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="pr-4 text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[180px] pl-4">From</TableHead>
+                  <TableHead className="min-w-[220px]">Subject</TableHead>
+                  <TableHead className="min-w-[140px]">Received</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="pr-4 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
               {messages.map((m) => (
                 <TableRow key={m.id}>
                   <TableCell className="pl-4">
@@ -603,6 +604,7 @@ export function AdminMessages() {
               ))}
             </TableBody>
           </Table>
+          </div>
         )}
       </Card>
 
@@ -636,11 +638,11 @@ function ReadMessageDialog({
   if (!message) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
       onClick={onClose}
     >
       <Card
-        className="w-full max-w-lg p-6"
+        className="relative my-8 w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-3">

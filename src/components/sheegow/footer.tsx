@@ -168,7 +168,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
-                <span>Mogadishu, Somalia</span>
+                <span>Hargeisa, Somaliland</span>
               </li>
             </ul>
             <div className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">

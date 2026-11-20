@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "English for Somalis",
     "online English course",
     "IELTS preparation",
-    "English teacher Somalia",
+    "English teacher Somaliland",
   ],
   authors: [{ name: "SHEEGOW ACADEMY" }],
   icons: {

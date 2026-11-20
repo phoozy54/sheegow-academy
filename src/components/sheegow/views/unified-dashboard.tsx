@@ -202,7 +202,7 @@ export function UnifiedDashboard() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="h-10 w-10 lg:hidden"
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -810,7 +810,7 @@ function TeacherOverview() {
 /* ─── Student: My Courses (full list within portal) ─────── */
 
 function StudentMyCourses() {
-  const { openCourse } = useStore();
+  const { openCourse, navigate } = useStore();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -844,6 +844,12 @@ function StudentMyCourses() {
         <p className="text-sm text-muted-foreground">
           Browse the catalog to enroll in your first course.
         </p>
+        <Button
+          onClick={() => navigate("courses")}
+          className="mt-4 gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+        >
+          <BookOpen className="h-4 w-4" /> Browse Courses
+        </Button>
       </Card>
     );
   }

@@ -28,6 +28,7 @@ import {
 
 export function LiveClassesView() {
   const openClass = useStore((s) => s.openClass);
+  const navigate = useStore((s) => s.navigate);
 
   const [classes, setClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,6 +114,14 @@ export function LiveClassesView() {
         <p className="mt-2 text-sm text-muted-foreground">
           Check back soon — new LIVE English classes are added every week.
         </p>
+        <Button
+          onClick={() => navigate("courses")}
+          variant="outline"
+          className="mt-6 gap-1.5"
+        >
+          Browse Courses
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
@@ -170,9 +179,9 @@ export function LiveClassesView() {
         {liveNow.length > 0 && (
           <section className="mb-12">
             <div className="mb-5 flex items-center gap-2">
-              <span className="flex h-2.5 w-2.5">
-                <span className="absolute h-2.5 w-2.5 animate-ping rounded-full bg-red-500 opacity-75" />
-                <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
               </span>
               <h2 className="text-xl font-bold text-foreground">Live now</h2>
               <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
