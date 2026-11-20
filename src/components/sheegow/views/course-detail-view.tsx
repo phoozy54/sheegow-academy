@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import type { Course, Review } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,12 @@ export function CourseDetailView() {
   const openCheckout = useStore((s) => s.openCheckout);
   const openAuthModal = useStore((s) => s.openAuthModal);
   const user = useStore((s) => s.user);
+  const { isMobile, isTablet } = useDevice();
+  const padClass = isMobile
+    ? "px-3"
+    : isTablet
+      ? "px-5"
+      : "px-4 sm:px-6 lg:px-8";
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,10 +111,10 @@ export function CourseDetailView() {
   /* ─── Loading state ─────────────────────────────────── */
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className={`mx-auto max-w-7xl py-10 ${padClass}`}>
         <div className="h-9 w-32 animate-pulse rounded bg-muted" />
-        <div className="mt-6 grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className="mt-6 grid gap-8 md:grid-cols-3">
+          <div className="md:col-span-2">
             <div className="aspect-[16/9] animate-pulse rounded-2xl bg-muted" />
             <div className="mt-6 h-8 w-3/4 animate-pulse rounded bg-muted" />
             <div className="mt-4 h-4 w-1/2 animate-pulse rounded bg-muted" />
@@ -126,7 +133,7 @@ export function CourseDetailView() {
   /* ─── Error state ───────────────────────────────────── */
   if (error || !course) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8">
+      <div className={`mx-auto max-w-3xl py-20 text-center ${padClass}`}>
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <PlayCircle className="h-8 w-8 text-red-500" />
         </div>
@@ -161,7 +168,7 @@ export function CourseDetailView() {
       {/* ─── HERO ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b">
         <div className="hero-mesh absolute inset-0" />
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className={`relative mx-auto max-w-7xl py-8 lg:py-10 ${padClass}`}>
           <button
             onClick={() => navigate("courses")}
             className="mb-6 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -169,9 +176,9 @@ export function CourseDetailView() {
             <ArrowLeft className="h-4 w-4" /> All Courses
           </button>
 
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3">
             {/* Hero image */}
-            <div className="lg:col-span-2">
+            <div className="md:col-span-2">
               <div className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
                 {course.image ? (
                   <img loading="lazy" decoding="async"
@@ -250,8 +257,8 @@ export function CourseDetailView() {
             </div>
 
             {/* Sticky enrollment card */}
-            <div className="lg:col-span-1">
-              <div className="lg:sticky lg:top-20">
+            <div className="md:col-span-1">
+              <div className="md:sticky md:top-20">
                 <EnrollmentCard
                   course={course}
                   onEnroll={handleEnroll}
@@ -264,10 +271,10 @@ export function CourseDetailView() {
       </section>
 
       {/* ─── MAIN CONTENT ─────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-3">
+      <section className={`mx-auto max-w-7xl py-12 ${padClass}`}>
+        <div className="grid gap-10 md:grid-cols-3">
           {/* Left: description + what you'll learn + reviews */}
-          <div className="space-y-10 lg:col-span-2">
+          <div className="space-y-10 md:col-span-2">
             {/* Description */}
             <div>
               <h2 className="mb-3 text-xl font-bold text-foreground">
@@ -357,7 +364,7 @@ export function CourseDetailView() {
           </div>
 
           {/* Right: secondary info card (mobile-friendly spacer) */}
-          <div className="lg:col-span-1">
+          <div className="md:col-span-1">
             <Card className="card-lift p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Award className="h-5 w-5 text-amber-500" />

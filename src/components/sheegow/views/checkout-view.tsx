@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,7 @@ export function CheckoutView() {
     navigate,
     checkoutCourseId,
   } = useStore();
+  const { isMobile, isTablet } = useDevice();
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -273,7 +275,11 @@ export function CheckoutView() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div
+      className={`mx-auto max-w-6xl py-8 ${
+        isMobile ? "px-3" : isTablet ? "px-5" : "px-4 sm:px-6 lg:px-8"
+      }`}
+    >
       {/* ─── Header ─────────────────────────────────────────── */}
       <div className="mb-6 flex items-center justify-between gap-3">
         <Button
@@ -292,8 +298,8 @@ export function CheckoutView() {
       </div>
 
       {loading ? (
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-4 lg:col-span-2">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-4 md:col-span-2">
             <Skeleton className="h-32 w-full rounded-xl" />
             <Skeleton className="h-64 w-full rounded-xl" />
           </div>
@@ -312,9 +318,9 @@ export function CheckoutView() {
           </Button>
         </Card>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {/* ─── Left: payment form ──────────────────────────── */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-6 md:col-span-2">
             {/* Payment methods */}
             <Card className="p-0">
               <CardHeader className="border-b">

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import type { Course, Enrollment, LiveClass, Role, User } from "@/lib/types";
 import {
@@ -131,6 +132,7 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
 
 export function UnifiedDashboard() {
   const { user, authLoading, openAuthModal, navigate } = useStore();
+  const { isMobile, isTablet } = useDevice();
   const [section, setSection] = useState<SectionId>("overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -196,6 +198,41 @@ export function UnifiedDashboard() {
         {sidebar}
       </aside>
 
+      {/* Tablet icon rail — persistent navigation without taking horizontal space */}
+      {isTablet && (
+        <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-20 shrink-0 flex-col items-center border-r bg-card py-4 md:flex lg:hidden">
+          <nav className="flex w-full flex-1 flex-col items-center gap-2">
+            {visibleNav.map((item, idx) => {
+              const active = section === item.id;
+              return (
+                <button
+                  key={`rail-${item.id}-${idx}`}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => setSection(item.id)}
+                  className={cn(
+                    "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
+                    active
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                </button>
+              );
+            })}
+          </nav>
+          <button
+            title="Back to site"
+            aria-label="Back to site"
+            onClick={() => navigate("home")}
+            className="flex h-12 w-12 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        </aside>
+      )}
+
       {/* Mobile sidebar — wider drawer with larger touch targets */}
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
         <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
@@ -212,7 +249,7 @@ export function UnifiedDashboard() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 shrink-0 lg:hidden"
+              className={`h-11 w-11 shrink-0 lg:hidden ${isTablet ? "hidden" : ""}`}
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -280,7 +317,9 @@ export function UnifiedDashboard() {
         </header>
 
         {/* Mobile quick navigation — switch sections without opening the drawer */}
-        <nav className="border-b bg-background/80 px-3 py-2 lg:hidden">
+        <nav
+          className={`border-b bg-background/80 px-3 py-2 lg:hidden ${isTablet ? "hidden" : ""}`}
+        >
           <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {visibleNav.map((item, idx) => {
               const active = section === item.id;
@@ -304,7 +343,11 @@ export function UnifiedDashboard() {
         </nav>
 
         {/* Content area — renders role-appropriate content */}
-        <main className="flex-1 px-3 pb-8 pt-4 sm:px-6 sm:pt-6">
+        <main
+          className={`flex-1 pb-8 pt-4 sm:pt-6 ${
+            isMobile ? "px-3" : isTablet ? "px-5" : "px-6"
+          }`}
+        >
           {section === "overview" && <RoleOverview role={role} />}
           {section === "courses" && role === "student" && <StudentMyCourses />}
           {section === "courses" && (role === "teacher" || isAdmin) && (
@@ -505,7 +548,7 @@ function StudentOverview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <StatCard icon={BookOpen} label="Active Courses" value={stats.activeCourses} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={CheckCircle2} label="Completed Lessons" value={stats.completedLessons} color="bg-emerald-100 text-emerald-600" />
         <StatCard icon={Clock} label="Learning Hours" value={`${stats.learningHours}h`} color="bg-amber-100 text-amber-600" />
@@ -513,7 +556,7 @@ function StudentOverview() {
       </div>
 
       {/* Two columns */}
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="h-full p-0">
             <CardHeader className="flex-row items-center justify-between border-b">
@@ -733,14 +776,14 @@ function TeacherOverview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <StatCard icon={BookOpen} label="My Courses" value={myCourses.length} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={Video} label="Upcoming Classes" value={upcoming.length} color="bg-rose-100 text-rose-600" />
         <StatCard icon={Users} label="Total Enrollments" value={myCourses.reduce((s, c) => s + (c.reviewCount || 0), 0)} color="bg-emerald-100 text-emerald-600" />
         <StatCard icon={Award} label="Avg Rating" value={myCourses.length ? (myCourses.reduce((s, c) => s + c.rating, 0) / myCourses.length).toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
         {/* My teaching courses */}
         <div className="lg:col-span-2">
           <Card className="h-full p-0">

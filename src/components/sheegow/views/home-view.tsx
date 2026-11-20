@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api } from "@/lib/api";
 import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,12 @@ const STATS = [
 
 export function HomeView() {
   const { navigate, openAuthModal, user } = useStore();
+  const { isMobile, isTablet } = useDevice();
+  const padClass = isMobile
+    ? "px-3"
+    : isTablet
+      ? "px-5"
+      : "px-4 sm:px-6 lg:px-8";
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -119,9 +126,9 @@ export function HomeView() {
       {/* ─── HERO ──────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="hero-mesh absolute inset-0" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:px-8 lg:pb-24 lg:pt-20">
-          <div className="grid items-center gap-10 lg:grid-cols-2">
-            <div className="text-center lg:text-left">
+        <div className={`relative mx-auto max-w-7xl pb-16 pt-12 sm:pt-16 lg:pb-24 lg:pt-20 ${padClass}`}>
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div className="text-center md:text-left lg:text-left">
               <Badge
                 variant="outline"
                 className="mb-5 inline-flex items-center gap-1.5 rounded-full border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
@@ -238,7 +245,7 @@ export function HomeView() {
       </section>
 
       {/* ─── FEATURES ──────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <Badge
             variant="outline"
@@ -279,7 +286,7 @@ export function HomeView() {
 
       {/* ─── POPULAR COURSES ──────────────────────── */}
       <section className="bg-gradient-to-b from-indigo-50/50 to-background py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={`mx-auto max-w-7xl ${padClass}`}>
           <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <Badge
@@ -321,7 +328,7 @@ export function HomeView() {
       </section>
 
       {/* ─── TESTIMONIALS ─────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <Badge
             variant="outline"
@@ -374,7 +381,7 @@ export function HomeView() {
       </section>
 
       {/* ─── CTA ─────────────────────────────────── */}
-      <section className="px-4 pb-16 sm:px-6 lg:px-8 lg:pb-24">
+      <section className={`pb-16 lg:pb-24 ${padClass}`}>
         <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 p-8 text-center shadow-2xl shadow-indigo-500/30 sm:p-12 lg:p-16">
           <div className="hero-mesh absolute inset-0 opacity-40" />
           <div className="relative">

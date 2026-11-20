@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import { getSocket, disconnectSocket } from "@/lib/socket";
 import { LiveStreamManager } from "@/lib/webrtc";
@@ -83,6 +84,10 @@ export function LiveRoomView() {
   const navigate = useStore((s) => s.navigate);
   const user = useStore((s) => s.user);
   const openAuthModal = useStore((s) => s.openAuthModal);
+  const { isMobile, isTablet } = useDevice();
+
+  // On phones the video and chat panels are shown one at a time.
+  const [mobileTab, setMobileTab] = useState<"video" | "chat">("video");
 
   const [liveClass, setLiveClass] = useState<LiveClass | null>(null);
   const [loading, setLoading] = useState(true);
@@ -459,7 +464,11 @@ export function LiveRoomView() {
     <div className="bg-background">
       {/* ─── Top bar ─────────────────────────────────────── */}
       <div className="border-b bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div
+          className={`mx-auto flex max-w-7xl items-center justify-between gap-3 py-3 ${
+            isMobile ? "px-3" : isTablet ? "px-5" : "px-4 sm:px-6 lg:px-8"
+          }`}
+        >
           <button
             onClick={() => navigate("live")}
             className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -493,10 +502,54 @@ export function LiveRoomView() {
       </div>
 
       {/* ─── Main grid ──────────────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+      <div
+        className={`mx-auto max-w-7xl py-4 ${
+          isMobile ? "px-3" : isTablet ? "px-5" : "px-4 sm:px-6 lg:px-8"
+        }`}
+      >
+        {/* Phone tabs: switch between the video and the chat without
+            scrolling past two stacked panels. Both panels stay mounted so
+            the WebRTC stream and chat socket are never interrupted. */}
+        {isMobile && (
+          <div className="mb-3 grid grid-cols-2 gap-1 rounded-xl border bg-card p-1">
+            <button
+              onClick={() => setMobileTab("video")}
+              className={cn(
+                "flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-colors",
+                mobileTab === "video"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground"
+              )}
+            >
+              <Video className="h-4 w-4" /> Video
+            </button>
+            <button
+              onClick={() => setMobileTab("chat")}
+              className={cn(
+                "flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-colors",
+                mobileTab === "chat"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground"
+              )}
+            >
+              <MessageSquare className="h-4 w-4" /> Chat
+              {messages.length > 0 && mobileTab !== "chat" && (
+                <span className="ml-0.5 rounded-full bg-indigo-100 px-1.5 text-[10px] font-bold text-indigo-700">
+                  {messages.length}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
+
         <div className="grid gap-4 lg:grid-cols-3">
           {/* ─── Video area ───────────────────────────── */}
-          <div className="lg:col-span-2">
+          <div
+            className="lg:col-span-2"
+            style={
+              isMobile ? { display: mobileTab === "video" ? "block" : "none" } : undefined
+            }
+          >
             <VideoArea
               liveClass={liveClass}
               onlineCount={onlineCount}
@@ -527,7 +580,12 @@ export function LiveRoomView() {
           </div>
 
           {/* ─── Chat sidebar ─────────────────────────── */}
-          <div className="lg:col-span-1">
+          <div
+            className="lg:col-span-1"
+            style={
+              isMobile ? { display: mobileTab === "chat" ? "block" : "none" } : undefined
+            }
+          >
             <ChatSidebar
               messages={messages}
               onlineCount={onlineCount}

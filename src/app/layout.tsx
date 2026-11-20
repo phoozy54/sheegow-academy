@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { DeviceProvider } from "@/lib/device";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -102,9 +103,11 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} font-sans antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
-        <SonnerToaster richColors position="top-right" />
+        <DeviceProvider>
+          {children}
+          <Toaster />
+          <SonnerToaster richColors position="top-right" />
+        </DeviceProvider>
       </body>
     </html>
   );

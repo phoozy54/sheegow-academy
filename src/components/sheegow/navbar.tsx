@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -71,6 +72,7 @@ export function Navbar() {
     setMobileMenuOpen,
     openAuthModal,
   } = useStore();
+  const { isMobile, isTablet } = useDevice();
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -109,7 +111,11 @@ export function Navbar() {
             : "bg-background/60 backdrop-blur-md"
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-8">
+        <div
+          className={`mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 sm:gap-4 ${
+            isMobile ? "px-3" : isTablet ? "px-5" : "px-8"
+          }`}
+        >
           <button
             onClick={() => go("home")}
             className="flex shrink-0 items-center gap-2.5 transition-transform hover:scale-105 sm:gap-2.5"
@@ -127,12 +133,16 @@ export function Navbar() {
             </span>
           </button>
 
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav
+            className={`hidden items-center md:flex ${isTablet ? "gap-0.5" : "gap-1"}`}
+          >
             {NAV_LINKS.map((link) => (
               <button
                 key={link.view}
                 onClick={() => go(link.view)}
-                className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                className={`relative rounded-lg py-2 font-medium transition-colors ${
+                  isTablet ? "px-2.5 text-[13px]" : "px-4 text-sm"
+                } ${
                   view === link.view
                     ? "text-indigo-600"
                     : "text-muted-foreground hover:text-foreground"
@@ -146,7 +156,9 @@ export function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div
+            className={`hidden items-center md:flex ${isTablet ? "gap-1.5" : "gap-2"}`}
+          >
             {authLoading ? (
               <div className="h-9 w-24 animate-pulse rounded-lg bg-muted" />
             ) : user ? (
@@ -162,10 +174,14 @@ export function Navbar() {
                         {user.fullName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="max-w-[100px] truncate text-sm font-medium">
-                      {user.fullName.split(" ")[0]}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    {!isTablet && (
+                      <span className="max-w-[100px] truncate text-sm font-medium">
+                        {user.fullName.split(" ")[0]}
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`h-4 w-4 text-muted-foreground ${isTablet ? "hidden" : ""}`}
+                    />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -211,7 +227,7 @@ export function Navbar() {
                   onClick={() => openAuthModal("register")}
                   className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-sm shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
                 >
-                  Get Started
+                  {isTablet ? "Join" : "Get Started"}
                 </Button>
               </>
             )}
@@ -228,7 +244,7 @@ export function Navbar() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] overflow-y-auto p-0 sm:w-[340px]">
+            <SheetContent side="right" className="w-[85vw] max-w-sm overflow-y-auto p-0">
               <SheetTitle className="mb-6 flex items-center gap-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
                   <GraduationCap className="h-5 w-5" />

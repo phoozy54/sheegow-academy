@@ -234,7 +234,7 @@ export function AdminLive() {
 
       {/* List */}
       {loading ? (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-40 w-full rounded-xl" />
           ))}
@@ -252,7 +252,7 @@ export function AdminLive() {
           </p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {sorted.map((c) => (
             <LiveClassCard
               key={c.id}

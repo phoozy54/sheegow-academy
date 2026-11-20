@@ -125,13 +125,13 @@ export function AdminDashboard() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28 w-full rounded-xl sm:h-32" />
           ))}
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Skeleton className="h-80 w-full rounded-xl lg:col-span-2" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Skeleton className="h-80 w-full rounded-xl md:col-span-2" />
           <Skeleton className="h-80 w-full rounded-xl" />
         </div>
         <Skeleton className="h-72 w-full rounded-xl" />
@@ -162,7 +162,7 @@ export function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         {STAT_CARDS.map((s) => {
           const raw = stats[s.key] as number;
           const display = s.isCurrency ? formatPrice(raw) : raw.toLocaleString();
@@ -205,9 +205,9 @@ export function AdminDashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {/* Revenue */}
-        <Card className="p-4 sm:p-6 lg:col-span-2">
+        <Card className="p-4 sm:p-6 md:col-span-2">
           <div className="mb-4 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <h3 className="text-sm font-semibold text-foreground sm:text-base">

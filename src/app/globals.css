@@ -219,3 +219,43 @@
     radial-gradient(at 80% 10%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
     radial-gradient(at 60% 80%, rgba(99, 102, 241, 0.12) 0px, transparent 50%);
 }
+
+/* ─── Device-aware utilities ───────────────────────────
+   Set by DeviceProvider on <html> as data-device="mobile|tablet|desktop".
+   Use the helper classes for content that genuinely needs a different
+   layout per device; prefer Tailwind responsive prefixes otherwise. */
+.device-only-mobile,
+.device-only-tablet,
+.device-only-desktop {
+  display: none !important;
+}
+html[data-device="mobile"] .device-only-mobile { display: revert !important; }
+html[data-device="tablet"] .device-only-tablet { display: revert !important; }
+html[data-device="desktop"] .device-only-desktop { display: revert !important; }
+
+/* Touch devices: instant scrolling and no sticky hover lift. */
+html[data-device="mobile"], html[data-device="tablet"] {
+  scroll-behavior: auto;
+}
+html[data-device="mobile"] .card-lift:hover,
+html[data-device="tablet"] .card-lift:hover {
+  transform: none;
+  box-shadow: 0 4px 12px -4px rgba(99, 102, 241, 0.2);
+}
+
+/* Comfortable touch targets for primary actions on smaller devices. */
+html[data-device="mobile"] button,
+html[data-device="tablet"] button {
+  min-height: 40px;
+}
+html[data-device="mobile"] button.h-9,
+html[data-device="mobile"] button.h-8,
+html[data-device="tablet"] button.h-8 {
+  min-height: 0;
+}
+
+/* Full-bleed but padded content on phones. */
+html[data-device="mobile"] [data-device-container] {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}

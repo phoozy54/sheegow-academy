@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,12 @@ const PAGE_SIZE = 9;
 
 export function CoursesView() {
   const navigate = useStore((s) => s.navigate);
+  const { isMobile, isTablet } = useDevice();
+  const padClass = isMobile
+    ? "px-3"
+    : isTablet
+      ? "px-5"
+      : "px-4 sm:px-6 lg:px-8";
 
   // Filter + pagination state
   const [level, setLevel] = useState<LevelFilter>("All");
@@ -77,7 +84,7 @@ export function CoursesView() {
       {/* ─── HEADER ───────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/60 to-background">
         <div className="hero-mesh absolute inset-0 opacity-70" />
-        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className={`relative mx-auto max-w-7xl py-12 lg:py-16 ${padClass}`}>
           <Badge
             variant="outline"
             className="mb-4 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
@@ -96,8 +103,8 @@ export function CoursesView() {
       </section>
 
       {/* ─── CONTROLS ─────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className={`mx-auto max-w-7xl pt-8 ${padClass}`}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Search */}
           <div className="relative w-full lg:max-w-sm">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -172,7 +179,7 @@ export function CoursesView() {
       </section>
 
       {/* ─── COURSES GRID ──────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <section className={`mx-auto max-w-7xl py-8 lg:py-12 ${padClass}`}>
         {loading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
