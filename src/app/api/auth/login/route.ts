@@ -9,7 +9,8 @@ import {
   ensureUsernameSchema,
   normalizeUsername,
 } from "@/lib/username";
-import { normalizeSomaliPhone } from "@/lib/phone";
+import { phoneLookupVariants } from "@/lib/phone";
+import { ensurePhoneNormalization } from "@/lib/phone-data";
 
 interface LoginBody {
   /** Username, email or Somali phone number. `email` is kept for compatibility. */
@@ -75,6 +76,16 @@ export async function POST(req: Request) {
 
     await ensureUsernameSchema();
 
+    // Rewrite legacy display-form phones to 9 digits. Non-fatal: the lookup
+    // below also accepts the old variants, so login works either way.
+    try {
+      await ensurePhoneNormalization();
+    } catch (e) {
+      logger.warn("[auth/login]", "phone normalization skipped", {
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+
     let user;
     if (kind === "email") {
       user = await db.user.findUnique({
@@ -82,7 +93,7 @@ export async function POST(req: Request) {
       });
     } else if (kind === "phone") {
       user = await db.user.findFirst({
-        where: { phone: normalizeSomaliPhone(rawIdentifier) },
+        where: { phone: { in: phoneLookupVariants(rawIdentifier) } },
       });
     } else {
       user = await db.user.findUnique({

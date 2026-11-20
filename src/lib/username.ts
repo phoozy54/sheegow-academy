@@ -55,6 +55,14 @@ export type IdentifierKind = "email" | "phone" | "username" | "invalid";
 export function classifyIdentifier(input: string): IdentifierKind {
   const raw = input.trim();
   if (!raw) return "invalid";
+
+  // A leading "@" is a handle prefix (@superadmin), not an email address.
+  // normalizeUsername() strips the "@" before the database lookup.
+  if (raw.startsWith("@")) {
+    return /^[a-z0-9][a-z0-9._]*$/i.test(raw.slice(1)) ? "username" : "invalid";
+  }
+
+  // Any other "@" is an email address.
   if (raw.includes("@")) return "email";
   if (isValidSomaliPhone(raw) || isValidSomaliPhone(normalizeSomaliPhone(raw))) {
     return "phone";

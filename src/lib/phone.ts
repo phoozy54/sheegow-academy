@@ -51,3 +51,33 @@ export function formatSomaliPhoneWithCode(input: string): string {
 export function phonePrefix(input: string): string {
   return normalizeSomaliPhone(input).slice(0, 2);
 }
+
+/**
+ * All the string forms a Somali number may have been stored as. The canonical
+ * invariant is 9 digits, but older rows kept the "+252 63 4085151" display
+ * form. Login matches any of these until that data is normalized.
+ */
+export function phoneLookupVariants(input: string): string[] {
+  const trimmed = input.trim();
+  const digits = normalizeSomaliPhone(input);
+  if (!SOMALI_NUMBER.test(digits)) return trimmed ? [trimmed] : [];
+
+  const prefix = digits.slice(0, 2);
+  const rest = digits.slice(2);
+  const compactGrouped = `${prefix} ${rest}`; // "63 4085151"
+  const grouped = `${prefix} ${rest.slice(0, 3)} ${rest.slice(3)}`; // "63 408 5151"
+
+  return [
+    ...new Set([
+      digits,
+      trimmed,
+      `+252 ${compactGrouped}`,
+      `+252 ${grouped}`,
+      `+252${digits}`,
+      `252${digits}`,
+      `0${digits}`,
+      compactGrouped,
+      grouped,
+    ]),
+  ];
+}
