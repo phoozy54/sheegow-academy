@@ -69,16 +69,30 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const sync = () => {
-      const width = window.innerWidth;
+      const viewportWidth =
+        window.innerWidth || document.documentElement.clientWidth || 0;
+      // A phone requesting "Desktop site" reports a laptop-sized innerWidth.
+      // The physical screen size is the reliable signal that it is still a
+      // phone, so use the smaller of the two for classification while keeping
+      // the real viewport width in the context.
+      const screenWidth =
+        typeof screen !== "undefined" && screen.width
+          ? screen.width
+          : viewportWidth;
+      const detectWidth = screenWidth && screenWidth < viewportWidth
+        ? screenWidth
+        : viewportWidth;
       const ua = navigator.userAgent;
-      const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
-      const device = detectDevice(width, ua, coarsePointer);
+      const coarsePointer =
+        window.matchMedia("(pointer: coarse)").matches ||
+        (navigator.maxTouchPoints > 0 && screenWidth > 0 && screenWidth < 1024);
+      const device = detectDevice(detectWidth, ua, coarsePointer);
       const orientation =
-        window.innerHeight > width ? "portrait" : "landscape";
+        window.innerHeight > viewportWidth ? "portrait" : "landscape";
 
       const next: DeviceInfo = {
         device,
-        width,
+        width: viewportWidth,
         isMobile: device === "mobile",
         isTablet: device === "tablet",
         isDesktop: device === "desktop",
