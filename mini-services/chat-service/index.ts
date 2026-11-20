@@ -7,12 +7,43 @@ import { Server } from 'socket.io'
 // Each live class is a "room" identified by its classId.
 // ============================================================================
 
-const PORT = 3003 // hardcoded — DO NOT read from env (Caddy forwards via XTransformPort)
+// Read PORT from env (Render sets PORT=10000), fall back to 3003 for local dev.
+// In the sandbox, Caddy forwards via XTransformPort so we keep 3003.
+const PORT = Number(process.env.PORT) || 3003
 
-const httpServer = createServer()
+// Detect production environment (Render/Heroku/etc.) where PORT is injected.
+// In production we use the default socket.io path (/socket.io/) so the HTTP
+// server can also serve a health-check page. In the sandbox we set path: '/'
+// because Caddy uses it to route XTransformPort requests.
+const isProduction = process.env.PORT !== undefined && process.env.PORT !== '3003'
+
+const httpServer = createServer((req, res) => {
+  // Only attach the HTTP handler in production — in the sandbox, Caddy
+  // owns path '/' and socket.io needs it.
+  if (!isProduction) {
+    res.writeHead(404)
+    res.end('Not Found')
+    return
+  }
+  // Production: serve a friendly status page for browser/health-check visits
+  if (req.url === '/' || req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({
+      service: 'SHEEGOW ACADEMY Chat Service',
+      status: 'online',
+      uptime: Math.floor(process.uptime()),
+      connections: io.engine.clientsCount,
+      timestamp: new Date().toISOString(),
+    }, null, 2))
+    return
+  }
+  res.writeHead(404, { 'Content-Type': 'application/json' })
+  res.end(JSON.stringify({ error: 'Not Found' }))
+})
+
 const io = new Server(httpServer, {
-  // DO NOT change the path, it is used by Caddy to forward the request to the correct port
-  path: '/',
+  // Sandbox: path '/' (Caddy requirement). Production: default '/socket.io/'.
+  ...(isProduction ? {} : { path: '/' }),
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
