@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../phone-input";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,6 +38,7 @@ import {
 import {
   Camera,
   Mail,
+  User,
   Phone,
   Lock,
   Bell,
@@ -61,10 +64,12 @@ const LEVELS = [
 export function ProfileView() {
   const { user, authLoading, openAuthModal, setUser } = useStore();
   const [savingAccount, setSavingAccount] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
 
   // Account form
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [level, setLevel] = useState<string>("Beginner");
 
@@ -85,7 +90,8 @@ export function ProfileView() {
     if (!user) return;
     setFullName(user.fullName || "");
     setEmail(user.email || "");
-    setPhone(user.phone || "");
+    setUsername(user.username || "");
+    setPhone(normalizeSomaliPhone(user.phone || ""));
     setLevel(user.level || "Beginner");
   }, [user]);
 
@@ -128,14 +134,24 @@ export function ProfileView() {
       toast.error("Full name cannot be empty");
       return;
     }
+    if (phone && !isValidSomaliPhone(phone)) {
+      toast.error("Enter a Somali number starting with 61, 63 or 65.");
+      return;
+    }
     setSavingAccount(true);
     try {
       const body: Record<string, string> = {
         fullName: fullName.trim(),
         level,
       };
+      if (
+        username.trim() &&
+        username.trim() !== (user.username || "")
+      ) {
+        body.username = username.trim();
+      }
       if (phone !== (user.phone || "")) body.phone = phone;
-      const { user: updated } = await api.updateUser(user.id, body);
+      const { user: updated } = await api.updateMyProfile(body);
       setUser(updated);
       toast.success("Profile updated successfully");
     } catch (err) {
@@ -147,23 +163,36 @@ export function ProfileView() {
     }
   };
 
-  const handleUpdatePassword = () => {
+  const handleUpdatePassword = async () => {
     if (!currentPw) {
       toast.error("Please enter your current password");
       return;
     }
-    if (newPw.length < 6) {
-      toast.error("New password must be at least 6 characters");
+    if (newPw.length < 12) {
+      toast.error("New password must be at least 12 characters");
       return;
     }
     if (newPw !== confirmPw) {
       toast.error("New passwords do not match");
       return;
     }
-    toast.success("Password updated (demo)");
-    setCurrentPw("");
-    setNewPw("");
-    setConfirmPw("");
+    setSavingPassword(true);
+    try {
+      await api.changePassword({
+        currentPassword: currentPw,
+        newPassword: newPw,
+      });
+      toast.success("Password updated successfully");
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : "Could not update password";
+      toast.error(msg);
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   const handlePhotoUpload = () => {
@@ -232,6 +261,14 @@ export function ProfileView() {
             <Separator className="my-5" />
 
             <dl className="w-full space-y-2 text-left text-sm">
+              <div className="flex items-center justify-between">
+                <dt className="flex items-center gap-2 text-muted-foreground">
+                  <User className="h-4 w-4" /> Username
+                </dt>
+                <dd className="max-w-[140px] truncate font-medium">
+                  {user.username || "Not set"}
+                </dd>
+              </div>
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" /> Email
@@ -304,6 +341,22 @@ export function ProfileView() {
                 </div>
 
                 <div className="space-y-1.5">
+                  <Label htmlFor="username">Login Username</Label>
+                  <Input
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="ahmed.hassan"
+                    minLength={3}
+                    maxLength={30}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    3–30 small letters, numbers, dots or underscores. You can
+                    log in with this, your email or your phone number.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -319,12 +372,7 @@ export function ProfileView() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+252 61 2345678"
-                  />
+                  <PhoneInput id="phone" value={phone} onChange={setPhone} />
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
@@ -392,7 +440,7 @@ export function ProfileView() {
                       type="password"
                       value={newPw}
                       onChange={(e) => setNewPw(e.target.value)}
-                      placeholder="At least 6 characters"
+                      placeholder="At least 12 characters"
                       className="pl-9"
                     />
                   </div>
@@ -420,9 +468,14 @@ export function ProfileView() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleUpdatePassword}
+                    disabled={savingPassword}
                     className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
                   >
-                    <Check className="h-4 w-4" />
+                    {savingPassword ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
                     Update Password
                   </Button>
                 </div>

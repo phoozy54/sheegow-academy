@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import { clientIp } from "@/lib/rate-limit";
 
 interface ValidateBody {
   code?: string;
@@ -15,6 +16,9 @@ interface ValidateBody {
  */
 export async function POST(req: Request) {
   try {
+    const limited = limitRequest(`coupon:${clientIp(req)}`, 20, 60_000);
+    if (limited) return limited;
+
     const body = await safeBody<ValidateBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
 

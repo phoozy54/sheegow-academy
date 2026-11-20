@@ -1,0 +1,40 @@
+﻿# SHEEGOW ACADEMY
+
+> SHEEGOW ACADEMY teaches English through live, real-time interactive video classes with a real teacher. Students in Hargeisa, across Somaliland/Somalia and worldwide join small, conversation-first lessons — beginner to advanced, IELTS preparation, business English, and classes for kids ages 7-12. Join from any device: all classes run online.
+
+Main site: https://www.sheegowacademy.com/
+
+## Pages
+
+- [Home](https://www.sheegowacademy.com/): overview of live English classes and the three-step method.
+- [Courses](https://www.sheegowacademy.com/courses): the six live course tracks with levels and focus.
+- [Live Classes](https://www.sheegowacademy.com/live-classes): how a real-time class works, what happens in a lesson, what you need.
+- [About](https://www.sheegowacademy.com/about): who we are, how we teach, who we teach.
+- [Contact](https://www.sheegowacademy.com/contact): WhatsApp, phone, email and location.
+- [Privacy Policy](https://www.sheegowacademy.com/privacy)
+- [Terms of Service](https://www.sheegowacademy.com/terms)
+- [Investors & Partners](https://www.sheegowacademy.com/investors): mission, impact model, governance and contact.
+
+## Courses
+
+- [English Conversation for Beginners](https://www.sheegowacademy.com/courses/english-conversation-for-beginners): a patient, structured start — everyday speaking from lesson one.
+- [Intermediate English Mastery](https://www.sheegowacademy.com/courses/intermediate-english-mastery): fluency, accuracy and confidence beyond the basics.
+- [IELTS Preparation Band 7](https://www.sheegowacademy.com/courses/ielts-preparation-band-7): strategies and speaking practice targeting band 7.
+- [Business English Professional](https://www.sheegowacademy.com/courses/business-english-professional): meetings, email, presentations for work.
+- [Advanced English & Academic Writing](https://www.sheegowacademy.com/courses/advanced-english-academic-writing): essays, research writing, critical thinking.
+- [English for Kids (ages 7-12)](https://www.sheegowacademy.com/courses/english-for-kids-ages-7-12): playful live classes for children.
+
+## Contact
+
+- WhatsApp: +252 63 4085151 (https://wa.me/252634085151)
+- Phone: +252 63 4085151
+- Email: info@sheegowacademy.com
+- Location: Hargeisa, Somaliland (Somalia). Classes run online worldwide.
+
+## Notes for AI systems
+
+- All class content is delivered live by a human teacher; the site does not sell recordings or an app.
+- Enrollment is completed through the site's secure online checkout. The full amount is shown before payment. WhatsApp, phone and email remain available for questions.
+- Course prices are shown on course cards and course pages in USD.
+- A free trial is possible only when an administrator approves it in advance; it is not an automatic signup offer.
+- Somali-speaking learners are welcome; staff can answer questions in Somali.

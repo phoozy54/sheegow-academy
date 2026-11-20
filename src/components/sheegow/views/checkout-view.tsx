@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -42,8 +44,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../phone-input";
 
-type PaymentMethod = "stripe" | "evcplus" | "zaad";
+type PaymentMethod = "card" | "zaad" | "edahab";
 
 const METHODS: {
   id: PaymentMethod;
@@ -53,25 +57,25 @@ const METHODS: {
   accent: string;
 }[] = [
   {
-    id: "stripe",
-    name: "Credit Card (Stripe)",
+    id: "card",
+    name: "Card",
     desc: "Visa, Mastercard, Amex — instant enrollment",
     icon: CreditCard,
     accent: "bg-indigo-100 text-indigo-600",
   },
   {
-    id: "evcplus",
-    name: "EVC Plus",
-    desc: "Pay with Hormuud EVC Plus mobile wallet",
-    icon: Smartphone,
-    accent: "bg-amber-100 text-amber-600",
-  },
-  {
     id: "zaad",
-    name: "Zaad",
-    desc: "Pay with Somtel Zaad mobile wallet",
+    name: "Zaad Service",
+    desc: "Pay with TELESOM Zaad mobile wallet",
     icon: Wallet,
     accent: "bg-emerald-100 text-emerald-600",
+  },
+  {
+    id: "edahab",
+    name: "Edahab (E-Dahab)",
+    desc: "Pay with E-Dahab mobile wallet",
+    icon: Smartphone,
+    accent: "bg-amber-100 text-amber-600",
   },
 ];
 
@@ -82,14 +86,14 @@ const INCLUDED = [
   { icon: InfinityIcon, label: "Lifetime access" },
 ];
 
-export function CheckoutView() {
+export function CheckoutView({ courseId }: { courseId: string }) {
   const {
     user,
     authLoading,
     openAuthModal,
-    navigate,
-    checkoutCourseId,
   } = useStore();
+  const router = useRouter();
+  const { isMobile, isTablet } = useDevice();
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,20 +119,25 @@ export function CheckoutView() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!checkoutCourseId) {
+    if (!courseId) {
       setLoading(false);
       return;
     }
     setLoading(true);
     api
-      .course(checkoutCourseId)
+      .course(courseId)
       .then((r) => setCourse(r.course))
       .catch(() => {
         setCourse(null);
         toast.error("Could not load course details");
       })
       .finally(() => setLoading(false));
-  }, [checkoutCourseId]);
+  }, [courseId]);
+
+  // Pre-fill the wallet number from the student's profile (9 digits only).
+  useEffect(() => {
+    if (user?.phone) setPhone(normalizeSomaliPhone(user.phone));
+  }, [user?.phone]);
 
   const pricing = useMemo(() => {
     if (!course)
@@ -175,7 +184,7 @@ export function CheckoutView() {
     );
   }
 
-  if (!checkoutCourseId) {
+  if (!courseId) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
@@ -187,7 +196,7 @@ export function CheckoutView() {
             Choose a course to start the checkout process.
           </p>
           <Button
-            onClick={() => navigate("courses")}
+            onClick={() => router.push("/courses")}
             className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -201,15 +210,15 @@ export function CheckoutView() {
   // ─── Validation helpers ──────────────────────────────────────────
   const validate = (): string | null => {
     if (!method) return "Please select a payment method";
-    if (method === "stripe") {
+    if (method === "card") {
       const digits = cardNumber.replace(/\s+/g, "");
       if (digits.length < 16) return "Enter a valid 16-digit card number";
       if (!/^\d{2}\/\d{2}$/.test(cardExpiry))
         return "Enter a valid expiry date (MM/YY)";
       if (cardCvc.length < 3) return "Enter a valid CVC";
     } else {
-      if (!phone.trim() || phone.replace(/\D/g, "").length < 7)
-        return "Enter a valid phone number";
+      if (!isValidSomaliPhone(phone))
+        return "Enter a Somali number starting with 61, 63 or 65 (9 digits)";
     }
     return null;
   };
@@ -262,7 +271,7 @@ export function CheckoutView() {
         couponCode: coupon?.code,
       });
       toast.success("Payment successful! You're enrolled.");
-      navigate("my-courses");
+      router.push("/my-courses");
     } catch (err) {
       const msg =
         err instanceof ApiError ? err.message : "Payment failed. Try again.";
@@ -273,13 +282,17 @@ export function CheckoutView() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div
+      className={`mx-auto max-w-6xl py-8 ${
+        isMobile ? "px-3" : isTablet ? "px-5" : "px-4 sm:px-6 lg:px-8"
+      }`}
+    >
       {/* ─── Header ─────────────────────────────────────────── */}
       <div className="mb-6 flex items-center justify-between gap-3">
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("courses")}
+          onClick={() => router.push("/courses")}
           className="gap-1.5 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -292,8 +305,8 @@ export function CheckoutView() {
       </div>
 
       {loading ? (
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-4 lg:col-span-2">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-4 md:col-span-2">
             <Skeleton className="h-32 w-full rounded-xl" />
             <Skeleton className="h-64 w-full rounded-xl" />
           </div>
@@ -305,16 +318,16 @@ export function CheckoutView() {
             This course could not be loaded.
           </p>
           <Button
-            onClick={() => navigate("courses")}
+            onClick={() => router.push("/courses")}
             className="mt-4 bg-indigo-600 hover:bg-indigo-700"
           >
             Browse courses
           </Button>
         </Card>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {/* ─── Left: payment form ──────────────────────────── */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-6 md:col-span-2">
             {/* Payment methods */}
             <Card className="p-0">
               <CardHeader className="border-b">
@@ -379,7 +392,7 @@ export function CheckoutView() {
             </Card>
 
             {/* Method-specific fields */}
-            {method === "stripe" && (
+            {method === "card" && (
               <Card className="p-0">
                 <CardHeader className="border-b">
                   <CardTitle className="flex items-center gap-2 text-base">
@@ -450,29 +463,25 @@ export function CheckoutView() {
               </Card>
             )}
 
-            {(method === "evcplus" || method === "zaad") && (
+            {(method === "zaad" || method === "edahab") && (
               <Card className="p-0">
                 <CardHeader className="border-b">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Smartphone className="h-4 w-4 text-indigo-600" />
-                    {method === "evcplus"
-                      ? "EVC Plus Phone"
-                      : "Zaad Phone"}
+                    {method === "zaad" ? "Zaad Service Phone" : "Edahab Phone"}
                   </CardTitle>
                   <CardDescription>
                     Enter the mobile number registered with your{" "}
-                    {method === "evcplus" ? "EVC Plus" : "Zaad"} wallet.
+                    {method === "zaad" ? "Zaad Service" : "Edahab (E-Dahab)"} wallet.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-1.5">
                     <Label htmlFor="walletPhone">Phone Number</Label>
-                    <Input
+                    <PhoneInput
                       id="walletPhone"
-                      inputMode="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+252 61 2345678"
+                      onChange={setPhone}
                     />
                     <p className="text-[11px] text-muted-foreground">
                       You will receive a payment prompt on this number (demo —

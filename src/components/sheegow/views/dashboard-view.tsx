@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import type { Enrollment, LiveClass } from "@/lib/types";
@@ -67,8 +68,8 @@ const RECENT_ACTIVITY = [
 ];
 
 export function DashboardView() {
-  const { user, authLoading, openAuthModal, navigate, openCourse, openClass } =
-    useStore();
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
 
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
@@ -180,7 +181,7 @@ export function DashboardView() {
           </p>
         </div>
         <Button
-          onClick={() => navigate("courses")}
+          onClick={() => router.push("/courses")}
           variant="outline"
           className="gap-2"
         >
@@ -233,7 +234,7 @@ export function DashboardView() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate("my-courses")}
+                  onClick={() => router.push("/my-courses")}
                   className="gap-1 text-indigo-600 hover:text-indigo-700"
                 >
                   View all
@@ -260,7 +261,7 @@ export function DashboardView() {
                 </div>
               ) : enrollments.length === 0 ? (
                 <EmptyCourses
-                  onBrowse={() => navigate("courses")}
+                  onBrowse={() => router.push("/courses")}
                 />
               ) : (
                 <ul className="divide-y">
@@ -274,7 +275,7 @@ export function DashboardView() {
                         className="flex flex-col gap-3 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center"
                       >
                         <button
-                          onClick={() => openCourse(course.id)}
+                          onClick={() => router.push(`/course/${course.id}`)}
                           className="relative h-16 w-full shrink-0 overflow-hidden rounded-lg sm:w-28"
                           aria-label={`Open ${course.title}`}
                         >
@@ -306,7 +307,7 @@ export function DashboardView() {
                             )}
                           </div>
                           <button
-                            onClick={() => openCourse(course.id)}
+                            onClick={() => router.push(`/course/${course.id}`)}
                             className="block w-full text-left text-sm font-bold leading-snug text-foreground hover:text-indigo-600"
                           >
                             {course.title}
@@ -329,7 +330,7 @@ export function DashboardView() {
 
                         <Button
                           size="sm"
-                          onClick={() => openCourse(course.id)}
+                          onClick={() => router.push(`/course/${course.id}`)}
                           className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:shrink-0"
                         >
                           <PlayCircle className="h-4 w-4" />
@@ -410,7 +411,7 @@ export function DashboardView() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => openClass(cls.id)}
+                        onClick={() => router.push(`/class/${cls.id}`)}
                         className="gap-1 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
                       >
                         Join
@@ -423,7 +424,7 @@ export function DashboardView() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate("live")}
+                  onClick={() => router.push("/live-classes")}
                   className="w-full justify-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                 >
                   View all classes

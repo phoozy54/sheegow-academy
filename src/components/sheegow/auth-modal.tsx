@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
+import { isValidSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "./phone-input";
 import {
   Dialog,
   DialogContent,
@@ -16,23 +19,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { GraduationCap, Eye, EyeOff, Mail, Lock, User, Phone, X } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, X } from "lucide-react";
+import { BrandMark } from "./brand-mark";
 import { toast } from "sonner";
 
 export function AuthModal() {
-  const { authModal, closeAuthModal, openAuthModal, setUser, navigate } =
-    useStore();
+  const { authModal, closeAuthModal, openAuthModal, setUser } = useStore();
+  const router = useRouter();
   const isLogin = authModal === "login";
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // Login fields
-  const [email, setEmail] = useState("");
+  // Login accepts one identifier: username, email or Somali phone number.
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
 
   // Register fields
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [agree, setAgree] = useState(false);
 
@@ -43,22 +50,28 @@ export function AuthModal() {
     setLoading(true);
     try {
       if (isLogin) {
-        const { user } = await api.login({ email, password });
+        const { user } = await api.login({ identifier, password });
         setUser(user);
         toast.success(`Welcome back, ${user.fullName.split(" ")[0]}!`);
         closeAuthModal();
         resetForm();
         // All roles (student, teacher, admin) land on the unified dashboard.
-        navigate("dashboard");
+        router.push("/dashboard");
       } else {
         if (!agree) {
           toast.error("Please accept the terms to continue.");
           setLoading(false);
           return;
         }
+        if (!isValidSomaliPhone(phone)) {
+          toast.error("Enter a Somali number starting with 61, 63 or 65.");
+          setLoading(false);
+          return;
+        }
         const { user } = await api.register({
           fullName,
           email,
+          username: username || undefined,
           phone,
           password,
         });
@@ -66,7 +79,7 @@ export function AuthModal() {
         toast.success("Account created! Welcome to SHEEGOW ACADEMY.");
         closeAuthModal();
         resetForm();
-        navigate("dashboard");
+        router.push("/dashboard");
       }
     } catch (err) {
       const msg =
@@ -78,9 +91,11 @@ export function AuthModal() {
   }
 
   function resetForm() {
+    setIdentifier("");
     setEmail("");
     setPassword("");
     setFullName("");
+    setUsername("");
     setPhone("");
     setAgree(false);
     setShowPassword(false);
@@ -111,7 +126,7 @@ export function AuthModal() {
           </DialogClose>
           <div className="relative flex items-center gap-3 pr-8">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-              <GraduationCap className="h-6 w-6" />
+              <BrandMark className="h-7 w-auto" />
             </span>
             <div className="min-w-0">
               <p className="text-lg font-extrabold leading-tight">
@@ -133,7 +148,7 @@ export function AuthModal() {
             </DialogTitle>
             <DialogDescription>
               {isLogin
-                ? "Enter your credentials below to access your dashboard."
+                ? "Enter your username, email or phone number and password."
                 : "Fill in your details to get started with live English classes."}
             </DialogDescription>
           </DialogHeader>
@@ -156,35 +171,73 @@ export function AuthModal() {
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-9"
-                  required
-                />
+            {!isLogin && (
+              <div className="space-y-1.5">
+                <Label htmlFor="username">Username (optional)</Label>
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="ahmed.hassan"
+                    minLength={3}
+                    maxLength={30}
+                    autoComplete="username"
+                    className="pl-9"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  3–30 small letters, numbers, dots or underscores. Leave blank
+                  and we will create one for you.
+                </p>
               </div>
-            </div>
+            )}
+
+            {isLogin ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="identifier">Username, Email or Phone</Label>
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="identifier"
+                    type="text"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder="ahmed.hassan / you@example.com / 634085151"
+                    autoComplete="username"
+                    className="pl-9"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Use the username, email or phone number linked to your account.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    className="pl-9"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
             {!isLogin && (
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+252 61 2345678"
-                    className="pl-9"
-                  />
-                </div>
+                <PhoneInput id="phone" value={phone} onChange={setPhone} required />
               </div>
             )}
 
@@ -200,7 +253,7 @@ export function AuthModal() {
                   placeholder="••••••••"
                   className="pl-9 pr-9"
                   required
-                  minLength={6}
+                  minLength={isLogin ? undefined : 12}
                 />
                 <button
                   type="button"
@@ -310,12 +363,6 @@ export function AuthModal() {
             </button>
           </p>
 
-          {!isLogin && (
-            <p className="mt-3 rounded-lg bg-indigo-50 px-3 py-2 text-center text-xs text-indigo-700">
-              Demo: use <strong>student@sheegow.academy / student123</strong> or{" "}
-              <strong>admin@sheegow.academy / admin123</strong>
-            </p>
-          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -325,8 +372,8 @@ export function AuthModal() {
 function scorePassword(pw: string): number {
   if (!pw) return 0;
   let score = 0;
-  if (pw.length >= 6) score++;
-  if (pw.length >= 10) score++;
+  if (pw.length >= 12) score++;
+  if (pw.length >= 16) score++;
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
   if (/[0-9]/.test(pw) || /[^A-Za-z0-9]/.test(pw)) score++;
   return Math.min(score, 4);

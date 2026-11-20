@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { hashPassword, setAuthCookies } from "@/lib/auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import {
+  allocateUsername,
+  ensureUsernameSchema,
+  usernameErrorResponse,
+} from "@/lib/username";
 
 interface RegisterBody {
   fullName?: string;
   email?: string;
+  username?: string;
   phone?: string;
   password?: string;
 }
@@ -17,24 +25,54 @@ interface RegisterBody {
  */
 export async function POST(req: Request) {
   try {
+    const ip = clientIp(req);
+    const limit = rateLimit(`register:${ip}`, 8, 60 * 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many accounts created. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
+
     const body = await safeBody<RegisterBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
 
     const fullName = body.fullName?.trim();
     const email = body.email?.trim().toLowerCase();
-    const phone = body.phone?.trim() || null;
+    const phone = normalizeSomaliPhone(body.phone || "");
+    const preferredUsername = body.username?.trim() || null;
     const password = body.password;
 
     // ── Validate inputs ──
     if (!fullName) return jsonError("Full name is required", 400);
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return jsonError("A valid email is required", 400);
-    if (!password || password.length < 6)
-      return jsonError("Password must be at least 6 characters", 400);
+    if (!isValidSomaliPhone(phone))
+      return jsonError(
+        "Enter a valid Somali phone number starting with 61, 63 or 65",
+        400
+      );
+    if (!password || password.length < 12)
+      return jsonError("Password must be at least 12 characters", 400);
 
     // ── Reject duplicate emails ──
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) return jsonError("Email already registered", 409);
+
+    await ensureUsernameSchema();
+
+    let username: string;
+    try {
+      username = await allocateUsername({
+        fullName,
+        role: "student",
+        preferred: preferredUsername,
+      });
+    } catch (e) {
+      const err = usernameErrorResponse(e);
+      if (err) return jsonError(err.message, err.status);
+      throw e;
+    }
 
     const hashed = await hashPassword(password);
 
@@ -42,6 +80,7 @@ export async function POST(req: Request) {
       data: {
         fullName,
         email,
+        username,
         phone,
         password: hashed,
         role: "student",
@@ -50,6 +89,7 @@ export async function POST(req: Request) {
         id: true,
         fullName: true,
         email: true,
+        username: true,
         phone: true,
         role: true,
         profilePicture: true,

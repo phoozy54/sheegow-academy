@@ -1,8 +1,9 @@
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { requireAuth } from "@/lib/auth";
-import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
 
 interface CheckoutBody {
   courseId?: string;
@@ -10,7 +11,16 @@ interface CheckoutBody {
   couponCode?: string;
 }
 
-const VALID_METHODS = new Set(["stripe", "evcplus", "zaad"]);
+const VALID_METHODS = new Set(["card", "zaad", "edahab"]);
+
+/**
+ * The mock checkout marks payments as completed without any provider charge.
+ * It is ONLY allowed when DEMO_MODE=true is explicitly configured. A real
+ * deployment must integrate a payment provider + signed webhook before
+ * enabling paid enrollment.
+ */
+const DEMO_MODE =
+  process.env.DEMO_MODE === "true" || process.env.NODE_ENV !== "production";
 
 /**
  * Validate a coupon by code. Returns the coupon when valid + active + not
@@ -35,6 +45,15 @@ async function findValidCoupon(code: string) {
 export async function POST(req: Request) {
   try {
     const user = await requireAuth();
+    const limited = limitRequest(`checkout:${user.id}`, 10, 10 * 60 * 1000);
+    if (limited) return limited;
+
+    if (!DEMO_MODE) {
+      return jsonError(
+        "Online payments are not configured. Contact the academy to enroll.",
+        503
+      );
+    }
 
     const body = await safeBody<CheckoutBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
@@ -45,7 +64,7 @@ export async function POST(req: Request) {
 
     if (!courseId) return jsonError("courseId is required", 400);
     if (!method || !VALID_METHODS.has(method))
-      return jsonError("method must be one of stripe, evcplus, zaad", 400);
+      return jsonError("method must be one of card, zaad, edahab", 400);
 
     const course = await db.course.findUnique({ where: { id: courseId } });
     if (!course) return jsonError("Course not found", 404);
@@ -76,9 +95,7 @@ export async function POST(req: Request) {
         amount: finalAmount,
         method,
         status: "completed",
-        transactionId: `mock_${Date.now()}_${Math.random()
-          .toString(36)
-          .slice(2, 10)}`,
+        transactionId: `demo_${randomUUID()}`,
         couponCode: appliedCouponCode,
       },
       include: {

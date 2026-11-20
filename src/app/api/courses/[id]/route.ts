@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { requireAdmin, requireTeacherOrAdmin } from "@/lib/auth";
+import {
+  getCurrentUser,
+  isAdminRole,
+  requireAdmin,
+  requireTeacherOrAdmin,
+} from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
 interface UpdateCourseBody {
@@ -16,13 +21,11 @@ interface UpdateCourseBody {
   isActive?: boolean;
 }
 
+/** Public-safe teacher projection. */
 const teacherSelect = {
   id: true,
   fullName: true,
-  email: true,
   profilePicture: true,
-  bio: true,
-  role: true,
 } as const;
 
 const reviewStudentSelect = {
@@ -40,10 +43,25 @@ type RouteContext = { params: Promise<{ id: string }> };
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
+    const viewer = await getCurrentUser();
 
     const course = await db.course.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        level: true,
+        ...(viewer ? { price: true } : {}),
+        duration: true,
+        image: true,
+        teacherId: true,
+        rating: true,
+        reviewCount: true,
+        whatYouLearn: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
         teacher: { select: teacherSelect },
         reviews: {
           orderBy: { createdAt: "desc" },
@@ -69,7 +87,7 @@ export async function GET(_req: Request, { params }: RouteContext) {
  */
 export async function PUT(req: Request, { params }: RouteContext) {
   try {
-    await requireTeacherOrAdmin();
+    const actor = await requireTeacherOrAdmin();
 
     const { id } = await params;
     const body = await safeBody<UpdateCourseBody>(req);
@@ -77,6 +95,11 @@ export async function PUT(req: Request, { params }: RouteContext) {
 
     const existing = await db.course.findUnique({ where: { id } });
     if (!existing) return jsonError("Course not found", 404);
+    // A teacher may only edit a course explicitly assigned to them; admins
+    // can edit any course. An unassigned course is not editable by teachers.
+    if (!isAdminRole(actor.role) && existing.teacherId !== actor.id) {
+      return jsonError("Forbidden", 403);
+    }
 
     const data: Record<string, unknown> = {};
     if (body.title !== undefined) data.title = body.title.trim();
@@ -87,7 +110,7 @@ export async function PUT(req: Request, { params }: RouteContext) {
     if (body.price !== undefined) data.price = body.price;
     if (body.duration !== undefined) data.duration = body.duration;
     if (body.image !== undefined) data.image = body.image.trim() || null;
-    if (body.teacherId !== undefined)
+    if (body.teacherId !== undefined && isAdminRole(actor.role))
       data.teacherId = body.teacherId.trim() || null;
     if (body.whatYouLearn !== undefined)
       data.whatYouLearn = body.whatYouLearn.trim() || null;

@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
-import type { LiveClass } from "@/lib/types";
+import type { LiveClass, TrialRequest } from "@/lib/types";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,9 @@ import {
   Loader2,
   PlayCircle,
   ChevronRight,
+  CheckCircle2,
+  Sparkles,
+  Pencil,
 } from "lucide-react";
 import {
   formatDateTime,
@@ -26,21 +31,55 @@ import {
   cn,
 } from "@/lib/ui";
 
+type TrialStatus = "pending" | "approved" | "rejected";
+
+type TrialActionProps = {
+  classId: string;
+  status?: TrialStatus;
+  isStudent: boolean;
+  requesting: boolean;
+  onRequest: (classId: string) => void;
+};
+
+function requestStatus(request?: TrialRequest): TrialStatus | undefined {
+  if (!request) return undefined;
+  if (request.status === "completed") {
+    if (request.expiresAt && new Date(request.expiresAt).getTime() < Date.now()) {
+      return undefined;
+    }
+    return "approved";
+  }
+  if (request.status === "failed") return "rejected";
+  return "pending";
+}
+
 export function LiveClassesView() {
-  const openClass = useStore((s) => s.openClass);
-  const navigate = useStore((s) => s.navigate);
+  const user = useStore((s) => s.user);
+  const openAuthModal = useStore((s) => s.openAuthModal);
+  const router = useRouter();
 
   const [classes, setClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trialRequests, setTrialRequests] = useState<TrialRequest[]>([]);
+  const [requestingTrial, setRequestingTrial] = useState<string | null>(null);
+
+  const isStudent = user?.role === "student";
+  // Teachers, admins and super admins host/manage classes — never students.
+  const isManager =
+    user?.role === "teacher" ||
+    user?.role === "admin" ||
+    user?.role === "super_admin";
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // The api.upcomingClasses() signature claims {classes} but the actual
-      // endpoint returns {items}. Read both shapes to be robust.
-      const r = await api.upcomingClasses();
+      // Managers see EVERY class (including ended); students see only the
+      // public upcoming/live window. Read both response shapes to be robust.
+      const r = isManager
+        ? await api.liveClasses()
+        : await api.upcomingClasses();
       const list =
         (r as unknown as { items?: LiveClass[] }).items ??
         r.classes ??
@@ -53,15 +92,76 @@ export function LiveClassesView() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isManager]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  // Partition into "live now" and "scheduled"
+  const loadTrials = useCallback(async () => {
+    if (user?.role !== "student") {
+      setTrialRequests([]);
+      return;
+    }
+    try {
+      const r = await api.trialRequests();
+      setTrialRequests(r.requests);
+    } catch {
+      // Non-fatal: the student can still join/buy normally.
+      setTrialRequests([]);
+    }
+  }, [user?.role]);
+
+  useEffect(() => {
+    loadTrials();
+  }, [loadTrials]);
+
+  // Latest request per class (the API returns newest first).
+  const trialByClass = useMemo(() => {
+    const map = new Map<string, TrialRequest>();
+    for (const r of trialRequests) {
+      if (r.classId && !map.has(r.classId)) map.set(r.classId, r);
+    }
+    return map;
+  }, [trialRequests]);
+
+  const handleRequestTrial = async (classId: string) => {
+    if (!user) {
+      openAuthModal("register");
+      return;
+    }
+    setRequestingTrial(classId);
+    try {
+      await api.requestTrial(classId);
+      toast.success("Trial request sent. An admin will review it shortly.");
+      await loadTrials();
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError ? e.message : "Could not send the trial request"
+      );
+    } finally {
+      setRequestingTrial(null);
+    }
+  };
+
+  const trialProps = (classId: string): TrialActionProps => ({
+    classId,
+    status: requestStatus(trialByClass.get(classId)),
+    isStudent,
+    requesting: requestingTrial === classId,
+    onRequest: handleRequestTrial,
+  });
+
+  // Partition into "live now" and "scheduled". Managers also get ended
+  // classes, which are sorted to the bottom instead of the top of the list.
   const liveNow = classes.filter((c) => isLiveNow(c.scheduledAt, c.duration, c.status));
-  const upcoming = classes.filter((c) => !isLiveNow(c.scheduledAt, c.duration, c.status));
+  const upcoming = classes
+    .filter((c) => !isLiveNow(c.scheduledAt, c.duration, c.status))
+    .sort((a, b) => {
+      if (a.status === "ended" && b.status !== "ended") return 1;
+      if (b.status === "ended" && a.status !== "ended") return -1;
+      return new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime();
+    });
 
   // Sum of attendees across all live classes
   const totalOnline = liveNow.reduce((sum, c) => sum + (c.attendeeCount || 0), 0);
@@ -110,16 +210,20 @@ export function LiveClassesView() {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
           <Video className="h-8 w-8 text-indigo-500" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">No live classes scheduled</h2>
+        <h2 className="text-2xl font-bold text-foreground">
+          {isManager ? "No live classes yet" : "No live classes scheduled"}
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Check back soon — new LIVE English classes are added every week.
+          {isManager
+            ? "Create a class from the live class manager — it will appear here for you and students."
+            : "Check back soon — new LIVE English classes are added every week."}
         </p>
         <Button
-          onClick={() => navigate("courses")}
+          onClick={() => (isManager ? router.push("/dashboard?section=live") : router.push("/courses"))}
           variant="outline"
           className="mt-6 gap-1.5"
         >
-          Browse Courses
+          {isManager ? "Open class manager" : "Browse Courses"}
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
@@ -167,7 +271,9 @@ export function LiveClassesView() {
                 <p className="text-lg font-extrabold leading-none text-foreground">
                   {classes.length}
                 </p>
-                <p className="text-xs text-muted-foreground">upcoming classes</p>
+                <p className="text-xs text-muted-foreground">
+                  {isManager ? "classes total" : "upcoming classes"}
+                </p>
               </div>
             </div>
           </div>
@@ -175,6 +281,28 @@ export function LiveClassesView() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Manager banner — admins see all statuses plus the management tools */}
+        {isManager && (
+          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-foreground">
+                Admin view — all {classes.length} classes are visible
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Live, scheduled and ended sessions. Use the manager to create,
+                edit, start or end classes.
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push("/dashboard?section=live")}
+              className="self-start gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:self-auto"
+              size="sm"
+            >
+              <Pencil className="h-3.5 w-3.5" /> Manage all classes
+            </Button>
+          </div>
+        )}
+
         {/* ─── LIVE NOW HIGHLIGHT ─────────────────────── */}
         {liveNow.length > 0 && (
           <section className="mb-12">
@@ -191,7 +319,14 @@ export function LiveClassesView() {
 
             <div className="grid gap-5 lg:grid-cols-2">
               {liveNow.map((lc) => (
-                <LiveNowCard key={lc.id} liveClass={lc} onJoin={() => openClass(lc.id)} />
+                <LiveNowCard
+                  key={lc.id}
+                  liveClass={lc}
+                  onJoin={() => router.push(`/class/${lc.id}`)}
+                  onManage={() => router.push("/dashboard?section=live")}
+                  isManager={isManager}
+                  trial={trialProps(lc.id)}
+                />
               ))}
             </div>
           </section>
@@ -203,15 +338,24 @@ export function LiveClassesView() {
             <div className="mb-5 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-indigo-600" />
-                <h2 className="text-xl font-bold text-foreground">Upcoming classes</h2>
+                <h2 className="text-xl font-bold text-foreground">
+                  {isManager ? "All classes" : "Upcoming classes"}
+                </h2>
               </div>
               <span className="text-sm text-muted-foreground">
-                {upcoming.length} scheduled
+                {upcoming.length} {isManager ? "listed" : "scheduled"}
               </span>
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {upcoming.map((lc) => (
-                <LiveClassCard key={lc.id} liveClass={lc} onJoin={() => openClass(lc.id)} />
+                <LiveClassCard
+                  key={lc.id}
+                  liveClass={lc}
+                  onJoin={() => router.push(`/class/${lc.id}`)}
+                  onManage={() => router.push("/dashboard?section=live")}
+                  isManager={isManager}
+                  trial={trialProps(lc.id)}
+                />
               ))}
             </div>
           </section>
@@ -226,9 +370,15 @@ export function LiveClassesView() {
 function LiveNowCard({
   liveClass,
   onJoin,
+  onManage,
+  isManager,
+  trial,
 }: {
   liveClass: LiveClass;
   onJoin: () => void;
+  onManage: () => void;
+  isManager: boolean;
+  trial: TrialActionProps;
 }) {
   const course = liveClass.course;
   return (
@@ -291,9 +441,15 @@ function LiveNowCard({
             onClick={onJoin}
             className="mt-4 gap-2 bg-gradient-to-r from-red-500 to-red-600 shadow-lg shadow-red-500/30 hover:from-red-600 hover:to-red-700"
           >
-            <Video className="h-4 w-4" /> Join Live Class
+            <Video className="h-4 w-4" /> {isManager ? "Teach Live Class" : "Join Live Class"}
             <ArrowRight className="h-4 w-4" />
           </Button>
+          {isManager && (
+            <Button onClick={onManage} variant="outline" size="sm" className="mt-2 w-full gap-2">
+              <Pencil className="h-4 w-4" /> Manage class
+            </Button>
+          )}
+          <TrialAction trial={trial} />
         </div>
       </div>
     </Card>
@@ -305,9 +461,15 @@ function LiveNowCard({
 function LiveClassCard({
   liveClass,
   onJoin,
+  onManage,
+  isManager,
+  trial,
 }: {
   liveClass: LiveClass;
   onJoin: () => void;
+  onManage: () => void;
+  isManager: boolean;
+  trial: TrialActionProps;
 }) {
   const course = liveClass.course;
   const ended = liveClass.status === "ended";
@@ -388,14 +550,62 @@ function LiveClassCard({
         >
           {ended ? (
             "Class ended"
+          ) : isManager ? (
+            <>
+              Teach Class <ChevronRight className="h-4 w-4" />
+            </>
           ) : (
             <>
               Join Class <ChevronRight className="h-4 w-4" />
             </>
           )}
         </Button>
+        {isManager && (
+          <Button onClick={onManage} variant="outline" size="sm" className="mt-2 w-full gap-1.5">
+            <Pencil className="h-3.5 w-3.5" /> Manage class
+          </Button>
+        )}
+        {!ended && <TrialAction trial={trial} />}
       </div>
     </Card>
+  );
+}
+
+/* ─── Trial request action (students only) ─────────────── */
+
+function TrialAction({ trial }: { trial: TrialActionProps }) {
+  const { classId, status, isStudent, requesting, onRequest } = trial;
+  if (!isStudent) return null;
+
+  if (status === "approved") {
+    return (
+      <div className="mt-2 flex items-center justify-center gap-1.5 rounded-md bg-green-50 px-3 py-2 text-xs font-semibold text-green-700">
+        <CheckCircle2 className="h-3.5 w-3.5" /> Trial approved — you can join
+      </div>
+    );
+  }
+  if (status === "pending") {
+    return (
+      <div className="mt-2 flex items-center justify-center gap-1.5 rounded-md bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
+        <Clock className="h-3.5 w-3.5" /> Trial request pending approval
+      </div>
+    );
+  }
+  return (
+    <Button
+      onClick={() => onRequest(classId)}
+      disabled={requesting}
+      variant="outline"
+      size="sm"
+      className="mt-2 w-full gap-1.5"
+    >
+      {requesting ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Sparkles className="h-3.5 w-3.5" />
+      )}
+      {status === "rejected" ? "Request trial again" : "Request free trial"}
+    </Button>
   );
 }
 

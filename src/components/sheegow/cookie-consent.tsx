@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useStore, initCookieConsent } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Cookie, X, Check } from "lucide-react";
@@ -45,12 +46,12 @@ export function CookieConsent() {
               We use cookies to keep you logged in, remember your preferences,
               and improve your learning experience. By clicking &ldquo;Accept&rdquo;,
               you agree to our use of cookies. Read our{" "}
-              <button
-                onClick={() => useStore.getState().navigate("about")}
+              <Link
+                href="/privacy"
                 className="font-medium text-indigo-600 underline-offset-2 hover:underline"
               >
                 Privacy Policy
-              </button>
+              </Link>
               .
             </p>
           </div>

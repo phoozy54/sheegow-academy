@@ -1,22 +1,25 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { logger } from "@/lib/logger"
-import { requireTeacherOrAdmin } from "@/lib/auth";
+import { logger } from "@/lib/logger";
+import { canManageLiveClass, requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, handleAuthError } from "@/lib/api-helpers";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 /**
  * PUT /api/live/:id/start
- * Mark a live class as "live" (teacher/admin only).
+ * Mark a live class as "live". Only its teacher or an admin may do this.
  */
 export async function PUT(_req: Request, { params }: RouteContext) {
   try {
-    await requireTeacherOrAdmin();
+    const actor = await requireTeacherOrAdmin();
     const { id } = await params;
 
     const existing = await db.liveClass.findUnique({ where: { id } });
     if (!existing) return jsonError("Live class not found", 404);
+    if (!canManageLiveClass(actor, existing.teacherId)) {
+      return jsonError("Forbidden", 403);
+    }
 
     const liveClass = await db.liveClass.update({
       where: { id },

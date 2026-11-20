@@ -130,8 +130,13 @@ export function AdminCourses() {
 
   async function fetchTeachers() {
     try {
-      const r = await api.users({ role: "teacher" });
-      setTeachers(r.users);
+      const r = await api.users();
+      // The founder (super admin) and admins can teach courses too.
+      setTeachers(
+        r.users.filter((u) =>
+          ["teacher", "admin", "super_admin"].includes(u.role)
+        )
+      );
     } catch {
       // silent — teachers list is best-effort
     }
@@ -271,7 +276,7 @@ export function AdminCourses() {
             </p>
           </div>
         ) : (
-          <div className="-mx-4 overflow-x-auto sm:mx-0">
+          <div className="-mx-3 overflow-x-auto sm:mx-0">
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
@@ -558,7 +563,7 @@ export function AdminCourses() {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Students pay this amount via Stripe, EVC Plus, or Zaad.
+                  Students pay this amount via Card, Zaad Service, or Edahab.
                 </p>
               </div>
             </div>

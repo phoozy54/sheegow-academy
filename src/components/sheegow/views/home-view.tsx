@@ -1,108 +1,96 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api } from "@/lib/api";
 import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import { CourseCard } from "../course-card";
+import { SectionHeading, type DesignTone } from "../design/section-heading";
+import { FeatureTile } from "../design/feature-tile";
+import { ProofStrip } from "../design/proof-strip";
+import { ComparisonPanel } from "../design/comparison-panel";
+import { PathwayCard } from "../design/pathway-card";
+import { CtaPanel } from "../design/cta-panel";
+import { useMyEnrollments } from "@/lib/use-my-enrollments";
+import { trackConversion, type ConversionEvent } from "@/lib/analytics";
 import {
-  PlayCircle,
   Video,
   Users,
   GraduationCap,
   MessageSquare,
   Award,
   Globe2,
-  Star,
   ArrowRight,
+  BookOpen,
   CheckCircle2,
   Sparkles,
-  Quote,
+  AudioLines,
+  UserRoundCheck,
+  Baby,
+  BriefcaseBusiness,
 } from "lucide-react";
 
-const FEATURES = [
+const FEATURES: Array<{
+  icon: typeof Video;
+  title: string;
+  desc: string;
+  tone: DesignTone;
+}> = [
   {
     icon: Video,
     title: "LIVE Video Classes",
     desc: "Real-time interactive English classes — no recorded videos. Speak with teachers and classmates every session.",
-    color: "from-rose-500 to-pink-600",
+    tone: "rose",
   },
   {
     icon: Users,
     title: "Small Group Learning",
     desc: "Learn in small batches so every student gets personal attention and speaking practice.",
-    color: "from-indigo-500 to-indigo-600",
+    tone: "indigo",
   },
   {
     icon: GraduationCap,
-    title: "Expert Teachers",
-    desc: "TESOL-certified instructors who specialize in teaching English to Somali speakers.",
-    color: "from-amber-500 to-orange-600",
+    title: "Expert Teacher",
+    desc: "Learn with Ciise Mohamed Sheeq (SHEEGOW) — English expert with a university degree and 15 years of teaching experience.",
+    tone: "amber",
   },
   {
     icon: MessageSquare,
     title: "Real-time Chat",
     desc: "Ask questions instantly during class with live chat support alongside your video lesson.",
-    color: "from-emerald-500 to-teal-600",
+    tone: "emerald",
   },
   {
     icon: Award,
     title: "Certificates & Progress",
     desc: "Track your progress and earn a certificate when you complete each course.",
-    color: "from-violet-500 to-purple-600",
+    tone: "indigo",
   },
   {
     icon: Globe2,
     title: "Learn From Anywhere",
-    desc: "Join from Somaliland or anywhere in the diaspora. Pay easily with EVC Plus or Zaad.",
-    color: "from-sky-500 to-blue-600",
+    desc: "Join from anywhere in the world. Payment details are shown clearly at checkout.",
+    tone: "sky",
   },
-];
-
-const TESTIMONIALS = [
-  {
-    name: "Hodan Abdi",
-    role: "Student, Hargeisa",
-    rating: 5,
-    text: "I joined SHEEGOW ACADEMY with zero English. After 8 weeks of live classes, I can have full conversations. The teachers are so patient and the live classes make it real.",
-    avatar: null,
-  },
-  {
-    name: "Mahamed Yusuf",
-    role: "University Applicant",
-    rating: 5,
-    text: "The IELTS course helped me score Band 7.5! The live speaking practice with Amina was exactly what I needed to build confidence. Highly recommend.",
-    avatar: null,
-  },
-  {
-    name: "Fadumo Cali",
-    role: "Mother of two",
-    rating: 5,
-    text: "My kids love the English for Kids course. The live video classes are fun and engaging. They actually look forward to learning English now!",
-    avatar: null,
-  },
-  {
-    name: "Abdullahi Farah",
-    role: "Business Owner",
-    rating: 4,
-    text: "The Business English course improved my emails and meetings with international clients. The live roleplay sessions were incredibly practical.",
-    avatar: null,
-  },
-];
-
-const STATS = [
-  { label: "Active Students", value: "2,400+", icon: Users },
-  { label: "Live Classes", value: "150+", icon: Video },
-  { label: "Expert Teachers", value: "25+", icon: GraduationCap },
-  { label: "Success Rate", value: "94%", icon: Award },
 ];
 
 export function HomeView() {
-  const { navigate, openAuthModal, user } = useStore();
+  const { openAuthModal, user } = useStore();
+  const router = useRouter();
+  const { enrollments, byCourse, loading: loadingEnrollments } = useMyEnrollments();
+  const { isMobile, isTablet } = useDevice();
+  const padClass = isMobile
+    ? "px-3"
+    : isTablet
+      ? "px-5"
+      : "px-4 sm:px-6 lg:px-8";
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -119,9 +107,9 @@ export function HomeView() {
       {/* ─── HERO ──────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="hero-mesh absolute inset-0" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:px-8 lg:pb-24 lg:pt-20">
-          <div className="grid items-center gap-10 lg:grid-cols-2">
-            <div className="text-center lg:text-left">
+        <div className={`relative mx-auto max-w-7xl pb-16 pt-12 sm:pt-16 lg:pb-24 lg:pt-20 ${padClass}`}>
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div className="text-center md:text-left lg:text-left">
               <Badge
                 variant="outline"
                 className="mb-5 inline-flex items-center gap-1.5 rounded-full border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
@@ -131,58 +119,55 @@ export function HomeView() {
               </Badge>
 
               <h1 className="mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Learn English with{" "}
-                <span className="gradient-text">LIVE Classes</span> — built for
-                Somali students
+                Speak English with confidence in{" "}
+                <span className="gradient-text">live classes</span>
               </h1>
 
               <p className="mx-auto mb-7 max-w-xl text-base text-muted-foreground sm:text-lg lg:mx-0">
-                SHEEGOW ACADEMY teaches English through real-time interactive
-                video classes. Speak with expert teachers, practice with
-                classmates, and gain confidence — no recorded videos, ever.
+                Talk to a real teacher from your first lesson. Small,
+                conversation-first classes help you speak clearly at work, in
+                exams and in everyday life — with feedback you can act on.
               </p>
 
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Button
+                  asChild
                   size="lg"
-                  onClick={() => navigate("courses")}
                   className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-base shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
                 >
-                  Start Learning
-                  <ArrowRight className="h-4 w-4" />
+                  <Link
+                    href="/courses"
+                    onClick={() => trackConversion("hero_explore_courses")}
+                  >
+                    Explore live courses
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => navigate("live")}
-                  className="w-full gap-2 sm:w-auto"
-                >
-                  <PlayCircle className="h-4 w-4 text-indigo-600" />
-                  Watch Live Demo
+                <Button asChild size="lg" variant="outline" className="w-full gap-2 sm:w-auto">
+                  <Link
+                    href="#how-it-works"
+                    onClick={() => trackConversion("hero_how_it_works")}
+                  >
+                    See how it works
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground lg:justify-start">
-                {[
-                  "Expert live teachers",
-                  "EVC Plus & Zaad",
-                  "Certificates included",
-                ].map((item) => (
-                  <span key={item} className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    {item}
-                  </span>
-                ))}
-              </div>
             </div>
 
             {/* Hero image card */}
             <div className="relative">
               <div className="absolute -inset-4 animate-float-slow rounded-[2rem] bg-gradient-to-tr from-indigo-300/40 via-amber-200/30 to-transparent blur-2xl" />
               <div className="relative overflow-hidden rounded-3xl border bg-card shadow-2xl shadow-indigo-500/20">
-                <img loading="lazy" decoding="async"
-                  src="/images/hero.png"
+                <img
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  src="/images/hero.webp"
                   alt="Live English class in progress"
+                  width={1344}
+                  height={1008}
                   className="aspect-[4/3] w-full object-cover"
                 />
                 <div className="absolute inset-x-4 bottom-4 flex items-center justify-between rounded-2xl bg-white/90 p-3 shadow-lg backdrop-blur">
@@ -195,110 +180,136 @@ export function HomeView() {
                         English Conversation
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Live with Teacher Amina
+                        Live with SHEEGOW
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-sm font-semibold text-indigo-600">
-                    <Users className="h-4 w-4" /> 28
+                    <Users className="h-4 w-4" /> Small group
                   </div>
                 </div>
               </div>
 
-              {/* Floating stats */}
-              <div className="absolute -left-3 top-8 hidden rounded-2xl border bg-card p-3 shadow-xl sm:block">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
-                    <Star className="h-5 w-5 fill-current" />
-                  </span>
-                  <div>
-                    <p className="text-lg font-extrabold leading-none">4.9</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Avg. rating
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* Stats bar */}
-          <div className="mt-16 grid grid-cols-2 gap-4 rounded-2xl border bg-card p-6 shadow-sm sm:grid-cols-4">
-            {STATS.map((s) => (
-              <div key={s.label} className="text-center">
-                <s.icon className="mx-auto mb-2 h-6 w-6 text-indigo-500" />
-                <p className="text-2xl font-extrabold text-foreground">
-                  {s.value}
-                </p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ─── FEATURES ──────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
-          >
-            <Sparkles className="h-3 w-3" /> Why SHEEGOW
-          </Badge>
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Everything you need to master English
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Our platform is designed around live, interactive learning — because
-            English is meant to be spoken, not just watched.
-          </p>
-        </div>
+      {/* ─── HONEST PROOF STRIP ────────────────────── */}
+      <div className={`relative z-10 mx-auto -mt-6 max-w-7xl ${padClass}`}>
+        <ProofStrip
+          items={[
+            {
+              icon: AudioLines,
+              label: "Speaking every lesson",
+              detail: "Practice out loud, not just watch",
+              tone: "rose",
+            },
+            {
+              icon: UserRoundCheck,
+              label: "Real teacher feedback",
+              detail: "Corrections you can act on",
+              tone: "emerald",
+            },
+            {
+              icon: Award,
+              label: "Certificate on completion",
+              detail: "Progress you can show",
+              tone: "amber",
+            },
+          ]}
+        />
+      </div>
 
+      {/* ─── CONTINUE LEARNING ─────────────────────── */}
+      {!loadingEnrollments && enrollments.length > 0 && (
+        <section className={`mx-auto max-w-7xl pt-12 ${padClass}`}>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <Badge
+                variant="outline"
+                className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+              >
+                <BookOpen className="h-3 w-3" /> Continue learning
+              </Badge>
+              <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                Pick up where you left off
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/dashboard")}
+              className="gap-1.5"
+            >
+              My dashboard <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {enrollments.slice(0, 3).map((enrollment) => (
+              <Card key={enrollment.id} className="card-lift flex flex-col p-5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-indigo-500">
+                  {enrollment.course?.level || "Your course"}
+                </p>
+                <h3 className="mt-1 line-clamp-2 text-base font-bold text-foreground">
+                  {enrollment.course?.title || "Course"}
+                </h3>
+                <div className="mb-1.5 mt-4 flex justify-between text-xs text-muted-foreground">
+                  <span>Progress</span>
+                  <span className="font-bold text-foreground">{enrollment.progress}%</span>
+                </div>
+                <Progress value={enrollment.progress} className="h-1.5" />
+                <Button
+                  className="mt-4 w-full gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+                  onClick={() => router.push(`/learn/${enrollment.courseId}`)}
+                >
+                  Continue lesson <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── FEATURES ──────────────────────────────── */}
+      <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
+        <SectionHeading
+          eyebrow="Why SHEEGOW"
+          icon={Sparkles}
+          tone="indigo"
+          title="Built for speaking, not just watching"
+          description="One proven format: a real teacher, a small group and a reason to speak in every lesson."
+        />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
-            <Card
+            <FeatureTile
               key={f.title}
-              className="card-lift group relative overflow-hidden p-6"
-            >
-              <div
-                className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white shadow-lg`}
-              >
-                <f.icon className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-lg font-bold text-foreground">
-                {f.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {f.desc}
-              </p>
-            </Card>
+              icon={f.icon}
+              title={f.title}
+              desc={f.desc}
+              tone={f.tone}
+            />
           ))}
         </div>
       </section>
 
       {/* ─── POPULAR COURSES ──────────────────────── */}
       <section className="bg-gradient-to-b from-indigo-50/50 to-background py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={`mx-auto max-w-7xl ${padClass}`}>
           <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <Badge
-                variant="outline"
-                className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
-              >
-                <GraduationCap className="h-3 w-3" /> Popular Courses
-              </Badge>
-              <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-                Live courses students love
-              </h2>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate("courses")}
-              className="gap-1.5"
-            >
-              View all courses
-              <ArrowRight className="h-4 w-4" />
+            <SectionHeading
+              eyebrow="Popular Courses"
+              icon={GraduationCap}
+              tone="amber"
+              align="left"
+              className="mb-0"
+              title="Live courses students love"
+            />
+            <Button asChild variant="outline" className="gap-1.5">
+              <Link href="/courses">
+                View all courses
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
 
@@ -315,105 +326,201 @@ export function HomeView() {
                     </div>
                   </Card>
                 ))
-              : courses.map((c) => <CourseCard key={c.id} course={c} />)}
+              : courses.map((c) => (
+                  <CourseCard key={c.id} course={c} enrollment={byCourse.get(c.id)} all={courses} />
+                ))}
           </div>
         </div>
       </section>
 
-      {/* ─── TESTIMONIALS ─────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-          >
-            <Quote className="h-3 w-3" /> Student Stories
-          </Badge>
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Real students. Real progress.
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Thousands of Somali learners have improved their English with our
-            live classes. Here&apos;s what they say.
-          </p>
-        </div>
+      {/* ─── HOW IT WORKS ─────────────────────────── */}
+      <section id="how-it-works" className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
+        <SectionHeading
+          id="how-it-works"
+          eyebrow="How it works"
+          icon={CheckCircle2}
+          tone="emerald"
+          title="Three steps to confident English"
+          description="Every class is live with your teacher — no recorded videos."
+        />
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {TESTIMONIALS.map((t) => (
-            <Card key={t.name} className="card-lift flex flex-col p-6">
-              <div className="mb-3 flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < t.rating
-                        ? "fill-amber-400 text-amber-400"
-                        : "fill-muted text-muted"
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="mb-4 flex-1 text-sm leading-relaxed text-foreground">
-                &ldquo;{t.text}&rdquo;
+        <div className="grid gap-5 sm:grid-cols-3">
+          {[
+            {
+              n: "1",
+              title: "Choose your course",
+              desc: "Pick the level that fits you — beginner, intermediate, IELTS, business or kids.",
+            },
+            {
+              n: "2",
+              title: "Join the live class",
+              desc: "See your teacher, speak, use chat and raise your hand — all in real time.",
+            },
+            {
+              n: "3",
+              title: "Earn your certificate",
+              desc: "Complete the lessons and quizzes to receive a verification certificate.",
+            },
+          ].map((step) => (
+            <Card key={step.n} className="card-lift flex flex-col p-6">
+              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-lg font-extrabold text-white shadow-lg shadow-indigo-500/30">
+                {step.n}
+              </span>
+              <h3 className="text-lg font-bold text-foreground">{step.title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                {step.desc}
               </p>
-              <div className="flex items-center gap-3 border-t pt-4">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={t.avatar || undefined} />
-                  <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
-                    {t.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-bold text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
             </Card>
           ))}
         </div>
       </section>
 
-      {/* ─── CTA ─────────────────────────────────── */}
-      <section className="px-4 pb-16 sm:px-6 lg:px-8 lg:pb-24">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 p-8 text-center shadow-2xl shadow-indigo-500/30 sm:p-12 lg:p-16">
-          <div className="hero-mesh absolute inset-0 opacity-40" />
-          <div className="relative">
-            <Badge
-              variant="outline"
-              className="mb-4 inline-flex items-center gap-1.5 border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
-            >
-              <Sparkles className="h-3 w-3" /> Live classes
-            </Badge>
-            <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Ready to start speaking English with confidence?
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-indigo-100">
-              Join SHEEGOW ACADEMY today and start speaking English with
-              expert teachers in live, interactive classes.
-            </p>
-            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button
-                size="lg"
-                onClick={() =>
-                  user ? navigate("courses") : openAuthModal("register")
-                }
-                className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
-              >
-                {user ? "Browse Courses" : "Create Account"}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate("about")}
-                className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
-              >
-                Learn More
-              </Button>
-            </div>
+      {/* ─── LIVE vs RECORDED ────────────────────── */}
+      <section className="bg-muted/30 py-16 lg:py-24">
+        <div className={`mx-auto max-w-7xl ${padClass}`}>
+          <SectionHeading
+            eyebrow="The difference is real"
+            icon={Video}
+            tone="amber"
+            title="Live classes vs. recorded drills"
+            description="Apps can build habits. Speaking with a teacher builds confidence."
+          />
+          <div className="grid gap-5 md:grid-cols-2">
+            <ComparisonPanel
+              highlighted
+              title="Live with SHEEGOW"
+              items={[
+                "A teacher hears you and corrects you in the moment",
+                "You speak in every lesson, not after finishing a module",
+                "Questions get answers during the class",
+                "Progress is marked by real lessons and a certificate",
+              ]}
+            />
+            <ComparisonPanel
+              title="Self-paced apps and recordings"
+              items={[
+                "Practice is mostly reading, tapping or repeating alone",
+                "No one listens to your pronunciation in real time",
+                "Mistakes can stay uncorrected for weeks",
+                "Finishing videos is not the same as speaking well",
+              ]}
+            />
           </div>
         </div>
       </section>
+
+      {/* ─── PATHWAYS ─────────────────────────────── */}
+      <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
+        <SectionHeading
+          eyebrow="Choose your path"
+          icon={Sparkles}
+          tone="sky"
+          title="There is a live class for your goal"
+          description="Start with a course, ask about a trial, or explore how we work with you."
+        />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {([
+            {
+              icon: GraduationCap,
+              tone: "indigo",
+              title: "Learners",
+              desc: "Beginner to advanced live English courses.",
+              cta: "Explore live courses",
+              href: "/courses",
+              event: "pathway_courses",
+            },
+            {
+              icon: Baby,
+              tone: "rose",
+              title: "Parents",
+              desc: "Playful live classes for children aged 7–12.",
+              cta: "See English for kids",
+              href: "/courses/english-for-kids-ages-7-12",
+              event: "pathway_kids",
+            },
+            {
+              icon: BriefcaseBusiness,
+              tone: "amber",
+              title: "Professionals",
+              desc: "Meetings, email, interviews and presentations at work.",
+              cta: "See business English",
+              href: "/courses/business-english-professional",
+              event: "pathway_business",
+            },
+          ] as Array<{
+            icon: typeof GraduationCap;
+            tone: DesignTone;
+            title: string;
+            desc: string;
+            cta: string;
+            href: string;
+            event: ConversionEvent;
+          }>).map((path) => (
+            <PathwayCard
+              key={path.title}
+              icon={path.icon}
+              tone={path.tone}
+              title={path.title}
+              desc={path.desc}
+              cta={path.cta}
+              href={path.href}
+              onClick={() => trackConversion(path.event)}
+            />
+          ))}
+        </div>
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Want to try a class first? A free trial is available with administrator
+          approval.{" "}
+          <Link
+            href="/contact"
+            onClick={() => trackConversion("trial_enquiry")}
+            className="font-semibold text-indigo-600 underline"
+          >
+            Ask us about a free trial
+          </Link>
+          .
+        </p>
+      </section>
+
+      {/* ─── CTA ─────────────────────────────────── */}
+      <CtaPanel
+        className={padClass}
+        title="Ready to start speaking English with confidence?"
+        description="Join SHEEGOW ACADEMY today and start speaking English with expert teachers in live, interactive classes."
+      >
+        {user ? (
+          <Button
+            asChild
+            size="lg"
+            className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
+          >
+            <Link href="/courses">
+              Browse Courses
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            onClick={() => openAuthModal("register")}
+            className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
+          >
+            Create Account
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          asChild
+          size="lg"
+          variant="outline"
+          className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
+        >
+          <Link href="/about">
+            About SHEEGOW ACADEMY
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </CtaPanel>
     </div>
   );
 }

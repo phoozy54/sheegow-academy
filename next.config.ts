@@ -1,10 +1,70 @@
 import type { NextConfig } from "next";
 
+/** Only the canonical site origin may read responses cross-origin. */
+const appOrigin = "https://www.sheegowacademy.com";
+
+// NOTE: Content-Security-Policy is now set by src/middleware.ts with a
+// per-request nonce so we can drop 'unsafe-inline' from script-src.
+// The other security headers below are static and stay here.
+const securityHeaders = [
+  { key: "Access-Control-Allow-Origin", value: appOrigin },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(self), microphone=(self), display-capture=(self), geolocation=(), interest-cohort=()",
+  },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+];
+
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: false,
+  /**
+   * One canonical origin: https://www.sheegowacademy.com
+   * Vercel's platform-level HTTP→HTTPS / apex→www redirects run before this
+   * code and use 308 (which Google treats the same as 301 for canonicalization).
+   * These rules cover hostnames we control inside the deployment.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sheegowacademy\\.com" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sheegow-academy\\.vercel\\.app" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www\\.sheegow-academy\\.vercel\\.app" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
+  },
+  async headers() {
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/api/auth/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+        ],
+      },
+    ];
   },
   // Compress responses (Vercel does this anyway, but good for self-hosting)
   compress: true,

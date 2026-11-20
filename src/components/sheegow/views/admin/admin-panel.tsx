@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
 import {
@@ -91,8 +92,27 @@ const VIEW_TITLES: Record<AdminView, string> = {
   messages: "Contact Messages",
 };
 
+/**
+ * Teachers may only manage their own courses and live classes. Staff/user
+ * management and contact messages stay with administrators, and creating
+ * teachers is reserved for the super admin.
+ */
+function allowedViewsFor(role: string): Set<AdminView> {
+  if (role === "super_admin") return new Set(NAV_ITEMS.map((n) => n.id));
+  if (role === "admin")
+    return new Set<AdminView>([
+      "dashboard",
+      "courses",
+      "students",
+      "live",
+      "messages",
+    ]);
+  return new Set<AdminView>(["dashboard", "courses", "live"]);
+}
+
 export function AdminPanel() {
-  const { user, authLoading, openAuthModal, navigate } = useStore();
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
   const [adminView, setAdminView] = useState<AdminView>("dashboard");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -133,7 +153,11 @@ export function AdminPanel() {
     );
   }
 
-  if (user.role !== "admin" && user.role !== "teacher") {
+  if (
+    user.role !== "admin" &&
+    user.role !== "super_admin" &&
+    user.role !== "teacher"
+  ) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card className="p-8 text-center">
@@ -147,7 +171,7 @@ export function AdminPanel() {
             Your account does not have permission to view the admin panel.
             Only administrators and teachers can access this area.
           </p>
-          <Button variant="outline" onClick={() => navigate("home")} className="gap-2">
+          <Button variant="outline" onClick={() => router.push("/")} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to site
           </Button>
@@ -156,12 +180,19 @@ export function AdminPanel() {
     );
   }
 
-  const activeTitle = VIEW_TITLES[adminView];
+  const allowedViews = allowedViewsFor(user.role);
+  // Defence in depth: never render a view the current role is not allowed to
+  // see, even if state was manipulated some other way.
+  const safeView: AdminView = allowedViews.has(adminView) ? adminView : "dashboard";
+  const navItems = NAV_ITEMS.filter((item) => allowedViews.has(item.id));
+  const activeTitle = VIEW_TITLES[safeView];
 
   const sidebar = (
     <SidebarContent
-      activeView={adminView}
+      items={navItems}
+      activeView={safeView}
       onSelect={(v) => {
+        if (!allowedViews.has(v)) return;
         setAdminView(v);
         setMobileNavOpen(false);
       }}
@@ -171,13 +202,13 @@ export function AdminPanel() {
   return (
     <div className="flex bg-muted/20">
       {/* Desktop sidebar */}
-      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r bg-card lg:flex lg:flex-col">
+      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:flex lg:flex-col xl:w-80">
         {sidebar}
       </aside>
 
       {/* Mobile sidebar */}
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
           <SheetTitle className="sr-only">Admin navigation</SheetTitle>
           {sidebar}
         </SheetContent>
@@ -210,7 +241,7 @@ export function AdminPanel() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("home")}
+              onClick={() => router.push("/")}
               className="gap-1.5"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -240,16 +271,16 @@ export function AdminPanel() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate("profile")}>
+                <DropdownMenuItem onClick={() => router.push("/profile")}>
                   <Users className="h-4 w-4" />
                   My Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("dashboard")}>
+                <DropdownMenuItem onClick={() => router.push("/dashboard")}>
                   <LayoutDashboard className="h-4 w-4" />
                   Student Dashboard
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("home")}>
+                <DropdownMenuItem onClick={() => router.push("/")}>
                   <ArrowLeft className="h-4 w-4" />
                   Back to site
                 </DropdownMenuItem>
@@ -260,12 +291,12 @@ export function AdminPanel() {
 
         {/* Content area */}
         <main className="flex-1 p-4 sm:p-6">
-          {adminView === "dashboard" && <AdminDashboard />}
-          {adminView === "courses" && <AdminCourses />}
-          {adminView === "students" && <AdminStudents />}
-          {adminView === "live" && <AdminLive />}
-          {adminView === "teachers" && <AdminTeachers />}
-          {adminView === "messages" && <AdminMessages />}
+          {safeView === "dashboard" && <AdminDashboard />}
+          {safeView === "courses" && <AdminCourses />}
+          {safeView === "students" && <AdminStudents />}
+          {safeView === "live" && <AdminLive />}
+          {safeView === "teachers" && <AdminTeachers />}
+          {safeView === "messages" && <AdminMessages />}
         </main>
       </div>
     </div>
@@ -273,13 +304,16 @@ export function AdminPanel() {
 }
 
 function SidebarContent({
+  items,
   activeView,
   onSelect,
 }: {
+  items: NavItem[];
   activeView: AdminView;
   onSelect: (v: AdminView) => void;
 }) {
-  const { user, navigate } = useStore();
+  const { user } = useStore();
+  const router = useRouter();
 
   return (
     <div className="flex h-full flex-col">
@@ -303,7 +337,7 @@ function SidebarContent({
         <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Management
         </p>
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const active = activeView === item.id;
           return (
             <button
@@ -362,7 +396,7 @@ function SidebarContent({
               variant="ghost"
               size="sm"
               className="mt-2 w-full justify-start gap-2 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => navigate("home")}
+              onClick={() => router.push("/")}
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to site
@@ -481,7 +515,7 @@ export function AdminMessages() {
             </p>
           </div>
         ) : (
-          <div className="-mx-4 overflow-x-auto sm:mx-0">
+          <div className="-mx-3 overflow-x-auto sm:mx-0">
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>

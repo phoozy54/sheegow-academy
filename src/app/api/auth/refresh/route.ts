@@ -3,15 +3,19 @@ import { cookies } from "next/headers";
 import { logger } from "@/lib/logger"
 import { db } from "@/lib/db";
 import { setAuthCookies, verifyRefreshToken } from "@/lib/auth";
-import { jsonError, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import { clientIp } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/refresh
  * Read the refresh token cookie, verify it, then issue a fresh pair of
  * auth cookies and return the current user.
  */
-export async function POST() {
+export async function POST(req: Request) {
   try {
+    const limited = limitRequest(`auth-refresh:${clientIp(req)}`, 20, 60_000);
+    if (limited) return limited;
+
     const cookieStore = await cookies();
     const refreshToken = cookieStore.get("sheegow_refresh")?.value;
     if (!refreshToken) return jsonError("Refresh token missing", 401);
@@ -26,6 +30,7 @@ export async function POST() {
         id: true,
         fullName: true,
         email: true,
+        username: true,
         phone: true,
         role: true,
         profilePicture: true,
