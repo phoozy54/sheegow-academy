@@ -278,7 +278,7 @@ export function AdminStudents() {
             </p>
           </div>
         ) : (
-          <div className="-mx-4 overflow-x-auto sm:mx-0">
+          <div className="-mx-3 overflow-x-auto sm:mx-0">
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>

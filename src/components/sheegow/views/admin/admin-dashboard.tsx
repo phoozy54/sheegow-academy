@@ -337,7 +337,7 @@ export function AdminDashboard() {
             {stats.totalEnrollments.toLocaleString()} total
           </Badge>
         </div>
-        <div className="-mx-4 overflow-x-auto sm:mx-0">
+        <div className="-mx-3 overflow-x-auto sm:mx-0">
           <Table>
             <TableHeader>
               <TableRow>
