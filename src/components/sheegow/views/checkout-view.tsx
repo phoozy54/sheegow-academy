@@ -43,6 +43,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../phone-input";
 
 type PaymentMethod = "card" | "zaad" | "edahab";
 
@@ -132,6 +134,11 @@ export function CheckoutView() {
       .finally(() => setLoading(false));
   }, [checkoutCourseId]);
 
+  // Pre-fill the wallet number from the student's profile (9 digits only).
+  useEffect(() => {
+    if (user?.phone) setPhone(normalizeSomaliPhone(user.phone));
+  }, [user?.phone]);
+
   const pricing = useMemo(() => {
     if (!course)
       return { original: 0, discount: 0, total: 0, hasCoupon: false };
@@ -210,8 +217,8 @@ export function CheckoutView() {
         return "Enter a valid expiry date (MM/YY)";
       if (cardCvc.length < 3) return "Enter a valid CVC";
     } else {
-      if (!phone.trim() || phone.replace(/\D/g, "").length < 7)
-        return "Enter a valid phone number";
+      if (!isValidSomaliPhone(phone))
+        return "Enter a Somali number starting with 61, 63 or 65 (9 digits)";
     }
     return null;
   };
@@ -471,12 +478,10 @@ export function CheckoutView() {
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-1.5">
                     <Label htmlFor="walletPhone">Phone Number</Label>
-                    <Input
+                    <PhoneInput
                       id="walletPhone"
-                      inputMode="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+252 63 4085151"
+                      onChange={setPhone}
                     />
                     <p className="text-[11px] text-muted-foreground">
                       You will receive a payment prompt on this number (demo —

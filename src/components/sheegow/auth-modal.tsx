@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
+import { isValidSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "./phone-input";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { GraduationCap, Eye, EyeOff, Mail, Lock, User, Phone, X } from "lucide-react";
+import { GraduationCap, Eye, EyeOff, Mail, Lock, User, X } from "lucide-react";
 import { toast } from "sonner";
 
 export function AuthModal() {
@@ -53,6 +55,11 @@ export function AuthModal() {
       } else {
         if (!agree) {
           toast.error("Please accept the terms to continue.");
+          setLoading(false);
+          return;
+        }
+        if (!isValidSomaliPhone(phone)) {
+          toast.error("Enter a Somali number starting with 61, 63 or 65.");
           setLoading(false);
           return;
         }
@@ -175,16 +182,7 @@ export function AuthModal() {
             {!isLogin && (
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+252 63 4085151"
-                    className="pl-9"
-                  />
-                </div>
+                <PhoneInput id="phone" value={phone} onChange={setPhone} required />
               </div>
             )}
 

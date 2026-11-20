@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { createSocketToken, isAdminRole, isTeachingRole, requireAuth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { handleAuthError, jsonError } from "@/lib/api-helpers";
+import { hasApprovedTrial } from "@/lib/trial-access";
+import { TRIAL_METHOD } from "@/lib/trial";
 
 /**
  * GET /api/socket/token?classId=<id>
@@ -14,7 +16,8 @@ import { handleAuthError, jsonError } from "@/lib/api-helpers";
  *  - Admins: any class, can broadcast.
  *  - Assigned teacher: their own class, can broadcast.
  *  - Other teachers: may observe as viewers.
- *  - Students: only classes they are enrolled in AND have paid for.
+ *  - Students: only classes they are enrolled in AND have paid for, or a
+ *    class with an admin-approved, time-limited trial.
  */
 export async function GET(req: Request) {
   try {
@@ -32,8 +35,11 @@ export async function GET(req: Request) {
     const canBroadcast = isAdminRole(user.role) || isAssignedTeacher;
 
     // Students must be enrolled in the course and have completed payment
-    // before they are allowed into the live room.
-    if (user.role === "student") {
+    // before they are allowed into the live room — unless an admin approved
+    // a timed trial specifically for this class.
+    const trialApproved =
+      user.role === "student" && (await hasApprovedTrial(user.id, classId));
+    if (user.role === "student" && !trialApproved) {
       if (!liveClass.courseId) {
         return jsonError("You are not enrolled in this class", 403);
       }
@@ -63,12 +69,15 @@ export async function GET(req: Request) {
             studentId: user.id,
             courseId: liveClass.courseId,
             status: "completed",
+            // A trial is scoped to one class via hasApprovedTrial above — it
+            // must never count as a course-wide payment for other classes.
+            method: { not: TRIAL_METHOD },
           },
           select: { id: true },
         });
         if (!paid) {
           return jsonError(
-            "Complete your payment before joining this class",
+            "Complete your payment or request an approved trial for this class",
             402
           );
         }
@@ -83,6 +92,9 @@ export async function GET(req: Request) {
       role: user.role,
       classId,
       canBroadcast,
+      // Screen sharing is a host-only capability. The chat service enforces
+      // this claim; the client merely shows/hides the button.
+      canShareScreen: canBroadcast,
     });
 
     return NextResponse.json(

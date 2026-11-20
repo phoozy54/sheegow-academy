@@ -16,7 +16,8 @@ for (const value of [
   }
 }
 
-const connectSources = ["'self'", ...chatOrigins].join(" ");
+// Cloudinary is used for signed PDF / media uploads by course authors.
+const connectSources = ["'self'", ...chatOrigins, "https://api.cloudinary.com"].join(" ");
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -40,7 +41,7 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
+    value: "camera=(self), microphone=(self), display-capture=(self), geolocation=(), interest-cohort=()",
   },
   {
     key: "Strict-Transport-Security",

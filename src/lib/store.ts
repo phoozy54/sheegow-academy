@@ -16,6 +16,9 @@ export type View =
   | "my-courses"
   | "profile"
   | "checkout"
+  | "course-player"
+  | "library"
+  | "certificate"
   | "admin"
   | "admin-courses"
   | "admin-students"
@@ -43,6 +46,7 @@ interface AppState {
   // Actions
   navigate: (view: View) => void;
   openCourse: (id: string) => void;
+  openPlayer: (id: string) => void;
   openClass: (id: string) => void;
   openCheckout: (courseId: string) => void;
   openAuthModal: (modal: "login" | "register") => void;
@@ -83,6 +87,11 @@ export const useStore = create<AppState>((set, get) => ({
 
   openCourse: (id) => {
     set({ view: "course-detail", selectedCourseId: id, mobileMenuOpen: false });
+    scrollToTop();
+  },
+
+  openPlayer: (id) => {
+    set({ view: "course-player", selectedCourseId: id, mobileMenuOpen: false });
     scrollToTop();
   },
 

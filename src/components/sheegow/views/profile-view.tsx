@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../phone-input";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -86,7 +88,7 @@ export function ProfileView() {
     if (!user) return;
     setFullName(user.fullName || "");
     setEmail(user.email || "");
-    setPhone(user.phone || "");
+    setPhone(normalizeSomaliPhone(user.phone || ""));
     setLevel(user.level || "Beginner");
   }, [user]);
 
@@ -127,6 +129,10 @@ export function ProfileView() {
   const handleSaveAccount = async () => {
     if (!fullName.trim()) {
       toast.error("Full name cannot be empty");
+      return;
+    }
+    if (phone && !isValidSomaliPhone(phone)) {
+      toast.error("Enter a Somali number starting with 61, 63 or 65.");
       return;
     }
     setSavingAccount(true);
@@ -333,12 +339,7 @@ export function ProfileView() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+252 63 4085151"
-                  />
+                  <PhoneInput id="phone" value={phone} onChange={setPhone} />
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">

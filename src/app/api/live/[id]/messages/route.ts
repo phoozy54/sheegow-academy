@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { isAdminRole, requireAuth } from "@/lib/auth";
-import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import { hasApprovedTrial } from "@/lib/trial-access";
 
 interface MessageBody {
   text?: string;
@@ -17,8 +18,8 @@ const senderSelect = {
 } as const;
 
 /**
- * Only the assigned teacher, an administrator, or a student enrolled in the
- * class's course may read or write its chat history.
+ * Only the assigned teacher, an administrator, a student enrolled in the
+ * class's course, or a student with an approved trial may read/write chat.
  */
 async function canAccessClass(
   user: { id: string; role: string },
@@ -26,6 +27,8 @@ async function canAccessClass(
 ): Promise<boolean> {
   if (isAdminRole(user.role)) return true;
   if (liveClass.teacherId === user.id) return true;
+  // An admin-approved trial grants chat access even for a class without a course.
+  if (await hasApprovedTrial(user.id, liveClass.id)) return true;
   if (!liveClass.courseId) return false;
   const enrollment = await db.enrollment.findUnique({
     where: {
@@ -86,6 +89,9 @@ export async function POST(req: Request, { params }: RouteContext) {
   try {
     const user = await requireAuth();
     const { id } = await params;
+
+    const limited = limitRequest(`chat:${user.id}:${id}`, 60, 10_000);
+    if (limited) return limited;
 
     const liveClass = await db.liveClass.findUnique({ where: { id } });
     if (!liveClass) return jsonError("Live class not found", 404);

@@ -29,7 +29,6 @@ import {
   BookOpen,
   PlayCircle,
   Award,
-  Download,
   LogIn,
   Loader2,
   Clock,
@@ -39,13 +38,12 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
-import { toast } from "sonner";
 import { formatDate, levelBadgeClass } from "@/lib/ui";
 
 type TabValue = "all" | "in-progress" | "completed";
 
 export function MyCoursesView() {
-  const { user, authLoading, openAuthModal, navigate, openCourse } = useStore();
+  const { user, authLoading, openAuthModal, navigate, openCourse, openPlayer } = useStore();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabValue>("all");
@@ -185,7 +183,7 @@ export function MyCoursesView() {
               key={enr.id}
               enrollment={enr}
               onContinue={() => {
-                if (enr.course) openCourse(enr.course.id);
+                if (enr.course) openPlayer(enr.course.id);
               }}
               onViewCertificate={() => setCertOpen(enr)}
             />
@@ -334,15 +332,12 @@ function CertificateDialog({
     <Dialog open={enrollment !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-0">
         <DialogHeader className="sr-only">
-          <DialogTitle>
-            Certificate of Completion — {course?.title}
-          </DialogTitle>
+          <DialogTitle>Certificates — {course?.title}</DialogTitle>
           <DialogDescription>
-            Your certificate of completion for this course.
+            Certificates are issued after real course completion.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Certificate visual */}
         <div className="relative overflow-hidden rounded-t-lg border-b bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-6 py-8 text-center">
           <div className="pointer-events-none absolute inset-0 opacity-40 [background:repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(99,102,241,0.05)_10px,rgba(99,102,241,0.05)_11px)]" />
           <div className="relative">
@@ -353,62 +348,33 @@ function CertificateDialog({
               SHEEGOW ACADEMY
             </p>
             <p className="mt-2 text-xl font-extrabold tracking-tight text-foreground">
-              Certificate of Completion
+              Professional Certificates
+            </p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              {userName}, your verifiable certificate for{" "}
+              <span className="font-semibold text-foreground">{course?.title}</span>{" "}
+              is issued automatically only after you finish all lessons, pass all
+              tests and complete all homework grading.
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
-              This certifies that
+              Enrolled {formatDate(enrollment?.enrolledAt || new Date().toISOString())}
             </p>
-            <p className="mt-1 text-lg font-bold text-indigo-700">
-              {userName}
-            </p>
-            <p className="mt-3 text-xs text-muted-foreground">
-              has successfully completed the course
-            </p>
-            <p className="mt-1 text-base font-semibold text-foreground">
-              {course?.title}
-            </p>
-            <div className="mt-5 flex items-center justify-center gap-6 text-xs text-muted-foreground">
-              <div className="text-center">
-                <p className="font-semibold text-foreground">
-                  {formatDate(
-                    enrollment?.enrolledAt || new Date().toISOString()
-                  )}
-                </p>
-                <p>Enrolled</p>
-              </div>
-              <div className="h-8 w-px bg-border" />
-              <div className="text-center">
-                <p className="font-semibold text-foreground">
-                  {formatDate(new Date().toISOString())}
-                </p>
-                <p>Issued</p>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-center gap-1 text-amber-600">
-              <Award className="h-4 w-4" />
-              <span className="text-xs font-semibold">
-                Awarded with {enrollment?.progress || 100}% completion
-              </span>
-            </div>
           </div>
         </div>
 
         <DialogFooter className="gap-2 px-6 pb-6 pt-4 sm:flex-row">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="sm:flex-1"
-          >
+          <Button variant="outline" onClick={onClose} className="sm:flex-1">
             Close
           </Button>
           <Button
             onClick={() => {
-              toast.success("Certificate downloaded (demo)");
+              onClose();
+              window.open("/certificate", "_self");
             }}
-            className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:flex-1"
+            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 sm:flex-1"
           >
-            <Download className="h-4 w-4" />
-            Download
+            <Award className="h-4 w-4" />
+            View Certificates
           </Button>
         </DialogFooter>
       </DialogContent>

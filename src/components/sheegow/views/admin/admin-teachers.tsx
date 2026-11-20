@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { Course, User } from "@/lib/types";
 import { cn, levelBadgeClass } from "@/lib/ui";
+import { normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../../phone-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -114,7 +116,7 @@ export function AdminTeachers() {
     setForm({
       fullName: t.fullName,
       email: t.email,
-      phone: t.phone ?? "",
+      phone: normalizeSomaliPhone(t.phone ?? ""),
       password: "",
       bio: t.bio ?? "",
       level: t.level,
@@ -355,13 +357,12 @@ export function AdminTeachers() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
-                <Input
+                <PhoneInput
                   id="phone"
                   value={form.phone}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, phone: e.target.value }))
+                  onChange={(phone) =>
+                    setForm((f) => ({ ...f, phone }))
                   }
-                  placeholder="+252 63 4085151"
                 />
               </div>
               <div className="space-y-1.5">
@@ -475,11 +476,11 @@ export function AdminTeachers() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="add-phone">Phone</Label>
-                <Input
+                <PhoneInput
                   id="add-phone"
                   value={addForm.phone}
-                  onChange={(e) =>
-                    setAddForm((f) => ({ ...f, phone: e.target.value }))
+                  onChange={(phone) =>
+                    setAddForm((f) => ({ ...f, phone }))
                   }
                 />
               </div>

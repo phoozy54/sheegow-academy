@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { requireAuth } from "@/lib/auth";
-import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
 
 interface CheckoutBody {
   courseId?: string;
@@ -45,6 +45,9 @@ async function findValidCoupon(code: string) {
 export async function POST(req: Request) {
   try {
     const user = await requireAuth();
+    const limited = limitRequest(`checkout:${user.id}`, 10, 10 * 60 * 1000);
+    if (limited) return limited;
+
     if (!DEMO_MODE) {
       return jsonError(
         "Online payments are not configured. Contact the academy to enroll.",

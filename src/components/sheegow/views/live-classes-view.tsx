@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
-import type { LiveClass } from "@/lib/types";
+import type { LiveClass, TrialRequest } from "@/lib/types";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,8 @@ import {
   Loader2,
   PlayCircle,
   ChevronRight,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import {
   formatDateTime,
@@ -26,13 +29,41 @@ import {
   cn,
 } from "@/lib/ui";
 
+type TrialStatus = "pending" | "approved" | "rejected";
+
+type TrialActionProps = {
+  classId: string;
+  status?: TrialStatus;
+  isStudent: boolean;
+  requesting: boolean;
+  onRequest: (classId: string) => void;
+};
+
+function requestStatus(request?: TrialRequest): TrialStatus | undefined {
+  if (!request) return undefined;
+  if (request.status === "completed") {
+    if (request.expiresAt && new Date(request.expiresAt).getTime() < Date.now()) {
+      return undefined;
+    }
+    return "approved";
+  }
+  if (request.status === "failed") return "rejected";
+  return "pending";
+}
+
 export function LiveClassesView() {
   const openClass = useStore((s) => s.openClass);
   const navigate = useStore((s) => s.navigate);
+  const user = useStore((s) => s.user);
+  const openAuthModal = useStore((s) => s.openAuthModal);
 
   const [classes, setClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trialRequests, setTrialRequests] = useState<TrialRequest[]>([]);
+  const [requestingTrial, setRequestingTrial] = useState<string | null>(null);
+
+  const isStudent = user?.role === "student";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -58,6 +89,60 @@ export function LiveClassesView() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const loadTrials = useCallback(async () => {
+    if (user?.role !== "student") {
+      setTrialRequests([]);
+      return;
+    }
+    try {
+      const r = await api.trialRequests();
+      setTrialRequests(r.requests);
+    } catch {
+      // Non-fatal: the student can still join/buy normally.
+      setTrialRequests([]);
+    }
+  }, [user?.role]);
+
+  useEffect(() => {
+    loadTrials();
+  }, [loadTrials]);
+
+  // Latest request per class (the API returns newest first).
+  const trialByClass = useMemo(() => {
+    const map = new Map<string, TrialRequest>();
+    for (const r of trialRequests) {
+      if (r.classId && !map.has(r.classId)) map.set(r.classId, r);
+    }
+    return map;
+  }, [trialRequests]);
+
+  const handleRequestTrial = async (classId: string) => {
+    if (!user) {
+      openAuthModal("register");
+      return;
+    }
+    setRequestingTrial(classId);
+    try {
+      await api.requestTrial(classId);
+      toast.success("Trial request sent. An admin will review it shortly.");
+      await loadTrials();
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError ? e.message : "Could not send the trial request"
+      );
+    } finally {
+      setRequestingTrial(null);
+    }
+  };
+
+  const trialProps = (classId: string): TrialActionProps => ({
+    classId,
+    status: requestStatus(trialByClass.get(classId)),
+    isStudent,
+    requesting: requestingTrial === classId,
+    onRequest: handleRequestTrial,
+  });
 
   // Partition into "live now" and "scheduled"
   const liveNow = classes.filter((c) => isLiveNow(c.scheduledAt, c.duration, c.status));
@@ -191,7 +276,12 @@ export function LiveClassesView() {
 
             <div className="grid gap-5 lg:grid-cols-2">
               {liveNow.map((lc) => (
-                <LiveNowCard key={lc.id} liveClass={lc} onJoin={() => openClass(lc.id)} />
+                <LiveNowCard
+                  key={lc.id}
+                  liveClass={lc}
+                  onJoin={() => openClass(lc.id)}
+                  trial={trialProps(lc.id)}
+                />
               ))}
             </div>
           </section>
@@ -211,7 +301,12 @@ export function LiveClassesView() {
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {upcoming.map((lc) => (
-                <LiveClassCard key={lc.id} liveClass={lc} onJoin={() => openClass(lc.id)} />
+                <LiveClassCard
+                  key={lc.id}
+                  liveClass={lc}
+                  onJoin={() => openClass(lc.id)}
+                  trial={trialProps(lc.id)}
+                />
               ))}
             </div>
           </section>
@@ -226,9 +321,11 @@ export function LiveClassesView() {
 function LiveNowCard({
   liveClass,
   onJoin,
+  trial,
 }: {
   liveClass: LiveClass;
   onJoin: () => void;
+  trial: TrialActionProps;
 }) {
   const course = liveClass.course;
   return (
@@ -294,6 +391,7 @@ function LiveNowCard({
             <Video className="h-4 w-4" /> Join Live Class
             <ArrowRight className="h-4 w-4" />
           </Button>
+          <TrialAction trial={trial} />
         </div>
       </div>
     </Card>
@@ -305,9 +403,11 @@ function LiveNowCard({
 function LiveClassCard({
   liveClass,
   onJoin,
+  trial,
 }: {
   liveClass: LiveClass;
   onJoin: () => void;
+  trial: TrialActionProps;
 }) {
   const course = liveClass.course;
   const ended = liveClass.status === "ended";
@@ -394,8 +494,47 @@ function LiveClassCard({
             </>
           )}
         </Button>
+        {!ended && <TrialAction trial={trial} />}
       </div>
     </Card>
+  );
+}
+
+/* ─── Trial request action (students only) ─────────────── */
+
+function TrialAction({ trial }: { trial: TrialActionProps }) {
+  const { classId, status, isStudent, requesting, onRequest } = trial;
+  if (!isStudent) return null;
+
+  if (status === "approved") {
+    return (
+      <div className="mt-2 flex items-center justify-center gap-1.5 rounded-md bg-green-50 px-3 py-2 text-xs font-semibold text-green-700">
+        <CheckCircle2 className="h-3.5 w-3.5" /> Trial approved — you can join
+      </div>
+    );
+  }
+  if (status === "pending") {
+    return (
+      <div className="mt-2 flex items-center justify-center gap-1.5 rounded-md bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
+        <Clock className="h-3.5 w-3.5" /> Trial request pending approval
+      </div>
+    );
+  }
+  return (
+    <Button
+      onClick={() => onRequest(classId)}
+      disabled={requesting}
+      variant="outline"
+      size="sm"
+      className="mt-2 w-full gap-1.5"
+    >
+      {requesting ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Sparkles className="h-3.5 w-3.5" />
+      )}
+      {status === "rejected" ? "Request trial again" : "Request free trial"}
+    </Button>
   );
 }
 

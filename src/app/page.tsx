@@ -7,6 +7,9 @@ import { CookieConsent } from "@/components/sheegow/cookie-consent";
 import { HomeView } from "@/components/sheegow/views/home-view";
 import { CoursesView } from "@/components/sheegow/views/courses-view";
 import { CourseDetailView } from "@/components/sheegow/views/course-detail-view";
+import { CoursePlayerView } from "@/components/sheegow/views/course-player-view";
+import { LibraryView } from "@/components/sheegow/views/library-view";
+import { CertificateView } from "@/components/sheegow/views/certificate-view";
 import { LiveClassesView } from "@/components/sheegow/views/live-classes-view";
 import { LiveRoomView } from "@/components/sheegow/views/live-room-view";
 import { AboutView } from "@/components/sheegow/views/about-view";
@@ -30,6 +33,9 @@ export default function Home() {
         {view === "home" && <HomeView />}
         {view === "courses" && <CoursesView />}
         {view === "course-detail" && <CourseDetailView />}
+        {view === "course-player" && <CoursePlayerView />}
+        {view === "library" && <LibraryView />}
+        {view === "certificate" && <CertificateView />}
         {view === "live" && <LiveClassesView />}
         {view === "live-room" && <LiveRoomView />}
         {view === "about" && <AboutView />}

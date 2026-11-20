@@ -85,9 +85,13 @@ export class LiveStreamManager {
   private opts: StreamManagerOptions;
 
   private localStream: MediaStream | null = null;
+  private cameraStream: MediaStream | null = null;
+  private screenStream: MediaStream | null = null;
   private peers = new Map<string, RTCPeerConnection>();
+  private senders = new Map<string, RTCRtpSender[]>();
   private pendingIce = new Map<string, RTCIceCandidateInit[]>();
   private broadcasting = false;
+  private screenSharing = false;
   private destroyed = false;
 
   constructor(opts: StreamManagerOptions) {
@@ -109,6 +113,10 @@ export class LiveStreamManager {
 
   get isBroadcasting() {
     return this.broadcasting;
+  }
+
+  get isScreenSharing() {
+    return this.screenSharing;
   }
 
   getLocalStream() {
@@ -139,7 +147,7 @@ export class LiveStreamManager {
     }
 
     try {
-      this.localStream = await navigator.mediaDevices.getUserMedia({
+      this.cameraStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "user",
           width: { ideal: 1280 },
@@ -147,6 +155,7 @@ export class LiveStreamManager {
         },
         audio: { echoCancellation: true, noiseSuppression: true },
       });
+      this.localStream = this.cameraStream;
     } catch (e) {
       const err = e as DOMException;
       const messages: Record<string, string> = {
@@ -174,6 +183,7 @@ export class LiveStreamManager {
 
   /** Host: stop publishing and close every viewer connection. */
   stopBroadcast() {
+    this.stopScreenShare();
     if (this.broadcasting) {
       this.emitWhenConnected("broadcast-stop", { classId: this.classId });
     }
@@ -188,7 +198,108 @@ export class LiveStreamManager {
 
   toggleCam(enabled: boolean) {
     this.localStream?.getVideoTracks().forEach((t) => (t.enabled = enabled));
+    this.cameraStream?.getVideoTracks().forEach((t) => (t.enabled = enabled));
   }
+
+  /**
+   * Host: replace the camera video track with a real screen capture while
+   * keeping the same peer connections and microphone audio. Viewers see a
+   * "screen sharing" label but never need to reconnect.
+   */
+  async startScreenShare(): Promise<{ ok: boolean; error?: string }> {
+    if (this.mode !== "host") {
+      return { ok: false, error: "Only the teacher can share their screen" };
+    }
+    if (!this.broadcasting || !this.localStream) {
+      return { ok: false, error: "Start your camera broadcast first" };
+    }
+    if (this.screenSharing) return { ok: true };
+
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      return {
+        ok: false,
+        error: "Screen sharing needs HTTPS. Open the site over https:// (localhost is also allowed).",
+      };
+    }
+    if (!navigator.mediaDevices?.getDisplayMedia) {
+      return {
+        ok: false,
+        error: "This browser cannot share a screen. Use an up-to-date browser over HTTPS.",
+      };
+    }
+
+    try {
+      const display = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: 30 } },
+        audio: false,
+      });
+      const screenVideo = display.getVideoTracks()[0];
+      if (!screenVideo) {
+        display.getTracks().forEach((t) => t.stop());
+        return { ok: false, error: "No screen video was selected" };
+      }
+
+      this.screenStream = display;
+      this.screenSharing = true;
+      // Keep the teacher's microphone from the original camera stream.
+      const audioTracks = this.cameraStream?.getAudioTracks() ?? [];
+      this.localStream = new MediaStream([screenVideo, ...audioTracks]);
+
+      for (const senders of this.senders.values()) {
+        await Promise.all(
+          senders.map(async (sender) => {
+            if (sender.track?.kind === "video") {
+              try {
+                await sender.replaceTrack(screenVideo);
+              } catch {
+                // Peer may be closing — it will be cleaned up by closePeer.
+              }
+            }
+          })
+        );
+      }
+
+      screenVideo.addEventListener("ended", this.onScreenEnded, { once: true });
+      this.emitWhenConnected("screen-share-start", { classId: this.classId });
+      return { ok: true };
+    } catch (e) {
+      const err = e as DOMException;
+      return {
+        ok: false,
+        error:
+          err.name === "NotAllowedError"
+            ? "Screen sharing was cancelled or blocked."
+            : "Could not start screen sharing.",
+      };
+    }
+  }
+
+  /** Host: restore the camera video track on every peer and stop capturing. */
+  stopScreenShare() {
+    if (!this.screenSharing) return;
+    this.screenSharing = false;
+    this.emitWhenConnected("screen-share-stop", { classId: this.classId });
+
+    const cameraVideo = this.cameraStream?.getVideoTracks()[0];
+    for (const senders of this.senders.values()) {
+      senders.forEach((sender) => {
+        if (sender.track?.kind === "video" && cameraVideo) {
+          void sender.replaceTrack(cameraVideo).catch(() => undefined);
+        }
+      });
+    }
+
+    this.screenStream?.getVideoTracks().forEach((t) => {
+      t.removeEventListener("ended", this.onScreenEnded);
+      t.stop();
+    });
+    this.screenStream = null;
+    this.localStream = this.cameraStream;
+  }
+
+  private onScreenEnded = () => {
+    if (!this.destroyed) this.stopScreenShare();
+  };
 
   /** Remove all listeners and release devices. Call on unmount. */
   destroy() {
@@ -314,9 +425,9 @@ export class LiveStreamManager {
     const pc = new RTCPeerConnection({ iceServers: await getIceServers() });
     this.peers.set(viewerId, pc);
 
-    this.localStream.getTracks().forEach((track) => {
-      pc.addTrack(track, this.localStream as MediaStream);
-    });
+    const stream = this.localStream;
+    const senders = stream.getTracks().map((track) => pc.addTrack(track, stream));
+    this.senders.set(viewerId, senders);
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
@@ -370,6 +481,7 @@ export class LiveStreamManager {
       this.peers.delete(peerId);
     }
     this.pendingIce.delete(peerId);
+    this.senders.delete(peerId);
   }
 
   /** Emit now, or queue until the signaling socket is connected. */
@@ -386,7 +498,11 @@ export class LiveStreamManager {
   }
 
   private stopLocal() {
-    this.localStream?.getTracks().forEach((t) => t.stop());
+    this.cameraStream?.getTracks().forEach((t) => t.stop());
+    this.cameraStream = null;
+    this.screenStream?.getTracks().forEach((t) => t.stop());
+    this.screenStream = null;
     this.localStream = null;
+    this.screenSharing = false;
   }
 }

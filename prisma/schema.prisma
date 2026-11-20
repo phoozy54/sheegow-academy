@@ -26,12 +26,20 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  enrollments   Enrollment[]
-  payments      Payment[]
-  reviews       Review[]
-  liveClasses   LiveClass[]
-  messages      Message[]
-  taughtCourses Course[]
+  enrollments    Enrollment[]
+  payments       Payment[]
+  reviews        Review[]
+  liveClasses    LiveClass[]
+  messages       Message[]
+  taughtCourses  Course[]
+  lessonProgress LessonProgress[]
+  quizAttempts   QuizAttempt[]
+  submissions    Submission[]
+  certificates   Certificate[]
+  learningEvents LearningEvent[]
+  pollVotes      PollVote[]
+  attendances    Attendance[]
+  bookmarks      Bookmark[]
 }
 
 // ─── COURSE ─────────────────────────────────────────────
@@ -56,6 +64,11 @@ model Course {
   liveClasses      LiveClass[]
   reviews          Review[]
   payments         Payment[]
+  modules          Module[]
+  materials        Material[]
+  quizzes          Quiz[]
+  assignments      Assignment[]
+  certificates     Certificate[]
 }
 
 // ─── ENROLLMENT ─────────────────────────────────────────
@@ -69,6 +82,7 @@ model Enrollment {
   status           String   @default("active") // active | completed
   enrolledAt       DateTime @default(now())
   expiresAt        DateTime?
+  completedAt      DateTime?
 
   student  User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -90,9 +104,12 @@ model LiveClass {
   attendeeCount Int     @default(0)
   createdAt    DateTime @default(now())
 
-  course    Course? @relation(fields: [courseId], references: [id])
-  teacher   User?   @relation(fields: [teacherId], references: [id])
-  messages  Message[]
+  course     Course? @relation(fields: [courseId], references: [id])
+  teacher    User?   @relation(fields: [teacherId], references: [id])
+  messages   Message[]
+  quizzes    Quiz[]
+  polls      Poll[]
+  attendances Attendance[]
 }
 
 // ─── PAYMENT ───────────────────────────────────────────
@@ -159,4 +176,280 @@ model Coupon {
   active    Boolean  @default(true)
   expiresAt DateTime?
   createdAt DateTime @default(now())
+}
+
+// ─── CONTENT FOUNDATION (modules → lessons → materials) ──
+// Course metadata alone cannot deliver a learning experience. These models
+// hold the ordered curriculum, private media/PDF references and per-lesson
+// progress. Enrollment.progress remains a cached roll-up of LessonProgress.
+
+model Module {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  order       Int
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@unique([courseId, order])
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  moduleId    String
+  title       String
+  // "video" | "pdf" | "text" | "quiz" | "live" | "assignment"
+  type        String
+  order       Int
+  body        String?  // text/notes/summary shown in the player
+  videoUrl    String?  // private/signed media URL — never a public bucket URL
+  durationSec Int?
+  isPreview   Boolean  @default(false) // visible before enrollment
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  module     Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  materials  Material[]
+  progress   LessonProgress[]
+  quiz       Quiz?
+  assignment Assignment?
+  bookmarks  Bookmark[]
+
+  @@unique([moduleId, order])
+}
+
+model Material {
+  id        String   @id @default(cuid())
+  courseId  String
+  lessonId  String?
+  name      String
+  url       String   // Cloudinary secure_url (private/signed delivery)
+  mimeType  String
+  sizeBytes Int?
+  uploadedBy String?
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+}
+
+model LessonProgress {
+  id             String    @id @default(cuid())
+  studentId      String
+  lessonId       String
+  status         String    @default("not_started") // not_started | in_progress | completed
+  lastPositionSec Int      @default(0)
+  secondsWatched Int       @default(0)
+  completedAt    DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+}
+
+// ─── ASSESSMENT (quiz / test / homework) ─────────────────
+model Quiz {
+  id           String    @id @default(cuid())
+  courseId     String
+  lessonId     String?   @unique // one quiz per lesson
+  liveClassId  String?   // set for a live quiz/poll-driven test
+  title        String
+  description  String?
+  timeLimitSec Int?
+  passScore    Int       @default(70) // percentage required to pass
+  maxAttempts  Int       @default(3)
+  randomize    Boolean   @default(true)
+  isLive       Boolean   @default(false)
+  isPublished  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  course     Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson     Lesson?       @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  liveClass  LiveClass?    @relation(fields: [liveClassId], references: [id], onDelete: SetNull)
+  questions  Question[]
+  attempts   QuizAttempt[]
+}
+
+model Question {
+  id       String @id @default(cuid())
+  quizId   String
+  type     String // single | multiple | true_false | short
+  prompt   String
+  points   Int    @default(1)
+  order    Int
+
+  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  choices Choice[]
+  answers QuizAnswer[]
+}
+
+model Choice {
+  id         String  @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false) // NEVER sent to the browser before submit
+  order      Int
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id          String    @id @default(cuid())
+  quizId      String
+  studentId   String
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  score       Int?      // percentage 0-100
+  passed      Boolean?
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answers QuizAnswer[]
+
+  @@index([studentId, quizId])
+}
+
+model QuizAnswer {
+  id         String @id @default(cuid())
+  attemptId  String
+  questionId String
+  choiceIds  String? // JSON array of Choice ids for single/multiple
+  textAnswer String? // for short answers (manual grading later)
+  isCorrect  Boolean?
+  pointsEarned Int    @default(0)
+
+  attempt  QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+}
+
+model Assignment {
+  id           String    @id @default(cuid())
+  courseId     String
+  lessonId     String?   @unique // one homework assignment per lesson
+  title        String
+  instructions String
+  dueAt        DateTime?
+  maxPoints    Int       @default(100)
+  isPublished  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson      Lesson?      @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  submissions Submission[]
+}
+
+model Submission {
+  id           String    @id @default(cuid())
+  assignmentId String
+  studentId    String
+  note         String?
+  fileUrl      String?   // signed upload URL
+  submittedAt  DateTime  @default(now())
+  status       String    @default("submitted") // submitted | graded | returned
+  grade        Int?
+  feedback     String?
+  gradedBy     String?   // admin/teacher user id
+  gradedAt     DateTime?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+}
+
+// ─── CERTIFICATES & ANALYTICS ────────────────────────────
+model Certificate {
+  id               String    @id @default(cuid())
+  studentId        String
+  courseId         String
+  serial           String    @unique
+  verificationCode String    @unique
+  issuedAt         DateTime  @default(now())
+  revokedAt        DateTime?
+  pdfUrl           String?
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+}
+
+model LearningEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  verb       String   // viewed | completed | attempted | passed | submitted
+  objectType String   // lesson | quiz | assignment | class
+  objectId   String
+  courseId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// ─── LIVE INTERACTION ────────────────────────────────────
+model Poll {
+  id          String    @id @default(cuid())
+  liveClassId String
+  question    String
+  options     Json      // string[] shown to students
+  createdBy   String
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+
+  liveClass LiveClass  @relation(fields: [liveClassId], references: [id], onDelete: Cascade)
+  votes     PollVote[]
+}
+
+model PollVote {
+  id        String   @id @default(cuid())
+  pollId    String
+  studentId String
+  optionIndex Int
+  createdAt DateTime @default(now())
+
+  poll    Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, studentId])
+}
+
+model Attendance {
+  id          String    @id @default(cuid())
+  liveClassId String
+  studentId   String
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
+  minutes     Int       @default(0)
+
+  liveClass LiveClass @relation(fields: [liveClassId], references: [id], onDelete: Cascade)
+  student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([liveClassId, studentId])
+}
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  studentId   String
+  lessonId    String
+  note        String?
+  positionSec Int?
+  createdAt   DateTime @default(now())
+
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
 }

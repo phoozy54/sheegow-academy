@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 
 const profileSelect = {
   id: true,
@@ -70,7 +71,17 @@ export async function PATCH(req: Request) {
       data.fullName = v;
     }
     if (body.phone !== undefined) {
-      data.phone = body.phone.trim().slice(0, 40) || null;
+      const phone = normalizeSomaliPhone(body.phone);
+      if (!phone) {
+        data.phone = null;
+      } else if (!isValidSomaliPhone(phone)) {
+        return jsonError(
+          "Enter a valid Somali phone number starting with 61, 63 or 65",
+          400
+        );
+      } else {
+        data.phone = phone;
+      }
     }
     if (body.level !== undefined) {
       const v = body.level.trim();

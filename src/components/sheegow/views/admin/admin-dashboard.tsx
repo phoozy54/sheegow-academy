@@ -25,7 +25,6 @@ import {
   BookOpen,
   DollarSign,
   Video,
-  TrendingUp,
   ArrowUpRight,
   GraduationCap,
 } from "lucide-react";
@@ -60,7 +59,6 @@ const STAT_CARDS: {
   >;
   label: string;
   icon: typeof Users;
-  trend: string;
   gradient: string;
   isCurrency?: boolean;
 }[] = [
@@ -68,21 +66,18 @@ const STAT_CARDS: {
     key: "totalStudents",
     label: "Total Students",
     icon: Users,
-    trend: "+12%",
     gradient: "from-indigo-500 to-indigo-600",
   },
   {
     key: "totalCourses",
     label: "Total Courses",
     icon: BookOpen,
-    trend: "+8%",
     gradient: "from-amber-500 to-orange-600",
   },
   {
     key: "totalRevenue",
     label: "Total Revenue",
     icon: DollarSign,
-    trend: "+18%",
     gradient: "from-emerald-500 to-teal-600",
     isCurrency: true,
   },
@@ -90,7 +85,6 @@ const STAT_CARDS: {
     key: "liveClassesCount",
     label: "Live Classes",
     icon: Video,
-    trend: "+5%",
     gradient: "from-violet-500 to-purple-600",
   },
 ];
@@ -183,13 +177,6 @@ export function AdminDashboard() {
                 >
                   <s.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <Badge
-                  variant="outline"
-                  className="hidden border-emerald-200 bg-emerald-50 text-emerald-700 sm:inline-flex"
-                >
-                  <TrendingUp className="h-3 w-3" />
-                  {s.trend}
-                </Badge>
               </div>
               <div className="mt-3 sm:mt-4">
                 <p className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">

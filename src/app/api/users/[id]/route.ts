@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { requireAdmin, isAdminRole } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 
 interface UpdateUserBody {
   fullName?: string;
@@ -70,7 +71,19 @@ export async function PUT(req: Request, { params }: RouteContext) {
         return jsonError("Email already in use", 409);
       data.email = v;
     }
-    if (body.phone !== undefined) data.phone = body.phone.trim() || null;
+    if (body.phone !== undefined) {
+      const phone = normalizeSomaliPhone(body.phone);
+      if (!phone) {
+        data.phone = null;
+      } else if (!isValidSomaliPhone(phone)) {
+        return jsonError(
+          "Enter a valid Somali phone number starting with 61, 63 or 65",
+          400
+        );
+      } else {
+        data.phone = phone;
+      }
+    }
     if (body.role !== undefined) {
       const v = body.role.trim();
       if (!VALID_ROLES.has(v))

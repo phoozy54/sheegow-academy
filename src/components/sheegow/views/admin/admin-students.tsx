@@ -5,6 +5,8 @@ import { api, ApiError } from "@/lib/api";
 import type { User } from "@/lib/types";
 import { useStore } from "@/lib/store";
 import { cn, formatDate, levelBadgeClass } from "@/lib/ui";
+import { normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../../phone-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -136,7 +138,7 @@ export function AdminStudents() {
     setEditForm({
       fullName: u.fullName,
       email: u.email,
-      phone: u.phone ?? "",
+      phone: normalizeSomaliPhone(u.phone ?? ""),
       level: u.level,
     });
     setEditOpen(true);
@@ -472,13 +474,12 @@ export function AdminStudents() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
-                <Input
+                <PhoneInput
                   id="phone"
                   value={editForm.phone}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, phone: e.target.value }))
+                  onChange={(phone) =>
+                    setEditForm((f) => ({ ...f, phone }))
                   }
-                  placeholder="+252 63 4085151"
                 />
               </div>
               <div className="space-y-1.5">

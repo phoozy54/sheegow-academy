@@ -53,6 +53,9 @@ import {
   DollarSign,
   TrendingUp,
   BookMarked,
+  ClipboardCheck,
+  Library,
+  Hammer,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,16 +67,22 @@ import { AdminLive } from "./admin/admin-live";
 import { AdminTeachers } from "./admin/admin-teachers";
 import { AdminMessages } from "./admin/admin-panel";
 import { AdminPayments } from "./admin/admin-payments";
+import { AdminTrialRequests } from "./admin/admin-trial-requests";
+import { LibraryView } from "./library-view";
+import { ContentBuilderView } from "./content-builder-view";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
 type SectionId =
   | "overview"
   | "courses"
+  | "library"
+  | "content-builder"
   | "students"
   | "live"
   | "teachers"
   | "payments"
+  | "trial-requests"
   | "messages"
   | "profile";
 
@@ -93,12 +102,15 @@ const ADMIN_ROLES: Role[] = ["admin", "super_admin"];
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, roles: ALL_ROLES },
   { id: "courses", label: "My Courses", icon: BookOpen, roles: ["student"] },
+  { id: "library", label: "My Library", icon: Library, roles: ["student"] },
   { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", ...ADMIN_ROLES] },
+  { id: "content-builder", label: "Content Builder", icon: Hammer, roles: ["teacher", ...ADMIN_ROLES] },
   { id: "live", label: "Live Classes", icon: Video, roles: ALL_ROLES },
   { id: "students", label: "My Students", icon: Users, roles: ["teacher"] },
   { id: "students", label: "Manage Students", icon: Users, roles: ADMIN_ROLES },
   { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["super_admin"] },
   { id: "payments", label: "Payments", icon: DollarSign, roles: ADMIN_ROLES },
+  { id: "trial-requests", label: "Trial Requests", icon: ClipboardCheck, roles: ADMIN_ROLES },
   { id: "messages", label: "Messages", icon: MessageSquare, roles: ADMIN_ROLES },
   { id: "profile", label: "Profile", icon: UserIcon, roles: ALL_ROLES },
 ];
@@ -106,10 +118,13 @@ const NAV_ITEMS: NavItem[] = [
 const SECTION_TITLES: Record<SectionId, string> = {
   overview: "Dashboard Overview",
   courses: "Courses",
+  library: "My Library",
+  "content-builder": "Content Builder",
   students: "Students",
   live: "Live Classes",
   teachers: "Teachers",
   payments: "Payments & Revenue",
+  "trial-requests": "Trial Requests",
   messages: "Contact Messages",
   profile: "Profile Settings",
 };
@@ -353,6 +368,10 @@ export function UnifiedDashboard() {
           {section === "courses" && (role === "teacher" || isAdmin) && (
             <AdminCourses />
           )}
+          {section === "library" && role === "student" && <LibraryView />}
+          {section === "content-builder" && (role === "teacher" || isAdmin) && (
+            <ContentBuilderView />
+          )}
           {section === "students" && role === "teacher" && <TeacherStudents />}
           {section === "students" && isAdmin && <AdminStudents />}
           {section === "live" && <AdminLive />}
@@ -360,6 +379,7 @@ export function UnifiedDashboard() {
           {section === "payments" && isAdmin && (
             <AdminPayments canManage={role === "super_admin"} />
           )}
+          {section === "trial-requests" && isAdmin && <AdminTrialRequests />}
           {section === "messages" && isAdmin && <AdminMessages />}
           {section === "profile" && <ProfileInline />}
         </main>
@@ -483,9 +503,15 @@ function RoleOverview({ role }: { role: Role }) {
 /* ─── Student Overview ─────────────────────────────────── */
 
 function StudentOverview() {
-  const { user, navigate, openCourse, openClass } = useStore();
+  const { user, navigate, openPlayer, openClass } = useStore();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
+  const [activity, setActivity] = useState<Awaited<ReturnType<typeof api.activity>>>({
+    completedLessons: 0,
+    watchedSeconds: 0,
+    learningHours: 0,
+    certificates: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -501,6 +527,15 @@ function StudentOverview() {
         if (active) setUpcoming(r.classes.slice(0, 3));
       })
       .catch(() => active && setUpcoming([]));
+    api
+      .activity()
+      .then((r) => active && setActivity(r))
+      .catch(() => active && setActivity({
+        completedLessons: 0,
+        watchedSeconds: 0,
+        learningHours: 0,
+        certificates: 0,
+      }));
     return () => {
       active = false;
     };
@@ -510,20 +545,13 @@ function StudentOverview() {
     const activeCourses = enrollments.filter(
       (e) => e.status === "active"
     ).length;
-    const completedLessons = enrollments.reduce((sum, e) => {
-      if (e.completedLessons) {
-        const parsed = String(e.completedLessons).split(",").filter(Boolean)
-          .length;
-        if (parsed > 0) return sum + parsed;
-      }
-      return sum + Math.round((e.progress || 0) / 10);
-    }, 0);
-    const learningHours = enrollments.length * 2;
-    const certificates = enrollments.filter(
-      (e) => e.status === "completed"
-    ).length;
-    return { activeCourses, completedLessons, learningHours, certificates };
-  }, [enrollments]);
+    return {
+      activeCourses,
+      completedLessons: activity.completedLessons,
+      learningHours: activity.learningHours,
+      certificates: activity.certificates,
+    };
+  }, [enrollments, activity]);
 
   const firstName = user?.fullName.split(" ")[0] || "Student";
   const today = formatDate(new Date().toISOString());
@@ -607,7 +635,7 @@ function StudentOverview() {
                         className="flex flex-col gap-3 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center"
                       >
                         <button
-                          onClick={() => openCourse(course.id)}
+                          onClick={() => openPlayer(course.id)}
                           className="relative h-16 w-full shrink-0 overflow-hidden rounded-lg sm:w-28"
                         >
                           {course.image ? (
@@ -624,7 +652,7 @@ function StudentOverview() {
                         </button>
                         <div className="min-w-0 flex-1">
                           <button
-                            onClick={() => openCourse(course.id)}
+                            onClick={() => openPlayer(course.id)}
                             className="block truncate text-left text-sm font-bold hover:text-indigo-600"
                           >
                             {course.title}
@@ -645,7 +673,7 @@ function StudentOverview() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => openCourse(course.id)}
+                          onClick={() => openPlayer(course.id)}
                           className="shrink-0 gap-1"
                         >
                           Continue <ArrowRight className="h-3.5 w-3.5" />
@@ -731,10 +759,15 @@ function TeacherOverview() {
   const { user, openClass, openCourse } = useStore();
   const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof api.teacherStats>> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
+    api
+      .teacherStats()
+      .then((r) => active && setStats(r))
+      .catch(() => active && setStats(null));
     // Get all courses and filter the ones this teacher teaches
     api
       .courses({ limit: 50 })
@@ -777,10 +810,10 @@ function TeacherOverview() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-        <StatCard icon={BookOpen} label="My Courses" value={myCourses.length} color="bg-indigo-100 text-indigo-600" />
-        <StatCard icon={Video} label="Upcoming Classes" value={upcoming.length} color="bg-rose-100 text-rose-600" />
-        <StatCard icon={Users} label="Total Enrollments" value={myCourses.reduce((s, c) => s + (c.reviewCount || 0), 0)} color="bg-emerald-100 text-emerald-600" />
-        <StatCard icon={Award} label="Avg Rating" value={myCourses.length ? (myCourses.reduce((s, c) => s + c.rating, 0) / myCourses.length).toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
+        <StatCard icon={BookOpen} label="My Courses" value={stats?.courses ?? myCourses.length} color="bg-indigo-100 text-indigo-600" />
+        <StatCard icon={Video} label="Upcoming Classes" value={stats?.upcoming ?? upcoming.length} color="bg-rose-100 text-rose-600" />
+        <StatCard icon={Users} label="Total Enrollments" value={stats?.enrollments ?? 0} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={Award} label="Avg Rating" value={stats?.averageRating != null ? stats.averageRating.toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
@@ -904,7 +937,7 @@ function TeacherOverview() {
 /* ─── Student: My Courses (full list within portal) ─────── */
 
 function StudentMyCourses() {
-  const { openCourse, navigate } = useStore();
+  const { openPlayer, navigate } = useStore();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -974,7 +1007,7 @@ function StudentMyCourses() {
                 )}
               </div>
               <button
-                onClick={() => openCourse(c.id)}
+                onClick={() => openPlayer(c.id)}
                 className="block text-left font-bold hover:text-indigo-600"
               >
                 {c.title}
@@ -988,7 +1021,7 @@ function StudentMyCourses() {
               <Button
                 size="sm"
                 className="mt-3 w-full gap-1 bg-indigo-600 hover:bg-indigo-700"
-                onClick={() => openCourse(c.id)}
+                onClick={() => openPlayer(c.id)}
               >
                 Continue Learning <ArrowRight className="h-3.5 w-3.5" />
               </Button>

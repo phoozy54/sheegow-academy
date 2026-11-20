@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { requireAuth } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { hasApprovedTrialForCourse } from "@/lib/trial-access";
+import { TRIAL_METHOD } from "@/lib/trial";
 
 interface EnrollBody {
   courseId?: string;
@@ -29,11 +31,17 @@ export async function POST(req: Request) {
     // endpoint would be a free-enrollment bypass around the checkout flow.
     if (course.price > 0) {
       const paid = await db.payment.findFirst({
-        where: { studentId: user.id, courseId, status: "completed" },
+        where: {
+          studentId: user.id,
+          courseId,
+          status: "completed",
+          method: { not: TRIAL_METHOD },
+        },
         select: { id: true },
       });
-      if (!paid) {
-        return jsonError("A completed payment is required for this course", 402);
+      const trialApproved = !paid && (await hasApprovedTrialForCourse(user.id, courseId));
+      if (!paid && !trialApproved) {
+        return jsonError("A completed payment or approved trial is required", 402);
       }
     }
 

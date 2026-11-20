@@ -43,6 +43,7 @@ interface SocketIdentity {
   role: string
   classId: string
   canBroadcast: boolean
+  canShareScreen: boolean
 }
 
 function verifySocketToken(token: unknown): SocketIdentity | null {
@@ -73,6 +74,7 @@ function verifySocketToken(token: unknown): SocketIdentity | null {
       role: String(payload.role || 'student'),
       classId: String(payload.classId),
       canBroadcast: payload.canBroadcast === true,
+      canShareScreen: payload.canShareScreen === true,
     }
   } catch {
     return null
@@ -150,6 +152,8 @@ interface ChatMessage {
   userAvatar?: string
   text: string
   timestamp: string
+  /** Client-generated id so the sender can dedupe its own socket echo. */
+  clientId?: string
 }
 
 interface JoinClassPayload {
@@ -162,6 +166,7 @@ interface JoinClassPayload {
 interface SendMessagePayload {
   classId: string
   text: string
+  clientId?: string
 }
 
 interface ClassStatusPayload {
@@ -185,6 +190,8 @@ interface RtcSignalPayload {
 const classUsers = new Map<string, Set<OnlineUser>>()
 const socketIndex = new Map<string, { classId: string; user: OnlineUser }>()
 const classHosts = new Map<string, { socketId: string; userId: string; userName: string }>()
+/** Classes where the active host is currently sharing a screen. */
+const screenShareClasses = new Set<string>()
 
 const generateId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
@@ -238,6 +245,9 @@ const stopHost = (classId: string) => {
   const host = classHosts.get(classId)
   if (!host) return
   classHosts.delete(classId)
+  if (screenShareClasses.delete(classId)) {
+    io.to(classId).emit('screen-share-stopped', { classId, hostUserId: host.userId })
+  }
   io.to(classId).emit('broadcast-stopped', { classId, hostUserId: host.userId })
   if (process.env.LOG_LEVEL !== 'quiet') {
     console.log(`[rtc] broadcast stopped: ${host.userName} in ${classId}`)
@@ -255,6 +265,7 @@ const identityOf = (socket: any): SocketIdentity => {
     role: 'teacher',
     classId: '',
     canBroadcast: true,
+    canShareScreen: true,
   }
 }
 
@@ -374,6 +385,9 @@ io.on('connection', (socket) => {
       userAvatar: entry.user.userAvatar,
       text,
       timestamp: new Date().toISOString(),
+      ...(typeof payload.clientId === 'string' && payload.clientId.length <= 80
+        ? { clientId: payload.clientId }
+        : {}),
     }
     io.to(entry.classId).emit('new-message', message)
   })
@@ -466,6 +480,44 @@ io.on('connection', (socket) => {
     stopHost(payload.classId)
   })
 
+  // ------------------------------------------------------------------
+  // Screen sharing — host-only capability from the signed socket token.
+  // It reuses the active WebRTC broadcast; viewers only get a UI update.
+  // ------------------------------------------------------------------
+  socket.on('screen-share-start', (payload: { classId: string }) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!identity.canShareScreen) {
+      socket.emit('error', { message: 'Screen sharing is only available to the teacher' })
+      return
+    }
+    const host = classHosts.get(entry.classId)
+    if (!host || host.socketId !== socket.id) {
+      socket.emit('error', { message: 'Start your camera broadcast before sharing your screen' })
+      return
+    }
+    if (!allowEvent(socket.id, 'screen-share', 10, 60_000)) return
+    screenShareClasses.add(entry.classId)
+    io.to(entry.classId).emit('screen-share-started', {
+      classId: entry.classId,
+      hostUserId: entry.user.userId,
+    })
+  })
+
+  socket.on('screen-share-stop', (payload: { classId: string }) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    const host = classHosts.get(entry.classId)
+    if (!host || host.socketId !== socket.id || !screenShareClasses.has(entry.classId)) return
+    screenShareClasses.delete(entry.classId)
+    io.to(entry.classId).emit('screen-share-stopped', {
+      classId: entry.classId,
+      hostUserId: entry.user.userId,
+    })
+  })
+
   /** Relay SDP offers/answers and ICE candidates point-to-point, with limits. */
   const relaySignal = (event: 'webrtc-offer' | 'webrtc-answer' | 'webrtc-ice') => {
     return (payload: RtcSignalPayload) => {
@@ -473,6 +525,16 @@ io.on('connection', (socket) => {
       const entry = socketIndex.get(socket.id)
       if (!entry) return
       if (!allowEvent(socket.id, event, 200, 10_000)) return
+
+      // Signaling is only valid for the ACTIVE host session in THIS class.
+      // A viewer cannot inject offers or impersonate the teacher.
+      const host = classHosts.get(entry.classId)
+      if (!host) return
+      const senderIsHost = host.socketId === socket.id
+      const targetIsHost = host.userId === payload.toUserId
+      if (event === 'webrtc-offer' && (!senderIsHost || targetIsHost)) return
+      if (event === 'webrtc-answer' && (senderIsHost || !targetIsHost)) return
+      if (event === 'webrtc-ice' && senderIsHost === targetIsHost) return
 
       const sdp = payload.sdp
       if (sdp) {

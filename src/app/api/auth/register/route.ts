@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger"
 import { hashPassword, setAuthCookies } from "@/lib/auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 
 interface RegisterBody {
   fullName?: string;
@@ -32,13 +33,18 @@ export async function POST(req: Request) {
 
     const fullName = body.fullName?.trim();
     const email = body.email?.trim().toLowerCase();
-    const phone = body.phone?.trim() || null;
+    const phone = normalizeSomaliPhone(body.phone || "");
     const password = body.password;
 
     // ── Validate inputs ──
     if (!fullName) return jsonError("Full name is required", 400);
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return jsonError("A valid email is required", 400);
+    if (!isValidSomaliPhone(phone))
+      return jsonError(
+        "Enter a valid Somali phone number starting with 61, 63 or 65",
+        400
+      );
     if (!password || password.length < 12)
       return jsonError("Password must be at least 12 characters", 400);
 

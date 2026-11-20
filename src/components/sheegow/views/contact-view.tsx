@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api, ApiError } from "@/lib/api";
+import { PhoneInput } from "../phone-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -225,12 +226,12 @@ export function ContactView() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="phone">Phone (optional)</Label>
-                      <Input
+                      <PhoneInput
                         id="phone"
-                        type="tel"
                         value={form.phone}
-                        onChange={update("phone")}
-                        placeholder="+252 63 4085151"
+                        onChange={(phone) =>
+                          setForm((f) => ({ ...f, phone }))
+                        }
                       />
                     </div>
                     <div className="space-y-1.5">

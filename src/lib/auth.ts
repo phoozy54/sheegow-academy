@@ -68,6 +68,7 @@ export function createSocketToken(user: {
   role: string;
   classId: string;
   canBroadcast: boolean;
+  canShareScreen: boolean;
 }): string {
   return jwt.sign(
     {
@@ -76,6 +77,7 @@ export function createSocketToken(user: {
       role: user.role,
       classId: user.classId,
       canBroadcast: user.canBroadcast,
+      canShareScreen: user.canShareScreen,
       purpose: "socket",
     },
     getSecret("JWT_SECRET"),

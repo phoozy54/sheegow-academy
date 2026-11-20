@@ -1,4 +1,22 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
+
+/**
+ * Return a 429 response when a key exceeds its window, otherwise null.
+ * Call after requireAuth so authenticated endpoints can limit per user.
+ */
+export function limitRequest(
+  key: string,
+  limit: number,
+  windowMs: number
+) {
+  const result = rateLimit(key, limit, windowMs);
+  if (result.allowed) return null;
+  return NextResponse.json(
+    { error: "Too many requests. Please wait before trying again." },
+    { status: 429, headers: { "Retry-After": String(result.retryAfter) } }
+  );
+}
 
 /**
  * Standard JSON error response helper.

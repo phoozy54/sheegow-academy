@@ -33,7 +33,7 @@ async function main() {
     create: {
       fullName: "Ciise Mohamed Sheeq (SHEEGOW)",
       email,
-      phone: "+252 63 4085151",
+      phone: "634085151",
       password: await bcrypt.hash(finalPassword, 12),
       role: "super_admin",
       level: "Advanced",
