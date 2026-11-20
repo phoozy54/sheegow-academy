@@ -125,9 +125,9 @@ export function AdminDashboard() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full rounded-xl" />
+            <Skeleton key={i} className="h-28 w-full rounded-xl sm:h-32" />
           ))}
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -162,37 +162,37 @@ export function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {STAT_CARDS.map((s) => {
           const raw = stats[s.key] as number;
           const display = s.isCurrency ? formatPrice(raw) : raw.toLocaleString();
           return (
-            <Card key={s.key} className="card-lift relative overflow-hidden p-5">
+            <Card key={s.key} className="card-lift relative overflow-hidden p-3 sm:p-5">
               <div
                 className={cn(
                   "absolute right-0 top-0 h-24 w-24 -translate-y-8 translate-x-8 rounded-full opacity-10 bg-gradient-to-br",
                   s.gradient
                 )}
               />
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-2">
                 <div
                   className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md",
+                    "flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md sm:h-11 sm:w-11",
                     s.gradient
                   )}
                 >
-                  <s.icon className="h-5 w-5" />
+                  <s.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <Badge
                   variant="outline"
-                  className="border-emerald-200 bg-emerald-50 text-emerald-700"
+                  className="hidden border-emerald-200 bg-emerald-50 text-emerald-700 sm:inline-flex"
                 >
                   <TrendingUp className="h-3 w-3" />
                   {s.trend}
                 </Badge>
               </div>
-              <div className="mt-4">
-                <p className="text-2xl font-extrabold tracking-tight text-foreground">
+              <div className="mt-3 sm:mt-4">
+                <p className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
                   {display}
                 </p>
                 <p className="text-xs font-medium text-muted-foreground">
@@ -207,10 +207,10 @@ export function AdminDashboard() {
       {/* Charts */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Revenue */}
-        <Card className="p-5 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-foreground">
+        <Card className="p-4 sm:p-6 lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-foreground sm:text-base">
                 Revenue (last 6 months)
               </h3>
               <p className="text-xs text-muted-foreground">
@@ -219,17 +219,17 @@ export function AdminDashboard() {
             </div>
             <Badge
               variant="outline"
-              className="border-indigo-200 bg-indigo-50 text-indigo-700"
+              className="shrink-0 border-indigo-200 bg-indigo-50 text-indigo-700"
             >
               <DollarSign className="h-3 w-3" />
               {formatPrice(stats.totalRevenue)}
             </Badge>
           </div>
-          <div className="h-72 w-full">
+          <div className="w-full">
             {revenueData.length === 0 ? (
               <EmptyChart label="No revenue data yet" />
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart
                   data={revenueData}
                   margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
@@ -281,20 +281,20 @@ export function AdminDashboard() {
         </Card>
 
         {/* Enrollments by level */}
-        <Card className="p-5">
+        <Card className="p-4 sm:p-6">
           <div className="mb-4">
-            <h3 className="text-base font-bold text-foreground">
+            <h3 className="text-sm font-semibold text-foreground sm:text-base">
               Enrollments by Level
             </h3>
             <p className="text-xs text-muted-foreground">
               Distribution across course levels
             </p>
           </div>
-          <div className="h-72 w-full">
+          <div className="w-full">
             {levelData.length === 0 ? (
               <EmptyChart label="No enrollments yet" />
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={levelData}
@@ -332,10 +332,10 @@ export function AdminDashboard() {
       </div>
 
       {/* Recent enrollments */}
-      <Card className="p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-bold text-foreground">
+      <Card className="p-4 sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground sm:text-base">
               Recent Enrollments
             </h3>
             <p className="text-xs text-muted-foreground">
@@ -344,13 +344,13 @@ export function AdminDashboard() {
           </div>
           <Badge
             variant="outline"
-            className="border-amber-200 bg-amber-50 text-amber-700"
+            className="shrink-0 border-amber-200 bg-amber-50 text-amber-700"
           >
             <GraduationCap className="h-3 w-3" />
             {stats.totalEnrollments.toLocaleString()} total
           </Badge>
         </div>
-        <div className="overflow-x-auto">
+        <div className="-mx-4 overflow-x-auto sm:mx-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -401,7 +401,7 @@ export function AdminDashboard() {
 
 function EmptyChart({ label }: { label: string }) {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+    <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
       <ArrowUpRight className="h-8 w-8 opacity-30" />
       <p className="text-xs">{label}</p>
     </div>

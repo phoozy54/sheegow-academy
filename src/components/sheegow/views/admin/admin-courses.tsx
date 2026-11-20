@@ -230,7 +230,7 @@ export function AdminCourses() {
     <div className="space-y-5">
       {/* Toolbar */}
       <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="relative max-w-sm flex-1">
+        <div className="relative w-full sm:max-w-sm sm:flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
@@ -241,7 +241,7 @@ export function AdminCourses() {
         </div>
         <Button
           onClick={openCreate}
-          className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Create Course
@@ -271,16 +271,16 @@ export function AdminCourses() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="-mx-4 overflow-x-auto sm:mx-0">
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[200px] pl-4">Course</TableHead>
                   <TableHead className="min-w-[100px]">Level</TableHead>
                   <TableHead className="min-w-[90px]">Price</TableHead>
-                  <TableHead className="min-w-[80px]">Duration</TableHead>
-                  <TableHead className="min-w-[140px]">Teacher</TableHead>
-                  <TableHead className="min-w-[90px]">Status</TableHead>
+                  <TableHead className="hidden min-w-[80px] md:table-cell">Duration</TableHead>
+                  <TableHead className="hidden min-w-[140px] lg:table-cell">Teacher</TableHead>
+                  <TableHead className="hidden min-w-[90px] md:table-cell">Status</TableHead>
                   <TableHead className="pr-4 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -326,10 +326,8 @@ export function AdminCourses() {
                         {formatPrice(c.price).replace("$", "")}
                       </span>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {c.duration}w
-                    </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">{c.duration}w</TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       {c.teacher ? (
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
@@ -350,7 +348,7 @@ export function AdminCourses() {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <Badge
                         variant="outline"
                         className={
@@ -431,7 +429,7 @@ export function AdminCourses() {
                 : "Fill in the course details to publish a new course."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="title">Course Title</Label>
               <Input
@@ -458,7 +456,7 @@ export function AdminCourses() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="level">Level</Label>
                 <Select

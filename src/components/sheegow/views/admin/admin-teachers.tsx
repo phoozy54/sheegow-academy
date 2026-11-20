@@ -173,15 +173,13 @@ export function AdminTeachers() {
   return (
     <div className="space-y-5">
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            Manage teaching staff and assigned courses.
-          </p>
-        </div>
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Manage teaching staff and assigned courses.
+        </p>
         <Button
           onClick={openAdd}
-          className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Add Teacher
@@ -312,7 +310,7 @@ export function AdminTeachers() {
               Update profile details for {editing?.fullName}.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleEditSubmit} className="space-y-4">
+          <form onSubmit={handleEditSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
@@ -336,7 +334,7 @@ export function AdminTeachers() {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
                 <Input
@@ -425,7 +423,7 @@ export function AdminTeachers() {
               </p>
             </div>
           </div>
-          <form onSubmit={handleAddSubmit} className="space-y-4">
+          <form onSubmit={handleAddSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="add-fullName">Full Name</Label>
               <Input
@@ -449,7 +447,7 @@ export function AdminTeachers() {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="add-phone">Phone</Label>
                 <Input

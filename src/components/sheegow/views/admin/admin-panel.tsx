@@ -191,7 +191,7 @@ export function AdminPanel() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 lg:hidden"
+              className="h-11 w-11 shrink-0 lg:hidden"
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -418,40 +418,40 @@ export function AdminMessages() {
   return (
     <div className="space-y-5">
       {/* Summary */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="p-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+        <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-              <MessageSquare className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10">
+              <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-2xl font-extrabold text-foreground">
+            <div className="min-w-0">
+              <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {messages.length}
               </p>
               <p className="text-xs text-muted-foreground">Total messages</p>
             </div>
           </div>
         </Card>
-        <Card className="p-5">
+        <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-              <MailOpen className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 sm:h-10 sm:w-10">
+              <MailOpen className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-2xl font-extrabold text-foreground">
+            <div className="min-w-0">
+              <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {unreadCount}
               </p>
               <p className="text-xs text-muted-foreground">Awaiting reply</p>
             </div>
           </div>
         </Card>
-        <Card className="p-5">
+        <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 sm:h-10 sm:w-10">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-2xl font-extrabold text-foreground">
+            <div className="min-w-0">
+              <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {messages.length - unreadCount}
               </p>
               <p className="text-xs text-muted-foreground">Resolved</p>
@@ -481,13 +481,13 @@ export function AdminMessages() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="-mx-4 overflow-x-auto sm:mx-0">
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[180px] pl-4">From</TableHead>
                   <TableHead className="min-w-[220px]">Subject</TableHead>
-                  <TableHead className="min-w-[140px]">Received</TableHead>
+                  <TableHead className="hidden min-w-[140px] md:table-cell">Received</TableHead>
                   <TableHead className="min-w-[100px]">Status</TableHead>
                   <TableHead className="pr-4 text-right">Actions</TableHead>
                 </TableRow>
@@ -518,7 +518,7 @@ export function AdminMessages() {
                       {m.message}
                     </p>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
+                  <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                     <div className="flex flex-col gap-0.5">
                       <span>{formatDateTime(m.createdAt)}</span>
                       <span className="text-[10px]">
@@ -690,15 +690,15 @@ function ReadMessageDialog({
             {message.message}
           </p>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Close
           </Button>
           <Button
             onClick={() =>
               onReply(message.email, message.subject, message.name)
             }
-            className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+            className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
           >
             <Mail className="h-4 w-4" />
             Reply

@@ -191,15 +191,13 @@ export function AdminLive() {
   return (
     <div className="space-y-5">
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            Manage upcoming, live, and past classes.
-          </p>
-        </div>
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Manage upcoming, live, and past classes.
+        </p>
         <Button
           onClick={openCreate}
-          className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Schedule Live Class
@@ -254,7 +252,7 @@ export function AdminLive() {
               Set up a new live class. Students will see it on the live page.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="title">Class Title</Label>
               <Input
@@ -279,7 +277,7 @@ export function AdminLive() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="course">Linked Course</Label>
                 <Select
@@ -333,7 +331,7 @@ export function AdminLive() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="scheduledAt">Scheduled At</Label>
                 <Input

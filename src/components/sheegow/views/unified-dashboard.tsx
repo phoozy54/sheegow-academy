@@ -202,7 +202,7 @@ export function UnifiedDashboard() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 lg:hidden"
+              className="h-11 w-11 shrink-0 lg:hidden"
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -463,14 +463,14 @@ function StudentOverview() {
             closer to fluency.
           </p>
         </div>
-        <Button onClick={() => navigate("courses")} variant="outline" className="gap-2">
+        <Button onClick={() => navigate("courses")} variant="outline" className="w-full gap-2 sm:w-auto">
           <Sparkles className="h-4 w-4 text-indigo-600" />
           Explore courses
         </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard icon={BookOpen} label="Active Courses" value={stats.activeCourses} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={CheckCircle2} label="Completed Lessons" value={stats.completedLessons} color="bg-emerald-100 text-emerald-600" />
         <StatCard icon={Clock} label="Learning Hours" value={`${stats.learningHours}h`} color="bg-amber-100 text-amber-600" />
@@ -478,7 +478,7 @@ function StudentOverview() {
       </div>
 
       {/* Two columns */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="h-full p-0">
             <CardHeader className="flex-row items-center justify-between border-b">
@@ -592,8 +592,16 @@ function StudentOverview() {
             </CardHeader>
             <CardContent className="p-0">
               {upcoming.length === 0 ? (
-                <div className="py-8 text-center text-xs text-muted-foreground">
-                  No upcoming classes.
+                <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
+                    <Calendar className="h-5 w-5 text-indigo-500" />
+                  </div>
+                  <p className="text-xs font-medium text-foreground">
+                    No upcoming classes
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Check back soon for new sessions.
+                  </p>
                 </div>
               ) : (
                 <ul className="divide-y">
@@ -690,14 +698,14 @@ function TeacherOverview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard icon={BookOpen} label="My Courses" value={myCourses.length} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={Video} label="Upcoming Classes" value={upcoming.length} color="bg-rose-100 text-rose-600" />
         <StatCard icon={Users} label="Total Enrollments" value={myCourses.reduce((s, c) => s + (c.reviewCount || 0), 0)} color="bg-emerald-100 text-emerald-600" />
         <StatCard icon={Award} label="Avg Rating" value={myCourses.length ? (myCourses.reduce((s, c) => s + c.rating, 0) / myCourses.length).toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         {/* My teaching courses */}
         <div className="lg:col-span-2">
           <Card className="h-full p-0">
@@ -770,8 +778,16 @@ function TeacherOverview() {
             </CardHeader>
             <CardContent className="p-0">
               {upcoming.length === 0 ? (
-                <div className="py-8 text-center text-xs text-muted-foreground">
-                  No upcoming classes.
+                <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
+                    <Calendar className="h-5 w-5 text-indigo-500" />
+                  </div>
+                  <p className="text-xs font-medium text-foreground">
+                    No upcoming classes
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Your scheduled sessions will appear here.
+                  </p>
                 </div>
               ) : (
                 <ul className="divide-y">
@@ -1001,11 +1017,11 @@ function StatCard({
   color: string;
 }) {
   return (
-    <Card className="p-4">
-      <div className={`mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg ${color}`}>
-        <Icon className="h-5 w-5" />
+    <Card className="card-lift p-3 sm:p-5">
+      <div className={`mb-2 inline-flex h-8 w-8 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${color}`}>
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
-      <p className="text-2xl font-extrabold leading-none">{value}</p>
+      <p className="text-xl font-extrabold leading-none sm:text-2xl">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </Card>
   );

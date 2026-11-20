@@ -220,7 +220,7 @@ export function AdminStudents() {
           value={roleFilter}
           onValueChange={(v) => setRoleFilter(v as RoleFilter)}
         >
-          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
+          <TabsList className="w-full justify-start overflow-x-auto whitespace-nowrap sm:w-auto">
             <TabsTrigger value="all" className="gap-1.5">
               <Users className="h-3.5 w-3.5" />
               All
@@ -240,7 +240,7 @@ export function AdminStudents() {
           </TabsList>
         </Tabs>
 
-        <div className="relative max-w-sm flex-1">
+        <div className="relative w-full max-w-sm flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
@@ -274,15 +274,15 @@ export function AdminStudents() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="-mx-4 overflow-x-auto sm:mx-0">
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[200px] pl-4">User</TableHead>
-                  <TableHead className="min-w-[120px]">Contact</TableHead>
+                  <TableHead className="hidden min-w-[120px] md:table-cell">Contact</TableHead>
                   <TableHead className="min-w-[90px]">Role</TableHead>
-                  <TableHead className="min-w-[110px]">Level</TableHead>
-                  <TableHead className="min-w-[110px]">Joined</TableHead>
+                  <TableHead className="hidden min-w-[110px] lg:table-cell">Level</TableHead>
+                  <TableHead className="hidden min-w-[110px] md:table-cell">Joined</TableHead>
                   <TableHead className="min-w-[100px]">Status</TableHead>
                   <TableHead className="pr-4 text-right">Actions</TableHead>
                 </TableRow>
@@ -324,7 +324,7 @@ export function AdminStudents() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                       {u.phone ?? "—"}
                     </TableCell>
                     <TableCell>
@@ -342,7 +342,7 @@ export function AdminStudents() {
                         {u.role}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <Badge
                         variant="outline"
                         className={cn("border", levelBadgeClass(u.level))}
@@ -350,7 +350,7 @@ export function AdminStudents() {
                         {u.level}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                       {formatDate(u.createdAt)}
                     </TableCell>
                     <TableCell>
@@ -439,7 +439,7 @@ export function AdminStudents() {
               Update profile details for {editing?.fullName}.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleEditSubmit} className="space-y-4">
+          <form onSubmit={handleEditSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
@@ -463,7 +463,7 @@ export function AdminStudents() {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
                 <Input
