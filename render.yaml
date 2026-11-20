@@ -3,10 +3,9 @@ services:
     name: sheegow-chat
     runtime: node
     plan: free
-    repo: https://github.com/phoozy54/sheegow-academy
     region: oregon
     rootDir: mini-services/chat-service
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: node index.js
     env:
       - key: NODE_ENV
