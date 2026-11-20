@@ -277,7 +277,7 @@ export function AdminDashboard() {
               Distribution across course levels
             </p>
           </div>
-          <div className="w-full">
+          <div className="w-full min-w-0">
             {levelData.length === 0 ? (
               <EmptyChart label="No enrollments yet" />
             ) : (

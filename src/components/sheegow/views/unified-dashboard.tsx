@@ -257,7 +257,7 @@ export function UnifiedDashboard() {
       </Sheet>
 
       {/* Main area */}
-      <div className="flex min-h-[calc(100vh-4rem)] flex-1 flex-col">
+      <div className="flex min-h-[calc(100vh-4rem)] min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <header className="sticky top-16 z-30 flex items-center justify-between gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
