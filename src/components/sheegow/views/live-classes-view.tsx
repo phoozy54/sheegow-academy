@@ -238,7 +238,7 @@ function LiveNowCard({
         {/* Thumb */}
         <div className="relative aspect-[16/9] w-full sm:h-auto sm:w-1/2">
           {course?.image ? (
-            <img
+            <img loading="lazy" decoding="async"
               src={course.image}
               alt={liveClass.title}
               className="h-full w-full object-cover"
@@ -317,7 +317,7 @@ function LiveClassCard({
       {/* Thumb */}
       <div className="relative aspect-[16/9] w-full overflow-hidden">
         {course?.image ? (
-          <img
+          <img loading="lazy" decoding="async"
             src={course.image}
             alt={liveClass.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

@@ -3,6 +3,7 @@
 import { useStore } from "@/lib/store";
 import { Navbar } from "@/components/sheegow/navbar";
 import { Footer } from "@/components/sheegow/footer";
+import { CookieConsent } from "@/components/sheegow/cookie-consent";
 import { HomeView } from "@/components/sheegow/views/home-view";
 import { CoursesView } from "@/components/sheegow/views/courses-view";
 import { CourseDetailView } from "@/components/sheegow/views/course-detail-view";
@@ -39,6 +40,7 @@ export default function Home() {
         {view === "checkout" && <CheckoutView />}
       </main>
       {isDashboard ? null : <Footer />}
+      <CookieConsent />
     </div>
   );
 }

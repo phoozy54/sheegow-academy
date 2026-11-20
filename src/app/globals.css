@@ -122,9 +122,34 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Better text rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior-y: none;
   }
   html {
+    /* Smooth scroll on desktop, instant on mobile (feels snappier) */
     scroll-behavior: smooth;
+    /* Tap highlight — transparent for a native-app feel */
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Buttons get a subtle active state instead of the default blue flash */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation; /* removes 300ms tap delay on mobile */
+  }
+  /* Improve focus visibility for keyboard users only */
+  :focus-visible {
+    outline: 2px solid oklch(0.62 0.19 264);
+    outline-offset: 2px;
+  }
+  /* Prevent layout shift from scrollbars */
+  html {
+    scrollbar-gutter: stable;
   }
 }
 

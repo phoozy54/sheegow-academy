@@ -16,6 +16,7 @@ import {
   Sparkles,
   ArrowRight,
   BookOpen,
+  ShieldCheck,
   MessageSquare,
   Rocket,
   HandHeart,
@@ -272,7 +273,7 @@ export function AboutView() {
             {TEACHERS.map((t) => (
               <Card key={t.name} className="card-lift flex flex-col overflow-hidden p-0">
                 <div className="relative aspect-[4/3] w-full overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={t.image}
                     alt={t.name}
                     className="h-full w-full object-cover"
@@ -373,6 +374,89 @@ export function AboutView() {
                 <MessageSquare className="h-4 w-4" /> Ask a Question
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── PRIVACY POLICY ──────────────────────────────── */}
+      <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <Badge
+            variant="outline"
+            className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+          >
+            <ShieldCheck className="h-3 w-3" /> Your Privacy
+          </Badge>
+          <h2 className="mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Privacy Policy
+          </h2>
+          <p className="text-muted-foreground">
+            How we handle your data at SHEEGOW ACADEMY.
+          </p>
+        </div>
+        <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
+          <div>
+            <h3 className="mb-2 text-base font-bold text-foreground">
+              1. Information We Collect
+            </h3>
+            <p>
+              When you create an account, we collect your full name, email
+              address, and phone number. When you enroll in a course or make a
+              payment, we record the transaction details. We do not store
+              credit card numbers — payments are processed by our payment
+              providers (Stripe, EVC Plus, Zaad).
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 text-base font-bold text-foreground">
+              2. How We Use Your Data
+            </h3>
+            <p>
+              We use your information to provide access to your courses,
+              authenticate your login sessions, send you class reminders,
+              process payments, and improve our platform. We never sell your
+              data to third parties.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 text-base font-bold text-foreground">
+              3. Cookies
+            </h3>
+            <p>
+              We use essential cookies to keep you logged in (httpOnly JWT
+              tokens) and remember your preferences. These cookies are required
+              for the platform to function and cannot be disabled. You can
+              manage your cookie preferences using the banner shown on first
+              visit.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 text-base font-bold text-foreground">
+              4. Data Security
+            </h3>
+            <p>
+              Passwords are hashed using bcrypt before storage. Authentication
+              tokens are stored in httpOnly cookies to prevent cross-site
+              scripting (XSS) attacks. All database connections use SSL/TLS
+              encryption. Our database is hosted on Neon Postgres with
+              encrypted storage.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 text-base font-bold text-foreground">
+              5. Your Rights
+            </h3>
+            <p>
+              You can request access to, correction of, or deletion of your
+              personal data at any time by contacting us at{" "}
+              <a
+                href="mailto:hello@sheegow.academy"
+                className="font-medium text-indigo-600 hover:underline"
+              >
+                hello@sheegow.academy
+              </a>
+              .
+            </p>
           </div>
         </div>
       </section>

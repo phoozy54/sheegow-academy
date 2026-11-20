@@ -582,7 +582,7 @@ export function CheckoutView() {
                 <div className="flex gap-3">
                   <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg">
                     {course.image ? (
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={course.image}
                         alt={course.title}
                         className="h-full w-full object-cover"

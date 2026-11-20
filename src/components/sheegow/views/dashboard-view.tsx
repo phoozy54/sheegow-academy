@@ -279,7 +279,7 @@ export function DashboardView() {
                           aria-label={`Open ${course.title}`}
                         >
                           {course.image ? (
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={course.image}
                               alt={course.title}
                               className="h-full w-full object-cover"

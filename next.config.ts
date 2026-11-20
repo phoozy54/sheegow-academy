@@ -2,11 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  /* config options here */
+  reactStrictMode: false,
   typescript: {
     ignoreBuildErrors: true,
   },
-  reactStrictMode: false,
+  // Compress responses (Vercel does this anyway, but good for self-hosting)
+  compress: true,
+  // Keep page data small for fast mobile navigation
+  productionBrowserSourceMaps: false,
+  // Optimize package transpilation for smaller client bundles
+  transpilePackages: [],
 };
 
 export default nextConfig;

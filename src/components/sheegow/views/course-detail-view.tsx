@@ -175,7 +175,7 @@ export function CourseDetailView() {
             <div className="lg:col-span-2">
               <div className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
                 {course.image ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={course.image}
                     alt={course.title}
                     className="aspect-[16/9] w-full object-cover"

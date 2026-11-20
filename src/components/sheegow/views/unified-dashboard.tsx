@@ -533,7 +533,7 @@ function StudentOverview() {
                           className="relative h-16 w-full shrink-0 overflow-hidden rounded-lg sm:w-28"
                         >
                           {course.image ? (
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={course.image}
                               alt={course.title}
                               className="h-full w-full object-cover"
@@ -730,7 +730,7 @@ function TeacherOverview() {
                     >
                       <div className="h-12 w-16 shrink-0 overflow-hidden rounded-md bg-muted">
                         {c.image && (
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={c.image}
                             alt={c.title}
                             className="h-full w-full object-cover"
@@ -863,7 +863,7 @@ function StudentMyCourses() {
           <Card key={enr.id} className="card-lift overflow-hidden p-0">
             <div className="aspect-[16/9] w-full overflow-hidden">
               {c.image ? (
-                <img src={c.image} alt={c.title} className="h-full w-full object-cover" />
+                <img loading="lazy" decoding="async" src={c.image} alt={c.title} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-indigo-100">
                   <PlayCircle className="h-8 w-8 text-indigo-400" />

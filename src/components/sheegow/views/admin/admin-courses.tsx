@@ -293,7 +293,7 @@ export function AdminCourses() {
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-14 shrink-0 overflow-hidden rounded-md border bg-muted">
                           {c.image ? (
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={c.image}
                               alt={c.title}
                               className="h-full w-full object-cover"

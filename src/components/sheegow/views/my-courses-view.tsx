@@ -225,7 +225,7 @@ function EnrollmentCard({
         aria-label={`Continue ${course.title}`}
       >
         {course.image ? (
-          <img
+          <img loading="lazy" decoding="async"
             src={course.image}
             alt={course.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
