@@ -1,31 +1,94 @@
 import { createServer } from 'http'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { Server } from 'socket.io'
 
 // ============================================================================
-// SHEEGOW ACADEMY - Live Class Chat Service
-// Real-time chat over socket.io for live English classes.
+// SHEEGOW ACADEMY - Live Class Chat + WebRTC Signaling Service
+// Real-time chat and camera/microphone signaling for live English classes.
 // Each live class is a "room" identified by its classId.
+//
+// SECURITY: every client must present a short-lived, class-scoped token issued
+// by the Next.js app (/api/socket/token). Identity, class and broadcast rights
+// are derived from that token — never from client-supplied event payloads.
 // ============================================================================
 
-// Read PORT from env (Render sets PORT=10000), fall back to 3003 for local dev.
-// In the sandbox, Caddy forwards via XTransformPort so we keep 3003.
 const PORT = Number(process.env.PORT) || 3003
 
-// Detect production environment (Render/Heroku/etc.) where PORT is injected.
-// In production we use the default socket.io path (/socket.io/) so the HTTP
-// server can also serve a health-check page. In the sandbox we set path: '/'
-// because Caddy uses it to route XTransformPort requests.
-const isProduction = process.env.PORT !== undefined && process.env.PORT !== '3003'
+// Render sets NODE_ENV=production. Local/sandbox runs stay in dev mode even
+// when a different PORT is used for testing.
+const isProduction =
+  process.env.NODE_ENV === 'production' ||
+  (process.env.PORT !== undefined &&
+    process.env.PORT !== '3003' &&
+    process.env.NODE_ENV !== 'development')
+
+// Must match JWT_SECRET in the Next.js app. Fail closed in production.
+const JWT_SECRET = process.env.JWT_SECRET?.trim() || ''
+
+const APP_ORIGINS = [
+  'https://sheegowacademy.com',
+  'https://www.sheegowacademy.com',
+  ...(process.env.APP_ORIGIN || process.env.NEXT_PUBLIC_APP_URL || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+]
+
+// ----------------------------------------------------------------------------
+// Token verification (HS256, no extra dependency)
+// ----------------------------------------------------------------------------
+interface SocketIdentity {
+  userId: string
+  userName: string
+  role: string
+  classId: string
+  canBroadcast: boolean
+}
+
+function verifySocketToken(token: unknown): SocketIdentity | null {
+  if (!JWT_SECRET || typeof token !== 'string') return null
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  const [headerB64, payloadB64, signatureB64] = parts
+  try {
+    const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString())
+    if (header.alg !== 'HS256') return null
+
+    const expected = createHmac('sha256', JWT_SECRET)
+      .update(`${headerB64}.${payloadB64}`)
+      .digest()
+    const provided = Buffer.from(signatureB64, 'base64url')
+    if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+      return null
+    }
+
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString())
+    if (payload.purpose !== 'socket') return null
+    if (typeof payload.exp !== 'number' || payload.exp * 1000 <= Date.now()) return null
+    if (!payload.userId || !payload.userName || !payload.classId) return null
+
+    return {
+      userId: String(payload.userId),
+      userName: String(payload.userName),
+      role: String(payload.role || 'student'),
+      classId: String(payload.classId),
+      canBroadcast: payload.canBroadcast === true,
+    }
+  } catch {
+    return null
+  }
+}
+
+if (isProduction && !JWT_SECRET) {
+  console.error('[security] JWT_SECRET is not set — signaling connections will be rejected')
+}
 
 const httpServer = createServer((req, res) => {
-  // Only attach the HTTP handler in production — in the sandbox, Caddy
-  // owns path '/' and socket.io needs it.
   if (!isProduction) {
     res.writeHead(404)
     res.end('Not Found')
     return
   }
-  // Production: serve a friendly status page for browser/health-check visits
   if (req.url === '/' || req.url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify({
@@ -42,20 +105,36 @@ const httpServer = createServer((req, res) => {
 })
 
 const io = new Server(httpServer, {
-  // Sandbox: path '/' (Caddy requirement). Production: default '/socket.io/'.
   ...(isProduction ? {} : { path: '/' }),
   cors: {
-    origin: '*',
+    origin: isProduction ? APP_ORIGINS : true,
     methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   },
   pingTimeout: 60000,
   pingInterval: 25000,
 })
 
+// Authenticate the handshake. In local dev (no JWT_SECRET configured on the
+// chat service) anonymous sockets are allowed so developers can still test.
+io.use((socket, next) => {
+  if (!isProduction && !JWT_SECRET) {
+    socket.data.identity = null
+    next()
+    return
+  }
+  const identity = verifySocketToken(socket.handshake.auth?.token)
+  if (!identity) {
+    next(new Error('unauthorized'))
+    return
+  }
+  socket.data.identity = identity
+  next()
+})
+
 // ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
-
 interface OnlineUser {
   socketId: string
   userId: string
@@ -75,46 +154,67 @@ interface ChatMessage {
 
 interface JoinClassPayload {
   classId: string
-  userId: string
-  userName: string
+  userId?: string
+  userName?: string
   userAvatar?: string
 }
 
 interface SendMessagePayload {
   classId: string
-  userId: string
-  userName: string
-  userAvatar?: string
   text: string
-}
-
-interface RaiseHandPayload {
-  classId: string
-  userId: string
-  userName: string
 }
 
 interface ClassStatusPayload {
   classId: string
 }
 
+interface RtcSignalPayload {
+  toUserId: string
+  sdp?: { type: string; sdp?: string }
+  candidate?: {
+    candidate: string
+    sdpMid?: string | null
+    sdpMLineIndex?: number | null
+    usernameFragment?: string | null
+  }
+}
+
 // ----------------------------------------------------------------------------
 // In-memory tracking
-// classId -> Set<OnlineUser>
 // ----------------------------------------------------------------------------
-
 const classUsers = new Map<string, Set<OnlineUser>>()
-
-// Reverse lookup: socketId -> { classId, user } so we can clean up on disconnect.
 const socketIndex = new Map<string, { classId: string; user: OnlineUser }>()
+const classHosts = new Map<string, { socketId: string; userId: string; userName: string }>()
 
 const generateId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 
+/** Small in-process rate limiter (per socket, per event). */
+const eventHits = new Map<string, number[]>()
+function allowEvent(socketId: string, event: string, max: number, windowMs: number) {
+  const key = `${socketId}:${event}`
+  const now = Date.now()
+  const hits = (eventHits.get(key) || []).filter((t) => now - t < windowMs)
+  if (hits.length >= max) {
+    eventHits.set(key, hits)
+    return false
+  }
+  hits.push(now)
+  eventHits.set(key, hits)
+  return true
+}
+
+function payloadTooLarge(payload: unknown): boolean {
+  try {
+    return JSON.stringify(payload || {}).length > 80_000
+  } catch {
+    return true
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Helpers
 // ----------------------------------------------------------------------------
-
 const getUsersInClass = (classId: string): Set<OnlineUser> => {
   let set = classUsers.get(classId)
   if (!set) {
@@ -126,32 +226,77 @@ const getUsersInClass = (classId: string): Set<OnlineUser> => {
 
 const broadcastOnlineCount = (classId: string) => {
   const users = classUsers.get(classId)
-  const count = users ? users.size : 0
-  io.to(classId).emit('online-count', { classId, onlineCount: count })
+  io.to(classId).emit('online-count', { classId, onlineCount: users ? users.size : 0 })
+}
+
+const findSocketId = (classId: string, userId: string): string | undefined => {
+  const users = classUsers.get(classId)
+  return users ? Array.from(users).find((u) => u.userId === userId)?.socketId : undefined
+}
+
+const stopHost = (classId: string) => {
+  const host = classHosts.get(classId)
+  if (!host) return
+  classHosts.delete(classId)
+  io.to(classId).emit('broadcast-stopped', { classId, hostUserId: host.userId })
+  if (process.env.LOG_LEVEL !== 'quiet') {
+    console.log(`[rtc] broadcast stopped: ${host.userName} in ${classId}`)
+  }
+}
+
+/** Identity from the verified token, or a dev-only fallback. */
+const identityOf = (socket: any): SocketIdentity => {
+  if (socket.data.identity) return socket.data.identity as SocketIdentity
+  // Local development only — auth middleware guarantees this is never used
+  // in production.
+  return {
+    userId: 'dev-user',
+    userName: 'Dev User',
+    role: 'teacher',
+    classId: '',
+    canBroadcast: true,
+  }
+}
+
+/** Every state-changing event must come from a socket that joined THIS class. */
+const membership = (socket: any, classId: string) => {
+  const entry = socketIndex.get(socket.id)
+  if (!entry || entry.classId !== classId) {
+    socket.emit('error', { message: 'Join the class first' })
+    return null
+  }
+  return entry
 }
 
 // ----------------------------------------------------------------------------
 // Connection handling
 // ----------------------------------------------------------------------------
-
 io.on('connection', (socket) => {
+  const identity = identityOf(socket)
   if (process.env.LOG_LEVEL !== 'quiet') {
-    console.log(`[chat] connect: ${socket.id}`)
+    console.log(`[chat] connect: ${socket.id} (${identity.userName})`)
   }
 
   // ------------------------------------------------------------------
   // join-class
   // ------------------------------------------------------------------
   socket.on('join-class', (payload: JoinClassPayload) => {
-    const { classId, userId, userName, userAvatar } = payload
-    if (!classId || !userId || !userName) {
-      socket.emit('error', { message: 'join-class requires classId, userId, userName' })
+    if (payloadTooLarge(payload) || !payload?.classId) return
+
+    // In production the token is class-scoped — a token for room A cannot be
+    // used to join room B.
+    if (isProduction && identity.classId && identity.classId !== payload.classId) {
+      socket.emit('error', { message: 'This token is for a different class' })
       return
     }
+    if (!allowEvent(socket.id, 'join', 10, 10_000)) return
 
-    // Leave any previous class this socket was in (defensive — one socket per class)
+    // Leave any previous class this socket was in.
     const previous = socketIndex.get(socket.id)
     if (previous) {
+      if (classHosts.get(previous.classId)?.socketId === socket.id) {
+        stopHost(previous.classId)
+      }
       const prevSet = classUsers.get(previous.classId)
       if (prevSet) {
         prevSet.delete(previous.user)
@@ -159,36 +304,37 @@ io.on('connection', (socket) => {
         io.to(previous.classId).emit('user-left', {
           userId: previous.user.userId,
           userName: previous.user.userName,
-          onlineCount: prevSet ? prevSet.size : 0,
+          onlineCount: prevSet.size,
         })
         broadcastOnlineCount(previous.classId)
       }
       socket.leave(previous.classId)
     }
 
+    // Identity is server-controlled. Dev fallback uses the client values only
+    // because there is no token in local development.
+    const devFallback = !isProduction && !socket.data.identity
     const user: OnlineUser = {
       socketId: socket.id,
-      userId,
-      userName,
-      userAvatar,
+      userId: devFallback && payload.userId ? payload.userId : identity.userId,
+      userName: devFallback && payload.userName ? payload.userName : identity.userName,
+      userAvatar: devFallback ? payload.userAvatar : undefined,
     }
 
-    socket.join(classId)
-    const users = getUsersInClass(classId)
+    socket.join(payload.classId)
+    const users = getUsersInClass(payload.classId)
     users.add(user)
-    socketIndex.set(socket.id, { classId, user })
+    socketIndex.set(socket.id, { classId: payload.classId, user })
 
     const onlineCount = users.size
-
-    // Notify everyone in the room (including the new joiner)
-    io.to(classId).emit('user-joined', { userId, userName, onlineCount })
-
-    // Updated count for the room
-    io.to(classId).emit('online-count', { classId, onlineCount })
-
-    // Send the current list of online users to the joining socket only
+    io.to(payload.classId).emit('user-joined', {
+      userId: user.userId,
+      userName: user.userName,
+      onlineCount,
+    })
+    io.to(payload.classId).emit('online-count', { classId: payload.classId, onlineCount })
     socket.emit('users-list', {
-      classId,
+      classId: payload.classId,
       users: Array.from(users).map((u) => ({
         userId: u.userId,
         userName: u.userName,
@@ -197,144 +343,188 @@ io.on('connection', (socket) => {
       onlineCount,
     })
 
-    if (process.env.LOG_LEVEL !== 'quiet') {
-      console.log(`[chat] join: ${userName} -> ${classId} (online: ${onlineCount})`)
+    const host = classHosts.get(payload.classId)
+    if (host && host.userId !== user.userId) {
+      socket.emit('broadcast-started', { classId: payload.classId, hostUserId: host.userId })
+      io.to(host.socketId).emit('viewer-joined', {
+        classId: payload.classId,
+        userId: user.userId,
+        userName: user.userName,
+      })
     }
   })
 
   // ------------------------------------------------------------------
-  // send-message
+  // send-message — membership + identity + rate/size limits
   // ------------------------------------------------------------------
   socket.on('send-message', (payload: SendMessagePayload) => {
-    const { classId, userId, userName, userAvatar, text } = payload
-    if (!classId || !userId || !userName || typeof text !== 'string') {
-      socket.emit('error', {
-        message: 'send-message requires classId, userId, userName, text',
-      })
-      return
-    }
+    if (payloadTooLarge(payload) || !payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!allowEvent(socket.id, 'message', 20, 10_000)) return
+
+    const text = typeof payload.text === 'string' ? payload.text.trim().slice(0, 500) : ''
+    if (!text) return
 
     const message: ChatMessage = {
       id: generateId(),
-      classId,
-      userId,
-      userName,
-      userAvatar,
+      classId: entry.classId,
+      userId: entry.user.userId,
+      userName: entry.user.userName,
+      userAvatar: entry.user.userAvatar,
       text,
       timestamp: new Date().toISOString(),
     }
-
-    // Broadcast to everyone in the room, including the sender
-    io.to(classId).emit('new-message', message)
-
-    if (process.env.LOG_LEVEL === 'debug') {
-      console.log(`[chat] msg in ${classId} from ${userName}`)
-    }
+    io.to(entry.classId).emit('new-message', message)
   })
 
   // ------------------------------------------------------------------
   // raise-hand
   // ------------------------------------------------------------------
-  socket.on('raise-hand', (payload: RaiseHandPayload) => {
-    const { classId, userId, userName } = payload
-    if (!classId || !userId || !userName) {
-      socket.emit('error', {
-        message: 'raise-hand requires classId, userId, userName',
+  socket.on('raise-hand', (payload: { classId: string }) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!allowEvent(socket.id, 'hand', 2, 10_000)) return
+    io.to(entry.classId).emit('hand-raised', {
+      userId: entry.user.userId,
+      userName: entry.user.userName,
+    })
+  })
+
+  // ------------------------------------------------------------------
+  // start-class / end-class — teacher/admin only
+  // ------------------------------------------------------------------
+  const handleClassStatus = (status: 'live' | 'ended') => {
+    return (payload: ClassStatusPayload) => {
+      if (!payload?.classId) return
+      const entry = membership(socket, payload.classId)
+      if (!entry) return
+      if (!identity.canBroadcast) {
+        socket.emit('error', { message: 'Only the teacher can change class status' })
+        return
+      }
+      if (!allowEvent(socket.id, 'status', 6, 60_000)) return
+      io.to(entry.classId).emit('class-status', { classId: entry.classId, status })
+    }
+  }
+  socket.on('start-class', handleClassStatus('live'))
+  socket.on('end-class', handleClassStatus('ended'))
+
+  // ------------------------------------------------------------------
+  // WebRTC signaling — real camera/microphone broadcast
+  // ------------------------------------------------------------------
+  socket.on('broadcast-start', (payload: { classId: string }) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!identity.canBroadcast) {
+      socket.emit('broadcast-denied', {
+        message: 'Only the assigned teacher or an administrator can share camera and microphone',
       })
       return
     }
 
-    io.to(classId).emit('hand-raised', { userId, userName })
+    const existing = classHosts.get(entry.classId)
+    if (existing && existing.socketId !== socket.id) {
+      socket.emit('broadcast-denied', {
+        message: `${existing.userName} is already sharing their camera and microphone`,
+      })
+      return
+    }
 
-    // raise-hand events are noisy — only log at debug level
-  })
-
-  // ------------------------------------------------------------------
-  // start-class / end-class
-  // ------------------------------------------------------------------
-  const handleClassStatus = (status: 'live' | 'ended') => {
-    return (payload: ClassStatusPayload) => {
-      const { classId } = payload
-      if (!classId) {
-        socket.emit('error', { message: `${status}-class requires classId` })
-        return
-      }
-
-      io.to(classId).emit('class-status', { classId, status })
-
+    if (!existing) {
+      classHosts.set(entry.classId, {
+        socketId: socket.id,
+        userId: entry.user.userId,
+        userName: entry.user.userName,
+      })
+      io.to(entry.classId).emit('broadcast-started', {
+        classId: entry.classId,
+        hostUserId: entry.user.userId,
+        hostUserName: entry.user.userName,
+      })
+      const users = classUsers.get(entry.classId)
+      users?.forEach((u) => {
+        if (u.userId !== entry.user.userId) {
+          io.to(socket.id).emit('viewer-joined', {
+            classId: entry.classId,
+            userId: u.userId,
+            userName: u.userName,
+          })
+        }
+      })
       if (process.env.LOG_LEVEL !== 'quiet') {
-        console.log(`[chat] class ${classId} -> ${status}`)
+        console.log(`[rtc] broadcast started: ${entry.user.userName} in ${entry.classId}`)
       }
     }
-  }
+  })
 
-  socket.on('start-class', handleClassStatus('live'))
-  socket.on('end-class', handleClassStatus('ended'))
+  socket.on('broadcast-stop', (payload: { classId: string }) => {
+    const host = classHosts.get(payload?.classId)
+    if (!host || host.socketId !== socket.id) return
+    stopHost(payload.classId)
+  })
+
+  /** Relay SDP offers/answers and ICE candidates point-to-point, with limits. */
+  const relaySignal = (event: 'webrtc-offer' | 'webrtc-answer' | 'webrtc-ice') => {
+    return (payload: RtcSignalPayload) => {
+      if (payloadTooLarge(payload) || !payload?.toUserId) return
+      const entry = socketIndex.get(socket.id)
+      if (!entry) return
+      if (!allowEvent(socket.id, event, 200, 10_000)) return
+
+      const sdp = payload.sdp
+      if (sdp) {
+        if (typeof sdp.type !== 'string' || sdp.type.length > 8) return
+        if (typeof sdp.sdp === 'string' && sdp.sdp.length > 60_000) return
+      }
+      const candidate = payload.candidate
+      if (candidate) {
+        if (typeof candidate.candidate !== 'string' || candidate.candidate.length > 2_000) return
+      }
+      if (!sdp && !candidate) return
+
+      const targetSocketId = findSocketId(entry.classId, payload.toUserId)
+      if (!targetSocketId) return
+      io.to(targetSocketId).emit(event, {
+        ...(sdp ? { sdp } : {}),
+        ...(candidate ? { candidate } : {}),
+        fromUserId: entry.user.userId,
+      })
+    }
+  }
+  socket.on('webrtc-offer', relaySignal('webrtc-offer'))
+  socket.on('webrtc-answer', relaySignal('webrtc-answer'))
+  socket.on('webrtc-ice', relaySignal('webrtc-ice'))
 
   // ------------------------------------------------------------------
   // disconnect
   // ------------------------------------------------------------------
   socket.on('disconnect', () => {
+    eventHits.forEach((_v, key) => {
+      if (key.startsWith(`${socket.id}:`)) eventHits.delete(key)
+    })
     const entry = socketIndex.get(socket.id)
-    if (!entry) {
-      if (process.env.LOG_LEVEL !== 'quiet') {
-        console.log(`[chat] disconnect: ${socket.id} (no class)`)
-      }
-      return
-    }
+    if (!entry) return
 
     const { classId, user } = entry
+    if (classHosts.get(classId)?.socketId === socket.id) stopHost(classId)
     const users = classUsers.get(classId)
     if (users) {
       users.delete(user)
-      if (users.size === 0) {
-        classUsers.delete(classId)
-      }
+      if (users.size === 0) classUsers.delete(classId)
     }
-
     socketIndex.delete(socket.id)
-
-    const onlineCount = users ? users.size : 0
-
-    // Notify the room the user left and the updated count
     io.to(classId).emit('user-left', {
       userId: user.userId,
       userName: user.userName,
-      onlineCount,
+      onlineCount: users ? users.size : 0,
     })
     broadcastOnlineCount(classId)
-
-    if (process.env.LOG_LEVEL !== 'quiet') {
-      console.log(`[chat] leave: ${user.userName} <- ${classId} (online: ${onlineCount})`)
-    }
-  })
-
-  socket.on('error', (error: Error) => {
-    console.error(`[chat] socket error (${socket.id}):`, error.message)
   })
 })
-
-// ----------------------------------------------------------------------------
-// Boot
-// ----------------------------------------------------------------------------
 
 httpServer.listen(PORT, () => {
-  console.log(`[chat] service running on port ${PORT}`)
+  console.log(`[chat] service running on port ${PORT}${isProduction ? ' (production)' : ' (dev)'}`)
 })
-
-// ----------------------------------------------------------------------------
-// Graceful shutdown
-// ----------------------------------------------------------------------------
-
-const shutdown = (signal: string) => {
-  console.log(`[chat] received ${signal}, shutting down...`)
-  io.close(() => {
-    httpServer.close(() => {
-      console.log('[chat] server closed')
-      process.exit(0)
-    })
-  })
-}
-
-process.on('SIGTERM', () => shutdown('SIGTERM'))
-process.on('SIGINT', () => shutdown('SIGINT'))

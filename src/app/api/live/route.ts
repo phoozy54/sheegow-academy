@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { requireTeacherOrAdmin } from "@/lib/auth";
+import { isAdminRole, requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
 interface CreateLiveBody {
@@ -50,7 +50,7 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
-    await requireTeacherOrAdmin();
+    const actor = await requireTeacherOrAdmin();
 
     const body = await safeBody<CreateLiveBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
@@ -58,7 +58,11 @@ export async function POST(req: Request) {
     const title = body.title?.trim();
     const description = body.description?.trim() || null;
     const courseId = body.courseId?.trim() || null;
-    const teacherId = body.teacherId?.trim() || null;
+    // Teachers always own the classes they create. Only admins may assign a
+    // class to somebody else.
+    const teacherId = isAdminRole(actor.role)
+      ? body.teacherId?.trim() || actor.id
+      : actor.id;
     const scheduledAtStr = body.scheduledAt;
     const duration = typeof body.duration === "number" ? body.duration : 60;
 

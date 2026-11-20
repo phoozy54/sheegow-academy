@@ -91,6 +91,24 @@ const VIEW_TITLES: Record<AdminView, string> = {
   messages: "Contact Messages",
 };
 
+/**
+ * Teachers may only manage their own courses and live classes. Staff/user
+ * management and contact messages stay with administrators, and creating
+ * teachers is reserved for the super admin.
+ */
+function allowedViewsFor(role: string): Set<AdminView> {
+  if (role === "super_admin") return new Set(NAV_ITEMS.map((n) => n.id));
+  if (role === "admin")
+    return new Set<AdminView>([
+      "dashboard",
+      "courses",
+      "students",
+      "live",
+      "messages",
+    ]);
+  return new Set<AdminView>(["dashboard", "courses", "live"]);
+}
+
 export function AdminPanel() {
   const { user, authLoading, openAuthModal, navigate } = useStore();
   const [adminView, setAdminView] = useState<AdminView>("dashboard");
@@ -133,7 +151,11 @@ export function AdminPanel() {
     );
   }
 
-  if (user.role !== "admin" && user.role !== "teacher") {
+  if (
+    user.role !== "admin" &&
+    user.role !== "super_admin" &&
+    user.role !== "teacher"
+  ) {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card className="p-8 text-center">
@@ -156,12 +178,19 @@ export function AdminPanel() {
     );
   }
 
-  const activeTitle = VIEW_TITLES[adminView];
+  const allowedViews = allowedViewsFor(user.role);
+  // Defence in depth: never render a view the current role is not allowed to
+  // see, even if state was manipulated some other way.
+  const safeView: AdminView = allowedViews.has(adminView) ? adminView : "dashboard";
+  const navItems = NAV_ITEMS.filter((item) => allowedViews.has(item.id));
+  const activeTitle = VIEW_TITLES[safeView];
 
   const sidebar = (
     <SidebarContent
-      activeView={adminView}
+      items={navItems}
+      activeView={safeView}
       onSelect={(v) => {
+        if (!allowedViews.has(v)) return;
         setAdminView(v);
         setMobileNavOpen(false);
       }}
@@ -171,13 +200,13 @@ export function AdminPanel() {
   return (
     <div className="flex bg-muted/20">
       {/* Desktop sidebar */}
-      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r bg-card lg:flex lg:flex-col">
+      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:flex lg:flex-col xl:w-80">
         {sidebar}
       </aside>
 
       {/* Mobile sidebar */}
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
           <SheetTitle className="sr-only">Admin navigation</SheetTitle>
           {sidebar}
         </SheetContent>
@@ -260,12 +289,12 @@ export function AdminPanel() {
 
         {/* Content area */}
         <main className="flex-1 p-4 sm:p-6">
-          {adminView === "dashboard" && <AdminDashboard />}
-          {adminView === "courses" && <AdminCourses />}
-          {adminView === "students" && <AdminStudents />}
-          {adminView === "live" && <AdminLive />}
-          {adminView === "teachers" && <AdminTeachers />}
-          {adminView === "messages" && <AdminMessages />}
+          {safeView === "dashboard" && <AdminDashboard />}
+          {safeView === "courses" && <AdminCourses />}
+          {safeView === "students" && <AdminStudents />}
+          {safeView === "live" && <AdminLive />}
+          {safeView === "teachers" && <AdminTeachers />}
+          {safeView === "messages" && <AdminMessages />}
         </main>
       </div>
     </div>
@@ -273,9 +302,11 @@ export function AdminPanel() {
 }
 
 function SidebarContent({
+  items,
   activeView,
   onSelect,
 }: {
+  items: NavItem[];
   activeView: AdminView;
   onSelect: (v: AdminView) => void;
 }) {
@@ -303,7 +334,7 @@ function SidebarContent({
         <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Management
         </p>
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const active = activeView === item.id;
           return (
             <button

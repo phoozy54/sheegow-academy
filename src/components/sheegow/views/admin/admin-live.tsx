@@ -38,6 +38,7 @@ import {
   Clock,
   UserCircle,
   Radio,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -66,6 +67,12 @@ const EMPTY_FORM: LiveFormValues = {
   duration: 60,
 };
 
+function toLocalInput(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function AdminLive() {
   const openClass = useStore((s) => s.openClass);
 
@@ -75,6 +82,7 @@ export function AdminLive() {
   const [loading, setLoading] = useState(true);
 
   const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<LiveFormValues>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [actioningId, setActioningId] = useState<string | null>(null);
@@ -120,7 +128,21 @@ export function AdminLive() {
   }, [classes]);
 
   function openCreate() {
+    setEditingId(null);
     setForm(EMPTY_FORM);
+    setFormOpen(true);
+  }
+
+  function openEdit(c: LiveClass) {
+    setEditingId(c.id);
+    setForm({
+      title: c.title,
+      description: c.description ?? "",
+      courseId: c.courseId ?? "",
+      teacherId: c.teacherId ?? "",
+      scheduledAt: toLocalInput(c.scheduledAt),
+      duration: c.duration,
+    });
     setFormOpen(true);
   }
 
@@ -145,8 +167,14 @@ export function AdminLive() {
         scheduledAt: iso,
         duration: Number(form.duration) || 60,
       };
-      const { liveClass } = await api.createLiveClass(body);
-      toast.success(`Live class "${liveClass.title}" scheduled`);
+      const { liveClass } = editingId
+        ? await api.updateLiveClass(editingId, body)
+        : await api.createLiveClass(body);
+      toast.success(
+        editingId
+          ? `Live class "${liveClass.title}" updated`
+          : `Live class "${liveClass.title}" scheduled`
+      );
       setFormOpen(false);
       await fetchAll();
     } catch (err) {
@@ -232,6 +260,7 @@ export function AdminLive() {
               actioning={actioningId === c.id}
               onStart={handleStart}
               onEnd={handleEnd}
+              onEdit={() => openEdit(c)}
               onViewRoom={() => openClass(c.id)}
             />
           ))}
@@ -247,9 +276,13 @@ export function AdminLive() {
       >
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Schedule Live Class</DialogTitle>
+            <DialogTitle>
+              {editingId ? "Edit Live Class" : "Schedule Live Class"}
+            </DialogTitle>
             <DialogDescription>
-              Set up a new live class. Students will see it on the live page.
+              {editingId
+                ? "Change the class details or its date and time."
+                : "Set up a new live class. Students will see it on the live page."}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
@@ -376,7 +409,13 @@ export function AdminLive() {
                 disabled={saving}
                 className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
               >
-                {saving ? "Scheduling..." : "Schedule Class"}
+                {saving
+                  ? editingId
+                    ? "Saving..."
+                    : "Scheduling..."
+                  : editingId
+                    ? "Save Changes"
+                    : "Schedule Class"}
               </Button>
             </DialogFooter>
           </form>
@@ -391,12 +430,14 @@ function LiveClassCard({
   actioning,
   onStart,
   onEnd,
+  onEdit,
   onViewRoom,
 }: {
   liveClass: LiveClass;
   actioning: boolean;
   onStart: (id: string) => void;
   onEnd: (id: string) => void;
+  onEdit: () => void;
   onViewRoom: () => void;
 }) {
   const c = liveClass;
@@ -500,6 +541,15 @@ function LiveClassCard({
             {actioning ? "Starting..." : "Start Now"}
           </Button>
         )}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onEdit}
+          className="gap-1.5"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Edit
+        </Button>
         {isLive && (
           <Button
             size="sm"

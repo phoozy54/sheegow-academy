@@ -1,10 +1,24 @@
 :81 {
-        @transform_port_query {
-                query XTransformPort=*
+        # Never proxy to an arbitrary port supplied by a caller — that would
+        # expose any internal service listening on localhost (SSRF pivot).
+        @to_app {
+                query XTransformPort=3002
+        }
+        @to_chat {
+                query XTransformPort=3003
         }
 
-        handle @transform_port_query {
-                reverse_proxy localhost:{query.XTransformPort} {
+        handle @to_app {
+                reverse_proxy localhost:3002 {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+                }
+        }
+
+        handle @to_chat {
+                reverse_proxy localhost:3003 {
                         header_up Host {host}
                         header_up X-Forwarded-For {remote_host}
                         header_up X-Forwarded-Proto {scheme}

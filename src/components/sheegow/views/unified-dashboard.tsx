@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Enrollment, LiveClass, User } from "@/lib/types";
+import type { Course, Enrollment, LiveClass, Role, User } from "@/lib/types";
 import {
   cn,
   formatDate,
@@ -62,6 +62,7 @@ import { AdminStudents } from "./admin/admin-students";
 import { AdminLive } from "./admin/admin-live";
 import { AdminTeachers } from "./admin/admin-teachers";
 import { AdminMessages } from "./admin/admin-panel";
+import { AdminPayments } from "./admin/admin-payments";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -71,6 +72,7 @@ type SectionId =
   | "students"
   | "live"
   | "teachers"
+  | "payments"
   | "messages"
   | "profile";
 
@@ -78,22 +80,26 @@ interface NavItem {
   id: SectionId;
   label: string;
   icon: typeof LayoutDashboard;
-  roles: Array<"student" | "teacher" | "admin">;
+  roles: Role[];
 }
 
-/* Role-aware navigation. Every role gets Overview, Courses, Live Classes,
-   and Profile. Teachers can also see Students (their own). Admins see the
-   full management suite (Students, Teachers, Messages). */
+const ALL_ROLES: Role[] = ["student", "teacher", "admin", "super_admin"];
+const ADMIN_ROLES: Role[] = ["admin", "super_admin"];
+
+/* Role-aware navigation. Every role gets Overview, Live Classes and Profile.
+   Teachers also see their own students. Admins and super admins see the full
+   management suite, with Payments available to both (edits are super-admin only). */
 const NAV_ITEMS: NavItem[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard, roles: ["student", "teacher", "admin"] },
+  { id: "overview", label: "Overview", icon: LayoutDashboard, roles: ALL_ROLES },
   { id: "courses", label: "My Courses", icon: BookOpen, roles: ["student"] },
-  { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", "admin"] },
-  { id: "live", label: "Live Classes", icon: Video, roles: ["student", "teacher", "admin"] },
+  { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", ...ADMIN_ROLES] },
+  { id: "live", label: "Live Classes", icon: Video, roles: ALL_ROLES },
   { id: "students", label: "My Students", icon: Users, roles: ["teacher"] },
-  { id: "students", label: "Manage Students", icon: Users, roles: ["admin"] },
-  { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["admin"] },
-  { id: "messages", label: "Messages", icon: MessageSquare, roles: ["admin"] },
-  { id: "profile", label: "Profile", icon: UserIcon, roles: ["student", "teacher", "admin"] },
+  { id: "students", label: "Manage Students", icon: Users, roles: ADMIN_ROLES },
+  { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["super_admin"] },
+  { id: "payments", label: "Payments", icon: DollarSign, roles: ADMIN_ROLES },
+  { id: "messages", label: "Messages", icon: MessageSquare, roles: ADMIN_ROLES },
+  { id: "profile", label: "Profile", icon: UserIcon, roles: ALL_ROLES },
 ];
 
 const SECTION_TITLES: Record<SectionId, string> = {
@@ -102,6 +108,7 @@ const SECTION_TITLES: Record<SectionId, string> = {
   students: "Students",
   live: "Live Classes",
   teachers: "Teachers",
+  payments: "Payments & Revenue",
   messages: "Contact Messages",
   profile: "Profile Settings",
 };
@@ -110,12 +117,14 @@ const ROLE_LABELS: Record<string, string> = {
   student: "Student Portal",
   teacher: "Teacher Console",
   admin: "Admin Console",
+  super_admin: "Super Admin Console",
 };
 
 const ROLE_BADGE_STYLES: Record<string, string> = {
   student: "border-emerald-200 bg-emerald-50 text-emerald-700",
   teacher: "border-amber-200 bg-amber-50 text-amber-700",
   admin: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  super_admin: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700",
 };
 
 /* ─── Main Unified Dashboard ─────────────────────────────── */
@@ -161,7 +170,8 @@ export function UnifiedDashboard() {
     );
   }
 
-  const role = user.role as "student" | "teacher" | "admin";
+  const role = user.role as Role;
+  const isAdmin = role === "admin" || role === "super_admin";
   // Filter nav items by the current user's role
   const visibleNav = NAV_ITEMS.filter((item) => item.roles.includes(role));
   const activeTitle = SECTION_TITLES[section];
@@ -182,13 +192,13 @@ export function UnifiedDashboard() {
   return (
     <div className="flex bg-muted/20">
       {/* Desktop sidebar */}
-      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r bg-card lg:flex lg:flex-col">
+      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:flex lg:flex-col xl:w-80">
         {sidebar}
       </aside>
 
-      {/* Mobile sidebar */}
+      {/* Mobile sidebar — wider drawer with larger touch targets */}
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
           <SheetTitle className="sr-only">Dashboard navigation</SheetTitle>
           {sidebar}
         </SheetContent>
@@ -269,18 +279,45 @@ export function UnifiedDashboard() {
           </div>
         </header>
 
+        {/* Mobile quick navigation — switch sections without opening the drawer */}
+        <nav className="border-b bg-background/80 px-3 py-2 lg:hidden">
+          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {visibleNav.map((item, idx) => {
+              const active = section === item.id;
+              return (
+                <button
+                  key={`quick-${item.id}-${idx}`}
+                  onClick={() => setSection(item.id)}
+                  className={cn(
+                    "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
+                    active
+                      ? "border-indigo-500 bg-indigo-600 text-white shadow-sm"
+                      : "border-border bg-card text-muted-foreground hover:bg-accent"
+                  )}
+                >
+                  <item.icon className="h-3.5 w-3.5" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
         {/* Content area — renders role-appropriate content */}
-        <main className="flex-1 p-4 sm:p-6">
+        <main className="flex-1 px-3 pb-8 pt-4 sm:px-6 sm:pt-6">
           {section === "overview" && <RoleOverview role={role} />}
           {section === "courses" && role === "student" && <StudentMyCourses />}
-          {section === "courses" && (role === "teacher" || role === "admin") && (
+          {section === "courses" && (role === "teacher" || isAdmin) && (
             <AdminCourses />
           )}
           {section === "students" && role === "teacher" && <TeacherStudents />}
-          {section === "students" && role === "admin" && <AdminStudents />}
+          {section === "students" && isAdmin && <AdminStudents />}
           {section === "live" && <AdminLive />}
-          {section === "teachers" && role === "admin" && <AdminTeachers />}
-          {section === "messages" && role === "admin" && <AdminMessages />}
+          {section === "teachers" && role === "super_admin" && <AdminTeachers />}
+          {section === "payments" && isAdmin && (
+            <AdminPayments canManage={role === "super_admin"} />
+          )}
+          {section === "messages" && isAdmin && <AdminMessages />}
           {section === "profile" && <ProfileInline />}
         </main>
       </div>
@@ -306,7 +343,7 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       {/* Logo / brand */}
-      <div className="flex items-center gap-2 border-b px-5 py-4">
+      <div className="flex items-center gap-2 border-b px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md">
           <GraduationCap className="h-5 w-5" />
         </div>
@@ -332,7 +369,7 @@ function SidebarContent({
               key={`${item.id}-${idx}`}
               onClick={() => onSelect(item.id)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium transition-colors",
                 active
                   ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -340,7 +377,7 @@ function SidebarContent({
             >
               <item.icon
                 className={cn(
-                  "h-4 w-4 shrink-0",
+                  "h-5 w-5 shrink-0",
                   active ? "text-white" : "text-muted-foreground"
                 )}
               />
@@ -394,7 +431,7 @@ function SidebarContent({
 
 /* ─── Role-specific Overview ────────────────────────────── */
 
-function RoleOverview({ role }: { role: "student" | "teacher" | "admin" }) {
+function RoleOverview({ role }: { role: Role }) {
   if (role === "student") return <StudentOverview />;
   if (role === "teacher") return <TeacherOverview />;
   return <AdminDashboard />;
@@ -418,9 +455,7 @@ function StudentOverview() {
     api
       .upcomingClasses()
       .then((r) => {
-        if (!active) return;
-        const list = (r as unknown as { items?: LiveClass[] }).items;
-        setUpcoming(list ? list.slice(0, 3) : []);
+        if (active) setUpcoming(r.classes.slice(0, 3));
       })
       .catch(() => active && setUpcoming([]));
     return () => {

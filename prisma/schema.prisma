@@ -18,7 +18,7 @@ model User {
   email          String   @unique
   phone          String?
   password       String   // hashed with bcrypt
-  role           String   @default("student") // "student" | "teacher" | "admin"
+  role           String   @default("student") // "student" | "teacher" | "admin" | "super_admin"
   profilePicture String?
   bio            String?
   level          String   @default("Beginner") // Beginner | Intermediate | Advanced | IELTS | Kids
@@ -101,7 +101,7 @@ model Payment {
   studentId     String
   courseId      String?
   amount        Float
-  method        String   // "stripe" | "evcplus" | "zaad"
+  method        String   // "card" | "zaad" | "edahab"
   status        String   @default("pending") // pending | completed | failed
   transactionId String?
   couponCode    String?
@@ -123,6 +123,8 @@ model Review {
 
   student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
 }
 
 // ─── MESSAGE (live class chat) ─────────────────────────

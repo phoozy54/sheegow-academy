@@ -558,7 +558,7 @@ export function AdminCourses() {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Students pay this amount via Stripe, EVC Plus, or Zaad.
+                  Students pay this amount via Card, Zaad Service, or Edahab.
                 </p>
               </div>
             </div>

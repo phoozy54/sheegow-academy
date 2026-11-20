@@ -61,6 +61,7 @@ const LEVELS = [
 export function ProfileView() {
   const { user, authLoading, openAuthModal, setUser } = useStore();
   const [savingAccount, setSavingAccount] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
 
   // Account form
   const [fullName, setFullName] = useState("");
@@ -135,7 +136,7 @@ export function ProfileView() {
         level,
       };
       if (phone !== (user.phone || "")) body.phone = phone;
-      const { user: updated } = await api.updateUser(user.id, body);
+      const { user: updated } = await api.updateMyProfile(body);
       setUser(updated);
       toast.success("Profile updated successfully");
     } catch (err) {
@@ -147,23 +148,36 @@ export function ProfileView() {
     }
   };
 
-  const handleUpdatePassword = () => {
+  const handleUpdatePassword = async () => {
     if (!currentPw) {
       toast.error("Please enter your current password");
       return;
     }
-    if (newPw.length < 6) {
-      toast.error("New password must be at least 6 characters");
+    if (newPw.length < 12) {
+      toast.error("New password must be at least 12 characters");
       return;
     }
     if (newPw !== confirmPw) {
       toast.error("New passwords do not match");
       return;
     }
-    toast.success("Password updated (demo)");
-    setCurrentPw("");
-    setNewPw("");
-    setConfirmPw("");
+    setSavingPassword(true);
+    try {
+      await api.changePassword({
+        currentPassword: currentPw,
+        newPassword: newPw,
+      });
+      toast.success("Password updated successfully");
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : "Could not update password";
+      toast.error(msg);
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   const handlePhotoUpload = () => {
@@ -323,7 +337,7 @@ export function ProfileView() {
                     id="phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+252 61 2345678"
+                    placeholder="+252 63 4085151"
                   />
                 </div>
 
@@ -392,7 +406,7 @@ export function ProfileView() {
                       type="password"
                       value={newPw}
                       onChange={(e) => setNewPw(e.target.value)}
-                      placeholder="At least 6 characters"
+                      placeholder="At least 12 characters"
                       className="pl-9"
                     />
                   </div>
@@ -420,9 +434,14 @@ export function ProfileView() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleUpdatePassword}
+                    disabled={savingPassword}
                     className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
                   >
-                    <Check className="h-4 w-4" />
+                    {savingPassword ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
                     Update Password
                   </Button>
                 </div>

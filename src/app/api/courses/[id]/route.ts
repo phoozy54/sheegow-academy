@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { requireAdmin, requireTeacherOrAdmin } from "@/lib/auth";
+import { isAdminRole, requireAdmin, requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
 interface UpdateCourseBody {
@@ -69,7 +69,7 @@ export async function GET(_req: Request, { params }: RouteContext) {
  */
 export async function PUT(req: Request, { params }: RouteContext) {
   try {
-    await requireTeacherOrAdmin();
+    const actor = await requireTeacherOrAdmin();
 
     const { id } = await params;
     const body = await safeBody<UpdateCourseBody>(req);
@@ -77,6 +77,14 @@ export async function PUT(req: Request, { params }: RouteContext) {
 
     const existing = await db.course.findUnique({ where: { id } });
     if (!existing) return jsonError("Course not found", 404);
+    // A teacher may only edit their own course; admins can edit any course.
+    if (
+      !isAdminRole(actor.role) &&
+      existing.teacherId &&
+      existing.teacherId !== actor.id
+    ) {
+      return jsonError("Forbidden", 403);
+    }
 
     const data: Record<string, unknown> = {};
     if (body.title !== undefined) data.title = body.title.trim();
@@ -87,7 +95,7 @@ export async function PUT(req: Request, { params }: RouteContext) {
     if (body.price !== undefined) data.price = body.price;
     if (body.duration !== undefined) data.duration = body.duration;
     if (body.image !== undefined) data.image = body.image.trim() || null;
-    if (body.teacherId !== undefined)
+    if (body.teacherId !== undefined && isAdminRole(actor.role))
       data.teacherId = body.teacherId.trim() || null;
     if (body.whatYouLearn !== undefined)
       data.whatYouLearn = body.whatYouLearn.trim() || null;

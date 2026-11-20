@@ -195,16 +195,22 @@ export function AboutView() {
               language stick.
             </p>
             <p>
-              Our founders — teachers and engineers from Hargeisa and the
-              diaspora — decided to fix this. We built a platform where every
-              single class is <span className="font-semibold text-foreground">LIVE</span>.
-              Where you see your teacher, hear your classmates, raise your hand,
-              and speak English out loud from day one.
+              Our founder and general manager,{" "}
+              <span className="font-semibold text-foreground">
+                Ciise Mohamed Sheeq (SHEEGOW)
+              </span>
+              , decided to fix this. An English language expert who studied at a
+              university in London, he holds multiple language certifications and
+              brings 15 years of hands-on teaching experience. We built a platform
+              where every single class is{" "}
+              <span className="font-semibold text-foreground">LIVE</span>. Where you
+              see your teacher, hear your classmates, raise your hand, and speak
+              English out loud from day one.
             </p>
             <p>
               Today, thousands of Somali students learn with us — from absolute
               beginners in Hargeisa to IELTS candidates preparing for
-              university abroad. We pay with EVC Plus and Zaad. We learn on
+              university abroad. We pay with Zaad Service and Edahab. We learn on
               phones and laptops. We come from different cities, but we share one
               goal: to speak English with confidence.
             </p>
@@ -250,6 +256,78 @@ export function AboutView() {
         </div>
       </section>
 
+      {/* ─── FOUNDER / GENERAL MANAGER ──────────────────── */}
+      <section className="bg-gradient-to-b from-indigo-50/40 to-background py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <Badge
+              variant="outline"
+              className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+            >
+              <Award className="h-3 w-3" /> Leadership
+            </Badge>
+            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              Meet the founder &amp; general manager
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              The English language expert behind SHEEGOW ACADEMY.
+            </p>
+          </div>
+
+          <Card className="card-lift overflow-hidden border-indigo-100 bg-gradient-to-br from-white via-indigo-50/40 to-amber-50/50 p-0">
+            <div className="grid gap-0 lg:grid-cols-[auto,1fr]">
+              <div className="flex items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 p-10 lg:p-14">
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white/30 text-3xl font-extrabold text-white sm:h-36 sm:w-36 sm:text-4xl">
+                  CS
+                </div>
+              </div>
+              <div className="p-6 sm:p-10">
+                <Badge className="mb-3 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                  Founder &amp; General Manager
+                </Badge>
+                <h3 className="text-2xl font-extrabold tracking-tight text-foreground">
+                  Ciise Mohamed Sheeq (SHEEGOW)
+                </h3>
+                <p className="mt-1 text-sm font-semibold text-indigo-600">
+                  English Language Expert · 15+ Years of Experience
+                </p>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                  Ciise studied English at a university in London and holds
+                  multiple language certifications. With 15 years of teaching
+                  experience, he leads SHEEGOW ACADEMY with one goal: helping
+                  Somali-speaking learners speak English with confidence through
+                  live, interactive classes.
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {[
+                    {
+                      icon: GraduationCap,
+                      label: "London university educated",
+                    },
+                    {
+                      icon: Award,
+                      label: "Multiple language certificates",
+                    },
+                    {
+                      icon: BookOpen,
+                      label: "15 years of teaching experience",
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-2 rounded-xl border border-indigo-100 bg-white/80 px-3 py-2.5 text-xs font-semibold text-foreground"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0 text-indigo-600" />
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
       {/* ─── TEACHERS ───────────────────────────────────── */}
       <section className="bg-gradient-to-b from-background to-indigo-50/40 py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -264,8 +342,9 @@ export function AboutView() {
               Certified, caring, and Somali-speaking
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              Our teachers specialize in teaching English to Somali learners.
-              Every one of them runs live, interactive classes.
+              Led by founder Ciise Mohamed Sheeq (SHEEGOW), our teachers specialize
+              in teaching English to Somali learners. Every one of them runs live,
+              interactive classes.
             </p>
           </div>
 
@@ -404,7 +483,7 @@ export function AboutView() {
               address, and phone number. When you enroll in a course or make a
               payment, we record the transaction details. We do not store
               credit card numbers — payments are processed by our payment
-              providers (Stripe, EVC Plus, Zaad).
+              providers (card, Zaad Service, Edahab).
             </p>
           </div>
           <div>

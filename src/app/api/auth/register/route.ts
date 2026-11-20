@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { hashPassword, setAuthCookies } from "@/lib/auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
 interface RegisterBody {
@@ -17,6 +18,15 @@ interface RegisterBody {
  */
 export async function POST(req: Request) {
   try {
+    const ip = clientIp(req);
+    const limit = rateLimit(`register:${ip}`, 8, 60 * 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many accounts created. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
+
     const body = await safeBody<RegisterBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
 
@@ -29,8 +39,8 @@ export async function POST(req: Request) {
     if (!fullName) return jsonError("Full name is required", 400);
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return jsonError("A valid email is required", 400);
-    if (!password || password.length < 6)
-      return jsonError("Password must be at least 6 characters", 400);
+    if (!password || password.length < 12)
+      return jsonError("Password must be at least 12 characters", 400);
 
     // ── Reject duplicate emails ──
     const existing = await db.user.findUnique({ where: { email } });

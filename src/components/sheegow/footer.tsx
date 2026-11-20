@@ -11,6 +11,7 @@ import {
   Instagram,
   Youtube,
   Send,
+  MessageCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -164,7 +165,23 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
-                <span>+252 61 555 0199</span>
+                <a
+                  href="tel:+252634085151"
+                  className="hover:text-indigo-600"
+                >
+                  +252 63 4085151
+                </a>
+              </li>
+              <li className="flex items-start gap-2.5 text-muted-foreground">
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                <a
+                  href="https://wa.me/252634085151"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-emerald-600"
+                >
+                  Chat on WhatsApp
+                </a>
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />

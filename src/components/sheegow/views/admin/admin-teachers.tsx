@@ -35,7 +35,6 @@ import {
   BookOpen,
   GraduationCap,
   UserCircle,
-  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,6 +44,7 @@ interface TeacherForm {
   fullName: string;
   email: string;
   phone: string;
+  password: string;
   bio: string;
   level: string;
 }
@@ -53,6 +53,7 @@ const EMPTY_FORM: TeacherForm = {
   fullName: "",
   email: "",
   phone: "",
+  password: "",
   bio: "",
   level: "Intermediate",
 };
@@ -114,6 +115,7 @@ export function AdminTeachers() {
       fullName: t.fullName,
       email: t.email,
       phone: t.phone ?? "",
+      password: "",
       bio: t.bio ?? "",
       level: t.level,
     });
@@ -159,15 +161,31 @@ export function AdminTeachers() {
       toast.error("Name and email are required");
       return;
     }
+    if (addForm.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
     setAdding(true);
-    // Demo: no create-teacher endpoint exists; just simulate delay + info toast
-    await new Promise((r) => setTimeout(r, 500));
-    toast.info(
-      "In production this would create a teacher account. Use the register flow with elevated role.",
-      { duration: 6000 }
-    );
-    setAdding(false);
-    setAddOpen(false);
+    try {
+      await api.createUser({
+        fullName: addForm.fullName.trim(),
+        email: addForm.email.trim(),
+        phone: addForm.phone.trim() || undefined,
+        password: addForm.password,
+        role: "teacher",
+        level: addForm.level,
+        bio: addForm.bio.trim() || undefined,
+      });
+      toast.success("Teacher account created");
+      setAddOpen(false);
+      await fetchAll();
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : "Failed to create teacher";
+      toast.error(msg);
+    } finally {
+      setAdding(false);
+    }
   }
 
   return (
@@ -343,7 +361,7 @@ export function AdminTeachers() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, phone: e.target.value }))
                   }
-                  placeholder="+252 61 2345678"
+                  placeholder="+252 63 4085151"
                 />
               </div>
               <div className="space-y-1.5">
@@ -412,16 +430,8 @@ export function AdminTeachers() {
               Invite a new instructor to the platform.
             </DialogDescription>
           </DialogHeader>
-          <div className="mb-4 flex items-start gap-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-800">
-            <Info className="mt-0.5 h-4 w-4 shrink-0" />
-            <div>
-              <p className="font-semibold">Demo notice</p>
-              <p className="mt-0.5">
-                There is no dedicated &quot;create teacher&quot; endpoint yet.
-                In production, submitting this form would create an account with
-                the teacher role and email an invitation.
-              </p>
-            </div>
+          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+            The teacher can log in immediately with the email and password set here.
           </div>
           <form onSubmit={handleAddSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
@@ -444,6 +454,21 @@ export function AdminTeachers() {
                 onChange={(e) =>
                   setAddForm((f) => ({ ...f, email: e.target.value }))
                 }
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="add-password">Initial Password</Label>
+              <Input
+                id="add-password"
+                type="password"
+                autoComplete="new-password"
+                value={addForm.password}
+                onChange={(e) =>
+                  setAddForm((f) => ({ ...f, password: e.target.value }))
+                }
+                placeholder="At least 6 characters"
+                minLength={6}
                 required
               />
             </div>

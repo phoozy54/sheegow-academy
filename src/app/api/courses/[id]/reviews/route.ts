@@ -36,11 +36,12 @@ export async function POST(req: Request, { params }: RouteContext) {
     const course = await db.course.findUnique({ where: { id: courseId } });
     if (!course) return jsonError("Course not found", 404);
 
-    // Reject duplicates
-    const existing = await db.review.findUnique({
-      where: {
-        studentId_courseId: { studentId: user.id, courseId },
-      },
+    // Reject duplicates. findFirst is used so this compiles against the
+    // current Prisma client; the DB-level @@unique constraint is the final
+    // guard against concurrent duplicate submissions.
+    const existing = await db.review.findFirst({
+      where: { studentId: user.id, courseId },
+      select: { id: true },
     });
     if (existing)
       return jsonError("You have already reviewed this course", 409);

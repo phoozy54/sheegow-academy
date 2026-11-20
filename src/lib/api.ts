@@ -17,9 +17,41 @@ export class ApiError extends Error {
   }
 }
 
+/** Endpoints where a 401 is a normal outcome — never auto-refresh there. */
+const AUTH_ENDPOINTS = new Set([
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/refresh",
+  "/api/auth/logout",
+]);
+
+/**
+ * Dedupe concurrent refreshes. When several API calls fail with 401 at the
+ * same time (e.g. a dashboard loading in parallel), only one refresh request
+ * is made and every caller waits on the same promise.
+ */
+let refreshPromise: Promise<boolean> | null = null;
+
+function refreshSession(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = fetch("/api/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
+      .then((res) => res.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
 async function request<T>(
   url: string,
-  options?: RequestInit
+  options?: RequestInit,
+  isRetry = false
 ): Promise<T> {
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
@@ -27,10 +59,21 @@ async function request<T>(
     ...options,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new ApiError(data.error || "Request failed", res.status);
+
+  if (res.ok) return data as T;
+
+  // The access token is short-lived (15 min). On a 401, rotate the session
+  // once and replay the original request so users are not logged out.
+  if (
+    res.status === 401 &&
+    !isRetry &&
+    !AUTH_ENDPOINTS.has(url.split("?")[0])
+  ) {
+    const refreshed = await refreshSession();
+    if (refreshed) return request<T>(url, options, true);
   }
-  return data as T;
+
+  throw new ApiError(data.error || "Request failed", res.status);
 }
 
 export const api = {
@@ -57,6 +100,12 @@ export const api = {
   me: () => request<{ user: User | null }>("/api/auth/me"),
 
   refresh: () => request<{ user: User }>("/api/auth/refresh", { method: "POST" }),
+
+  changePassword: (body: { currentPassword: string; newPassword: string }) =>
+    request<{ success: boolean }>("/api/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 
   // COURSES
   courses: (params: {
@@ -123,6 +172,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  updateLiveClass: (id: string, body: Partial<LiveClass>) =>
+    request<{ liveClass: LiveClass }>(`/api/live/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+
   startLiveClass: (id: string) =>
     request<{ liveClass: LiveClass }>(`/api/live/${id}/start`, { method: "PUT" }),
   endLiveClass: (id: string) =>
@@ -149,6 +204,31 @@ export const api = {
   paymentHistory: () =>
     request<{ payments: Payment[] }>("/api/payments/history"),
 
+  // PAYMENTS (admin / super admin)
+  allPayments: (params: { status?: string; method?: string } = {}) => {
+    const q = new URLSearchParams();
+    if (params.status) q.set("status", params.status);
+    if (params.method) q.set("method", params.method);
+    return request<{
+      payments: Payment[];
+      summary: {
+        total: number;
+        completed: number;
+        pending: number;
+        failed: number;
+        refunded: number;
+        revenue: number;
+      };
+      total: number;
+    }>(`/api/payments?${q.toString()}`);
+  },
+
+  updatePaymentStatus: (id: string, status: string) =>
+    request<{ payment: Payment }>(`/api/payments/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+
   validateCoupon: (body: { code: string; courseId: string }) =>
     request<{ valid: boolean; discount?: number }>(
       "/api/payments/coupon/validate",
@@ -169,8 +249,34 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  updateMyProfile: (body: Partial<{
+    fullName: string;
+    phone: string;
+    level: string;
+    bio: string;
+    profilePicture: string;
+  }>) =>
+    request<{ user: User }>("/api/users/me", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+
   deleteUser: (id: string) =>
     request<{ success: boolean }>(`/api/users/${id}`, { method: "DELETE" }),
+
+  createUser: (body: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    password: string;
+    role: "student" | "teacher" | "admin" | "super_admin";
+    level?: string;
+    bio?: string;
+  }) =>
+    request<{ user: User }>("/api/users", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 
   // CONTACT
   contact: (body: {

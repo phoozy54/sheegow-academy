@@ -23,7 +23,19 @@ export async function POST(req: Request) {
     if (!courseId) return jsonError("courseId is required", 400);
 
     const course = await db.course.findUnique({ where: { id: courseId } });
-    if (!course) return jsonError("Course not found", 404);
+    if (!course || !course.isActive) return jsonError("Course not found", 404);
+
+    // A paid course requires a completed payment. Without this check this
+    // endpoint would be a free-enrollment bypass around the checkout flow.
+    if (course.price > 0) {
+      const paid = await db.payment.findFirst({
+        where: { studentId: user.id, courseId, status: "completed" },
+        select: { id: true },
+      });
+      if (!paid) {
+        return jsonError("A completed payment is required for this course", 402);
+      }
+    }
 
     // Check for existing enrollment (unique [studentId, courseId])
     const existing = await db.enrollment.findUnique({

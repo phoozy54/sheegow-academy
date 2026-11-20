@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, isAdminRole } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
 interface UpdateUserBody {
@@ -15,7 +15,7 @@ interface UpdateUserBody {
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-const VALID_ROLES = new Set(["student", "teacher", "admin"]);
+const VALID_ROLES = new Set(["student", "teacher", "admin", "super_admin"]);
 const VALID_LEVELS = new Set([
   "Beginner",
   "Intermediate",
@@ -75,8 +75,19 @@ export async function PUT(req: Request, { params }: RouteContext) {
       const v = body.role.trim();
       if (!VALID_ROLES.has(v))
         return jsonError("Invalid role", 400);
-      // Prevent self-demotion of the last admin (best-effort)
-      if (existing.role === "admin" && v !== "admin" && admin.id === id)
+      // Only the super admin may change roles — including assigning or
+      // revoking the teacher role. This keeps staff management centralised.
+      if (v !== existing.role && admin.role !== "super_admin") {
+        return jsonError("Only a super admin can change user roles", 403);
+      }
+      // Only a super admin may grant or revoke super-admin access.
+      if (
+        (v === "super_admin" || existing.role === "super_admin") &&
+        admin.role !== "super_admin"
+      )
+        return jsonError("Only a super admin can manage super-admin accounts", 403);
+      // Prevent an admin from stripping their own management role.
+      if (isAdminRole(existing.role) && !isAdminRole(v) && admin.id === id)
         return jsonError("You cannot demote your own admin account", 400);
       data.role = v;
     }
@@ -120,6 +131,8 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
 
     const existing = await db.user.findUnique({ where: { id } });
     if (!existing) return jsonError("User not found", 404);
+    if (existing.role === "super_admin" && admin.role !== "super_admin")
+      return jsonError("Only a super admin can delete a super admin", 403);
 
     await db.user.delete({ where: { id } });
 

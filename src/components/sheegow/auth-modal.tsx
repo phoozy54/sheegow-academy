@@ -181,7 +181,7 @@ export function AuthModal() {
                     id="phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+252 61 2345678"
+                    placeholder="+252 63 4085151"
                     className="pl-9"
                   />
                 </div>
@@ -200,7 +200,7 @@ export function AuthModal() {
                   placeholder="••••••••"
                   className="pl-9 pr-9"
                   required
-                  minLength={6}
+                  minLength={isLogin ? undefined : 12}
                 />
                 <button
                   type="button"
@@ -310,12 +310,6 @@ export function AuthModal() {
             </button>
           </p>
 
-          {!isLogin && (
-            <p className="mt-3 rounded-lg bg-indigo-50 px-3 py-2 text-center text-xs text-indigo-700">
-              Demo: use <strong>student@sheegow.academy / student123</strong> or{" "}
-              <strong>admin@sheegow.academy / admin123</strong>
-            </p>
-          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -325,8 +319,8 @@ export function AuthModal() {
 function scorePassword(pw: string): number {
   if (!pw) return 0;
   let score = 0;
-  if (pw.length >= 6) score++;
-  if (pw.length >= 10) score++;
+  if (pw.length >= 12) score++;
+  if (pw.length >= 16) score++;
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
   if (/[0-9]/.test(pw) || /[^A-Za-z0-9]/.test(pw)) score++;
   return Math.min(score, 4);

@@ -58,7 +58,7 @@ const FEATURES = [
   {
     icon: Globe2,
     title: "Learn From Anywhere",
-    desc: "Join from Somaliland or anywhere in the diaspora. Pay easily with EVC Plus or Zaad.",
+    desc: "Join from Somaliland or anywhere in the diaspora. Pay easily with Card, Zaad Service or Edahab.",
     color: "from-sky-500 to-blue-600",
   },
 ];
@@ -165,7 +165,7 @@ export function HomeView() {
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground lg:justify-start">
                 {[
                   "Expert live teachers",
-                  "EVC Plus & Zaad",
+                  "Zaad Service & Edahab",
                   "Certificates included",
                 ].map((item) => (
                   <span key={item} className="flex items-center gap-1.5">

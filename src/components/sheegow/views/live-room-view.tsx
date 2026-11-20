@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
 import { getSocket, disconnectSocket } from "@/lib/socket";
+import { LiveStreamManager } from "@/lib/webrtc";
 import type { LiveClass } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -32,6 +33,8 @@ import {
   Loader2,
   Lock,
   MessageSquare,
+  Volume2,
+  RadioTower,
 } from "lucide-react";
 import { cn, formatDateTime } from "@/lib/ui";
 import { toast } from "sonner";
@@ -90,11 +93,21 @@ export function LiveRoomView() {
   const [onlineCount, setOnlineCount] = useState(0);
   const [chatInput, setChatInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   // Video controls
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [handRaised, setHandRaised] = useState(false);
+
+  // Real WebRTC stream state
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [hostPresent, setHostPresent] = useState(false);
+  const [needsPlay, setNeedsPlay] = useState(false);
+  const streamManagerRef = useRef<LiveStreamManager | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // Socket instance — created on mount, destroyed on unmount
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
@@ -139,12 +152,29 @@ export function LiveRoomView() {
     loadClass();
   }, [loadClass]);
 
+  /* ─── Access errors (e.g. payment required) ─────────── */
+  useEffect(() => {
+    const onAccessError = (event: Event) => {
+      const message = (event as CustomEvent<{ message?: string }>).detail?.message;
+      if (message) toast.error(message);
+    };
+    window.addEventListener("sheegow:socket-auth-error", onAccessError);
+    return () =>
+      window.removeEventListener("sheegow:socket-auth-error", onAccessError);
+  }, []);
+
   /* ─── Socket connection ─────────────────────────────── */
   useEffect(() => {
     if (!classId) return;
 
-    const socket = getSocket();
+    const socket = getSocket(classId);
     socketRef.current = socket;
+    setSocketConnected(socket.connected);
+
+    const onSocketConnect = () => setSocketConnected(true);
+    const onSocketDisconnect = () => setSocketConnected(false);
+    socket.on("connect", onSocketConnect);
+    socket.on("disconnect", onSocketDisconnect);
 
     const addSystem = (text: string, kind: SystemMsg["kind"] = "system") => {
       setMessages((prev) => [
@@ -244,9 +274,104 @@ export function LiveRoomView() {
       socket.off("hand-raised", onHandRaised);
       socket.off("class-status", onClassStatus);
       socket.off("connect", onConnect);
+      socket.off("connect", onSocketConnect);
+      socket.off("disconnect", onSocketDisconnect);
       disconnectSocket();
     };
   }, [classId, user]);
+
+  /* ─── Real audio/video (WebRTC over the signaling socket) ── */
+  const userId = user?.id;
+  const userName = user?.fullName;
+  const canBroadcast =
+    !!user &&
+    !!liveClass &&
+    (user.id === liveClass.teacherId ||
+      user.role === "admin" ||
+      user.role === "super_admin");
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket || !classId || !userId || !userName || !liveClass) return;
+
+    const manager = new LiveStreamManager({
+      socket,
+      classId,
+      userId,
+      userName,
+      mode: canBroadcast ? "host" : "viewer",
+      onRemoteStream: (stream) => {
+        setRemoteStream(stream);
+        setHostPresent(true);
+      },
+      onBroadcastStarted: () => setHostPresent(true),
+      onBroadcastStopped: () => {
+        setRemoteStream(null);
+        setHostPresent(false);
+      },
+      onError: (message) => toast.error(message),
+    });
+    streamManagerRef.current = manager;
+
+    return () => {
+      manager.destroy();
+      streamManagerRef.current = null;
+      setRemoteStream(null);
+      setHostPresent(false);
+      setIsBroadcasting(false);
+    };
+  }, [classId, userId, userName, liveClass, canBroadcast]);
+
+  // Attach the teacher's local preview once the stream is live.
+  useEffect(() => {
+    const video = localVideoRef.current;
+    const stream = streamManagerRef.current?.getLocalStream();
+    if (video && stream) {
+      video.srcObject = stream;
+      video.play().catch(() => undefined);
+    }
+  }, [isBroadcasting]);
+
+  // Attach the incoming teacher stream to the student's video element.
+  useEffect(() => {
+    const video = remoteVideoRef.current;
+    if (!video || !remoteStream) return;
+    video.srcObject = remoteStream;
+    video
+      .play()
+      .then(() => setNeedsPlay(false))
+      .catch(() => setNeedsPlay(true));
+  }, [remoteStream]);
+
+  async function handleToggleBroadcast() {
+    const manager = streamManagerRef.current;
+    if (!manager) return;
+    if (manager.isBroadcasting) {
+      manager.stopBroadcast();
+      setIsBroadcasting(false);
+      toast.success("Camera and microphone turned off");
+      return;
+    }
+    const result = await manager.startBroadcast();
+    if (result.ok) {
+      setIsBroadcasting(true);
+      toast.success("Your camera and microphone are live");
+    } else {
+      toast.error(result.error || "Could not start the stream");
+    }
+  }
+
+  function handleToggleMic() {
+    const next = !micOn;
+    setMicOn(next);
+    streamManagerRef.current?.toggleMic(next);
+  }
+
+  function handleToggleCam() {
+    const next = !camOn;
+    setCamOn(next);
+    streamManagerRef.current?.toggleCam(next);
+  }
 
   /* ─── Send a chat message ───────────────────────────── */
   const handleSend = async () => {
@@ -350,6 +475,17 @@ export function LiveRoomView() {
               {liveClass.title}
             </span>
           </div>
+          <span
+            className={cn(
+              "hidden shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold sm:inline-flex",
+              socketConnected
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-amber-100 text-amber-700"
+            )}
+            title="Live video & chat signaling connection"
+          >
+            {socketConnected ? "Connected" : "Connecting…"}
+          </span>
           <Badge variant="outline" className="hidden shrink-0 border-red-200 bg-red-50 text-red-700 sm:inline-flex">
             <Radio className="mr-1 h-3 w-3" /> LIVE
           </Badge>
@@ -367,8 +503,22 @@ export function LiveRoomView() {
               micOn={micOn}
               camOn={camOn}
               handRaised={handRaised}
-              onToggleMic={() => setMicOn((v) => !v)}
-              onToggleCam={() => setCamOn((v) => !v)}
+              isHost={canBroadcast}
+              isBroadcasting={isBroadcasting}
+              remoteStream={remoteStream}
+              hostPresent={hostPresent}
+              needsPlay={needsPlay}
+              localVideoRef={localVideoRef}
+              remoteVideoRef={remoteVideoRef}
+              onToggleMic={handleToggleMic}
+              onToggleCam={handleToggleCam}
+              onToggleBroadcast={handleToggleBroadcast}
+              onEnablePlay={() => {
+                remoteVideoRef.current
+                  ?.play()
+                  .then(() => setNeedsPlay(false))
+                  .catch(() => undefined);
+              }}
               onRaiseHand={handleRaiseHand}
               onLeave={() => navigate("live")}
               isLoggedIn={!!user}
@@ -404,8 +554,17 @@ function VideoArea({
   micOn,
   camOn,
   handRaised,
+  isHost,
+  isBroadcasting,
+  remoteStream,
+  hostPresent,
+  needsPlay,
+  localVideoRef,
+  remoteVideoRef,
   onToggleMic,
   onToggleCam,
+  onToggleBroadcast,
+  onEnablePlay,
   onRaiseHand,
   onLeave,
   isLoggedIn,
@@ -416,8 +575,17 @@ function VideoArea({
   micOn: boolean;
   camOn: boolean;
   handRaised: boolean;
+  isHost: boolean;
+  isBroadcasting: boolean;
+  remoteStream: MediaStream | null;
+  hostPresent: boolean;
+  needsPlay: boolean;
+  localVideoRef: React.RefObject<HTMLVideoElement | null>;
+  remoteVideoRef: React.RefObject<HTMLVideoElement | null>;
   onToggleMic: () => void;
   onToggleCam: () => void;
+  onToggleBroadcast: () => void;
+  onEnablePlay: () => void;
   onRaiseHand: () => void;
   onLeave: () => void;
   isLoggedIn: boolean;
@@ -455,28 +623,76 @@ function VideoArea({
           </div>
         </div>
 
-        {/* Center: teacher avatar + class info */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center sm:px-6">
-          <div className="relative">
-            <div className="absolute -inset-3 animate-pulse rounded-full bg-red-500/20 blur-xl" />
-            <Avatar className="relative h-20 w-20 border-4 border-white/30 shadow-2xl sm:h-28 sm:w-28 lg:h-32 lg:w-32">
-              <AvatarImage src={teacherAvatar || undefined} />
-              <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-xl font-bold text-white sm:text-2xl">
-                {teacherName.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 ring-4 ring-slate-900">
-              <Radio className="h-3 w-3 text-white" />
-            </span>
+        {/* Center: real video, local preview, or waiting state */}
+        {remoteStream ? (
+          <>
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className="absolute inset-0 h-full w-full bg-black object-contain"
+            />
+            {needsPlay && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/70 p-4 text-center">
+                <Volume2 className="h-8 w-8 text-white" />
+                <p className="text-sm font-semibold text-white">Tap to enable sound</p>
+                <Button size="sm" onClick={onEnablePlay}>
+                  Enable audio
+                </Button>
+              </div>
+            )}
+            <div className="absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+              {teacherName} · live
+            </div>
+          </>
+        ) : isHost && isBroadcasting ? (
+          <>
+            <video
+              ref={localVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 h-full w-full scale-x-[-1] bg-black object-cover"
+            />
+            {!camOn && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 text-sm font-medium text-white">
+                Camera is off
+              </div>
+            )}
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+              <Radio className="h-3 w-3 text-red-400" /> You are live · {onlineCount} watching
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center sm:px-6">
+            <div className="relative">
+              <div className="absolute -inset-3 animate-pulse rounded-full bg-red-500/20 blur-xl" />
+              <Avatar className="relative h-20 w-20 border-4 border-white/30 shadow-2xl sm:h-28 sm:w-28 lg:h-32 lg:w-32">
+                <AvatarImage src={teacherAvatar || undefined} />
+                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-xl font-bold text-white sm:text-2xl">
+                  {teacherName.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 ring-4 ring-slate-900">
+                <Radio className="h-3 w-3 text-white" />
+              </span>
+            </div>
+            <h3 className="mt-4 line-clamp-2 text-base font-bold text-white sm:text-lg lg:text-xl">{liveClass.title}</h3>
+            <p className="mt-1 text-xs text-indigo-200 sm:text-sm">
+              with <span className="font-semibold">{teacherName}</span>
+            </p>
+            <p className="mt-3 line-clamp-3 max-w-md text-xs text-slate-300">
+              {liveClass.description || "Live interactive English class in session."}
+            </p>
+            <p className="mt-4 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-indigo-100 backdrop-blur">
+              {isHost
+                ? 'Press "Start Camera & Mic" to begin teaching'
+                : hostPresent
+                  ? "Connecting to the teacher's video…"
+                  : "Waiting for the teacher to start the camera…"}
+            </p>
           </div>
-          <h3 className="mt-4 line-clamp-2 text-base font-bold text-white sm:text-lg lg:text-xl">{liveClass.title}</h3>
-          <p className="mt-1 text-xs text-indigo-200 sm:text-sm">
-            with <span className="font-semibold">{teacherName}</span>
-          </p>
-          <p className="mt-3 line-clamp-3 max-w-md text-xs text-slate-300">
-            {liveClass.description || "Live interactive English class in session."}
-          </p>
-        </div>
+        )}
 
         {/* Participant bubbles — bottom left, hidden on very small screens */}
         <div className="absolute bottom-16 left-3 hidden sm:flex lg:bottom-20 lg:left-4">
@@ -502,24 +718,50 @@ function VideoArea({
 
       {/* Control bar */}
       <div className="flex items-center justify-center gap-2 overflow-x-auto border-t bg-card p-3 sm:gap-3 lg:overflow-visible">
-        {/* Mic */}
-        <ControlButton
-          active={micOn}
-          onClick={onToggleMic}
-          activeIcon={Mic}
-          inactiveIcon={MicOff}
-          activeLabel="Mute microphone"
-          inactiveLabel="Unmute microphone"
-        />
-        {/* Camera */}
-        <ControlButton
-          active={camOn}
-          onClick={onToggleCam}
-          activeIcon={Video}
-          inactiveIcon={VideoOff}
-          activeLabel="Turn off camera"
-          inactiveLabel="Turn on camera"
-        />
+        {/* Teacher controls — mic/cam toggle the real MediaStream tracks */}
+        {isHost && (
+          <>
+            <ControlButton
+              active={micOn}
+              onClick={onToggleMic}
+              activeIcon={Mic}
+              inactiveIcon={MicOff}
+              activeLabel="Mute microphone"
+              inactiveLabel="Unmute microphone"
+            />
+            <ControlButton
+              active={camOn}
+              onClick={onToggleCam}
+              activeIcon={Video}
+              inactiveIcon={VideoOff}
+              activeLabel="Turn off camera"
+              inactiveLabel="Turn on camera"
+            />
+            <Button
+              size="sm"
+              onClick={onToggleBroadcast}
+              className={cn(
+                "h-11 shrink-0 gap-1.5 rounded-full px-3 text-xs font-semibold sm:px-4",
+                isBroadcasting
+                  ? "bg-amber-500 text-white hover:bg-amber-600"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+              )}
+            >
+              <RadioTower className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isBroadcasting ? "Stop Camera" : "Start Camera & Mic"}
+              </span>
+              <span className="sm:hidden">{isBroadcasting ? "Stop" : "Go Live"}</span>
+            </Button>
+          </>
+        )}
+        {/* Students only receive — they listen and chat */}
+        {!isHost && (
+          <div className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-emerald-100 px-3 text-xs font-semibold text-emerald-700">
+            <Volume2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Listening</span>
+          </div>
+        )}
         {/* Screen share — disabled */}
         <Tooltip>
           <TooltipTrigger asChild>

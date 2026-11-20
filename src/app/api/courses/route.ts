@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { requireTeacherOrAdmin } from "@/lib/auth";
+import { isAdminRole, requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError, nonEmpty } from "@/lib/api-helpers";
 
 interface CreateCourseBody {
@@ -76,7 +76,7 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
-    await requireTeacherOrAdmin();
+    const actor = await requireTeacherOrAdmin();
 
     const body = await safeBody<CreateCourseBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
@@ -103,7 +103,11 @@ export async function POST(req: Request) {
         price,
         duration,
         image: body.image?.trim() || null,
-        teacherId: body.teacherId?.trim() || null,
+        // Teachers always own courses they create. Only admins may attribute a
+        // course to somebody else.
+        teacherId: isAdminRole(actor.role)
+          ? body.teacherId?.trim() || actor.id
+          : actor.id,
         whatYouLearn: body.whatYouLearn?.trim() || null,
       },
       include: { teacher: { select: teacherSelect } },

@@ -1,6 +1,6 @@
 // SHEEGOW ACADEMY — shared types
 
-export type Role = "student" | "teacher" | "admin";
+export type Role = "student" | "teacher" | "admin" | "super_admin";
 export type Level = "Beginner" | "Intermediate" | "Advanced" | "IELTS" | "Kids";
 
 export interface User {

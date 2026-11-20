@@ -68,7 +68,7 @@ import { toast } from "sonner";
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "IELTS", "Kids"];
 
-type RoleFilter = "all" | "student" | "teacher" | "admin";
+type RoleFilter = "all" | "student" | "teacher" | "admin" | "super_admin";
 
 interface EditForm {
   fullName: string;
@@ -205,6 +205,7 @@ export function AdminStudents() {
       student: 0,
       teacher: 0,
       admin: 0,
+      super_admin: 0,
     };
     // Note: counts reflect the currently loaded list (filtered by role).
     // We still want to show a count next to the current tab.
@@ -237,6 +238,7 @@ export function AdminStudents() {
               Teachers
             </TabsTrigger>
             <TabsTrigger value="admin">Admins</TabsTrigger>
+            <TabsTrigger value="super_admin">Super Admins</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -299,11 +301,13 @@ export function AdminStudents() {
                           <AvatarFallback
                             className={cn(
                               "text-xs font-bold",
-                              u.role === "admin"
-                                ? "bg-amber-100 text-amber-700"
-                                : u.role === "teacher"
-                                  ? "bg-indigo-100 text-indigo-700"
-                                  : "bg-emerald-100 text-emerald-700"
+                              u.role === "super_admin"
+                                ? "bg-fuchsia-100 text-fuchsia-700"
+                                : u.role === "admin"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : u.role === "teacher"
+                                    ? "bg-indigo-100 text-indigo-700"
+                                    : "bg-emerald-100 text-emerald-700"
                             )}
                           >
                             {u.fullName.slice(0, 2).toUpperCase()}
@@ -332,11 +336,13 @@ export function AdminStudents() {
                         variant="outline"
                         className={cn(
                           "border",
-                          u.role === "admin"
-                            ? "border-amber-200 bg-amber-50 text-amber-700"
-                            : u.role === "teacher"
-                              ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-                              : "border-muted bg-muted text-muted-foreground"
+                          u.role === "super_admin"
+                            ? "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700"
+                            : u.role === "admin"
+                              ? "border-amber-200 bg-amber-50 text-amber-700"
+                              : u.role === "teacher"
+                                ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                                : "border-muted bg-muted text-muted-foreground"
                         )}
                       >
                         {u.role}
@@ -472,7 +478,7 @@ export function AdminStudents() {
                   onChange={(e) =>
                     setEditForm((f) => ({ ...f, phone: e.target.value }))
                   }
-                  placeholder="+252 61 2345678"
+                  placeholder="+252 63 4085151"
                 />
               </div>
               <div className="space-y-1.5">

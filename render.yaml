@@ -15,4 +15,11 @@ services:
         value: 10000
       - key: LOG_LEVEL
         value: quiet
+      # Must be set in the Render dashboard to the SAME value as the Next.js
+      # app's JWT_SECRET. With it missing the service rejects all signaling.
+      - key: JWT_SECRET
+        sync: false
+      # Comma-separated browser origins allowed to connect (optional).
+      - key: APP_ORIGIN
+        sync: false
     autoDeploy: true
