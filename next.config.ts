@@ -52,6 +52,34 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: false,
+  /**
+   * One canonical origin: https://www.sheegowacademy.com
+   * Vercel's platform-level HTTP→HTTPS / apex→www redirects run before this
+   * code and use 308 (which Google treats the same as 301 for canonicalization).
+   * These rules cover hostnames we control inside the deployment.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sheegowacademy\\.com" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sheegow-academy\\.vercel\\.app" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www\\.sheegow-academy\\.vercel\\.app" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

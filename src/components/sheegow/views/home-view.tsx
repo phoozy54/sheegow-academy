@@ -140,9 +140,14 @@ export function HomeView() {
             <div className="relative">
               <div className="absolute -inset-4 animate-float-slow rounded-[2rem] bg-gradient-to-tr from-indigo-300/40 via-amber-200/30 to-transparent blur-2xl" />
               <div className="relative overflow-hidden rounded-3xl border bg-card shadow-2xl shadow-indigo-500/20">
-                <img loading="lazy" decoding="async"
-                  src="/images/hero.png"
+                <img
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  src="/images/hero.webp"
                   alt="Live English class in progress"
+                  width={1344}
+                  height={1008}
                   className="aspect-[4/3] w-full object-cover"
                 />
                 <div className="absolute inset-x-4 bottom-4 flex items-center justify-between rounded-2xl bg-white/90 p-3 shadow-lg backdrop-blur">

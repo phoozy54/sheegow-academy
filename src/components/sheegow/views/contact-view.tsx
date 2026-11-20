@@ -41,8 +41,8 @@ const CONTACT_INFO = [
   {
     icon: Mail,
     label: "Email",
-    value: "hello@sheegow.academy",
-    href: "mailto:hello@sheegow.academy",
+    value: "info@sheegowacademy.com",
+    href: "mailto:info@sheegowacademy.com",
     hint: "We reply within 24 hours",
     color: "from-indigo-500 to-indigo-600",
   },

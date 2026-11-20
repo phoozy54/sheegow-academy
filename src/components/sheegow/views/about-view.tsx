@@ -475,10 +475,10 @@ export function AboutView() {
               You can request access to, correction of, or deletion of your
               personal data at any time by contacting us at{" "}
               <a
-                href="mailto:hello@sheegow.academy"
+                href="mailto:info@sheegowacademy.com"
                 className="font-medium text-indigo-600 hover:underline"
               >
-                hello@sheegow.academy
+                info@sheegowacademy.com
               </a>
               .
             </p>

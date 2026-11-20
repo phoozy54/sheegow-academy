@@ -6,10 +6,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Facebook,
-  Twitter,
-  Instagram,
-  Youtube,
   Send,
   MessageCircle,
 } from "lucide-react";
@@ -80,24 +76,11 @@ export function Footer() {
               worldwide. Learn with expert teachers in real-time interactive
               classes.
             </p>
-            <div className="mt-4 flex gap-2">
-              {[
-                { Icon: Facebook, label: "Facebook" },
-                { Icon: Twitter, label: "Twitter" },
-                { Icon: Instagram, label: "Instagram" },
-                { Icon: Youtube, label: "YouTube" },
-              ].map(({ Icon, label }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  onClick={(e) => e.preventDefault()}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
+            {/* No real profiles exist yet — never render fake '#' links. */}
+            <p className="mt-4 text-xs text-muted-foreground">
+              Facebook · YouTube · TikTok · Instagram —{" "}
+              <span className="font-semibold text-foreground">Coming soon</span>
+            </p>
           </div>
 
           {/* Quick links */}
@@ -157,10 +140,10 @@ export function Footer() {
               <li className="flex items-start gap-2.5 text-muted-foreground">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
                 <a
-                  href="mailto:hello@sheegow.academy"
+                  href="mailto:info@sheegowacademy.com"
                   className="hover:text-indigo-600"
                 >
-                  hello@sheegow.academy
+                  info@sheegowacademy.com
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">

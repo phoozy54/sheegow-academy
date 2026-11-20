@@ -6,10 +6,10 @@ const globalForPrisma = globalThis as unknown as {
 
 // In development, only log errors (not every query — too noisy).
 // In production, log only errors and warnings.
-const logConfig =
+const logConfig: ('error' | 'warn')[] =
   process.env.NODE_ENV === 'production'
-    ? (['error', 'warn'] as const)
-    : (['error'] as const)
+    ? ['error', 'warn']
+    : ['error']
 
 export const db =
   globalForPrisma.prisma ??
