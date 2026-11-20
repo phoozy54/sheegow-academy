@@ -129,7 +129,7 @@ export function AuthModal() {
         <div className="max-h-[calc(92vh-7rem)] overflow-y-auto px-6 pb-6 pt-5">
           <DialogHeader className="mb-4 space-y-1">
             <DialogTitle className="text-xl">
-              {isLogin ? "Log in to your account" : "Create your free account"}
+              {isLogin ? "Log in to your account" : "Create your account"}
             </DialogTitle>
             <DialogDescription>
               {isLogin
@@ -306,7 +306,7 @@ export function AuthModal() {
               onClick={() => openAuthModal(isLogin ? "register" : "login")}
               className="font-semibold text-indigo-600 hover:underline"
             >
-              {isLogin ? "Sign up free" : "Log in"}
+              {isLogin ? "Sign up" : "Log in"}
             </button>
           </p>
 

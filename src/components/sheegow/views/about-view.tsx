@@ -351,8 +351,8 @@ export function AboutView() {
               Ready to start your English journey?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-indigo-100">
-              Join SHEEGOW ACADEMY today and get your first LIVE English class
-              for free. No credit card required.
+              Join SHEEGOW ACADEMY today and start speaking English with
+              expert teachers in live, interactive classes.
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
@@ -362,7 +362,7 @@ export function AboutView() {
                 }
                 className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
               >
-                {user ? "Browse Courses" : "Create Free Account"}
+                {user ? "Browse Courses" : "Create Account"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <Button

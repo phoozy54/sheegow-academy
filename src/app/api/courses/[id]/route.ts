@@ -81,6 +81,8 @@ export async function PUT(req: Request, { params }: RouteContext) {
     if (body.title !== undefined) data.title = body.title.trim();
     if (body.description !== undefined) data.description = body.description.trim();
     if (body.level !== undefined) data.level = body.level.trim();
+    if (body.price !== undefined && body.price < 1)
+      return jsonError("Price must be at least $1", 400);
     if (body.price !== undefined) data.price = body.price;
     if (body.duration !== undefined) data.duration = body.duration;
     if (body.image !== undefined) data.image = body.image.trim() || null;

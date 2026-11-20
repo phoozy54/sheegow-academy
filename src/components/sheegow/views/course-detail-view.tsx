@@ -147,7 +147,6 @@ export function CourseDetailView() {
 
   const bullets = parseWhatYouLearn(course.whatYouLearn);
   const reviews: Review[] = course.reviews || [];
-  const isFree = course.price === 0;
 
   const handleEnroll = () => {
     if (!user) {
@@ -406,19 +405,15 @@ function EnrollmentCard({
       <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-extrabold">
-            {course.price === 0 ? "Free" : formatPrice(course.price)}
+            {formatPrice(course.price)}
           </span>
-          {course.price > 0 && (
-            <span className="text-sm text-indigo-200">
-              / {course.duration} weeks
-            </span>
-          )}
+          <span className="text-sm text-indigo-200">
+            / {course.duration} weeks
+          </span>
         </div>
-        {course.price > 0 && (
-          <p className="mt-1 text-xs text-indigo-200">
-            One-time payment. Lifetime access.
-          </p>
-        )}
+        <p className="mt-1 text-xs text-indigo-200">
+          One-time payment. Lifetime access.
+        </p>
       </div>
 
       <div className="p-6">
@@ -428,23 +423,14 @@ function EnrollmentCard({
           className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
         >
           <Sparkles className="h-4 w-4" />
-          {course.price === 0 ? "Start Free" : "Enroll Now"}
+          {course.price === 0 ? "Start Now" : "Enroll Now"}
         </Button>
 
         {!isLoggedIn && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            You&apos;ll need to create a free account to enroll.
+            You&apos;ll need to create an account to enroll.
           </p>
         )}
-
-        {/* Free trial banner */}
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-          <PlayCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-          <span>
-            <span className="font-bold">Free trial class included.</span> Try
-            the first live session before you pay.
-          </span>
-        </div>
 
         <Separator className="my-4" />
 

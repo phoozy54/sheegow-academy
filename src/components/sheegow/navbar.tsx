@@ -314,7 +314,7 @@ export function Navbar() {
                         className="bg-gradient-to-r from-indigo-500 to-indigo-600"
                         onClick={() => openAuthModal("register")}
                       >
-                        Get Started Free
+                        Get Started
                       </Button>
                     </SheetClose>
                   </div>

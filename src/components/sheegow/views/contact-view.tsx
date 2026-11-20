@@ -88,8 +88,8 @@ const FAQS = [
     a: "Yes. When you complete a course (attend the live classes and finish the assignments), you'll receive a SHEEGOW ACADEMY certificate of completion. For IELTS students, the goal is achieving your target Band score on the official exam.",
   },
   {
-    q: "Can I try a class before paying?",
-    a: "Absolutely. Every new student gets a FREE trial live class — no credit card required. Sign up for a free account, browse our live classes page, and join any upcoming session marked as a trial. You'll experience exactly what a SHEEGOW class feels like.",
+    q: "How do I enroll and pay for a course?",
+    a: "Browse our courses page, choose your course, and click Enroll. You'll be taken to our secure checkout where you can pay with Credit Card (Stripe), EVC Plus, or Zaad. Once payment is confirmed, you're instantly enrolled and can join live classes right away.",
   },
 ];
 

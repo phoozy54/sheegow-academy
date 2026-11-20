@@ -89,8 +89,8 @@ export async function POST(req: Request) {
     if (!title) return jsonError("Title is required", 400);
     if (!description) return jsonError("Description is required", 400);
     if (!level) return jsonError("Level is required", 400);
-    if (price === undefined || price < 0)
-      return jsonError("Valid price is required", 400);
+    if (price === undefined || price < 1)
+      return jsonError("Price must be at least $1", 400);
     if (duration === undefined || duration <= 0)
       return jsonError("Valid duration is required", 400);
 

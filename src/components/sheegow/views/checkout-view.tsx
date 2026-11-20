@@ -638,7 +638,7 @@ export function CheckoutView() {
                   <div className="flex items-baseline justify-between pt-1">
                     <span className="font-bold text-foreground">Total</span>
                     <span className="text-xl font-extrabold text-indigo-700">
-                      {pricing.total === 0 ? "Free" : formatPrice(pricing.total)}
+                      {formatPrice(pricing.total)}
                     </span>
                   </div>
                 </div>

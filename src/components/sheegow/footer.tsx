@@ -26,7 +26,7 @@ export function Footer() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row lg:px-8">
           <div className="text-center md:text-left">
             <h3 className="text-xl font-bold text-foreground">
-              Get a FREE trial English class
+              Never miss a live class
             </h3>
             <p className="text-sm text-muted-foreground">
               Join our newsletter and never miss a live class schedule.

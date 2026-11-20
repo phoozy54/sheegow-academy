@@ -106,7 +106,7 @@ export function CourseCard({ course }: { course: Course }) {
         <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
           <div>
             <span className="text-lg font-extrabold text-foreground">
-              {course.price === 0 ? "Free" : formatPrice(course.price)}
+              {formatPrice(course.price)}
             </span>
             <span className="ml-1 text-xs text-muted-foreground">
               /{course.duration}w

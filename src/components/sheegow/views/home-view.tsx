@@ -151,7 +151,7 @@ export function HomeView() {
                   onClick={() => navigate("courses")}
                   className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-base shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
                 >
-                  Start Learning Free
+                  Start Learning
                   <ArrowRight className="h-4 w-4" />
                 </Button>
                 <Button
@@ -167,7 +167,7 @@ export function HomeView() {
 
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground lg:justify-start">
                 {[
-                  "Free trial class",
+                  "Expert live teachers",
                   "EVC Plus & Zaad",
                   "Certificates included",
                 ].map((item) => (
@@ -385,14 +385,14 @@ export function HomeView() {
               variant="outline"
               className="mb-4 inline-flex items-center gap-1.5 border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
             >
-              <Sparkles className="h-3 w-3" /> Free trial class
+              <Sparkles className="h-3 w-3" /> Live classes
             </Badge>
             <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
               Ready to start speaking English with confidence?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-indigo-100">
-              Join SHEEGOW ACADEMY today and get your first LIVE English class
-              for free. No credit card required.
+              Join SHEEGOW ACADEMY today and start speaking English with
+              expert teachers in live, interactive classes.
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
@@ -402,7 +402,7 @@ export function HomeView() {
                 }
                 className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
               >
-                {user ? "Browse Courses" : "Create Free Account"}
+                {user ? "Browse Courses" : "Create Account"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <Button

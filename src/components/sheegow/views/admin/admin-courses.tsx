@@ -56,7 +56,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Switch } from "@/components/ui/switch";
 import {
   Plus,
   Search,
@@ -66,7 +65,6 @@ import {
   Play,
   BookOpen,
   DollarSign,
-  Gift,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -93,7 +91,7 @@ const EMPTY_FORM: CourseFormValues = {
   title: "",
   description: "",
   level: "Beginner",
-  price: 0,
+  price: 29,
   duration: 4,
   image: "",
   teacherId: "",
@@ -323,16 +321,10 @@ export function AdminCourses() {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium">
-                      {c.price === 0 ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                          <Gift className="h-3 w-3" /> Free
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-foreground">
-                          <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                          {formatPrice(c.price).replace("$", "")}
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                        {formatPrice(c.price).replace("$", "")}
+                      </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {c.duration}w
@@ -390,7 +382,7 @@ export function AdminCourses() {
                                 title: c.title,
                                 description: c.description,
                                 level: c.level,
-                                price: c.price === 0 ? 29 : c.price,
+                                price: c.price,
                                 duration: c.duration,
                                 image: c.image ?? "",
                                 teacherId: c.teacherId ?? "",
@@ -400,7 +392,7 @@ export function AdminCourses() {
                             }}
                           >
                             <DollarSign className="h-4 w-4" />
-                            {c.price === 0 ? "Set Price" : "Change Price"}
+                            {"Change Price"}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -503,96 +495,74 @@ export function AdminCourses() {
               </div>
             </div>
 
-            {/* ─── Pricing section — admin/teacher decides the price ─── */}
+            {/* ─── Pricing section — admin/teacher sets the price ─── */}
             <div className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                    <DollarSign className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold text-foreground">
-                      Course Pricing
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Set the price students pay to enroll
-                    </p>
-                  </div>
-                </div>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg border bg-background px-3 py-1.5">
-                  <Switch
-                    checked={form.price === 0}
-                    onCheckedChange={(checked) =>
-                      setForm((f) => ({ ...f, price: checked ? 0 : 29 }))
-                    }
-                  />
-                  <span className="flex items-center gap-1 text-xs font-semibold text-foreground">
-                    <Gift className="h-3.5 w-3.5 text-emerald-600" />
-                    Free course
-                  </span>
-                </label>
-              </div>
-
-              {form.price === 0 ? (
-                <div className="flex items-center justify-center rounded-lg border border-dashed border-emerald-300 bg-emerald-50 py-3 text-sm font-semibold text-emerald-700">
-                  <Gift className="mr-2 h-4 w-4" />
-                  This course is FREE — students can enroll at no cost
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="price">Price (USD)</Label>
-                    <div className="relative">
-                      <DollarSign className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        id="price"
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        value={form.price}
-                        onChange={(e) =>
-                          setForm((f) => ({
-                            ...f,
-                            price: Number(e.target.value),
-                          }))
-                        }
-                        className="pl-9 text-lg font-bold"
-                      />
-                    </div>
-                  </div>
-                  {/* Quick price presets */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      { label: "$19", value: 19 },
-                      { label: "$29", value: 29 },
-                      { label: "$39", value: 39 },
-                      { label: "$49", value: 49 },
-                      { label: "$59", value: 59 },
-                      { label: "$79", value: 79 },
-                      { label: "$99", value: 99 },
-                    ].map((preset) => (
-                      <button
-                        key={preset.value}
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => ({ ...f, price: preset.value }))
-                        }
-                        className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors ${
-                          form.price === preset.value
-                            ? "border-indigo-500 bg-indigo-600 text-white"
-                            : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:text-indigo-600"
-                        }`}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                  <DollarSign className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-foreground">
+                    Course Pricing
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Students pay this amount via Stripe, EVC Plus, or Zaad.
-                    Toggle the switch above to make it free.
+                    Set the price students pay to enroll
                   </p>
                 </div>
-              )}
+              </div>
+
+              <div className="space-y-2.5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="price">Price (USD)</Label>
+                  <div className="relative">
+                    <DollarSign className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="price"
+                      type="number"
+                      min={1}
+                      step="0.01"
+                      value={form.price}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          price: Math.max(1, Number(e.target.value)),
+                        }))
+                      }
+                      className="pl-9 text-lg font-bold"
+                    />
+                  </div>
+                </div>
+                {/* Quick price presets */}
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: "$19", value: 19 },
+                    { label: "$29", value: 29 },
+                    { label: "$39", value: 39 },
+                    { label: "$49", value: 49 },
+                    { label: "$59", value: 59 },
+                    { label: "$79", value: 79 },
+                    { label: "$99", value: 99 },
+                  ].map((preset) => (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({ ...f, price: preset.value }))
+                      }
+                      className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        form.price === preset.value
+                          ? "border-indigo-500 bg-indigo-600 text-white"
+                          : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:text-indigo-600"
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Students pay this amount via Stripe, EVC Plus, or Zaad.
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
