@@ -7,12 +7,11 @@ services:
     rootDir: mini-services/chat-service
     buildCommand: npm install && npm run build
     startCommand: node index.js
-    env:
+    envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
       - key: LOG_LEVEL
         value: quiet
-    healthCheckPath: /
     autoDeploy: true
