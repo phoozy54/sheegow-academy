@@ -10,7 +10,12 @@ import { Star, Clock, Users, Play } from "lucide-react";
 import { levelBadgeClass, formatPrice } from "@/lib/ui";
 
 export function CourseCard({ course }: { course: Course }) {
-  const { openCourse, openCheckout, user, openAuthModal } = useStore();
+  const { openCourse, openCheckout, openDashboard, user, openAuthModal } = useStore();
+
+  const isManager =
+    user?.role === "teacher" ||
+    user?.role === "admin" ||
+    user?.role === "super_admin";
 
   const handleEnroll = () => {
     if (!user) {
@@ -114,10 +119,10 @@ export function CourseCard({ course }: { course: Course }) {
           </div>
           <Button
             size="sm"
-            onClick={handleEnroll}
+            onClick={isManager ? () => openDashboard("courses") : handleEnroll}
             className="bg-indigo-600 hover:bg-indigo-700"
           >
-            Enroll
+            {isManager ? "Manage" : "Enroll"}
           </Button>
         </div>
       </div>

@@ -25,6 +25,8 @@ import {
   PlayCircle,
   Video,
   ClipboardList,
+  Hammer,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -41,7 +43,7 @@ const TYPE_ICONS: Record<string, typeof BookOpen> = {
 };
 
 export function CoursePlayerView() {
-  const { selectedCourseId, user, authLoading, navigate, openAuthModal, openPlayer } = useStore();
+  const { selectedCourseId, user, authLoading, navigate, openAuthModal, openPlayer, openDashboard } = useStore();
   const [data, setData] = useState<CurriculumData | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -122,6 +124,22 @@ export function CoursePlayerView() {
           </div>
         )}
       </div>
+
+      {data?.canManage && selectedCourseId && (
+        <Card className="mb-5 flex flex-wrap items-center justify-between gap-3 border-fuchsia-200 bg-fuchsia-50/60 p-4 dark:bg-fuchsia-950/20">
+          <div className="flex items-center gap-2 text-sm font-semibold text-fuchsia-800 dark:text-fuchsia-200">
+            <Hammer className="h-4 w-4" /> Teacher mode — you can edit and deliver this course
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openDashboard("courses")}>
+              <Pencil className="h-3.5 w-3.5" /> Edit course
+            </Button>
+            <Button size="sm" className="gap-1.5" onClick={() => openDashboard("content-builder")}>
+              <Hammer className="h-3.5 w-3.5" /> Manage lessons
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {roadmap && (
         <div className="mb-5">

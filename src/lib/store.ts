@@ -31,6 +31,8 @@ interface AppState {
   selectedCourseId: string | null;
   selectedClassId: string | null;
   checkoutCourseId: string | null;
+  /** Dashboard section to open when navigating from a public view. */
+  dashboardSection: string | null;
   authModal: "login" | "register" | null;
 
   // Auth
@@ -45,6 +47,8 @@ interface AppState {
 
   // Actions
   navigate: (view: View) => void;
+  openDashboard: (section?: string) => void;
+  clearDashboardSection: () => void;
   openCourse: (id: string) => void;
   openPlayer: (id: string) => void;
   openClass: (id: string) => void;
@@ -74,6 +78,7 @@ export const useStore = create<AppState>((set, get) => ({
   selectedCourseId: null,
   selectedClassId: null,
   checkoutCourseId: null,
+  dashboardSection: null,
   authModal: null,
   user: null,
   authLoading: true,
@@ -81,9 +86,20 @@ export const useStore = create<AppState>((set, get) => ({
   cookieConsent: null,
 
   navigate: (view) => {
-    set({ view, mobileMenuOpen: false });
+    set({ view, dashboardSection: null, mobileMenuOpen: false });
     scrollToTop();
   },
+
+  openDashboard: (section) => {
+    set({
+      view: "dashboard",
+      dashboardSection: section ?? null,
+      mobileMenuOpen: false,
+    });
+    scrollToTop();
+  },
+
+  clearDashboardSection: () => set({ dashboardSection: null }),
 
   openCourse: (id) => {
     set({ view: "course-detail", selectedCourseId: id, mobileMenuOpen: false });

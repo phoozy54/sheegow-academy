@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CourseCard } from "../course-card";
 import {
-  PlayCircle,
   Video,
   Users,
   GraduationCap,
@@ -157,15 +156,6 @@ export function HomeView() {
                 >
                   Start Learning
                   <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => navigate("live")}
-                  className="w-full gap-2 sm:w-auto"
-                >
-                  <PlayCircle className="h-4 w-4 text-indigo-600" />
-                  Watch Live Demo
                 </Button>
               </div>
 

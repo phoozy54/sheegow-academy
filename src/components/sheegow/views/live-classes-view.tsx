@@ -21,6 +21,7 @@ import {
   ChevronRight,
   CheckCircle2,
   Sparkles,
+  Pencil,
 } from "lucide-react";
 import {
   formatDateTime,
@@ -54,6 +55,7 @@ function requestStatus(request?: TrialRequest): TrialStatus | undefined {
 export function LiveClassesView() {
   const openClass = useStore((s) => s.openClass);
   const navigate = useStore((s) => s.navigate);
+  const openDashboard = useStore((s) => s.openDashboard);
   const user = useStore((s) => s.user);
   const openAuthModal = useStore((s) => s.openAuthModal);
 
@@ -64,6 +66,11 @@ export function LiveClassesView() {
   const [requestingTrial, setRequestingTrial] = useState<string | null>(null);
 
   const isStudent = user?.role === "student";
+  // Teachers, admins and super admins host/manage classes — never students.
+  const isManager =
+    user?.role === "teacher" ||
+    user?.role === "admin" ||
+    user?.role === "super_admin";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -280,6 +287,8 @@ export function LiveClassesView() {
                   key={lc.id}
                   liveClass={lc}
                   onJoin={() => openClass(lc.id)}
+                  onManage={() => openDashboard("live")}
+                  isManager={isManager}
                   trial={trialProps(lc.id)}
                 />
               ))}
@@ -305,6 +314,8 @@ export function LiveClassesView() {
                   key={lc.id}
                   liveClass={lc}
                   onJoin={() => openClass(lc.id)}
+                  onManage={() => openDashboard("live")}
+                  isManager={isManager}
                   trial={trialProps(lc.id)}
                 />
               ))}
@@ -321,10 +332,14 @@ export function LiveClassesView() {
 function LiveNowCard({
   liveClass,
   onJoin,
+  onManage,
+  isManager,
   trial,
 }: {
   liveClass: LiveClass;
   onJoin: () => void;
+  onManage: () => void;
+  isManager: boolean;
   trial: TrialActionProps;
 }) {
   const course = liveClass.course;
@@ -388,9 +403,14 @@ function LiveNowCard({
             onClick={onJoin}
             className="mt-4 gap-2 bg-gradient-to-r from-red-500 to-red-600 shadow-lg shadow-red-500/30 hover:from-red-600 hover:to-red-700"
           >
-            <Video className="h-4 w-4" /> Join Live Class
+            <Video className="h-4 w-4" /> {isManager ? "Teach Live Class" : "Join Live Class"}
             <ArrowRight className="h-4 w-4" />
           </Button>
+          {isManager && (
+            <Button onClick={onManage} variant="outline" size="sm" className="mt-2 w-full gap-2">
+              <Pencil className="h-4 w-4" /> Manage class
+            </Button>
+          )}
           <TrialAction trial={trial} />
         </div>
       </div>
@@ -403,10 +423,14 @@ function LiveNowCard({
 function LiveClassCard({
   liveClass,
   onJoin,
+  onManage,
+  isManager,
   trial,
 }: {
   liveClass: LiveClass;
   onJoin: () => void;
+  onManage: () => void;
+  isManager: boolean;
   trial: TrialActionProps;
 }) {
   const course = liveClass.course;
@@ -488,12 +512,21 @@ function LiveClassCard({
         >
           {ended ? (
             "Class ended"
+          ) : isManager ? (
+            <>
+              Teach Class <ChevronRight className="h-4 w-4" />
+            </>
           ) : (
             <>
               Join Class <ChevronRight className="h-4 w-4" />
             </>
           )}
         </Button>
+        {isManager && (
+          <Button onClick={onManage} variant="outline" size="sm" className="mt-2 w-full gap-1.5">
+            <Pencil className="h-3.5 w-3.5" /> Manage class
+          </Button>
+        )}
         {!ended && <TrialAction trial={trial} />}
       </div>
     </Card>

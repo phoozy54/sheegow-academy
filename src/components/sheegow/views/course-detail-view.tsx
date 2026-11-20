@@ -26,6 +26,10 @@ import {
   Loader2,
   Sparkles,
   ShieldCheck,
+  Pencil,
+  Hammer,
+  BookOpen,
+  LayoutDashboard,
 } from "lucide-react";
 import {
   levelBadgeClass,
@@ -73,6 +77,8 @@ export function CourseDetailView() {
   const navigate = useStore((s) => s.navigate);
   const openCheckout = useStore((s) => s.openCheckout);
   const openAuthModal = useStore((s) => s.openAuthModal);
+  const openDashboard = useStore((s) => s.openDashboard);
+  const openPlayer = useStore((s) => s.openPlayer);
   const user = useStore((s) => s.user);
   const { isMobile, isTablet } = useDevice();
   const padClass = isMobile
@@ -154,6 +160,12 @@ export function CourseDetailView() {
 
   const bullets = parseWhatYouLearn(course.whatYouLearn);
   const reviews: Review[] = course.reviews || [];
+  // Teachers, admins and super admins manage courses — they are never shown
+  // the student enroll/pay flow.
+  const isManager =
+    user?.role === "teacher" ||
+    user?.role === "admin" ||
+    user?.role === "super_admin";
 
   const handleEnroll = () => {
     if (!user) {
@@ -259,11 +271,20 @@ export function CourseDetailView() {
             {/* Sticky enrollment card */}
             <div className="md:col-span-1">
               <div className="md:sticky md:top-20">
-                <EnrollmentCard
-                  course={course}
-                  onEnroll={handleEnroll}
-                  isLoggedIn={!!user}
-                />
+                {isManager ? (
+                  <TeacherCourseCard
+                    course={course}
+                    onEdit={() => openDashboard("courses")}
+                    onContent={() => openDashboard("content-builder")}
+                    onOpen={() => openPlayer(course.id)}
+                  />
+                ) : (
+                  <EnrollmentCard
+                    course={course}
+                    onEnroll={handleEnroll}
+                    isLoggedIn={!!user}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -393,6 +414,52 @@ export function CourseDetailView() {
         </div>
       </section>
     </div>
+  );
+}
+
+/* ─── Teacher / admin controls (never shown to students) ── */
+
+function TeacherCourseCard({
+  course,
+  onEdit,
+  onContent,
+  onOpen,
+}: {
+  course: Course;
+  onEdit: () => void;
+  onContent: () => void;
+  onOpen: () => void;
+}) {
+  return (
+    <Card className="card-lift overflow-hidden p-0 shadow-xl">
+      <div className="bg-gradient-to-br from-fuchsia-600 to-indigo-800 p-6 text-white">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-100">
+          <LayoutDashboard className="h-4 w-4" /> Teacher controls
+        </div>
+        <p className="mt-2 text-lg font-extrabold leading-tight">
+          You manage this course
+        </p>
+        <p className="mt-1 text-xs text-indigo-100">
+          Edit details, build lessons and deliver live classes — no enrollment
+          needed.
+        </p>
+      </div>
+
+      <div className="space-y-2.5 p-6">
+        <Button onClick={onEdit} size="lg" className="w-full gap-2">
+          <Pencil className="h-4 w-4" /> Edit course
+        </Button>
+        <Button onClick={onContent} size="lg" variant="outline" className="w-full gap-2">
+          <Hammer className="h-4 w-4" /> Add lessons &amp; quizzes
+        </Button>
+        <Button onClick={onOpen} size="lg" variant="ghost" className="w-full gap-2">
+          <BookOpen className="h-4 w-4" /> Open course player
+        </Button>
+        <p className="pt-1 text-center text-xs text-muted-foreground">
+          {course.title}
+        </p>
+      </div>
+    </Card>
   );
 }
 

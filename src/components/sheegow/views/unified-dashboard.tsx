@@ -147,9 +147,19 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
 
 export function UnifiedDashboard() {
   const { user, authLoading, openAuthModal, navigate } = useStore();
+  const dashboardSection = useStore((s) => s.dashboardSection);
+  const clearDashboardSection = useStore((s) => s.clearDashboardSection);
   const { isMobile, isTablet } = useDevice();
-  const [section, setSection] = useState<SectionId>("overview");
+  const [section, setSection] = useState<SectionId>(
+    () => (dashboardSection as SectionId) || "overview"
+  );
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // A public view can ask the dashboard to open a specific section (e.g. the
+  // teacher controls for a course or live class). Consume it once on mount.
+  useEffect(() => {
+    if (dashboardSection) clearDashboardSection();
+  }, [dashboardSection, clearDashboardSection]);
 
   // Auth gate — every role must be logged in
   if (authLoading) {
