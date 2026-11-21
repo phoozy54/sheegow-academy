@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { isAdminRole, requireAdmin, requireTeacherOrAdmin } from "@/lib/auth";
+import {
+  getCurrentUser,
+  isAdminRole,
+  requireAdmin,
+  requireTeacherOrAdmin,
+} from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 
 interface UpdateCourseBody {
@@ -16,13 +21,11 @@ interface UpdateCourseBody {
   isActive?: boolean;
 }
 
+/** Public-safe teacher projection. */
 const teacherSelect = {
   id: true,
   fullName: true,
-  email: true,
   profilePicture: true,
-  bio: true,
-  role: true,
 } as const;
 
 const reviewStudentSelect = {
@@ -40,10 +43,25 @@ type RouteContext = { params: Promise<{ id: string }> };
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
+    const viewer = await getCurrentUser();
 
     const course = await db.course.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        level: true,
+        ...(viewer ? { price: true } : {}),
+        duration: true,
+        image: true,
+        teacherId: true,
+        rating: true,
+        reviewCount: true,
+        whatYouLearn: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
         teacher: { select: teacherSelect },
         reviews: {
           orderBy: { createdAt: "desc" },
@@ -77,12 +95,9 @@ export async function PUT(req: Request, { params }: RouteContext) {
 
     const existing = await db.course.findUnique({ where: { id } });
     if (!existing) return jsonError("Course not found", 404);
-    // A teacher may only edit their own course; admins can edit any course.
-    if (
-      !isAdminRole(actor.role) &&
-      existing.teacherId &&
-      existing.teacherId !== actor.id
-    ) {
+    // A teacher may only edit a course explicitly assigned to them; admins
+    // can edit any course. An unassigned course is not editable by teachers.
+    if (!isAdminRole(actor.role) && existing.teacherId !== actor.id) {
       return jsonError("Forbidden", 403);
     }
 

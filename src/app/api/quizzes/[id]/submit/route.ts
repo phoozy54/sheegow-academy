@@ -52,6 +52,9 @@ export async function POST(req: Request, { params }: RouteContext) {
       },
     });
     if (!quiz) return jsonError("Quiz not found", 404);
+    // Draft/unpublished quizzes must never be gradeable, even for students who
+    // already have access to the course.
+    if (!quiz.isPublished) return jsonError("Quiz not available", 404);
 
     const access = await decideCourseContentAccess(user, quiz.courseId);
     if (!access.allowed) return jsonError(access.reason || "Forbidden", access.status);

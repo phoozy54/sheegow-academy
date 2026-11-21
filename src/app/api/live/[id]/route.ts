@@ -12,7 +12,6 @@ const includeRelations = {
     select: {
       id: true,
       fullName: true,
-      email: true,
       profilePicture: true,
     },
   },
@@ -58,11 +57,8 @@ export async function PUT(req: Request, { params }: RouteContext) {
 
     const existing = await db.liveClass.findUnique({ where: { id } });
     if (!existing) return jsonError("Live class not found", 404);
-    if (
-      !isAdminRole(actor.role) &&
-      existing.teacherId &&
-      existing.teacherId !== actor.id
-    ) {
+    // Teachers may only edit classes explicitly assigned to them.
+    if (!isAdminRole(actor.role) && existing.teacherId !== actor.id) {
       return jsonError("Forbidden", 403);
     }
 

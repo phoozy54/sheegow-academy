@@ -6,7 +6,7 @@ import {
   hashPassword,
   requireAuth,
 } from "@/lib/auth";
-import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
 
 interface ChangePasswordBody {
   currentPassword?: string;
@@ -20,6 +20,9 @@ interface ChangePasswordBody {
 export async function POST(req: Request) {
   try {
     const user = await requireAuth();
+    const limited = limitRequest(`change-password:${user.id}`, 5, 15 * 60_000);
+    if (limited) return limited;
+
     const body = await safeBody<ChangePasswordBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
 

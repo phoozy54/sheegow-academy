@@ -132,11 +132,13 @@ export async function setAuthCookies(payload: TokenPayload) {
   });
 }
 
-/** Clear auth cookies (logout) */
+/** Clear auth cookies (logout). The refresh cookie must be deleted with the
+ * exact path it was set with, otherwise it survives logout and can be replayed
+ * at /api/auth/refresh. */
 export async function clearAuthCookies() {
   const cookieStore = await cookies();
   cookieStore.delete("sheegow_access");
-  cookieStore.delete("sheegow_refresh");
+  cookieStore.delete({ name: "sheegow_refresh", path: "/api/auth" });
 }
 
 /**
@@ -204,14 +206,13 @@ export function isTeachingRole(role: string): boolean {
   return TEACHING_ROLES.has(role);
 }
 
-/** Admins manage everything; teachers only manage their own classes. */
+/** Admins manage everything; teachers only manage classes explicitly assigned
+ * to them. A class without a teacher is NOT up for grabs — fail closed. */
 export function canManageLiveClass(
   actor: { id: string; role: string },
   classTeacherId: string | null
 ): boolean {
-  return (
-    isAdminRole(actor.role) || !classTeacherId || classTeacherId === actor.id
-  );
+  return isAdminRole(actor.role) || classTeacherId === actor.id;
 }
 
 /** Require admin or super-admin role. */

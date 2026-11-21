@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { jsonError, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import { clientIp } from "@/lib/rate-limit";
 
 type RouteContext = { params: Promise<{ code: string }> };
 
@@ -10,8 +11,11 @@ type RouteContext = { params: Promise<{ code: string }> };
  * Deliberately public and minimal: name, course, serial, issue date, status.
  * No email, phone, payment or enrollment data is ever exposed here.
  */
-export async function GET(_req: Request, { params }: RouteContext) {
+export async function GET(req: Request, { params }: RouteContext) {
   try {
+    const limited = limitRequest(`cert-verify:${clientIp(req)}`, 30, 60_000);
+    if (limited) return limited;
+
     const { code } = await params;
     const certificate = await db.certificate.findUnique({
       where: { verificationCode: code.trim() },

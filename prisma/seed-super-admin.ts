@@ -7,17 +7,17 @@ import bcrypt from "bcryptjs";
  *
  *   bun run db:superadmin
  *
- * SUPER_ADMIN_PASSWORD is required in production. Running this script also
- * rotates the password of an existing super admin, so a leaked default
- * password can be fixed with one command.
+ * SUPER_ADMIN_PASSWORD is required in every environment — there is no
+ * hardcoded fallback password. Running this script also rotates the password
+ * of an existing super admin, so a leaked default can be fixed with one command.
  */
 async function main() {
   const email = "superadmin@sheegow.academy";
   const password = process.env.SUPER_ADMIN_PASSWORD?.trim() || "";
-  if (!password && process.env.NODE_ENV === "production") {
-    throw new Error("SUPER_ADMIN_PASSWORD must be set in production");
+  if (!password) {
+    throw new Error("SUPER_ADMIN_PASSWORD must be set before seeding");
   }
-  const finalPassword = password || "Sheegow@Super2026!";
+  const finalPassword = password;
   if (finalPassword.length < 12) {
     throw new Error("SUPER_ADMIN_PASSWORD must be at least 12 characters long");
   }

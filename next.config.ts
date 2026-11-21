@@ -34,8 +34,12 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
 ].join("; ");
 
+/** Only the canonical site origin may read responses cross-origin. */
+const appOrigin = "https://www.sheegowacademy.com";
+
 const securityHeaders = [
   { key: "Content-Security-Policy", value: contentSecurityPolicy },
+  { key: "Access-Control-Allow-Origin", value: appOrigin },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -81,10 +85,18 @@ const nextConfig: NextConfig = {
     ];
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/api/auth/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+        ],
+      },
+    ];
   },
   // Compress responses (Vercel does this anyway, but good for self-hosting)
   compress: true,

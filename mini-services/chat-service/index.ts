@@ -25,6 +25,10 @@ const isProduction =
 // Must match JWT_SECRET in the Next.js app. Fail closed in production.
 const JWT_SECRET = process.env.JWT_SECRET?.trim() || ''
 
+// Anonymous sockets are opt-in for local development only.
+const allowAnonymousDev =
+  !isProduction && !JWT_SECRET && process.env.ALLOW_ANONYMOUS_DEV === 'true'
+
 const APP_ORIGINS = [
   'https://sheegowacademy.com',
   'https://www.sheegowacademy.com',
@@ -109,7 +113,7 @@ const httpServer = createServer((req, res) => {
 const io = new Server(httpServer, {
   ...(isProduction ? {} : { path: '/' }),
   cors: {
-    origin: isProduction ? APP_ORIGINS : true,
+    origin: allowAnonymousDev ? true : APP_ORIGINS,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   },
@@ -117,10 +121,9 @@ const io = new Server(httpServer, {
   pingInterval: 25000,
 })
 
-// Authenticate the handshake. In local dev (no JWT_SECRET configured on the
-// chat service) anonymous sockets are allowed so developers can still test.
+// Authenticate the handshake. A missing secret never opens the service up.
 io.use((socket, next) => {
-  if (!isProduction && !JWT_SECRET) {
+  if (allowAnonymousDev) {
     socket.data.identity = null
     next()
     return

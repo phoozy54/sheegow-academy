@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { isAdminRole, requireTeacherOrAdmin } from "@/lib/auth";
+import { getCurrentUser, isAdminRole, requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError, nonEmpty } from "@/lib/api-helpers";
 
 interface CreateCourseBody {
@@ -15,15 +15,25 @@ interface CreateCourseBody {
   whatYouLearn?: string;
 }
 
-/** Public user projection for nested teacher includes */
+/** Public projection for nested teacher includes — never expose email,
+ * internal role or the free-text bio on publicly readable endpoints. */
 const teacherSelect = {
   id: true,
   fullName: true,
-  email: true,
   profilePicture: true,
-  bio: true,
-  role: true,
 } as const;
+
+/** Parse a bounded positive integer from a query string. */
+function boundedInt(
+  value: string | null,
+  fallback: number,
+  max: number
+): number | null {
+  if (value === null || value.trim() === "") return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > max) return null;
+  return parsed;
+}
 
 /**
  * GET /api/courses
@@ -33,8 +43,10 @@ const teacherSelect = {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.max(1, parseInt(searchParams.get("limit") || "10", 10));
+    const page = boundedInt(searchParams.get("page"), 1, 1000);
+    const limit = boundedInt(searchParams.get("limit"), 10, 50);
+    if (page === null || limit === null)
+      return jsonError("Invalid pagination parameters", 400);
     const level = nonEmpty(searchParams.get("level"));
     const search = nonEmpty(searchParams.get("search"));
 
@@ -44,10 +56,30 @@ export async function GET(req: Request) {
       ...(search ? { title: { contains: search } } : {}),
     } as const;
 
+    // Price is a purchase detail: only reveal it to a signed-in user.
+    const viewer = await getCurrentUser();
+    const select = {
+      id: true,
+      title: true,
+      description: true,
+      level: true,
+      ...(viewer ? { price: true } : {}),
+      duration: true,
+      image: true,
+      teacherId: true,
+      rating: true,
+      reviewCount: true,
+      whatYouLearn: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+      teacher: { select: teacherSelect },
+    };
+
     const [items, total] = await Promise.all([
       db.course.findMany({
         where,
-        include: { teacher: { select: teacherSelect } },
+        select,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
