@@ -40,7 +40,7 @@ const FEATURES = [
   {
     icon: GraduationCap,
     title: "Expert Teacher",
-    desc: "Learn with Ciise Mohamed Sheeq (SHEEGOW) — London-educated English expert with 15 years of teaching experience.",
+    desc: "Learn with Ciise Mohamed Sheeq (SHEEGOW) — English expert with a university degree and 15 years of teaching experience.",
     color: "from-amber-500 to-orange-600",
   },
   {
@@ -58,7 +58,7 @@ const FEATURES = [
   {
     icon: Globe2,
     title: "Learn From Anywhere",
-    desc: "Join from Somaliland or anywhere in the diaspora. Pay easily with Card, Zaad Service or Edahab.",
+    desc: "Join from anywhere in the world. Payment details are shown clearly at checkout.",
     color: "from-sky-500 to-blue-600",
   },
 ];
@@ -101,8 +101,8 @@ export function HomeView() {
 
               <h1 className="mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                 Learn English with{" "}
-                <span className="gradient-text">LIVE Classes</span> — built for
-                Somali students
+                <span className="gradient-text">LIVE Classes</span> — for learners
+                everywhere
               </h1>
 
               <p className="mx-auto mb-7 max-w-xl text-base text-muted-foreground sm:text-lg lg:mx-0">
@@ -125,7 +125,7 @@ export function HomeView() {
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground lg:justify-start">
                 {[
                   "Expert live teachers",
-                  "Zaad Service & Edahab",
+                  "Secure checkout",
                   "Certificates included",
                 ].map((item) => (
                   <span key={item} className="flex items-center gap-1.5">

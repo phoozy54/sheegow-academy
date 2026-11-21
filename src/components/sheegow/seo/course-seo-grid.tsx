@@ -36,10 +36,7 @@ export function CourseSeoGrid({
             <UserRound className="h-3.5 w-3.5" />
             {readable(course.teacher?.fullName) || "Ciise Mohamed Sheeq"}
           </p>
-          <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
-            <span className="text-base font-extrabold text-foreground">
-              ${course.price}
-            </span>
+          <div className="mt-4 flex items-center justify-end gap-3 border-t pt-4">
             <Link
               href={coursePath(course, all)}
               className="inline-flex min-h-9 items-center rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"

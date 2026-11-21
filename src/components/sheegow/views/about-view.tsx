@@ -35,13 +35,13 @@ const VALUES = [
   {
     icon: Globe2,
     title: "Accessible to all",
-    desc: "Quality English education should reach every Somali learner — in Hargeisa, Mogadishu, Kismayo, or the diaspora.",
+    desc: "Quality English education should reach every learner, in every country — no matter where you start.",
     color: "from-indigo-500 to-indigo-600",
   },
   {
     icon: GraduationCap,
     title: "Quality teaching",
-    desc: "Our teachers are TESOL-certified and specialize in teaching English to Somali-speaking students.",
+    desc: "Our teachers are TESOL-certified and specialize in teaching English to students from every background.",
     color: "from-amber-500 to-orange-600",
   },
   {
@@ -53,7 +53,7 @@ const VALUES = [
   {
     icon: HandHeart,
     title: "Cultural respect",
-    desc: "We honor Somali culture and language. Our lessons respect your background while opening new doors.",
+    desc: "We respect every culture and background. Our lessons help you open new doors without leaving your identity behind.",
     color: "from-violet-500 to-purple-600",
   },
   {
@@ -66,7 +66,7 @@ const VALUES = [
 
 const TEACHER = {
   name: "Ciise Mohamed Sheeq (SHEEGOW)",
-  bio: "English language expert educated at a university in London, with multiple language certifications and 15 years of teaching experience. He personally leads every live course at SHEEGOW ACADEMY.",
+  bio: "English language expert with a university degree, multiple language certifications and 15 years of teaching experience. He personally leads every live course at SHEEGOW ACADEMY.",
   specialty: "English Language Expert · 15+ Years",
 };
 
@@ -92,9 +92,9 @@ export function AboutView() {
               About <span className="gradient-text">SHEEGOW ACADEMY</span>
             </h1>
             <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-              We exist to bring quality, live English education to Somali-speaking
-              students everywhere. No recorded videos. No lonely self-study. Just
-              real teachers, real conversations, real progress.
+              We exist to bring quality, live English education to students
+              everywhere. No recorded videos. No lonely self-study. Just real
+              teachers, real conversations, real progress.
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -129,7 +129,7 @@ export function AboutView() {
             <h2 className="mb-3 text-xl font-bold text-foreground">Our Mission</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               To make high-quality, interactive English education accessible to
-              every Somali learner — through live classes taught by caring expert
+              every learner — through live classes taught by caring expert
               teachers. We exist to break the barrier of recorded, passive
               learning and replace it with conversation, practice, and
               confidence.
@@ -142,7 +142,7 @@ export function AboutView() {
             </div>
             <h2 className="mb-3 text-xl font-bold text-foreground">Our Vision</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              A Somaliland where every student — from primary school to working
+              A world where every student — from primary school to working
               professional — can speak English confidently. Where live classes
               replace lonely videos, where teachers know their students by name,
               and where a better future is just a live class away.
@@ -161,36 +161,34 @@ export function AboutView() {
             <BookOpen className="h-3 w-3" /> The Story
           </Badge>
           <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Built by Somali learners, for Somali learners
+            Built for learners, by learners
           </h2>
 
           <div className="space-y-5 text-base leading-relaxed text-muted-foreground">
             <p>
               SHEEGOW ACADEMY started with a simple frustration: too many English
-              courses for Somali students were just recordings. You watched a
-              video, took a quiz, and forgot everything. There was no speaking,
-              no practice, no real conversation — the very things that make a
-              language stick.
+              courses were just recordings. You watched a video, took a quiz, and
+              forgot everything. There was no speaking, no practice, no real
+              conversation — the very things that make a language stick.
             </p>
             <p>
               Our founder and general manager,{" "}
               <span className="font-semibold text-foreground">
                 Ciise Mohamed Sheeq (SHEEGOW)
               </span>
-              , decided to fix this. An English language expert who studied at a
-              university in London, he holds multiple language certifications and
-              brings 15 years of hands-on teaching experience. We built a platform
+              , decided to fix this. An English language expert with a university
+              degree, he holds multiple language certifications and brings 15
+              years of hands-on teaching experience. We built a platform
               where every single class is{" "}
               <span className="font-semibold text-foreground">LIVE</span>. Where you
               see your teacher, hear your classmates, raise your hand, and speak
               English out loud from day one.
             </p>
             <p>
-              Today, Somali students learn with us — from absolute beginners in
-              Hargeisa to IELTS candidates preparing for university abroad. We
-              pay with Zaad Service and Edahab. We learn on phones and laptops.
-              We come from different cities, but we share one goal: to speak
-              English with confidence.
+              Today, students learn with us — from absolute beginners taking
+              their first class to IELTS candidates preparing for university
+              abroad. We learn on phones and laptops. We come from different
+              countries, but we share one goal: to speak English with confidence.
             </p>
             <p>
               That&apos;s the SHEEGOW difference. <span className="font-semibold text-foreground">Live classes, not recorded videos.</span>
@@ -270,17 +268,17 @@ export function AboutView() {
                   English Language Expert · 15+ Years of Experience
                 </p>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                  Ciise studied English at a university in London and holds
-                  multiple language certifications. With 15 years of teaching
-                  experience, he leads SHEEGOW ACADEMY with one goal: helping
-                  Somali-speaking learners speak English with confidence through
+                  Ciise holds a university degree in English and multiple
+                  language certifications. With 15 years of teaching experience,
+                  he leads SHEEGOW ACADEMY with one goal: helping
+                  learners everywhere speak English with confidence through
                   live, interactive classes.
                 </p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
                   {[
                     {
                       icon: GraduationCap,
-                      label: "London university educated",
+                      label: "University degree",
                     },
                     {
                       icon: Award,
@@ -429,7 +427,7 @@ export function AboutView() {
               address, and phone number. When you enroll in a course or make a
               payment, we record the transaction details. We do not store
               credit card numbers — payments are processed by our payment
-              providers (card, Zaad Service, Edahab).
+              providers.
             </p>
           </div>
           <div>

@@ -70,17 +70,17 @@ export default async function CourseDetailPage({ params }: Props) {
     },
     {
       question: "Who teaches this course?",
-      answer: `${teacherName} teaches the live sessions. Ciise is a London-educated English expert with 15 years of teaching experience and is the academy's real, sole teacher.`,
+      answer: `${teacherName} teaches the live sessions. Ciise is an English expert with a university degree and 15 years of teaching experience, and is the academy's real, sole teacher.`,
     },
     {
-      question: "Can I join from Hargeisa and from outside Somaliland?",
+      question: "Can I join from anywhere in the world?",
       answer:
-        "Yes. Classes are online and live, so you can join from Hargeisa, elsewhere in Somaliland, or from any country with a stable internet connection.",
+        "Yes. Classes are online and live, so you can join from any country with a stable internet connection.",
     },
     {
       question: "How do I enrol and pay?",
       answer:
-        "Create a free student account, enrol in the course, and complete payment using card, Zaad or Edahab. A free trial is possible only when an administrator approves it in advance.",
+        "Create a free student account, enrol in the course, and complete payment securely at checkout, where the full amount is shown. A free trial is possible only when an administrator approves it in advance.",
     },
   ];
 
@@ -110,7 +110,6 @@ export default async function CourseDetailPage({ params }: Props) {
             <span className="flex items-center gap-1.5">
               <UserRound className="h-4 w-4 text-indigo-500" /> {teacherName}
             </span>
-            <span className="font-extrabold text-foreground">${course.price}</span>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link

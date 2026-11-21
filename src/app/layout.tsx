@@ -29,16 +29,15 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Live interactive English classes for Somali learners in Hargeisa and online. Speak with a real teacher, practice every lesson, and learn at your pace.",
+    "Live interactive English classes for learners everywhere. Speak with a real teacher, practise every lesson, and learn at your pace.",
   keywords: [
     "SHEEGOW ACADEMY",
     "learn English",
     "live English classes",
-    "English for Somalis",
     "online English course",
     "IELTS preparation",
-    "English teacher Somaliland",
-    "Hargeisa English school",
+    "live English teacher",
+    "online English school",
   ],
   authors: [{ name: "SHEEGOW ACADEMY" }],
   creator: "SHEEGOW ACADEMY",
@@ -59,12 +58,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SHEEGOW ACADEMY | Live English Classes",
     description:
-      "Learn English through live interactive classes with a real teacher. Built for Somali-speaking students in Hargeisa and worldwide.",
+      "Learn English through live interactive classes with a real teacher. Open to learners in every country.",
     url: "/",
     siteName: SITE_NAME,
     type: "website",
     locale: "en_US",
-    alternateLocale: "so_SO",
     images: [OG_IMAGE],
   },
   twitter: {

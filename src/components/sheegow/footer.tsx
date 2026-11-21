@@ -72,9 +72,8 @@ export function Footer() {
               </span>
             </button>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Live English learning platform built for Somali-speaking students
-              worldwide. Learn with expert teachers in real-time interactive
-              classes.
+              Live English learning platform for students everywhere. Learn with
+              expert teachers in real-time interactive classes.
             </p>
             {/* No real profiles exist yet — never render fake '#' links. */}
             <p className="mt-4 text-xs text-muted-foreground">
@@ -180,7 +179,7 @@ export function Footer() {
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} SHEEGOW ACADEMY. All rights reserved.
-            Built with care for Somali learners.
+            Built with care for learners everywhere.
           </p>
           <p className="text-xs text-muted-foreground">
             Made with <span className="text-indigo-500">live classes</span>, not

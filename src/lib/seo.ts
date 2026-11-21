@@ -20,7 +20,7 @@ export const OG_IMAGE = {
   url: "/og-image.png",
   width: 1200,
   height: 630,
-  alt: "SHEEGOW ACADEMY — Live English classes for Somali learners",
+  alt: "SHEEGOW ACADEMY — Live English classes for learners everywhere",
 } as const;
 
 export type SeoCourse = {
@@ -84,7 +84,6 @@ export function pageMeta({
       siteName: SITE_NAME,
       type: "website",
       locale: "en_US",
-      alternateLocale: "so_SO",
       images: [OG_IMAGE],
     },
     twitter: {
@@ -151,32 +150,32 @@ const COURSE_COPY: Record<string, CourseSeoCopy> = {
   cmwmpccht0006vs0nvvbbbfu4: {
     title: "English for Beginners — Live Online Course",
     description:
-      "Start speaking English from day one in live online classes for Somali learners. Learn greetings, travel and daily conversation with teacher Ciise.",
+      "Start speaking English from day one in live online classes for learners everywhere. Learn greetings, travel and daily conversation with teacher Ciise.",
   },
   cmwmpcctz0008vs0niuafulzh: {
     title: "Intermediate English — Live Speaking Classes",
     description:
-      "Build fluent conversation and stronger grammar in live interactive classes. Practice speaking every session with Somali learners and teacher Ciise.",
+      "Build fluent conversation and stronger grammar in live interactive classes. Practice speaking every session with teacher Ciise and learners worldwide.",
   },
   cmwmpcdif000gvs0nvyvknqdy: {
     title: "Advanced English & Academic Writing — Live",
     description:
-      "Master academic writing, critical thinking and confident expression in live online classes for advanced Somali learners and university students.",
+      "Master academic writing, critical thinking and confident expression in live online classes for advanced learners and university students.",
   },
   cmwmpcd67000cvs0noo5w1x1b: {
     title: "Business English Professional — Live Course",
     description:
-      "Speak confidently at work: meetings, presentations, emails and negotiations. Live English classes for Somali professionals, taught by Ciise.",
+      "Speak confidently at work: meetings, presentations, emails and negotiations. Live English classes for professionals, taught by Ciise.",
   },
   cmwmpcdcb000evs0n3ggmo80h: {
     title: "English for Kids (7–12) — Live Online Classes",
     description:
-      "Fun live English classes for children aged 7–12. Games, songs and stories with a friendly teacher in small online groups from Hargeisa.",
+      "Fun live English classes for children aged 7–12. Games, songs and stories with a friendly teacher in small online groups.",
   },
   cmwmpcd03000avs0nrtlewh5d: {
-    title: "IELTS Preparation Band 7+ — Live in Somaliland",
+    title: "IELTS Preparation Band 7+ — Live Online",
     description:
-      "Prepare for IELTS in Somaliland with live coaching in Listening, Reading, Writing and Speaking, mock tests and personal feedback from Ciise.",
+      "Prepare for IELTS with live coaching in Listening, Reading, Writing and Speaking, mock tests and personal feedback from Ciise.",
   },
 };
 
@@ -188,7 +187,7 @@ export function courseSeo(course: SeoCourse): CourseSeoCopy {
   return {
     title: seoTitle(`${cleanTitle} — Live English Course`),
     description: seoDescription(
-      `${cleanDescription} Live interactive English classes in Hargeisa and online.`,
+      `${cleanDescription} Live interactive English classes online.`,
     ),
   };
 }
@@ -260,8 +259,6 @@ export function courseJsonLd(course: SeoCourse, path: string) {
     offers: {
       "@type": "Offer",
       category: "Education",
-      price: course.price,
-      priceCurrency: "USD",
       availability: "https://schema.org/InStock",
       url: absoluteUrl(path),
     },

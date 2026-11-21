@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Clock, Users, Play } from "lucide-react";
-import { levelBadgeClass, formatPrice } from "@/lib/ui";
+import { levelBadgeClass } from "@/lib/ui";
 
 export function CourseCard({
   course,
@@ -125,16 +125,11 @@ export function CourseCard({
           </div>
         )}
 
-        {/* Price + enroll / continue */}
+        {/* Enroll / continue — price is shown only at checkout */}
         <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
-          <div>
-            <span className="text-lg font-extrabold text-foreground">
-              {formatPrice(course.price)}
-            </span>
-            <span className="ml-1 text-xs text-muted-foreground">
-              /{course.duration}w
-            </span>
-          </div>
+          <span className="text-xs text-muted-foreground">
+            {course.duration} weeks
+          </span>
           <Button
             size="sm"
             onClick={

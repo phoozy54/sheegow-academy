@@ -38,7 +38,7 @@ async function main() {
       password: await bcrypt.hash(finalPassword, 12),
       role: "super_admin",
       level: "Advanced",
-      bio: "Founder & general manager. English language expert educated at a university in London, with multiple language certifications and 15 years of teaching experience.",
+      bio: "Founder & general manager. English language expert with a university degree, multiple language certifications and 15 years of teaching experience.",
     },
   });
 

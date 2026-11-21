@@ -1,7 +1,7 @@
 {
   "name": "SHEEGOW ACADEMY",
   "short_name": "SHEEGOW",
-  "description": "Live English Learning Platform — Learn English through LIVE interactive classes with expert teachers. Built for Somali-speaking students worldwide.",
+  "description": "Live English Learning Platform — Learn English through LIVE interactive classes with expert teachers. Open to learners everywhere.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

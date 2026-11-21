@@ -86,8 +86,8 @@ const FAQS = [
     a: "Every SHEEGOW ACADEMY class is a real-time, interactive video session. You join live with your teacher and classmates — you can speak, ask questions in chat, and raise your hand. We never use recorded videos for live classes.",
   },
   {
-    q: "How do I pay? Do you accept Zaad Service and Edahab?",
-    a: "Yes. We accept Zaad Service (Telesom), Edahab (E-Dahab), and cards. After you click Enroll, you'll be taken to a checkout page where you can choose your payment method. Once payment is confirmed, you're instantly enrolled in the course.",
+    q: "How do I pay?",
+    a: "After you click Enroll, you'll be taken to a secure checkout page where the full amount and available payment methods are shown. Once payment is confirmed, you're instantly enrolled in the course.",
   },
   {
     q: "What happens if I miss a live class?",
@@ -99,7 +99,7 @@ const FAQS = [
   },
   {
     q: "How do I enroll and pay for a course?",
-    a: "Browse our courses page, choose your course, and click Enroll. You'll be taken to our secure checkout where you can pay with Card, Zaad Service, or Edahab. Once payment is confirmed, you're instantly enrolled and can join live classes right away.",
+    a: "Browse our courses page, choose your course, and click Enroll. You'll be taken to our secure checkout where the full amount and payment options are shown. Once payment is confirmed, you're instantly enrolled and can join live classes right away.",
   },
 ];
 
@@ -390,7 +390,7 @@ export function ContactView() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { icon: Video, label: "Live Classes" },
-                { icon: CreditCard, label: "Payments (Card / Zaad / Edahab)" },
+                { icon: CreditCard, label: "Secure payments" },
                 { icon: CalendarClock, label: "Class Scheduling" },
                 { icon: Award, label: "Certificates" },
               ].map(({ icon: Icon, label }) => (

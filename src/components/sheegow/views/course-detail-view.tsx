@@ -33,13 +33,7 @@ import {
   BookOpen,
   LayoutDashboard,
 } from "lucide-react";
-import {
-  levelBadgeClass,
-  formatPrice,
-  formatDate,
-  timeAgo,
-  cn,
-} from "@/lib/ui";
+import { levelBadgeClass, formatDate, timeAgo, cn } from "@/lib/ui";
 import { toast } from "sonner";
 
 /* ─── Helpers ───────────────────────────────────────────── */
@@ -535,16 +529,11 @@ function EnrollmentCard({
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
       <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-extrabold">
-            {formatPrice(course.price)}
-          </span>
-          <span className="text-sm text-indigo-200">
-            / {course.duration} weeks
-          </span>
-        </div>
+        <p className="text-sm font-semibold text-indigo-100">
+          {course.duration}-week live course
+        </p>
         <p className="mt-1 text-xs text-indigo-200">
-          One-time payment. Lifetime access.
+          Full price and payment options are shown at checkout.
         </p>
       </div>
 

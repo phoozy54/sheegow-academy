@@ -18,54 +18,59 @@ export type LandingConfig = {
   levels: string[];
 };
 
+/**
+ * Public landing-page copy. These pages are open to learners everywhere:
+ * no single country, language or payment provider is presented as required.
+ * Prices and payment methods are disclosed only in checkout.
+ */
 export const LANDING_PAGES: Record<string, LandingConfig> = {
   "barashada-ingiriisiga-online": {
     slug: "barashada-ingiriisiga-online",
     path: "/barashada-ingiriisiga-online",
-    eyebrow: "Barashada Ingiriisiga online",
-    title: "Barashada Ingiriisiga online — fasallo live ah",
-    metaTitle: "Barashada Ingiriisiga Online — Live Classes",
+    eyebrow: "Learn English online",
+    title: "Learn English online — live classes",
+    metaTitle: "Learn English Online — Live Classes",
     metaDescription:
-      "Baro Ingiriisiga online fasallo live ah oo lala wadaago macallin dhab ah. Ku bilow Hargeisa ama meel kasta — koorso Somali u gaar ah.",
-    lead: "Barashada Ingiriisiga online waxay noqon kartaa mid dhab ah markaad si toos ah ula hadasho macallin. SHEEGOW ACADEMY waxay bixisaa fasallo video ah oo is dhexgal ah — ma aha muuqaallo horay loo duubay.",
+      "Learn English online in live classes with a real teacher. Speak from the first lesson, practise every week, and join from anywhere in the world.",
+    lead: "Learning English online works best when you actually speak. SHEEGOW ACADEMY offers interactive live video classes — never pre-recorded videos — with a teacher who sees you, hears you and guides you in real time.",
     sections: [
       {
-        heading: "Maxaad ku baran doontaa?",
-        body: "Koorso kasta wuxuu ku dhisan yahay casharro live ah, layli hadal, iyo jawaab celin aad ka hesho macallinka isla markiiba.",
+        heading: "What you will learn",
+        body: "Every course is built around live lessons, speaking practice, and feedback you get from your teacher straight away.",
         bullets: [
-          "Ku hadal Ingiriisi bilowgii hore, adigoo aan ka baqayn inaad qalad sameyso",
-          "Baro erayo iyo tibaaxo nolol maalmeedka ah oo Somali ah",
-          "Ku celceli dhageysiga, akhriska, qorista iyo hadalka fasal kasta",
-          "Hel jawaab celin shaqsiyeed iyo qiimeyn cad oo horumarkaaga ah",
+          "Speak English from the first class, without fear of making mistakes",
+          "Learn practical words and expressions for everyday situations",
+          "Practise listening, reading, writing and speaking in every lesson",
+          "Get personal feedback and a clear view of your progress",
         ],
       },
       {
-        heading: "Sidee ayay u shaqeysaa?",
-        body: "Samee akoon arday ah oo bilaash ah, dooro koorsada kugu habboon, ka dibna ku biir fasalka live-ka ah. Waxaad aragtaa macallinka, maqashaa codkiisa, chat ayaadna ku weydiin kartaa su’aal ama gacan ayaad qaadi kartaa.",
+        heading: "How it works",
+        body: "Create a free student account, choose the course that fits you, and join the live class. You can see and hear your teacher, ask questions in chat, and raise your hand.",
         bullets: [
-          "Ku biir Hargeisa ama meel kasta oo adduunka ah",
-          "Fasallada waa kuwo yaryar oo is dhexgal ah",
-          "Lacagtu waa card, Zaad ama Edahab — tijaabo bilaash ah waxaa ansixin kara maamulka kaliya",
-          "Shahaado waxaa la bixiyaa marka casharrada, imtixaannada iyo shaqada guriga la dhammaystiro",
+          "Join from anywhere in the world",
+          "Small, interactive online groups",
+          "The full amount and available payment methods are shown at checkout",
+          "A certificate is awarded once lessons, quizzes and homework are complete",
         ],
       },
     ],
     faqs: [
       {
-        question: "Ma bilaash baa barashada Ingiriisiga online?",
-        answer: "Akoonka ardayda iyo tijaabada fasalka waa bilaash marka maamulku ansixiyo. Koorsooyinka buuxa waa lacag, waxaana lagu bixiyaa card, Zaad ama Edahab.",
+        question: "Is learning English online free?",
+        answer: "Student accounts are free. A free trial is possible only when an administrator approves it in advance. The full price of a paid course is shown at checkout.",
       },
       {
-        question: "Ma waxaa jira muuqaallo duuban?",
-        answer: "Maya. Dhammaan fasallada SHEEGOW ACADEMY waa live. Ma bixino duubis ama replay, marka waxaad u baahan tahay inaad waqtiga fasalka joogto.",
+        question: "Are the classes recorded?",
+        answer: "No. Every SHEEGOW ACADEMY class is live. We do not provide recordings or replays, so you join the teacher and classmates in real time.",
       },
       {
-        question: "Yaa wax dhiga?",
-        answer: "Ciise Mohamed Sheeq (SHEEGOW), macallin Ingiriisi ah oo London ku wax ku bartay, 15 sano oo khibrad wax dhigis ah leh, ayaa ah macallinka dhabta ah ee koorsooyinka.",
+        question: "Who teaches the courses?",
+        answer: "Ciise Mohamed Sheeq (SHEEGOW), an English expert with a university degree and 15 years of teaching experience, is the academy's real and sole teacher.",
       },
       {
-        question: "Ma ka biirsan karaa Hargeisa?",
-        answer: "Haa. Waxaan ku sugannahay Hargeisa, Somaliland, fasalladana waa online, marka waad ka biirsan kartaa Hargeisa iyo meel kasta oo internet fiican leh.",
+        question: "Can I join from anywhere?",
+        answer: "Yes. Classes are live online, so you can join from any country with a stable internet connection.",
       },
     ],
     levels: ["Beginner", "Intermediate", "Advanced"],
@@ -74,50 +79,50 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
   "koorso-ingiriisi-hargeisa": {
     slug: "koorso-ingiriisi-hargeisa",
     path: "/koorso-ingiriisi-hargeisa",
-    eyebrow: "Koorsada Ingiriisiga Hargeisa",
-    title: "Koorsada Ingiriisiga Hargeisa — live online",
-    metaTitle: "Koorsada Ingiriisiga Hargeisa | Live Online",
+    eyebrow: "English courses online",
+    title: "English courses — live online",
+    metaTitle: "English Courses | Live Online",
     metaDescription:
-      "Koorsada Ingiriisiga Hargeisa ee live online: bilow, IELTS iyo business English. Macallin Ciise, fasallo is dhexgal ah, ma aha duubis.",
-    lead: "Haddii aad Hargeisa ku raadineyso koorso Ingiriisi ah oo runtii lagu hadlo, halkan kuma helaysid muuqaal duuban — waxaad helaysaa fasal toos ah oo aad macallinka la hadasho.",
+      "Live online English courses: beginner, IELTS, business and more. Learn with a real teacher in interactive classes, wherever you are.",
+    lead: "If you are looking for an English course where you really speak, you will not find pre-recorded videos here — you get a live class with a teacher who listens and corrects you in real time.",
     sections: [
       {
-        heading: "Koorsooyin ku habboon Hargeisa",
-        body: "Laga bilaabo xarfaha iyo salaanta ilaa IELTS iyo shaqo, waxaa jira waddo cad oo aad ku socoto. Koorso kasta wuxuu leeyahay casharro, layli iyo imtixaan la dhammaystiro.",
+        heading: "Courses for every goal",
+        body: "From first words and greetings to IELTS and the workplace, there is a clear path. Each course has lessons, practice and a quiz to complete.",
         bullets: [
-          "English Conversation for Beginners — bilowayaasha",
-          "Intermediate English Mastery — hadal iyo grammar",
-          "IELTS Preparation — Somaliland iyo Hargeisa",
-          "Business English — shaqo, shirar iyo email",
+          "English Conversation for Beginners — start from zero",
+          "Intermediate English Mastery — speaking and grammar",
+          "IELTS Preparation — all four exam parts",
+          "Business English — meetings, presentations and email",
         ],
       },
       {
-        heading: "Maxaa ka duwan?",
-        body: "Macallin dhab ah ayaa ku arka, ku maqla, oo kuu sharxaya markaad qalad sameyso. Ardayda kale ayay ku hadlaan, chat-bana way u furan yahay su’aalaha.",
+        heading: "What makes it different",
+        body: "A real teacher sees you, hears you, and explains things when you get stuck. Classmates speak too, and chat is open for questions.",
         bullets: [
-          "Fasal live ah oo Hargeisa laga geli karo",
-          "Macallin Ciise — 15 sano oo khibrad ah",
-          "Qiimeyn cad iyo shahaado marka shuruudaha la buuxiyo",
-          "Lacag bixin maxalli ah: Zaad, Edahab ama card",
+          "Live, interactive online classes",
+          "Teacher Ciise — 15 years of teaching experience",
+          "Clear progress tracking and a certificate on completion",
+          "Payment details and methods shown only at checkout",
         ],
       },
     ],
     faqs: [
       {
-        question: "Koorsada Ingiriisiga Hargeisa ma online baa mise waji ka waji?",
-        answer: "Fasallada waa online live video, waxaana laga geli karaa Hargeisa. Ma bixino duubis; waxaad si toos ah ula hadashaa macallinka iyo ardayda kale.",
+        question: "Are the courses online or face to face?",
+        answer: "Classes are live online video sessions, accessible from anywhere. We do not provide recordings — you speak directly with your teacher and classmates.",
       },
       {
-        question: "Waa kuwee koorsooyiga ugu horreeya?",
-        answer: "Bilowayaasha waxaan kula talinaynaa English Conversation for Beginners. Haddii aad hore u garanayso aasaaska, qaado Intermediate Mastery; haddii aad u baahan tahay IELTS, qaado IELTS Preparation.",
+        question: "Which course should I start with?",
+        answer: "Beginners should start with English Conversation for Beginners. If you already know the basics, take Intermediate Mastery; if you need IELTS, take IELTS Preparation.",
       },
       {
-        question: "Sideen ku bixiyaa?",
-        answer: "Waxaa la bixin karaa card, Zaad ama Edahab. Koorso lacag leh waxay u baahan tahay enrolment iyo bixin la dhammaystiro; tijaabo bilaash ah waxaa go’aamin kara maamulka.",
+        question: "How do I pay?",
+        answer: "After you click Enroll, you will see a secure checkout with the full amount and the payment options available to you. A free trial is decided by an administrator.",
       },
       {
-        question: "Halkee ku sugan tahay academy-ku?",
-        answer: "SHEEGOW ACADEMY waxay ku sugan tahay Hargeisa, Somaliland. Email: info@sheegowacademy.com, telefoon/WhatsApp: +252 63 4085151.",
+        question: "How can I contact the academy?",
+        answer: "Email info@sheegowacademy.com or use the contact page. Our team will be happy to help you choose a course.",
       },
     ],
     levels: ["Beginner", "IELTS", "Advanced", "Business"],
@@ -126,50 +131,50 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
   "ielts-somali": {
     slug: "ielts-somali",
     path: "/ielts-somali",
-    eyebrow: "IELTS Somaliland",
-    title: "IELTS Somaliland — diyaarin live ah",
-    metaTitle: "IELTS Somaliland — Live Preparation Course",
+    eyebrow: "IELTS preparation",
+    title: "IELTS preparation — live classes",
+    metaTitle: "IELTS Preparation — Live Course",
     metaDescription:
-      "U diyaar garow IELTS ee Somaliland adigoo wata tababar live ah: Listening, Reading, Writing, Speaking, mock tests iyo jawaab celin shaqsiyeed.",
-    lead: "IELTS Somaliland waa tartan, waxaadna u baahan tahay jawaab celin dhab ah — ma aha muuqaal aad daawato. Koorsooyinkayaga IELTS waa fasallo live ah oo dhammaan afarta qaybood daboola.",
+      "Prepare for IELTS with live coaching: Listening, Reading, Writing and Speaking, mock tests and personal feedback from an experienced teacher.",
+    lead: "IELTS is competitive, and you need real feedback — not a video to watch. Our IELTS courses are live classes that cover all four parts of the exam.",
     sections: [
       {
-        heading: "Afarta qaybood ee IELTS",
-        body: "Cashar kasta wuxuu leeyahay tababar iyo jawaab celin. Macallinku wuxuu dhageysanayaa hadalkaaga, akhrinayaa qoraalkaaga, wuxuuna kuu sharxayaa sida score-ka loo kordhiyo.",
+        heading: "The four IELTS parts",
+        body: "Every lesson includes practice and feedback. Your teacher listens to your speaking, reads your writing, and shows you how to raise your score.",
         bullets: [
-          "Listening — dhageysiga iyo fahamka codadka imtixaanka",
-          "Reading — akhris degdeg ah iyo faham qoto dheer",
-          "Writing — Task 1 iyo Task 2 oo la saxo",
-          "Speaking — Part 1, 2 iyo 3 oo toos ah loo tababaro",
+          "Listening — understand exam accents and question types",
+          "Reading — read quickly and understand deeply",
+          "Writing — Task 1 and Task 2, marked and improved",
+          "Speaking — Parts 1, 2 and 3 practised live",
         ],
       },
       {
-        heading: "Maxaa kuu diyaarinaya?",
-        body: "Waxaa jira mock tests, layli waqtiyeysan iyo jawaab celin shaqsiyeed oo kala saarta meesha aad ku fiican tahay iyo meesha aad ku kordhin karto.",
+        heading: "How we prepare you",
+        body: "Mock tests, timed practice and personal feedback show what you already do well and where you can improve.",
         bullets: [
-          "Mock tests iyo falanqayn natiijo",
-          "Jawaab celin shaqsiyeed oo qoraal iyo hadal ah",
-          "Tababar waqtiyeysan oo imtixaanka u eg",
-          "Ku biirista Hargeisa ama meel kasta oo Somaliland ah",
+          "Mock tests with result analysis",
+          "Personal feedback on writing and speaking",
+          "Timed practice that mirrors the exam",
+          "Learn from anywhere with a stable connection",
         ],
       },
     ],
     faqs: [
       {
-        question: "Ma u diyaarin kartaa IELTS Somaliland?",
-        answer: "Haa. Koorsooyinkayaga IELTS waa online live, waxaana laga geli karaa Hargeisa, Muqdisho, Garoowe ama meel kasta oo Somaliland iyo Soomaaliya ah.",
+        question: "Can you help me prepare for IELTS?",
+        answer: "Yes. Our IELTS courses are live online and open to learners anywhere. All you need is a stable internet connection.",
       },
       {
-        question: "Ma jiraan mock tests?",
-        answer: "Haa. Waxaa jira imtixaano tababar ah iyo jawaab celin macallinka oo ku saabsan afarta qaybood ee IELTS.",
+        question: "Are there mock tests?",
+        answer: "Yes. We run practice exams and give teacher feedback across all four parts of IELTS.",
       },
       {
-        question: "Ma bixisaa duubis cashar ah?",
-        answer: "Maya. Dhammaan casharrada IELTS waa live. Ma bixino recording ama replay, marka waa inaad joogtaa waqtiga fasalka.",
+        question: "Do you provide recordings?",
+        answer: "No. All IELTS lessons are live. Recordings and replays are not provided, so you join at the scheduled time.",
       },
       {
-        question: "Immisa ayay ku kacaysaa?",
-        answer: "Koorsada IELTS Preparation waa $79 waxaana lagu bixiyaa card, Zaad ama Edahab. Tijaabo bilaash ah waxaa ansixin kara maamulka kaliya.",
+        question: "How much does it cost?",
+        answer: "The full amount is shown at checkout before you pay. A free trial requires administrator approval.",
       },
     ],
     levels: ["IELTS"],
@@ -178,21 +183,21 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
   "english-classes-for-somalis": {
     slug: "english-classes-for-somalis",
     path: "/english-classes-for-somalis",
-    eyebrow: "English classes for Somalis",
-    title: "English classes for Somalis — live online",
-    metaTitle: "English Classes for Somalis — Live Online",
+    eyebrow: "Live English classes",
+    title: "Live English classes for everyone",
+    metaTitle: "Live English Classes — Learn Online",
     metaDescription:
-      "Live English classes for Somalis in Hargeisa and worldwide. Speak every lesson with a real teacher, practise speaking, and build confidence fast.",
-    lead: "Our English classes for Somalis are built around one simple idea: you must speak to learn. Every session is a live video class where your teacher sees you, hears you and corrects you in real time.",
+      "Live English classes for learners everywhere. Speak in every lesson with a real teacher, practise out loud, and build confidence fast.",
+    lead: "Our English classes are built around one simple idea: you must speak to learn. Every session is a live video class where your teacher sees you, hears you and corrects you in real time.",
     sections: [
       {
-        heading: "Made for Somali speakers",
-        body: "Explanations connect English to the Somali words and situations you already know. That makes grammar and vocabulary clearer, and it helps you speak without translating every sentence in your head.",
+        heading: "Made for speakers, not spectators",
+        body: "You do not learn a language by watching someone else talk. In our classes you speak from the first minute, make mistakes safely, and improve with feedback.",
         bullets: [
           "Beginner, intermediate, advanced, IELTS, business and kids courses",
           "Live video with chat and raise-hand — not pre-recorded videos",
-          "Teacher Ciise, a London-educated English expert with 15 years of teaching",
-          "Learn from Hargeisa or from anywhere in the Somali diaspora",
+          "Teacher Ciise, an English expert with 15 years of teaching experience",
+          "Learn from anywhere with an internet connection",
         ],
       },
       {
@@ -212,16 +217,16 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
         answer: "No. SHEEGOW ACADEMY only offers live interactive classes. There are no recordings or replays — you join the teacher and other students in real time.",
       },
       {
-        question: "Can I join from outside Somaliland?",
-        answer: "Yes. Students join live online from Hargeisa, across Somaliland and from the diaspora. All you need is a stable internet connection and a device with a camera and microphone.",
+        question: "Can I join from outside my country?",
+        answer: "Yes. Students join live online from many countries. All you need is a stable internet connection and a device with a camera and microphone.",
       },
       {
         question: "How much do the courses cost?",
-        answer: "Courses range from $29 to $79 depending on level and length. You can pay by card, Zaad or Edahab. A free trial is available only when an administrator approves it.",
+        answer: "The full amount for your chosen course is shown at checkout before you pay. A free trial is available only when an administrator approves it.",
       },
       {
         question: "Who is the teacher?",
-        answer: "Ciise Mohamed Sheeq (SHEEGOW) is the academy's real and sole teacher. He is a London-educated English expert with 15 years of teaching experience.",
+        answer: "Ciise Mohamed Sheeq (SHEEGOW) is the academy's real and sole teacher. He is an English expert with a university degree and 15 years of teaching experience.",
       },
     ],
     levels: ["Beginner", "Intermediate", "Advanced", "IELTS", "Kids"],
@@ -230,50 +235,50 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
   "ingiriis-ku-hadal": {
     slug: "ingiriis-ku-hadal",
     path: "/ingiriis-ku-hadal",
-    eyebrow: "Ingiriis ku hadal",
-    title: "Ingiriis ku hadal — kalsooni live ah",
-    metaTitle: "Ingiriis Ku Hadal — Live Speaking Classes",
+    eyebrow: "Spoken English",
+    title: "Speak English with confidence — live",
+    metaTitle: "Spoken English — Live Classes",
     metaDescription:
-      "Ingiriis ku hadal oo kalsooni leh: fasallo live ah oo aad ku hadasho macallin iyo ardayda kale. Ku bilow Hargeisa ama online.",
-    lead: "Haddii aad fahanto Ingiriisiga laakiin aad ka baqayso inaad hadasho, waxaad u baahan tahay fasallo lagu hadlo — ma aha ku la daawado. Halkan waxaad ku hadashaa bilow ilaa dhammaad.",
+      "Speak English with confidence in live classes. Talk with your teacher and classmates, practise real situations, and get instant feedback.",
+    lead: "If you understand English but feel afraid to speak, you need classes where you talk — not watch. Here you speak from the beginning to the end of every lesson.",
     sections: [
       {
-        heading: "Hadalka ayaa saldhig u ah",
-        body: "Cashar kasta wuxuu leeyahay qayb gaar ah oo hadal ah: salaan, is-barasho, su’aalo, sheeko gaaban iyo dood. Macallinku wuxuu ku dhageysanayaa si toos ah wuxuuna kuu saxayaa ku dhawaaqida iyo naxwaha.",
+        heading: "Speaking is the foundation",
+        body: "Every lesson has a speaking section: greetings, introductions, questions, short stories and discussion. Your teacher listens live and corrects pronunciation and grammar.",
         bullets: [
-          "Ku hadal macallinka iyo ardayda kale fasal kasta",
-          "Ku celceli xaaladaha dhabta ah: dukaan, safar, shaqo iyo imtixaan",
-          "Baro tibaaxo Ingiriisi ah oo dabiici ah",
-          "Hel jawaab celin degdeg ah oo kalsoonida ku dhisaysa",
+          "Speak with your teacher and classmates in every class",
+          "Practise real situations: shopping, travel, work and exams",
+          "Learn natural, everyday English expressions",
+          "Get quick feedback that builds confidence",
         ],
       },
       {
-        heading: "Laga bilaabo Hargeisa ilaa adduunka",
-        body: "Waxaan joognaa Hargeisa, Somaliland, laakiin fasallada waa online. Waxaad ka hadli kartaa gurigaaga, adigoo isticmaalaya telefoon ama kombiyuutar.",
+        heading: "Learn from where you are",
+        body: "Classes are online. You can speak from home using a phone or a computer — all you need is a stable connection.",
         bullets: [
-          "Fasallo yaryar oo is dhexgal ah",
-          "Chat iyo gacan-qaad live ah oo su’aalaha loo geliyo",
-          "Lacag bixin Zaad, Edahab ama card",
-          "Tijaabo waxaa ansixin kara maamulka oo keliya",
+          "Small, interactive online groups",
+          "Live chat and raise-hand for questions",
+          "Payment details shown only at checkout",
+          "A free trial requires administrator approval",
         ],
       },
     ],
     faqs: [
       {
-        question: "Ma ku hadli karaa Ingiriisi haddii aan waxba aqaan?",
-        answer: "Haa. Koorsooyinka bilowga ah waxay ka bilaabmaan salaan iyo is-barasho. Macallinku wuxuu kugu hagayaa talaabo yar-yar, qaladkana waa qayb ka mid ah barashada.",
+        question: "Can I speak English if I am a complete beginner?",
+        answer: "Yes. Beginner courses start with greetings and introductions. Your teacher guides you in small steps, and mistakes are part of learning.",
       },
       {
-        question: "Ma la duubaa casharrada hadalka?",
-        answer: "Maya. Ma bixino duubis. Fasal kasta waa live, marka waa inaad joogtaa waqtiga si aad u hadasho.",
+        question: "Are speaking lessons recorded?",
+        answer: "No. We do not provide recordings. Each class is live, so you need to join at the scheduled time to take part.",
       },
       {
-        question: "Immisa arday ayaa fasal ku jira?",
-        answer: "Fasallada waa kuwo yaryar si qof walba u helo waqti uu ku hadlo. Waxaad isticmaali kartaa chat iyo raise-hand markaad su’aal qabto.",
+        question: "How many students are in a class?",
+        answer: "Classes are small so everyone gets time to speak. You can use chat and raise-hand when you have a question.",
       },
       {
-        question: "Sideen ku bilaabayaa?",
-        answer: "Samee akoon arday ah oo bilaash ah, dooro koorso, ku biir fasalka live-ka ah. Haddii aad rabto tijaabo, maamulka ayaa ansixin kara ka hor intaadan fasalka gelin.",
+        question: "How do I get started?",
+        answer: "Create a free student account, choose a course, and join the live class. If you want a trial, an administrator can approve it before you join.",
       },
     ],
     levels: ["Beginner", "Intermediate", "Advanced"],
@@ -286,7 +291,7 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
     title: "English for beginners — live online course",
     metaTitle: "English for Beginners — Live Online Course",
     metaDescription:
-      "Start English from zero with live online classes for Somali beginners. Greetings, travel and daily conversation with teacher Ciise.",
+      "Start English from zero with live online classes. Greetings, travel and daily conversation with an experienced teacher and a supportive group.",
     lead: "Never studied English before? Start here. This beginner course gives you the words, the confidence and the live practice to speak from your very first class.",
     sections: [
       {
@@ -304,7 +309,7 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
         body: "A beginner needs correction and encouragement immediately. In a live class your teacher hears you, fixes mistakes gently, and repeats until the sentence feels natural.",
         bullets: [
           "Live video with chat and raise-hand for questions",
-          "Somali explanations when a concept is difficult",
+          "Clear explanations at every step",
           "Short homework and quizzes to lock in each lesson",
           "Certificate after lessons, quizzes and homework are complete",
         ],
@@ -313,7 +318,7 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
     faqs: [
       {
         question: "I have never learned English. Can I join?",
-        answer: "Yes. English Conversation for Beginners is designed for absolute beginners. The teacher starts from greetings and simple sentences, and explains difficult points in Somali.",
+        answer: "Yes. English Conversation for Beginners is designed for absolute beginners. The teacher starts from greetings and simple sentences, and explains difficult points step by step.",
       },
       {
         question: "Are the lessons recorded?",
@@ -325,7 +330,7 @@ export const LANDING_PAGES: Record<string, LandingConfig> = {
       },
       {
         question: "How much does it cost and how do I pay?",
-        answer: "The beginner course is $39. You can pay by card, Zaad or Edahab after enrolling. A free trial requires administrator approval.",
+        answer: "The full amount is shown at checkout before you pay. A free trial requires administrator approval.",
       },
     ],
     levels: ["Beginner"],

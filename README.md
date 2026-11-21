@@ -1,8 +1,8 @@
 # SHEEGOW ACADEMY
 
-**Live English Learning Platform** — teaches English to Somali-speaking students through LIVE interactive online classes. No recorded videos — every class is a real-time video session with expert teachers.
+**Live English Learning Platform** — teaches English to learners everywhere through LIVE interactive online classes. No recorded videos — every class is a real-time video session with expert teachers.
 
-Founded and led by **Ciise Mohamed Sheeq (SHEEGOW)** — an English language expert educated at a university in London, with multiple language certifications and 15 years of teaching experience. He is the founder, general manager and super admin of the platform.
+Founded and led by **Ciise Mohamed Sheeq (SHEEGOW)** — an English language expert with a university degree, multiple language certifications and 15 years of teaching experience. He is the founder, general manager and super admin of the platform.
 
 Built with Next.js 16, TypeScript, Prisma (SQLite locally / PostgreSQL in production), Socket.io, and Tailwind CSS.
 
@@ -14,9 +14,9 @@ Built with Next.js 16, TypeScript, Prisma (SQLite locally / PostgreSQL in produc
 - **Real-time chat** — Socket.io-powered live class chat sidebar
 - **Role-aware unified dashboard** — students, teachers, admins and super admins use one portal that adapts to their role
 - **Course catalog** — courses are created by teachers/admins (no seeded demo courses)
-- **Enrollment & payments** — Cards, Zaad Service (Telesom) and Edahab (E-Dahab) mobile wallets with coupon codes; paid classes require enrollment + completed payment before joining
+- **Enrollment & payments** — secure checkout with coupon codes; the full amount and available payment methods are shown only at checkout. Paid classes require enrollment + completed payment before joining
 - **Admin panel** — course CRUD, user management, live class scheduling, revenue charts
-- **Auth** — short-lived access + refresh JWTs in scoped httpOnly cookies, bcrypt hashing, rate-limited login/register; username, email or Somali phone login
+- **Auth** — short-lived access + refresh JWTs in scoped httpOnly cookies, bcrypt hashing, rate-limited login/register; username, email or phone login
 - **Responsive** — mobile-first design with larger drawers/dashboards that work on phones
 
 ### Roles & access rules
@@ -93,7 +93,7 @@ in `.env`. All roles log in through the same auth modal and land in the
 Students self-register through the same modal. Every account has a unique
 username; the founder is assigned `@superadmin`, the first admin `@admin`, and
 all other accounts get a generated handle. Anyone can log in with their
-**username, email or Somali phone number** (plus password), and can change their
+**username, email or phone number** (plus password), and can change their
 username under Profile Settings. After a schema push, run `bun run db:usernames`
 once to add usernames to existing accounts.
 

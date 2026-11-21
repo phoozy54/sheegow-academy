@@ -19,9 +19,9 @@ export const dynamic = "force-dynamic";
 const PATH = "/courses";
 
 export const metadata: Metadata = pageMeta({
-  title: "Live English Courses for Somalis | SHEEGOW ACADEMY",
+  title: "Live English Courses for Everyone | SHEEGOW ACADEMY",
   description:
-    "Explore live online English courses for Somali learners: beginners, IELTS, business, kids and advanced. Learn with a real teacher from Hargeisa.",
+    "Explore live online English courses for learners everywhere: beginners, IELTS, business, kids and advanced. Learn with a real teacher, wherever you are.",
   path: PATH,
 });
 
@@ -45,9 +45,9 @@ export default async function CoursesPage() {
   return (
     <SeoShell jsonLd={[organizationJsonLd(), listJsonLd]}>
       <SeoHero
-        eyebrow="English classes for Somalis"
-        title="Live English courses built for Somali learners"
-        lead="Beginner conversation, IELTS, business English and more — every course is a real-time interactive video class with a teacher, not a recording. Join from Hargeisa or anywhere in the world."
+        eyebrow="Live English classes online"
+        title="Live English courses for learners everywhere"
+        lead="Beginner conversation, IELTS, business English and more — every course is a real-time interactive video class with a teacher, not a recording. Join from anywhere in the world."
       />
       <SeoSection title="Choose your course">
         {courses.length > 0 ? (
