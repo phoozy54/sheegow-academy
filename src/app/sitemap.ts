@@ -9,6 +9,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPaths = [
     "/",
     "/courses",
+    "/about",
+    "/contact",
+    "/live-classes",
+    "/privacy",
+    "/terms",
     ...Object.values(LANDING_PAGES).map((page) => page.path),
   ];
 
