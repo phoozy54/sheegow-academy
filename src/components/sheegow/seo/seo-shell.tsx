@@ -110,21 +110,34 @@ export function SeoHero({
 
 export function SeoSection({
   title,
+  eyebrow,
+  description,
+  id,
   children,
+  wide = false,
 }: {
   title: string;
+  eyebrow?: string;
+  description?: string;
+  id?: string;
   children: React.ReactNode;
+  wide?: boolean;
 }) {
   return (
-    <section id="course-list" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+    <section
+      id={id}
+      className={`mx-auto px-4 py-10 sm:px-6 sm:py-14 lg:px-8 ${wide ? "max-w-6xl" : "max-w-4xl"}`}
+    >
       <div className="mb-8 max-w-2xl">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">Course catalog</p>
+        {eyebrow ? (
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">{eyebrow}</p>
+        ) : null}
         <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {title}
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Pick the path that matches your goal. Each course is taught live, with real speaking practice, clear feedback and a visible price.
-        </p>
+        {description ? (
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
+        ) : null}
       </div>
       {children}
     </section>

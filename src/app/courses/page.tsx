@@ -51,7 +51,13 @@ export default async function CoursesPage() {
         imageSrc="/images/course-conversation.webp"
         imageAlt="Students practicing English in a live class"
       />
-      <SeoSection title="Choose your course">
+      <SeoSection
+        id="course-list"
+        wide
+        eyebrow="Course catalog"
+        title="Choose your course"
+        description="Pick the path that matches your goal. Each course is taught live, with real speaking practice, clear feedback and a visible price."
+      >
         {courses.length > 0 ? (
           <CourseSeoGrid courses={courses} all={courses} />
         ) : (
