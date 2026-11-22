@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TrendingUp } from "lucide-react";
 import { SeoShell } from "@/components/sheegow/seo/seo-shell";
+import { PageHero } from "@/components/sheegow/design/page-hero";
 import { pageMeta, NAP } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
@@ -18,21 +20,15 @@ export const metadata: Metadata = pageMeta({
 export default function InvestorsPage() {
   return (
     <SeoShell>
+      <PageHero
+        eyebrow="Investors & partners"
+        icon={TrendingUp}
+        tone="emerald"
+        title="Building practical English skills through live teaching"
+        lead="SHEEGOW ACADEMY is a live English school. Our product is simple and deliberate: a real teacher, a small group, and speaking practice in every lesson. We believe this is the most reliable way for a learner to move from understanding English to using it."
+      />
       <div className="mx-auto max-w-4xl px-4 py-12">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600">
-          Investors & partners
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-          Building practical English skills through live teaching
-        </h1>
-        <p className="mt-6 text-lg text-muted-foreground">
-          SHEEGOW ACADEMY is a live English school. Our product is simple and
-          deliberate: a real teacher, a small group, and speaking practice in
-          every lesson. We believe this is the most reliable way for a learner
-          to move from understanding English to using it.
-        </p>
-
-        <section className="mt-12">
+        <section className="mt-0">
           <h2 className="text-xl font-semibold">The problem we solve</h2>
           <p className="mt-3 text-muted-foreground">
             Many learners study English for years but still hesitate to speak.

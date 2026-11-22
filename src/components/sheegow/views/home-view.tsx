@@ -11,6 +11,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CourseCard } from "../course-card";
+import { SectionHeading, type DesignTone } from "../design/section-heading";
+import { FeatureTile } from "../design/feature-tile";
+import { ProofStrip } from "../design/proof-strip";
+import { ComparisonPanel } from "../design/comparison-panel";
+import { PathwayCard } from "../design/pathway-card";
+import { CtaPanel } from "../design/cta-panel";
 import { useMyEnrollments } from "@/lib/use-my-enrollments";
 import { trackConversion, type ConversionEvent } from "@/lib/analytics";
 import {
@@ -24,44 +30,54 @@ import {
   BookOpen,
   CheckCircle2,
   Sparkles,
+  AudioLines,
+  UserRoundCheck,
+  Baby,
+  BriefcaseBusiness,
+  TrendingUp,
 } from "lucide-react";
 
-const FEATURES = [
+const FEATURES: Array<{
+  icon: typeof Video;
+  title: string;
+  desc: string;
+  tone: DesignTone;
+}> = [
   {
     icon: Video,
     title: "LIVE Video Classes",
     desc: "Real-time interactive English classes — no recorded videos. Speak with teachers and classmates every session.",
-    color: "from-rose-500 to-pink-600",
+    tone: "rose",
   },
   {
     icon: Users,
     title: "Small Group Learning",
     desc: "Learn in small batches so every student gets personal attention and speaking practice.",
-    color: "from-indigo-500 to-indigo-600",
+    tone: "indigo",
   },
   {
     icon: GraduationCap,
     title: "Expert Teacher",
     desc: "Learn with Ciise Mohamed Sheeq (SHEEGOW) — English expert with a university degree and 15 years of teaching experience.",
-    color: "from-amber-500 to-orange-600",
+    tone: "amber",
   },
   {
     icon: MessageSquare,
     title: "Real-time Chat",
     desc: "Ask questions instantly during class with live chat support alongside your video lesson.",
-    color: "from-emerald-500 to-teal-600",
+    tone: "emerald",
   },
   {
     icon: Award,
     title: "Certificates & Progress",
     desc: "Track your progress and earn a certificate when you complete each course.",
-    color: "from-violet-500 to-purple-600",
+    tone: "indigo",
   },
   {
     icon: Globe2,
     title: "Learn From Anywhere",
     desc: "Join from anywhere in the world. Payment details are shown clearly at checkout.",
-    color: "from-sky-500 to-blue-600",
+    tone: "sky",
   },
 ];
 
@@ -137,18 +153,6 @@ export function HomeView() {
                 </Button>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground lg:justify-start">
-                {[
-                  "Real human teacher",
-                  "Speak from lesson one",
-                  "Clear prices, secure checkout",
-                ].map((item) => (
-                  <span key={item} className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    {item}
-                  </span>
-                ))}
-              </div>
             </div>
 
             {/* Hero image card */}
@@ -190,6 +194,32 @@ export function HomeView() {
 
         </div>
       </section>
+
+      {/* ─── HONEST PROOF STRIP ────────────────────── */}
+      <div className={`relative z-10 mx-auto -mt-6 max-w-7xl ${padClass}`}>
+        <ProofStrip
+          items={[
+            {
+              icon: AudioLines,
+              label: "Speaking every lesson",
+              detail: "Practice out loud, not just watch",
+              tone: "rose",
+            },
+            {
+              icon: UserRoundCheck,
+              label: "Real teacher feedback",
+              detail: "Corrections you can act on",
+              tone: "emerald",
+            },
+            {
+              icon: Award,
+              label: "Certificate on completion",
+              detail: "Progress you can show",
+              tone: "amber",
+            },
+          ]}
+        />
+      </div>
 
       {/* ─── CONTINUE LEARNING ─────────────────────── */}
       {!loadingEnrollments && enrollments.length > 0 && (
@@ -242,40 +272,22 @@ export function HomeView() {
 
       {/* ─── FEATURES ──────────────────────────────── */}
       <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
-          >
-            <Sparkles className="h-3 w-3" /> Why SHEEGOW
-          </Badge>
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Built for speaking, not just watching
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            One proven format: a real teacher, a small group and a reason to
-            speak in every lesson.
-          </p>
-        </div>
-
+        <SectionHeading
+          eyebrow="Why SHEEGOW"
+          icon={Sparkles}
+          tone="indigo"
+          title="Built for speaking, not just watching"
+          description="One proven format: a real teacher, a small group and a reason to speak in every lesson."
+        />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
-            <Card
+            <FeatureTile
               key={f.title}
-              className="card-lift group relative overflow-hidden p-6"
-            >
-              <div
-                className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white shadow-lg`}
-              >
-                <f.icon className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-lg font-bold text-foreground">
-                {f.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {f.desc}
-              </p>
-            </Card>
+              icon={f.icon}
+              title={f.title}
+              desc={f.desc}
+              tone={f.tone}
+            />
           ))}
         </div>
       </section>
@@ -284,17 +296,14 @@ export function HomeView() {
       <section className="bg-gradient-to-b from-indigo-50/50 to-background py-16 lg:py-24">
         <div className={`mx-auto max-w-7xl ${padClass}`}>
           <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <Badge
-                variant="outline"
-                className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
-              >
-                <GraduationCap className="h-3 w-3" /> Popular Courses
-              </Badge>
-              <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-                Live courses students love
-              </h2>
-            </div>
+            <SectionHeading
+              eyebrow="Popular Courses"
+              icon={GraduationCap}
+              tone="amber"
+              align="left"
+              className="mb-0"
+              title="Live courses students love"
+            />
             <Button asChild variant="outline" className="gap-1.5">
               <Link href="/courses">
                 View all courses
@@ -325,20 +334,14 @@ export function HomeView() {
 
       {/* ─── HOW IT WORKS ─────────────────────────── */}
       <section id="how-it-works" className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-          >
-            <CheckCircle2 className="h-3 w-3" /> How it works
-          </Badge>
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Three steps to confident English
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Every class is live with your teacher — no recorded videos.
-          </p>
-        </div>
+        <SectionHeading
+          id="how-it-works"
+          eyebrow="How it works"
+          icon={CheckCircle2}
+          tone="emerald"
+          title="Three steps to confident English"
+          description="Every class is live with your teacher — no recorded videos."
+        />
 
         <div className="grid gap-5 sm:grid-cols-3">
           {[
@@ -374,81 +377,51 @@ export function HomeView() {
       {/* ─── LIVE vs RECORDED ────────────────────── */}
       <section className="bg-muted/30 py-16 lg:py-24">
         <div className={`mx-auto max-w-7xl ${padClass}`}>
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <Badge
-              variant="outline"
-              className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
-            >
-              <Video className="h-3 w-3" /> The difference is real
-            </Badge>
-            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Live classes vs. recorded drills
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Apps can build habits. Speaking with a teacher builds confidence.
-            </p>
-          </div>
+          <SectionHeading
+            eyebrow="The difference is real"
+            icon={Video}
+            tone="amber"
+            title="Live classes vs. recorded drills"
+            description="Apps can build habits. Speaking with a teacher builds confidence."
+          />
           <div className="grid gap-5 md:grid-cols-2">
-            <Card className="border-indigo-200 bg-card p-6 shadow-lg shadow-indigo-500/10">
-              <h3 className="text-lg font-bold text-indigo-600">
-                Live with SHEEGOW
-              </h3>
-              <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-                {[
-                  "A teacher hears you and corrects you in the moment",
-                  "You speak in every lesson, not after finishing a module",
-                  "Questions get answers during the class",
-                  "Progress is marked by real lessons and a certificate",
-                ].map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-            <Card className="p-6">
-              <h3 className="text-lg font-bold text-foreground">
-                Self-paced apps and recordings
-              </h3>
-              <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-                {[
-                  "Practice is mostly reading, tapping or repeating alone",
-                  "No one listens to your pronunciation in real time",
-                  "Mistakes can stay uncorrected for weeks",
-                  "Finishing videos is not the same as speaking well",
-                ].map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <span className="mt-0.5 shrink-0 text-muted-foreground">—</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            <ComparisonPanel
+              highlighted
+              title="Live with SHEEGOW"
+              items={[
+                "A teacher hears you and corrects you in the moment",
+                "You speak in every lesson, not after finishing a module",
+                "Questions get answers during the class",
+                "Progress is marked by real lessons and a certificate",
+              ]}
+            />
+            <ComparisonPanel
+              title="Self-paced apps and recordings"
+              items={[
+                "Practice is mostly reading, tapping or repeating alone",
+                "No one listens to your pronunciation in real time",
+                "Mistakes can stay uncorrected for weeks",
+                "Finishing videos is not the same as speaking well",
+              ]}
+            />
           </div>
         </div>
       </section>
 
       {/* ─── PATHWAYS ─────────────────────────────── */}
       <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="mb-3 inline-flex items-center gap-1.5 border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700"
-          >
-            <Sparkles className="h-3 w-3" /> Choose your path
-          </Badge>
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            There is a live class for your goal
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Start with a course, ask about a trial, or explore how we work with
-            partners.
-          </p>
-        </div>
+        <SectionHeading
+          eyebrow="Choose your path"
+          icon={Sparkles}
+          tone="sky"
+          title="There is a live class for your goal"
+          description="Start with a course, ask about a trial, or explore how we work with partners."
+        />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {([
             {
+              icon: GraduationCap,
+              tone: "indigo",
               title: "Learners",
               desc: "Beginner to advanced live English courses.",
               cta: "Explore live courses",
@@ -456,6 +429,8 @@ export function HomeView() {
               event: "pathway_courses",
             },
             {
+              icon: Baby,
+              tone: "rose",
               title: "Parents",
               desc: "Playful live classes for children aged 7–12.",
               cta: "See English for kids",
@@ -463,6 +438,8 @@ export function HomeView() {
               event: "pathway_kids",
             },
             {
+              icon: BriefcaseBusiness,
+              tone: "amber",
               title: "Professionals",
               desc: "Meetings, email, interviews and presentations at work.",
               cta: "See business English",
@@ -470,6 +447,8 @@ export function HomeView() {
               event: "pathway_business",
             },
             {
+              icon: TrendingUp,
+              tone: "emerald",
               title: "Partners & investors",
               desc: "Our mission, impact model and governance.",
               cta: "Read our impact model",
@@ -477,26 +456,24 @@ export function HomeView() {
               event: "pathway_investors",
             },
           ] as Array<{
+            icon: typeof GraduationCap;
+            tone: DesignTone;
             title: string;
             desc: string;
             cta: string;
             href: string;
             event: ConversionEvent;
           }>).map((path) => (
-            <Card key={path.title} className="card-lift flex flex-col p-6">
-              <h3 className="text-lg font-bold text-foreground">{path.title}</h3>
-              <p className="mt-2 flex-1 text-sm text-muted-foreground">
-                {path.desc}
-              </p>
-              <Link
-                href={path.href}
-                onClick={() => trackConversion(path.event)}
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
-              >
-                {path.cta}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Card>
+            <PathwayCard
+              key={path.title}
+              icon={path.icon}
+              tone={path.tone}
+              title={path.title}
+              desc={path.desc}
+              cta={path.cta}
+              href={path.href}
+              onClick={() => trackConversion(path.event)}
+            />
           ))}
         </div>
         <p className="mt-8 text-center text-sm text-muted-foreground">
@@ -514,60 +491,44 @@ export function HomeView() {
       </section>
 
       {/* ─── CTA ─────────────────────────────────── */}
-      <section className={`pb-16 lg:pb-24 ${padClass}`}>
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 p-8 text-center shadow-2xl shadow-indigo-500/30 sm:p-12 lg:p-16">
-          <div className="hero-mesh absolute inset-0 opacity-40" />
-          <div className="relative">
-            <Badge
-              variant="outline"
-              className="mb-4 inline-flex items-center gap-1.5 border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
-            >
-              <Sparkles className="h-3 w-3" /> Live classes
-            </Badge>
-            <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Ready to start speaking English with confidence?
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-indigo-100">
-              Join SHEEGOW ACADEMY today and start speaking English with
-              expert teachers in live, interactive classes.
-            </p>
-            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              {user ? (
-                <Button
-                  asChild
-                  size="lg"
-                  className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
-                >
-                  <Link href="/courses">
-                    Browse Courses
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  onClick={() => openAuthModal("register")}
-                  className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
-                >
-                  Create Account
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
-              >
-                <Link href="/about">
-                  About SHEEGOW ACADEMY
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CtaPanel
+        className={padClass}
+        title="Ready to start speaking English with confidence?"
+        description="Join SHEEGOW ACADEMY today and start speaking English with expert teachers in live, interactive classes."
+      >
+        {user ? (
+          <Button
+            asChild
+            size="lg"
+            className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
+          >
+            <Link href="/courses">
+              Browse Courses
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            onClick={() => openAuthModal("register")}
+            className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
+          >
+            Create Account
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          asChild
+          size="lg"
+          variant="outline"
+          className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
+        >
+          <Link href="/about">
+            About SHEEGOW ACADEMY
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </CtaPanel>
     </div>
   );
 }
