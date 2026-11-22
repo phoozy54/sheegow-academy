@@ -35,6 +35,9 @@ const AUTH_ENDPOINTS = new Set([
   "/api/auth/register",
   "/api/auth/refresh",
   "/api/auth/logout",
+  // "Not logged in" is a valid answer for this endpoint, never a reason to
+  // rotate the session or log a 401 in the browser console.
+  "/api/auth/me",
 ]);
 
 /**

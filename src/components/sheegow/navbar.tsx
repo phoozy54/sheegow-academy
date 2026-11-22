@@ -127,7 +127,7 @@ export function Navbar() {
               <span className="text-lg font-extrabold tracking-tight text-foreground">
                 SHEEGOW
               </span>
-              <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-500">
+              <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-700">
                 ACADEMY
               </span>
             </span>
@@ -250,7 +250,7 @@ export function Navbar() {
                   <GraduationCap className="h-5 w-5" />
                 </span>
                 <span className="font-extrabold">SHEEGOW</span>
-                <span className="text-[10px] font-semibold tracking-widest text-indigo-500">
+                <span className="text-[10px] font-semibold tracking-widest text-indigo-700">
                   ACADEMY
                 </span>
               </SheetTitle>

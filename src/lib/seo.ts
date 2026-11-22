@@ -210,7 +210,7 @@ export function organizationJsonLd() {
     contactPoint: [
       {
         "@type": "ContactPoint",
-        telephone: NAP.phoneHref.replace("tel:", "+"),
+        telephone: NAP.phoneHref.replace(/^tel:/, ""),
         contactType: "customer support",
         email: NAP.email,
         areaServed: ["SO", "GB", "US"],

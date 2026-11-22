@@ -10,6 +10,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -23,28 +24,47 @@ export function Footer() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row lg:px-8">
           <div className="text-center md:text-left">
             <h3 className="text-xl font-bold text-foreground">
-              Never miss a live class
+              Get the live class schedule
             </h3>
             <p className="text-sm text-muted-foreground">
-              Join our newsletter and never miss a live class schedule.
+              Send us your email and we will add you to the class schedule list.
             </p>
           </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              toast.success("Subscribed! Check your inbox for the trial link.");
-              (e.target as HTMLFormElement).reset();
+              const value = new FormData(e.currentTarget).get("email");
+              if (typeof value !== "string" || !value.trim()) return;
+              const subject = encodeURIComponent(
+                "Live class schedule — please add my email"
+              );
+              const body = encodeURIComponent(
+                `Hello SHEEGOW ACADEMY,\n\nPlease add ${value.trim()} to the live class schedule list.\n\nThank you.`
+              );
+              window.location.href = `mailto:info@sheegowacademy.com?subject=${subject}&body=${body}`;
+              toast.info(
+                "Your email app will open — send the message to join the list."
+              );
             }}
-            className="flex w-full max-w-md items-center gap-2"
+            className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center"
           >
+            <Label htmlFor="newsletter-email" className="sr-only">
+              Email address
+            </Label>
             <Input
+              id="newsletter-email"
+              name="email"
               type="email"
+              autoComplete="email"
               placeholder="Enter your email"
               required
               className="bg-background"
             />
-            <Button type="submit" className="gap-1.5">
-              <Send className="h-4 w-4" /> Subscribe
+            <Button
+              type="submit"
+              className="gap-1.5 bg-indigo-700 text-white hover:bg-indigo-800"
+            >
+              <Send className="h-4 w-4" /> Request schedule
             </Button>
           </form>
         </div>
@@ -66,7 +86,7 @@ export function Footer() {
                 <span className="text-lg font-extrabold tracking-tight">
                   SHEEGOW
                 </span>
-                <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-500">
+                <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-700">
                   ACADEMY
                 </span>
               </span>
@@ -182,7 +202,7 @@ export function Footer() {
             Built with care for learners everywhere.
           </p>
           <p className="text-xs text-muted-foreground">
-            Made with <span className="text-indigo-500">live classes</span>, not
+            Made with <span className="text-indigo-700">live classes</span>, not
             recorded videos.
           </p>
         </div>

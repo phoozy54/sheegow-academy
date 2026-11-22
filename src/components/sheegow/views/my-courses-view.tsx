@@ -344,7 +344,7 @@ function CertificateDialog({
             <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg">
               <GraduationCap className="h-7 w-7" />
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-500">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-700">
               SHEEGOW ACADEMY
             </p>
             <p className="mt-2 text-xl font-extrabold tracking-tight text-foreground">
