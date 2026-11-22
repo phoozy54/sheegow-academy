@@ -30,6 +30,7 @@ export default function ContactPage() {
         lead="Do you have a question about which class fits your level, when lessons run, or how payment works? Contact us directly — you will talk to a real person, not a bot."
       />
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+        <ContentSection id="channels" title="Reach us directly">
         <div className="grid gap-4 sm:grid-cols-2">
           <ContactCard icon={MessageSquare} title="WhatsApp (fastest)" tone="emerald">
             <p>
@@ -78,6 +79,7 @@ export default function ContactPage() {
             </p>
           </ContactCard>
         </div>
+        </ContentSection>
 
         <ContentSection id="next-step" title="Ready to start?">
           <p>

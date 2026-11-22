@@ -14,7 +14,8 @@
     "db:reset": "prisma migrate reset",
     "db:superadmin": "bun prisma/seed-super-admin.ts",
     "db:usernames": "bun prisma/backfill-usernames.ts",
-    "db:courses": "bun prisma/seed-courses.ts"
+    "db:courses": "bun prisma/seed-courses.ts",
+    "db:courses:api": "bun scripts/seed-courses-api.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
