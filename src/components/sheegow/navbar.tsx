@@ -136,7 +136,7 @@ export function Navbar() {
             </span>
             <span className="flex flex-col leading-none">
               <span className="text-lg font-extrabold tracking-tight text-foreground">
-                SHEEGOW
+                SHEEGOW{" "}
               </span>
               <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-700">
                 ACADEMY

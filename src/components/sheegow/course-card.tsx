@@ -43,7 +43,6 @@ export function CourseCard({
       {/* Image */}
       <Link
         href={href}
-        aria-label={`View ${course.title}`}
         className="relative block aspect-[16/9] w-full overflow-hidden"
       >
         {course.image ? (

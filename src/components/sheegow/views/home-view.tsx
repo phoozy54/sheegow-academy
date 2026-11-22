@@ -406,7 +406,7 @@ export function HomeView() {
                 className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
               >
                 <Link href="/about">
-                  Learn More
+                  About SHEEGOW ACADEMY
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
