@@ -25,7 +25,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Menu,
-  GraduationCap,
   LayoutDashboard,
   BookOpen,
   User as UserIcon,
@@ -33,6 +32,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { AuthModal } from "./auth-modal";
+import { BrandLockup } from "./brand-mark";
 
 type View =
   | "home"
@@ -129,19 +129,9 @@ export function Navbar() {
           <Link
             href="/"
             aria-label="SHEEGOW ACADEMY — home"
-            className="flex shrink-0 items-center gap-2.5 transition-transform hover:scale-105 sm:gap-2.5"
+            className="shrink-0 transition-transform hover:scale-[1.02]"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
-              <GraduationCap className="h-6 w-6" />
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="text-lg font-extrabold tracking-tight text-foreground">
-                SHEEGOW{" "}
-              </span>
-              <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-700">
-                ACADEMY
-              </span>
-            </span>
+            <BrandLockup />
           </Link>
 
           <nav
@@ -260,14 +250,8 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[85vw] max-w-sm overflow-y-auto p-0">
-              <SheetTitle className="mb-6 flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
-                  <GraduationCap className="h-5 w-5" />
-                </span>
-                <span className="font-extrabold">SHEEGOW</span>
-                <span className="text-[10px] font-semibold tracking-widest text-indigo-700">
-                  ACADEMY
-                </span>
+              <SheetTitle className="mb-6">
+                <BrandLockup className="scale-95 origin-left" />
               </SheetTitle>
               <nav className="flex flex-col gap-1">
                 {NAV_LINKS.map((link) => {

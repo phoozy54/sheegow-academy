@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useStore, type View } from "@/lib/store";
 import {
-  GraduationCap,
+
   Mail,
   Phone,
   MapPin,
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { BrandLockup } from "./brand-mark";
 
 type FooterLink = {
   label: string;
@@ -92,19 +93,9 @@ export function Footer() {
             <Link
               href="/"
               aria-label="SHEEGOW ACADEMY — home"
-              className="mb-4 flex items-center gap-2.5"
+              className="mb-4 inline-flex"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
-                <GraduationCap className="h-6 w-6" />
-              </span>
-              <span className="flex flex-col leading-none">
-                <span className="text-lg font-extrabold tracking-tight">
-                  SHEEGOW{" "}
-                </span>
-                <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-700">
-                  ACADEMY
-                </span>
-              </span>
+              <BrandLockup />
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Live English learning platform for students everywhere. Learn with

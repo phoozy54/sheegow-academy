@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { GraduationCap, Eye, EyeOff, Mail, Lock, User, X } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, X } from "lucide-react";
+import { BrandMark } from "./brand-mark";
 import { toast } from "sonner";
 
 export function AuthModal() {
@@ -124,7 +125,7 @@ export function AuthModal() {
           </DialogClose>
           <div className="relative flex items-center gap-3 pr-8">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-              <GraduationCap className="h-6 w-6" />
+              <BrandMark className="h-7 w-auto" />
             </span>
             <div className="min-w-0">
               <p className="text-lg font-extrabold leading-tight">
