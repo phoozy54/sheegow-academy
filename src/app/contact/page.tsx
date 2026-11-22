@@ -1,5 +1,15 @@
 ﻿import type { Metadata } from "next";
+import Link from "next/link";
+import {
+  MessageSquare,
+  Mail,
+  Phone,
+  MapPin,
+  ArrowRight,
+} from "lucide-react";
 import { SeoShell } from "@/components/sheegow/seo/seo-shell";
+import { ContentSection, PageHero } from "@/components/sheegow/design/page-hero";
+import { ContactCard } from "@/components/sheegow/design/contact-card";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
@@ -12,63 +22,80 @@ export const metadata: Metadata = pageMeta({
 export default function ContactPage() {
   return (
     <SeoShell>
-      <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">Contact us</h1>
-      <p className="mt-6 text-muted-foreground">
-        Do you have a question about which class fits your level, when lessons
-        run, or how payment works? Contact us directly — you will talk to a
-        real person, not a bot.
-      </p>
-      <div className="mt-8 space-y-6">
-        <div className="rounded-lg border p-4">
-          <h2 className="text-lg font-semibold">WhatsApp (fastest)</h2>
-          <p className="mt-2 text-muted-foreground">
-            Message us any time:{" "}
-            <a
-              className="underline"
-              href="https://wa.me/252634085151"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              +252 63 4085151 on WhatsApp
-            </a>
-            . Tell us your current level and your goal, and we will recommend a
-            class.
-          </p>
+      <PageHero
+        eyebrow="Contact us"
+        icon={MessageSquare}
+        tone="sky"
+        title="Talk to a real person"
+        lead="Do you have a question about which class fits your level, when lessons run, or how payment works? Contact us directly — you will talk to a real person, not a bot."
+      />
+      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <ContactCard icon={MessageSquare} title="WhatsApp (fastest)" tone="emerald">
+            <p>
+              Message us any time:{" "}
+              <a
+                className="font-medium text-indigo-600 underline"
+                href="https://wa.me/252634085151"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                +252 63 4085151 on WhatsApp
+              </a>
+              . Tell us your current level and your goal, and we will recommend a
+              class.
+            </p>
+          </ContactCard>
+
+          <ContactCard icon={Mail} title="Email" tone="indigo">
+            <p>
+              <a
+                className="font-medium text-indigo-600 underline"
+                href="mailto:info@sheegowacademy.com"
+              >
+                info@sheegowacademy.com
+              </a>{" "}
+              — for enrolment, invoices, school and company enquiries.
+            </p>
+          </ContactCard>
+
+          <ContactCard icon={Phone} title="Phone" tone="amber">
+            <p>
+              <a
+                className="font-medium text-indigo-600 underline"
+                href="tel:+252634085151"
+              >
+                +252 63 4085151
+              </a>{" "}
+              — during class hours; WhatsApp is more reliable outside them.
+            </p>
+          </ContactCard>
+
+          <ContactCard icon={MapPin} title="Location" tone="sky">
+            <p>
+              Hargeisa, Somaliland (Somalia). Classes themselves run online —
+              join from anywhere.
+            </p>
+          </ContactCard>
         </div>
-        <div className="rounded-lg border p-4">
-          <h2 className="text-lg font-semibold">Email</h2>
-          <p className="mt-2 text-muted-foreground">
-            <a className="underline" href="mailto:info@sheegowacademy.com">
-              info@sheegowacademy.com
-            </a>{" "}
-            — for enrolment, invoices, school and company enquiries.
+
+        <ContentSection id="next-step" title="Ready to start?">
+          <p>
+            Browse the{" "}
+            <Link className="font-medium text-indigo-600 underline" href="/courses">
+              live English courses
+            </Link>{" "}
+            and pick your level, or ask us on WhatsApp and we will pick it for
+            you.
           </p>
-        </div>
-        <div className="rounded-lg border p-4">
-          <h2 className="text-lg font-semibold">Phone</h2>
-          <p className="mt-2 text-muted-foreground">
-            <a className="underline" href="tel:+252634085151">
-              +252 63 4085151
-            </a>{" "}
-            — during class hours; WhatsApp is more reliable outside them.
-          </p>
-        </div>
-        <div className="rounded-lg border p-4">
-          <h2 className="text-lg font-semibold">Location</h2>
-          <p className="mt-2 text-muted-foreground">
-            Hargeisa, Somaliland (Somalia). Classes themselves run online —
-            join from anywhere.
-          </p>
-        </div>
-      </div>
-      <p className="mt-8 text-muted-foreground">
-        Ready to start? Browse the{" "}
-        <a className="underline" href="/courses">
-          live English courses
-        </a>{" "}
-        and pick your level, or ask us on WhatsApp and we will pick it for you.
-      </p>
+          <Link
+            href="/courses"
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-500/25 hover:bg-indigo-700"
+          >
+            See live courses
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </ContentSection>
       </div>
     </SeoShell>
   );
