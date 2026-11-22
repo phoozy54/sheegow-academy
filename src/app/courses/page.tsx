@@ -48,6 +48,8 @@ export default async function CoursesPage() {
         eyebrow="Live English classes online"
         title="Live English courses for learners everywhere"
         lead="Beginner conversation, IELTS, business English and more — every course is a real-time interactive video class with a teacher, not a recording. Join from anywhere in the world."
+        imageSrc="/images/course-conversation.webp"
+        imageAlt="Students practicing English in a live class"
       />
       <SeoSection title="Choose your course">
         {courses.length > 0 ? (
