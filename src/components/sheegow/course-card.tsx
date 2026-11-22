@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Clock, Users, Play } from "lucide-react";
-import { levelBadgeClass } from "@/lib/ui";
+import { formatPrice, levelBadgeClass } from "@/lib/ui";
+import { trackConversion } from "@/lib/analytics";
 
 export function CourseCard({
   course,
@@ -35,6 +36,7 @@ export function CourseCard({
       openAuthModal("register");
       return;
     }
+    trackConversion("checkout_start", { courseId: course.id });
     openCheckout(course.id);
   };
 
@@ -130,10 +132,13 @@ export function CourseCard({
           </div>
         )}
 
-        {/* Enroll / continue — price is shown only at checkout */}
+        {/* Real price from the catalogue — full total is confirmed at checkout */}
         <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
-          <span className="text-xs text-muted-foreground">
-            {course.duration} weeks
+          <span className="text-sm font-bold text-foreground">
+            {formatPrice(course.price)}
+            <span className="ml-1 text-xs font-normal text-muted-foreground">
+              USD
+            </span>
           </span>
           <Button
             size="sm"

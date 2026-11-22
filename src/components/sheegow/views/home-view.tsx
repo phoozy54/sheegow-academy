@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CourseCard } from "../course-card";
 import { useMyEnrollments } from "@/lib/use-my-enrollments";
+import { trackConversion, type ConversionEvent } from "@/lib/analytics";
 import {
   Video,
   Users,
@@ -101,15 +102,14 @@ export function HomeView() {
               </Badge>
 
               <h1 className="mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Learn English with{" "}
-                <span className="gradient-text">LIVE Classes</span> — for learners
-                everywhere
+                Speak English with confidence in{" "}
+                <span className="gradient-text">live classes</span>
               </h1>
 
               <p className="mx-auto mb-7 max-w-xl text-base text-muted-foreground sm:text-lg lg:mx-0">
-                SHEEGOW ACADEMY teaches English through real-time interactive
-                video classes. Speak with expert teachers, practice with
-                classmates, and gain confidence — no recorded videos, ever.
+                Talk to a real teacher from your first lesson. Small,
+                conversation-first classes help you speak clearly at work, in
+                exams and in everyday life — with feedback you can act on.
               </p>
 
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
@@ -118,8 +118,20 @@ export function HomeView() {
                   size="lg"
                   className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-base shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
                 >
-                  <Link href="/courses">
-                    Start Learning
+                  <Link
+                    href="/courses"
+                    onClick={() => trackConversion("hero_explore_courses")}
+                  >
+                    Explore live courses
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="w-full gap-2 sm:w-auto">
+                  <Link
+                    href="#how-it-works"
+                    onClick={() => trackConversion("hero_how_it_works")}
+                  >
+                    See how it works
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -127,9 +139,9 @@ export function HomeView() {
 
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground lg:justify-start">
                 {[
-                  "Expert live teachers",
-                  "Secure checkout",
-                  "Certificates included",
+                  "Real human teacher",
+                  "Speak from lesson one",
+                  "Clear prices, secure checkout",
                 ].map((item) => (
                   <span key={item} className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500" />
@@ -168,7 +180,7 @@ export function HomeView() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-sm font-semibold text-indigo-600">
-                    <Users className="h-4 w-4" /> 28
+                    <Users className="h-4 w-4" /> Small group
                   </div>
                 </div>
               </div>
@@ -238,11 +250,11 @@ export function HomeView() {
             <Sparkles className="h-3 w-3" /> Why SHEEGOW
           </Badge>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Everything you need to master English
+            Built for speaking, not just watching
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Our platform is designed around live, interactive learning — because
-            English is meant to be spoken, not just watched.
+            One proven format: a real teacher, a small group and a reason to
+            speak in every lesson.
           </p>
         </div>
 
@@ -312,7 +324,7 @@ export function HomeView() {
       </section>
 
       {/* ─── HOW IT WORKS ─────────────────────────── */}
-      <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
+      <section id="how-it-works" className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <Badge
             variant="outline"
@@ -357,6 +369,148 @@ export function HomeView() {
             </Card>
           ))}
         </div>
+      </section>
+
+      {/* ─── LIVE vs RECORDED ────────────────────── */}
+      <section className="bg-muted/30 py-16 lg:py-24">
+        <div className={`mx-auto max-w-7xl ${padClass}`}>
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <Badge
+              variant="outline"
+              className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+            >
+              <Video className="h-3 w-3" /> The difference is real
+            </Badge>
+            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              Live classes vs. recorded drills
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Apps can build habits. Speaking with a teacher builds confidence.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2">
+            <Card className="border-indigo-200 bg-card p-6 shadow-lg shadow-indigo-500/10">
+              <h3 className="text-lg font-bold text-indigo-600">
+                Live with SHEEGOW
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+                {[
+                  "A teacher hears you and corrects you in the moment",
+                  "You speak in every lesson, not after finishing a module",
+                  "Questions get answers during the class",
+                  "Progress is marked by real lessons and a certificate",
+                ].map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card className="p-6">
+              <h3 className="text-lg font-bold text-foreground">
+                Self-paced apps and recordings
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+                {[
+                  "Practice is mostly reading, tapping or repeating alone",
+                  "No one listens to your pronunciation in real time",
+                  "Mistakes can stay uncorrected for weeks",
+                  "Finishing videos is not the same as speaking well",
+                ].map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-0.5 shrink-0 text-muted-foreground">—</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── PATHWAYS ─────────────────────────────── */}
+      <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <Badge
+            variant="outline"
+            className="mb-3 inline-flex items-center gap-1.5 border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700"
+          >
+            <Sparkles className="h-3 w-3" /> Choose your path
+          </Badge>
+          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            There is a live class for your goal
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            Start with a course, ask about a trial, or explore how we work with
+            partners.
+          </p>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {([
+            {
+              title: "Learners",
+              desc: "Beginner to advanced live English courses.",
+              cta: "Explore live courses",
+              href: "/courses",
+              event: "pathway_courses",
+            },
+            {
+              title: "Parents",
+              desc: "Playful live classes for children aged 7–12.",
+              cta: "See English for kids",
+              href: "/courses/english-for-kids-ages-7-12",
+              event: "pathway_kids",
+            },
+            {
+              title: "Professionals",
+              desc: "Meetings, email, interviews and presentations at work.",
+              cta: "See business English",
+              href: "/courses/business-english-professional",
+              event: "pathway_business",
+            },
+            {
+              title: "Partners & investors",
+              desc: "Our mission, impact model and governance.",
+              cta: "Read our impact model",
+              href: "/investors",
+              event: "pathway_investors",
+            },
+          ] as Array<{
+            title: string;
+            desc: string;
+            cta: string;
+            href: string;
+            event: ConversionEvent;
+          }>).map((path) => (
+            <Card key={path.title} className="card-lift flex flex-col p-6">
+              <h3 className="text-lg font-bold text-foreground">{path.title}</h3>
+              <p className="mt-2 flex-1 text-sm text-muted-foreground">
+                {path.desc}
+              </p>
+              <Link
+                href={path.href}
+                onClick={() => trackConversion(path.event)}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+              >
+                {path.cta}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Card>
+          ))}
+        </div>
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Want to try a class first? A free trial is available with administrator
+          approval.{" "}
+          <Link
+            href="/contact"
+            onClick={() => trackConversion("trial_enquiry")}
+            className="font-semibold text-indigo-600 underline"
+          >
+            Ask us about a free trial
+          </Link>
+          .
+        </p>
       </section>
 
       {/* ─── CTA ─────────────────────────────────── */}

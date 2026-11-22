@@ -236,6 +236,8 @@ export function courseJsonLd(course: SeoCourse, path: string) {
       category: "Education",
       availability: "https://schema.org/InStock",
       url: absoluteUrl(path),
+      price: course.price,
+      priceCurrency: "USD",
     },
   };
 }

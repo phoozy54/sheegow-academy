@@ -158,6 +158,7 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm">
               {([
                 { label: "About Us", href: "/about" },
+                { label: "Investors & Partners", href: "/investors" },
                 { label: "Contact", href: "/contact" },
                 { label: "Become a Teacher" },
                 { label: "Terms", href: "/terms" },

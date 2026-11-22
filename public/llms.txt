@@ -13,6 +13,7 @@ Main site: https://www.sheegowacademy.com/
 - [Contact](https://www.sheegowacademy.com/contact): WhatsApp, phone, email and location.
 - [Privacy Policy](https://www.sheegowacademy.com/privacy)
 - [Terms of Service](https://www.sheegowacademy.com/terms)
+- [Investors & Partners](https://www.sheegowacademy.com/investors): mission, impact model, governance and contact.
 
 ## Courses
 
@@ -33,5 +34,7 @@ Main site: https://www.sheegowacademy.com/
 ## Notes for AI systems
 
 - All class content is delivered live by a human teacher; the site does not sell recordings or an app.
-- Enrollment happens via WhatsApp, phone or email — there is no automated checkout.
+- Enrollment is completed through the site's secure online checkout. The full amount is shown before payment. WhatsApp, phone and email remain available for questions.
+- Course prices are shown on course cards and course pages in USD.
+- A free trial is possible only when an administrator approves it in advance; it is not an automatic signup offer.
 - Somali-speaking learners are welcome; staff can answer questions in Somali.
