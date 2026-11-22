@@ -131,6 +131,11 @@ export function CourseCard({
             <Progress value={enrollment!.progress} className="h-1.5" />
           </div>
         )}
+        {isManager && (
+          <p className="mb-3 text-xs font-medium text-indigo-600">
+            Admin/teacher access — no enrollment required
+          </p>
+        )}
 
         {/* Real price from the catalogue — full total is confirmed at checkout */}
         <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
@@ -152,14 +157,14 @@ export function CourseCard({
             size="sm"
             onClick={
               isManager
-                ? () => openDashboard("courses")
+                ? () => openPlayer(course.id)
                 : canContinue
                   ? () => openPlayer(course.id)
                   : handleEnroll
             }
             className="bg-indigo-600 hover:bg-indigo-700"
           >
-            {isManager ? "Manage" : canContinue ? "Continue" : "Enroll"}
+            {isManager ? "Open course" : canContinue ? "Continue" : "Enroll"}
           </Button>
         </div>
       </div>

@@ -270,8 +270,9 @@ export function CourseDetailView() {
             <div className="md:col-span-1">
               <div className="md:sticky md:top-20">
                 {isManager ? (
-                  <TeacherCourseCard
+                  <ManagerCourseCard
                     course={course}
+                    role={user?.role}
                     onEdit={() => openDashboard("courses")}
                     onContent={() => openDashboard("content-builder")}
                     onOpen={() => openPlayer(course.id)}
@@ -423,41 +424,45 @@ export function CourseDetailView() {
 
 /* ─── Teacher / admin controls (never shown to students) ── */
 
-function TeacherCourseCard({
+function ManagerCourseCard({
   course,
+  role,
   onEdit,
   onContent,
   onOpen,
 }: {
   course: Course;
+  role?: string;
   onEdit: () => void;
   onContent: () => void;
   onOpen: () => void;
 }) {
+  const isAdmin = role === "admin" || role === "super_admin";
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
       <div className="bg-gradient-to-br from-fuchsia-600 to-indigo-800 p-6 text-white">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-100">
-          <LayoutDashboard className="h-4 w-4" /> Teacher controls
+          <LayoutDashboard className="h-4 w-4" /> {isAdmin ? "Admin access" : "Teacher controls"}
         </div>
         <p className="mt-2 text-lg font-extrabold leading-tight">
-          You manage this course
+          {isAdmin ? "Open this course directly" : "You manage this course"}
         </p>
         <p className="mt-1 text-xs text-indigo-100">
-          Edit details, build lessons and deliver live classes — no enrollment
-          needed.
+          {isAdmin
+            ? "As admin you can open lessons, edit the course and manage content — no enrollment required."
+            : "Edit details, build lessons and deliver live classes — no enrollment needed."}
         </p>
       </div>
 
       <div className="space-y-2.5 p-6">
-        <Button onClick={onEdit} size="lg" className="w-full gap-2">
-          <Pencil className="h-4 w-4" /> Edit course
+        <Button onClick={onOpen} size="lg" className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <BookOpen className="h-4 w-4" /> Open course
         </Button>
         <Button onClick={onContent} size="lg" variant="outline" className="w-full gap-2">
-          <Hammer className="h-4 w-4" /> Add lessons &amp; quizzes
+          <Hammer className="h-4 w-4" /> Manage lessons &amp; quizzes
         </Button>
-        <Button onClick={onOpen} size="lg" variant="ghost" className="w-full gap-2">
-          <BookOpen className="h-4 w-4" /> Open course player
+        <Button onClick={onEdit} size="lg" variant="ghost" className="w-full gap-2">
+          <Pencil className="h-4 w-4" /> Edit course
         </Button>
         <p className="pt-1 text-center text-xs text-muted-foreground">
           {course.title}
