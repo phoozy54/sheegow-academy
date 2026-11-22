@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api } from "@/lib/api";
@@ -113,12 +114,14 @@ export function HomeView() {
 
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Button
+                  asChild
                   size="lg"
-                  onClick={() => navigate("courses")}
                   className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-base shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
                 >
-                  Start Learning
-                  <ArrowRight className="h-4 w-4" />
+                  <Link href="/courses">
+                    Start Learning
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </div>
 
@@ -280,13 +283,11 @@ export function HomeView() {
                 Live courses students love
               </h2>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate("courses")}
-              className="gap-1.5"
-            >
-              View all courses
-              <ArrowRight className="h-4 w-4" />
+            <Button asChild variant="outline" className="gap-1.5">
+              <Link href="/courses">
+                View all courses
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
 
@@ -304,7 +305,7 @@ export function HomeView() {
                   </Card>
                 ))
               : courses.map((c) => (
-                  <CourseCard key={c.id} course={c} enrollment={byCourse.get(c.id)} />
+                  <CourseCard key={c.id} course={c} enrollment={byCourse.get(c.id)} all={courses} />
                 ))}
           </div>
         </div>
@@ -377,23 +378,37 @@ export function HomeView() {
               expert teachers in live, interactive classes.
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {user ? (
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
+                >
+                  <Link href="/courses">
+                    Browse Courses
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  onClick={() => openAuthModal("register")}
+                  className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
+                >
+                  Create Account
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
               <Button
-                size="lg"
-                onClick={() =>
-                  user ? navigate("courses") : openAuthModal("register")
-                }
-                className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
-              >
-                {user ? "Browse Courses" : "Create Account"}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button
+                asChild
                 size="lg"
                 variant="outline"
-                onClick={() => navigate("about")}
                 className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
               >
-                Learn More
+                <Link href="/about">
+                  Learn More
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>

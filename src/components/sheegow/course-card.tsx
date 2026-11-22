@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { coursePath } from "@/lib/slug";
 import type { Course, Enrollment } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +15,14 @@ import { levelBadgeClass } from "@/lib/ui";
 export function CourseCard({
   course,
   enrollment,
+  all,
 }: {
   course: Course;
   enrollment?: Enrollment | null;
+  all: Pick<Course, "id" | "title">[];
 }) {
-  const { openCourse, openCheckout, openDashboard, openPlayer, user, openAuthModal } = useStore();
+  const { openCheckout, openDashboard, openPlayer, user, openAuthModal } = useStore();
+  const href = coursePath(course, all);
 
   const isManager =
     user?.role === "teacher" ||
@@ -36,8 +41,9 @@ export function CourseCard({
   return (
     <Card className="card-lift group flex h-full flex-col overflow-hidden p-0">
       {/* Image */}
-      <button
-        onClick={() => openCourse(course.id)}
+      <Link
+        href={href}
+        aria-label={`View ${course.title}`}
         className="relative block aspect-[16/9] w-full overflow-hidden"
       >
         {course.image ? (
@@ -62,7 +68,7 @@ export function CourseCard({
         >
           {course.level}
         </Badge>
-      </button>
+      </Link>
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-4">
@@ -78,12 +84,12 @@ export function CourseCard({
           )}
         </div>
 
-        <button
-          onClick={() => openCourse(course.id)}
+        <Link
+          href={href}
           className="mb-2 line-clamp-2 text-left text-base font-bold leading-snug transition-colors hover:text-indigo-600"
         >
           {course.title}
-        </button>
+        </Link>
 
         <p className="mb-3 line-clamp-2 flex-1 text-sm text-muted-foreground">
           {course.description}

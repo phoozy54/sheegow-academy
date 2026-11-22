@@ -1,16 +1,18 @@
 ﻿import type { Metadata } from "next";
+import { SeoShell } from "@/components/sheegow/seo/seo-shell";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Terms of Service | SHEEGOW ACADEMY",
   description:
     "The terms that apply when you use the SHEEGOW ACADEMY website, contact us, or enrol in live English classes.",
-  alternates: { canonical: "https://www.sheegowacademy.com/terms" },
-  robots: { index: true, follow: true },
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <SeoShell>
+      <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="text-3xl font-bold tracking-tight">Terms of Service</h1>
       <p className="mt-4 text-muted-foreground">
         These terms apply when you use sheegowacademy.com or enrol in
@@ -77,6 +79,7 @@ export default function TermsPage() {
         (Somalia), without affecting consumer rights that local law grants
         you.
       </p>
-    </main>
+      </div>
+    </SeoShell>
   );
 }

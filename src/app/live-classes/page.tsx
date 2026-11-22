@@ -1,24 +1,18 @@
 ﻿import type { Metadata } from "next";
+import { SeoShell } from "@/components/sheegow/seo/seo-shell";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Live Classes | SHEEGOW ACADEMY — Real-time English Lessons",
+export const metadata: Metadata = pageMeta({
+  title: "Live Classes | SHEEGOW ACADEMY",
   description:
     "Every SHEEGOW ACADEMY lesson is a live, real-time video class with a real teacher: speaking practice, instant correction, and small groups. See how live classes work.",
-  alternates: { canonical: "https://www.sheegowacademy.com/live-classes" },
-  openGraph: {
-    title: "Live Classes at SHEEGOW ACADEMY",
-    description:
-      "Real-time video classes with a real teacher — speaking practice in every lesson.",
-    url: "https://www.sheegowacademy.com/live-classes",
-    siteName: "SHEEGOW ACADEMY",
-    locale: "en_US",
-    type: "website",
-  },
-};
+  path: "/live-classes",
+});
 
 export default function LiveClassesPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <SeoShell>
+      <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="text-3xl font-bold tracking-tight">
         Live classes — how it works
       </h1>
@@ -65,6 +59,7 @@ export default function LiveClassesPage() {
           Find your course
         </a>
       </p>
-    </main>
+      </div>
+    </SeoShell>
   );
 }

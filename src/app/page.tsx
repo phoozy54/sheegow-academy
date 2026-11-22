@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useStore } from "@/lib/store";
 import { Navbar } from "@/components/sheegow/navbar";
@@ -90,7 +91,9 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <AppLinkBridge />
+      <Suspense fallback={null}>
+        <AppLinkBridge />
+      </Suspense>
       <Navbar />
       <main className="flex-1">
         {view === "home" && <HomeView />}

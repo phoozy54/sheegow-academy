@@ -2,6 +2,8 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 
+export { slugify, courseSlug, coursePath } from "@/lib/slug";
+
 /** The single canonical origin for every public page. */
 export const SITE_URL = "https://www.sheegowacademy.com";
 export const SITE_NAME = "SHEEGOW ACADEMY";
@@ -93,33 +95,6 @@ export function pageMeta({
       images: [OG_IMAGE.url],
     },
   };
-}
-
-export function slugify(value: string): string {
-  return (
-    value
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      // Course titles imported from the DB can contain mojibake for em dashes.
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 70) || "course"
-  );
-}
-
-/** Stable URL segment per course, de-duplicated against the active catalog. */
-export function courseSlug(course: SeoCourse, all: SeoCourse[]): string {
-  const base = slugify(course.title);
-  const taken = new Set(all.map((c) => slugify(c.title)));
-  const duplicates = all.filter((c) => slugify(c.title) === base);
-  if (duplicates.length <= 1 && !taken.has(`${base}-2`)) return base;
-  const index = duplicates.findIndex((c) => c.id === course.id);
-  return index > 0 ? `${base}-${index + 1}` : base;
-}
-
-export function coursePath(course: SeoCourse, all: SeoCourse[]): string {
-  return `/courses/${courseSlug(course, all)}`;
 }
 
 /** Keep titles <= 60 and descriptions <= 155 characters. */

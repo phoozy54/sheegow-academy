@@ -1,24 +1,18 @@
 ﻿import type { Metadata } from "next";
+import { SeoShell } from "@/components/sheegow/seo/seo-shell";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "About SHEEGOW ACADEMY | Live English Classes in Hargeisa & Online",
+export const metadata: Metadata = pageMeta({
+  title: "About SHEEGOW ACADEMY | Live English Classes",
   description:
     "SHEEGOW ACADEMY teaches English through live, interactive video classes with a real teacher — in Hargeisa and online, for learners everywhere.",
-  alternates: { canonical: "https://www.sheegowacademy.com/about" },
-  openGraph: {
-    title: "About SHEEGOW ACADEMY",
-    description:
-      "Live English classes with a real teacher — in Hargeisa and online.",
-    url: "https://www.sheegowacademy.com/about",
-    siteName: "SHEEGOW ACADEMY",
-    locale: "en_US",
-    type: "website",
-  },
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <SeoShell>
+      <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="text-3xl font-bold tracking-tight">
         About SHEEGOW ACADEMY
       </h1>
@@ -104,6 +98,7 @@ export default function AboutPage() {
           See our courses
         </a>
       </p>
-    </main>
+      </div>
+    </SeoShell>
   );
 }

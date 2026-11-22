@@ -1,6 +1,8 @@
 "use client";
 
-import { useStore } from "@/lib/store";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useStore, type View } from "@/lib/store";
 import {
   GraduationCap,
   Mail,
@@ -14,8 +16,20 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+type FooterLink = {
+  label: string;
+  href?: string;
+  view?: View;
+};
+
 export function Footer() {
-  const { navigate } = useStore();
+  const { openAuthModal } = useStore();
+  const router = useRouter();
+
+  /** Interactive-only views get an addressable URL on the app root. */
+  const goApp = (view: View) => {
+    router.push(view === "home" ? "/" : `/?view=${view}`);
+  };
 
   return (
     <footer className="mt-auto border-t bg-gradient-to-b from-background to-indigo-50/40">
@@ -75,8 +89,9 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <button
-              onClick={() => navigate("home")}
+            <Link
+              href="/"
+              aria-label="SHEEGOW ACADEMY — home"
               className="mb-4 flex items-center gap-2.5"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
@@ -90,7 +105,7 @@ export function Footer() {
                   ACADEMY
                 </span>
               </span>
-            </button>
+            </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Live English learning platform for students everywhere. Learn with
               expert teachers in real-time interactive classes.
@@ -108,19 +123,28 @@ export function Footer() {
               Learn
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {[
-                { label: "All Courses", view: "courses" as const },
-                { label: "Live Classes", view: "live" as const },
+              {([
+                { label: "All Courses", href: "/courses" },
+                { label: "Live Classes", href: "/live-classes" },
                 { label: "My Dashboard", view: "dashboard" as const },
                 { label: "My Courses", view: "my-courses" as const },
-              ].map((l) => (
+              ] as FooterLink[]).map((l) => (
                 <li key={l.label}>
-                  <button
-                    onClick={() => navigate(l.view)}
-                    className="text-muted-foreground transition-colors hover:text-indigo-600"
-                  >
-                    {l.label}
-                  </button>
+                  {l.href ? (
+                    <Link
+                      href={l.href}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => l.view && goApp(l.view)}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -132,19 +156,29 @@ export function Footer() {
               Company
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {[
-                { label: "About Us", view: "about" as const },
-                { label: "Contact", view: "contact" as const },
-                { label: "Become a Teacher", view: "register" as const },
-                { label: "Terms & Privacy", view: "about" as const },
-              ].map((l) => (
+              {([
+                { label: "About Us", href: "/about" },
+                { label: "Contact", href: "/contact" },
+                { label: "Become a Teacher" },
+                { label: "Terms", href: "/terms" },
+                { label: "Privacy Policy", href: "/privacy" },
+              ] as FooterLink[]).map((l) => (
                 <li key={l.label}>
-                  <button
-                    onClick={() => navigate(l.view)}
-                    className="text-muted-foreground transition-colors hover:text-indigo-600"
-                  >
-                    {l.label}
-                  </button>
+                  {l.href ? (
+                    <Link
+                      href={l.href}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => openAuthModal("register")}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

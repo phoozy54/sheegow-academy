@@ -1,24 +1,18 @@
 ﻿import type { Metadata } from "next";
+import { SeoShell } from "@/components/sheegow/seo/seo-shell";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Contact SHEEGOW ACADEMY | WhatsApp, Phone & Email",
   description:
     "Talk to a real person at SHEEGOW ACADEMY: WhatsApp +252 63 4085151, phone, or email info@sheegowacademy.com. We answer questions about classes, levels and schedules.",
-  alternates: { canonical: "https://www.sheegowacademy.com/contact" },
-  openGraph: {
-    title: "Contact SHEEGOW ACADEMY",
-    description:
-      "WhatsApp, phone or email — a real person answers your questions about live English classes.",
-    url: "https://www.sheegowacademy.com/contact",
-    siteName: "SHEEGOW ACADEMY",
-    locale: "en_US",
-    type: "website",
-  },
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <SeoShell>
+      <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="text-3xl font-bold tracking-tight">Contact us</h1>
       <p className="mt-6 text-muted-foreground">
         Do you have a question about which class fits your level, when lessons
@@ -75,6 +69,7 @@ export default function ContactPage() {
         </a>{" "}
         and pick your level, or ask us on WhatsApp and we will pick it for you.
       </p>
-    </main>
+      </div>
+    </SeoShell>
   );
 }

@@ -1,16 +1,18 @@
 ﻿import type { Metadata } from "next";
+import { SeoShell } from "@/components/sheegow/seo/seo-shell";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Privacy Policy | SHEEGOW ACADEMY",
   description:
     "How SHEEGOW ACADEMY collects, uses and protects your information when you use our website, contact us, or join live English classes.",
-  alternates: { canonical: "https://www.sheegowacademy.com/privacy" },
-  robots: { index: true, follow: true },
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <SeoShell>
+      <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="text-3xl font-bold tracking-tight">Privacy Policy</h1>
       <p className="mt-4 text-muted-foreground">
         SHEEGOW ACADEMY (&quot;we&quot;) respects your privacy. This policy
@@ -90,6 +92,7 @@ export default function PrivacyPage() {
         If this policy changes materially, we will update this page and the
         date above.
       </p>
-    </main>
+      </div>
+    </SeoShell>
   );
 }

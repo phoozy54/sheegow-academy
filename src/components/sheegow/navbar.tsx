@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api } from "@/lib/api";
@@ -52,18 +54,18 @@ type View =
   | "admin-live"
   | "admin-teachers";
 
-const NAV_LINKS: { label: string; view: View }[] = [
-  { label: "Home", view: "home" },
-  { label: "Courses", view: "courses" },
-  { label: "Live Classes", view: "live" },
-  { label: "About", view: "about" },
-  { label: "Contact", view: "contact" },
+/** Public pages are real routes — crawlable, shareable, openable in a new tab. */
+const NAV_LINKS: { label: string; href: string; view: View }[] = [
+  { label: "Home", href: "/", view: "home" },
+  { label: "Courses", href: "/courses", view: "courses" },
+  { label: "Live Classes", href: "/live-classes", view: "live" },
+  { label: "About", href: "/about", view: "about" },
+  { label: "Contact", href: "/contact", view: "contact" },
 ];
 
 export function Navbar() {
   const {
     view,
-    navigate,
     user,
     setUser,
     authLoading,
@@ -73,6 +75,8 @@ export function Navbar() {
     openAuthModal,
   } = useStore();
   const { isMobile, isTablet } = useDevice();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -97,10 +101,16 @@ export function Navbar() {
       /* ignore */
     }
     setUser(null);
-    navigate("home");
+    router.push("/");
   };
 
-  const go = (v: View) => navigate(v);
+  /** Interactive-only views get an addressable URL on the app root. */
+  const goApp = (v: View) => {
+    router.push(v === "home" ? "/" : `/?view=${v}`);
+  };
+
+  const isActive = (link: (typeof NAV_LINKS)[number]) =>
+    pathname === "/" ? view === link.view : pathname === link.href;
 
   return (
     <>
@@ -116,8 +126,9 @@ export function Navbar() {
             isMobile ? "px-3" : isTablet ? "px-5" : "px-8"
           }`}
         >
-          <button
-            onClick={() => go("home")}
+          <Link
+            href="/"
+            aria-label="SHEEGOW ACADEMY — home"
             className="flex shrink-0 items-center gap-2.5 transition-transform hover:scale-105 sm:gap-2.5"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
@@ -131,29 +142,33 @@ export function Navbar() {
                 ACADEMY
               </span>
             </span>
-          </button>
+          </Link>
 
           <nav
             className={`hidden items-center md:flex ${isTablet ? "gap-0.5" : "gap-1"}`}
           >
-            {NAV_LINKS.map((link) => (
-              <button
-                key={link.view}
-                onClick={() => go(link.view)}
-                className={`relative rounded-lg py-2 font-medium transition-colors ${
-                  isTablet ? "px-2.5 text-[13px]" : "px-4 text-sm"
-                } ${
-                  view === link.view
-                    ? "text-indigo-600"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {link.label}
-                {view === link.view && (
-                  <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-indigo-500" />
-                )}
-              </button>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`relative rounded-lg py-2 font-medium transition-colors ${
+                    isTablet ? "px-2.5 text-[13px]" : "px-4 text-sm"
+                  } ${
+                    active
+                      ? "text-indigo-600"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                  {active && (
+                    <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-indigo-500" />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
           <div
@@ -196,13 +211,13 @@ export function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => go("dashboard")}>
+                  <DropdownMenuItem onClick={() => goApp("dashboard")}>
                     <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => go("my-courses")}>
+                  <DropdownMenuItem onClick={() => goApp("my-courses")}>
                     <BookOpen className="mr-2 h-4 w-4" /> My Courses
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => go("profile")}>
+                  <DropdownMenuItem onClick={() => goApp("profile")}>
                     <UserIcon className="mr-2 h-4 w-4" /> Profile Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -255,20 +270,24 @@ export function Navbar() {
                 </span>
               </SheetTitle>
               <nav className="flex flex-col gap-1">
-                {NAV_LINKS.map((link) => (
-                  <SheetClose asChild key={link.view}>
-                    <button
-                      onClick={() => go(link.view)}
-                      className={`rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
-                        view === link.view
-                          ? "bg-indigo-50 text-indigo-600"
-                          : "text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {link.label}
-                    </button>
-                  </SheetClose>
-                ))}
+                {NAV_LINKS.map((link) => {
+                  const active = isActive(link);
+                  return (
+                    <SheetClose asChild key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={active ? "page" : undefined}
+                        className={`rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
+                          active
+                            ? "bg-indigo-50 text-indigo-600"
+                            : "text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    </SheetClose>
+                  );
+                })}
               </nav>
               <div className="mt-6 border-t pt-4">
                 {user ? (
@@ -293,7 +312,7 @@ export function Navbar() {
                       <Button
                         variant="outline"
                         className="justify-start"
-                        onClick={() => go("dashboard")}
+                        onClick={() => goApp("dashboard")}
                       >
                         <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                       </Button>
@@ -302,7 +321,7 @@ export function Navbar() {
                       <Button
                         variant="outline"
                         className="justify-start"
-                        onClick={() => go("my-courses")}
+                        onClick={() => goApp("my-courses")}
                       >
                         <BookOpen className="mr-2 h-4 w-4" /> My Courses
                       </Button>
