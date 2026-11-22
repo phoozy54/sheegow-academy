@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { getCurrentUser, isAdminRole, requireTeacherOrAdmin } from "@/lib/auth";
+import { isAdminRole, requireTeacherOrAdmin } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError, nonEmpty } from "@/lib/api-helpers";
 
 interface CreateCourseBody {
@@ -56,14 +56,15 @@ export async function GET(req: Request) {
       ...(search ? { title: { contains: search } } : {}),
     } as const;
 
-    // Price is a purchase detail: only reveal it to a signed-in user.
-    const viewer = await getCurrentUser();
+    // Prices are public: the card shows the course price and the full total
+    // is confirmed at checkout. Keeping this in the public projection makes
+    // the site, the JSON-LD and the rendered UI consistent for every visitor.
     const select = {
       id: true,
       title: true,
       description: true,
       level: true,
-      ...(viewer ? { price: true } : {}),
+      price: true,
       duration: true,
       image: true,
       teacherId: true,

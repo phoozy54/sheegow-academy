@@ -135,10 +135,18 @@ export function CourseCard({
         {/* Real price from the catalogue — full total is confirmed at checkout */}
         <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
           <span className="text-sm font-bold text-foreground">
-            {formatPrice(course.price)}
-            <span className="ml-1 text-xs font-normal text-muted-foreground">
-              USD
-            </span>
+            {typeof course.price === "number" && Number.isFinite(course.price) ? (
+              <>
+                {formatPrice(course.price)}
+                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                  USD
+                </span>
+              </>
+            ) : (
+              <span className="text-xs font-normal text-muted-foreground">
+                Price at checkout
+              </span>
+            )}
           </span>
           <Button
             size="sm"
