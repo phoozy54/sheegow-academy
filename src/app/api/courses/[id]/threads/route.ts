@@ -12,6 +12,7 @@ import {
   safeBody,
   limitRequest,
 } from "@/lib/api-helpers";
+import { awardPoints, checkAndAwardBadges, POINTS } from "@/lib/gamification";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -246,7 +247,15 @@ export async function POST(req: Request, { params }: RouteContext) {
       })),
     };
 
-    return jsonOk({ thread: payload }, 201);
+    // Gamification: small points for starting a discussion. Only students
+    // accrue points (teachers/admins post announcements, not "questions").
+    let newBadges: string[] = [];
+    if (actor.role === "student") {
+      await awardPoints(actor.id, POINTS.threadCreate, "thread_create");
+      newBadges = await checkAndAwardBadges(actor.id);
+    }
+
+    return jsonOk({ thread: payload, newBadges }, 201);
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;

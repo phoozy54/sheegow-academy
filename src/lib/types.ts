@@ -657,3 +657,125 @@ export interface SearchResponse {
   /** Only populated for admin / teacher sessions. */
   users?: SearchUserResult[];
 }
+
+// ─── GAMIFICATION ─────────────────────────────────────
+// Points reward learning actions, streaks track consecutive days of activity,
+// and badges are one-time achievement awards. Returned by /api/me/gamification.
+
+export interface GamificationBadge {
+  /** Stable identifier — see BadgeType in src/lib/badge-metadata.ts. */
+  type: string;
+  /** ISO timestamp when the badge was awarded. */
+  awardedAt: string;
+}
+
+export interface GamificationData {
+  points: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastActiveDate: string | null;
+  badges: GamificationBadge[];
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  studentId: string;
+  fullName: string;
+  username?: string | null;
+  points: number;
+  currentStreak: number;
+  profilePicture?: string | null;
+}
+
+export interface LeaderboardResponse {
+  entries: LeaderboardEntry[];
+  /** Rank of the current viewer (1-based). null when not signed in or below
+   *  the rank cutoff returned. Useful for the "your rank" callout. */
+  currentUserRank: number | null;
+  /** The viewer's own entry, if any. null when not signed in. */
+  currentUser: LeaderboardEntry | null;
+}
+
+
+// ─── REFUND REQUESTS ──────────────────────────────────────
+// A student asks for their money back on a completed payment. Admins review
+// the request: approving flips the payment status to "refunded" and notifies
+// the student; rejecting leaves the payment as "completed".
+
+export type RefundStatus = "pending" | "approved" | "rejected";
+
+export interface RefundRequest {
+  id: string;
+  paymentId: string;
+  studentId: string;
+  reason: string;
+  status: RefundStatus;
+  adminNote?: string | null;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  payment?: Payment | null;
+  /** Populated when the request is fetched by an admin (cross-user). */
+  student?: Pick<
+    User,
+    "id" | "fullName" | "email" | "phone" | "profilePicture"
+  > | null;
+}
+
+// ─── COURSE BUNDLES ─────────────────────────────────────
+// A bundle is a discounted package of multiple courses. Students buy the
+// bundle once and are auto-enrolled in every included course. The list
+// endpoints include the bundle's courses with teacher + image for cards.
+
+export interface BundleCourseItem {
+  id: string;
+  bundleId: string;
+  courseId: string;
+  course: Course;
+}
+
+export interface Bundle {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  courses: BundleCourseItem[];
+}
+
+/** Lightweight course projection embedded inside a bundle's course list. */
+export interface BundleCourseSummary {
+  id: string;
+  title: string;
+  description: string;
+  level: string;
+  price: number;
+  duration: number;
+  image?: string | null;
+  teacher?: {
+    id: string;
+    fullName: string;
+    profilePicture?: string | null;
+  } | null;
+}
+
+/** GET /api/bundles payload — flattened for cards & checkout. */
+export interface BundleWithCourses extends Omit<Bundle, "courses"> {
+  courses: BundleCourseSummary[];
+  /** Sum of the included courses' individual prices (for the savings badge). */
+  originalTotal: number;
+  /** `originalTotal - price` (a positive number when the bundle is discounted). */
+  savings: number;
+}
+
+/** POST /api/bundles/:id/checkout response. */
+export interface BundleCheckoutResult {
+  payment: Payment;
+  enrollments: Enrollment[];
+  bundle: Pick<Bundle, "id" | "title" | "price">;
+  finalAmount: number;
+  alreadyEnrolledCourseIds: string[];
+}

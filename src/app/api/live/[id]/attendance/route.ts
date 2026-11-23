@@ -5,6 +5,7 @@ import { isAdminRole, requireAuth } from "@/lib/auth";
 import { jsonError, handleAuthError, safeBody } from "@/lib/api-helpers";
 import { hasApprovedTrial } from "@/lib/trial-access";
 import { rateLimit } from "@/lib/rate-limit";
+import { awardPoints, updateStreak, checkAndAwardBadges, POINTS } from "@/lib/gamification";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -80,7 +81,7 @@ export async function POST(req: Request, { params }: RouteContext) {
 
     const liveClass = await db.liveClass.findUnique({
       where: { id },
-      select: { id: true, courseId: true, teacherId: true },
+      select: { id: true, courseId: true, teacherId: true, scheduledAt: true },
     });
     if (!liveClass) return jsonError("Live class not found", 404);
     if (!(await canAccessClass(user, liveClass))) return jsonError("Forbidden", 403);
@@ -98,6 +99,7 @@ export async function POST(req: Request, { params }: RouteContext) {
 
     const now = new Date();
     const existing = await findRecord(id, user.id);
+    const firstJoin = action === "join" && !existing;
 
     if (action === "join") {
       if (existing) {
@@ -135,7 +137,21 @@ export async function POST(req: Request, { params }: RouteContext) {
     }
 
     if (action !== "heartbeat") await syncAttendeeCount(id);
-    return NextResponse.json({ recorded: true });
+
+    // Gamification: award points + extend the streak the first time the
+    // student joins a class. Heartbeats and leave actions never re-award.
+    let newBadges: string[] = [];
+    if (firstJoin) {
+      await awardPoints(user.id, POINTS.liveAttendance, "live_attendance");
+      await updateStreak(user.id);
+      // early_bird / night_owl depend on the class start time.
+      const hour = new Date(liveClass.scheduledAt).getHours();
+      if (hour < 9 || hour >= 21) {
+        newBadges = await checkAndAwardBadges(user.id);
+      }
+    }
+
+    return NextResponse.json({ recorded: true, newBadges });
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;

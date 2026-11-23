@@ -7,6 +7,7 @@ export const CONVERSION_EVENTS = [
   "pathway_business",
   "trial_enquiry",
   "checkout_start",
+  "bundle_checkout_start",
 ] as const;
 
 export type ConversionEvent = (typeof CONVERSION_EVENTS)[number];

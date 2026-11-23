@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
 import { jsonError, handleAuthError, safeBody } from "@/lib/api-helpers";
 import { decideCourseContentAccess, recomputeEnrollmentProgress, recordLearningEvent } from "@/lib/content-access";
+import { awardPoints, updateStreak, checkAndAwardBadges, POINTS } from "@/lib/gamification";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -54,8 +55,9 @@ export async function POST(req: Request, { params }: RouteContext) {
 
     const existing = await db.lessonProgress.findUnique({
       where: { studentId_lessonId: { studentId: user.id, lessonId: id } },
-      select: { secondsWatched: true },
+      select: { secondsWatched: true, status: true },
     });
+    const newlyCompleted = status === "completed" && existing?.status !== "completed";
 
     const progress = await db.lessonProgress.upsert({
       where: { studentId_lessonId: { studentId: user.id, lessonId: id } },
@@ -85,7 +87,16 @@ export async function POST(req: Request, { params }: RouteContext) {
       metadata: { lastPositionSec, secondsWatched },
     });
 
-    return NextResponse.json({ progress, completion });
+    // Gamification: only fire on the first completion, so a re-save does not
+    // double-count points. Streak + badges are idempotent in the helpers.
+    let newBadges: string[] = [];
+    if (newlyCompleted) {
+      await awardPoints(user.id, POINTS.lessonComplete, "lesson_complete");
+      await updateStreak(user.id);
+      newBadges = await checkAndAwardBadges(user.id);
+    }
+
+    return NextResponse.json({ progress, completion, newBadges });
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;

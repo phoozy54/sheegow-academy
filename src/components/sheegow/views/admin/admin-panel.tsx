@@ -52,6 +52,7 @@ import {
   MoreVertical,
   MailOpen,
   CheckCircle2,
+  Package,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminDashboard } from "./admin-dashboard";
@@ -59,10 +60,12 @@ import { AdminCourses } from "./admin-courses";
 import { AdminStudents } from "./admin-students";
 import { AdminLive } from "./admin-live";
 import { AdminTeachers } from "./admin-teachers";
+import { AdminBundles } from "./admin-bundles";
 
 type AdminView =
   | "dashboard"
   | "courses"
+  | "bundles"
   | "students"
   | "live"
   | "teachers"
@@ -77,6 +80,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "courses", label: "Courses", icon: BookOpen },
+  { id: "bundles", label: "Bundles", icon: Package },
   { id: "students", label: "Students", icon: Users },
   { id: "live", label: "Live Classes", icon: Video },
   { id: "teachers", label: "Teachers", icon: GraduationCap },
@@ -86,6 +90,7 @@ const NAV_ITEMS: NavItem[] = [
 const VIEW_TITLES: Record<AdminView, string> = {
   dashboard: "Dashboard",
   courses: "Courses",
+  bundles: "Course Bundles",
   students: "Students & Users",
   live: "Live Classes",
   teachers: "Teachers",
@@ -94,8 +99,8 @@ const VIEW_TITLES: Record<AdminView, string> = {
 
 /**
  * Teachers may only manage their own courses and live classes. Staff/user
- * management and contact messages stay with administrators, and creating
- * teachers is reserved for the super admin.
+ * management, bundles, and contact messages stay with administrators, and
+ * creating teachers is reserved for the super admin.
  */
 function allowedViewsFor(role: string): Set<AdminView> {
   if (role === "super_admin") return new Set(NAV_ITEMS.map((n) => n.id));
@@ -103,6 +108,7 @@ function allowedViewsFor(role: string): Set<AdminView> {
     return new Set<AdminView>([
       "dashboard",
       "courses",
+      "bundles",
       "students",
       "live",
       "messages",
@@ -293,6 +299,7 @@ export function AdminPanel() {
         <main className="flex-1 p-4 sm:p-6">
           {safeView === "dashboard" && <AdminDashboard />}
           {safeView === "courses" && <AdminCourses />}
+          {safeView === "bundles" && <AdminBundles />}
           {safeView === "students" && <AdminStudents />}
           {safeView === "live" && <AdminLive />}
           {safeView === "teachers" && <AdminTeachers />}

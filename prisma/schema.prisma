@@ -54,6 +54,12 @@ model User {
   wishlist      Wishlist[]
   // In-app notifications (announcements, replies, DMs, class reminders, etc.).
   notifications Notification[]
+  // Refund requests submitted by this user (as student).
+  refundRequests RefundRequest[]
+  // Gamification: total points, day streak, and earned achievement badges.
+  studentPoints StudentPoints?
+  streak        Streak?
+  badges        Badge[]
 }
 
 // ─── COURSE ─────────────────────────────────────────────
@@ -88,6 +94,8 @@ model Course {
   threads       DiscussionThread[]
   // Wishlist / favorites — students who saved this course for later.
   wishlistItems Wishlist[]
+  // Bundle membership — courses grouped into a discounted package.
+  bundleItems  BundleCourse[]
 }
 
 // ─── ENROLLMENT ─────────────────────────────────────────
@@ -146,6 +154,8 @@ model Payment {
   student     User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course      Course?      @relation(fields: [courseId], references: [id])
   enrollment  Enrollment?
+  // Refund requests tied to this payment (one pending/approved at a time).
+  refundRequest RefundRequest?
 }
 
 // ─── REVIEW ────────────────────────────────────────────
@@ -594,4 +604,87 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+// ─── COURSE BUNDLES ─────────────────────────────────────
+// A bundle is a discounted package of multiple courses. Students buy the
+// bundle once and are auto-enrolled in every included course. The price is
+// typically lower than the sum of the individual course prices.
+
+model Bundle {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  courses     BundleCourse[]
+}
+
+model BundleCourse {
+  id        String @id @default(cuid())
+  bundleId  String
+  courseId  String
+  bundle    Bundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, courseId])
+}
+
+// ─── REFUND REQUESTS ─────────────────────────────────────
+// A student asks for their money back on a completed payment. An admin
+// reviews it and either approves (the linked payment flips to "refunded"
+// and the student is notified) or rejects. Only one pending/approved refund
+// can exist per payment — a duplicate POST is rejected client-side.
+model RefundRequest {
+  id          String   @id @default(cuid())
+  paymentId   String   @unique
+  studentId   String
+  reason      String
+  status      String   @default("pending") // "pending" | "approved" | "rejected"
+  adminNote   String?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  payment  Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  student  User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, createdAt])
+  @@index([status, createdAt])
+}
+
+// ─── GAMIFICATION ──────────────────────────────────────────
+// Points reward concrete learning actions (lessons, quizzes, attendance...),
+// streaks track consecutive days of activity, and badges are one-time awards
+// for milestones (first lesson, 7-day streak, etc.).
+
+model StudentPoints {
+  id        String  @id @default(cuid())
+  studentId String  @unique
+  points    Int     @default(0)
+  student   User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Streak {
+  id            String    @id @default(cuid())
+  studentId     String    @unique
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastActiveDate DateTime?
+  student       User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Badge {
+  id        String   @id @default(cuid())
+  studentId String
+  // first_lesson | first_course | streak_7 | streak_30 | quiz_master |
+  // social_butterfly | early_bird | night_owl | polyglot | perfect_attendance
+  badgeType String
+  awardedAt DateTime @default(now())
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, badgeType])
 }

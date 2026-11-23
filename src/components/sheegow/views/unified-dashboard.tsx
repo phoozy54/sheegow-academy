@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Enrollment, LiveClass, Payment, Role, User, WishlistItem } from "@/lib/types";
+import type { Course, Enrollment, LiveClass, Payment, RefundRequest, Role, User, WishlistItem } from "@/lib/types";
 import {
   cn,
   formatDate,
@@ -20,6 +20,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Sheet,
   SheetContent,
@@ -59,6 +68,7 @@ import {
   Hammer,
   Download,
   Heart,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -73,8 +83,11 @@ import { AdminMessages } from "./admin/admin-panel";
 import { AdminPayments } from "./admin/admin-payments";
 import { AdminTrialRequests } from "./admin/admin-trial-requests";
 import { GradebookView } from "./admin/gradebook-view";
+import { AdminRefunds } from "./admin/admin-refunds";
+import { StudentRefunds } from "./student-refunds";
 import { LibraryView } from "./library-view";
 import { ContentBuilderView } from "./content-builder-view";
+import { GamificationWidget } from "@/components/sheegow/gamification-widget";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -88,6 +101,8 @@ type SectionId =
   | "teachers"
   | "payments"
   | "my-payments"
+  | "my-refunds"
+  | "refunds"
   | "trial-requests"
   | "gradebook"
   | "messages"
@@ -111,6 +126,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "courses", label: "My Courses", icon: BookOpen, roles: ["student"] },
   { id: "library", label: "My Library", icon: Library, roles: ["student"] },
   { id: "my-payments", label: "My Payments", icon: DollarSign, roles: ["student"] },
+  { id: "my-refunds", label: "Refund Requests", icon: RotateCcw, roles: ["student"] },
   { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", ...ADMIN_ROLES] },
   { id: "content-builder", label: "Content Builder", icon: Hammer, roles: ["teacher", ...ADMIN_ROLES] },
   { id: "live", label: "Live Classes", icon: Video, roles: ALL_ROLES },
@@ -118,6 +134,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "students", label: "Manage Students", icon: Users, roles: ADMIN_ROLES },
   { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["super_admin"] },
   { id: "payments", label: "Payments", icon: DollarSign, roles: ADMIN_ROLES },
+  { id: "refunds", label: "Refund Requests", icon: RotateCcw, roles: ADMIN_ROLES },
   { id: "trial-requests", label: "Trial Requests", icon: ClipboardCheck, roles: ADMIN_ROLES },
   { id: "gradebook", label: "Gradebook", icon: GraduationCap, roles: ["teacher", ...ADMIN_ROLES] },
   { id: "messages", label: "Messages", icon: MessageSquare, roles: ADMIN_ROLES },
@@ -134,6 +151,8 @@ const SECTION_TITLES: Record<SectionId, string> = {
   teachers: "Teachers",
   payments: "Payments & Revenue",
   "my-payments": "My Payments",
+  "my-refunds": "My Refund Requests",
+  refunds: "Refund Requests",
   "trial-requests": "Trial Requests",
   gradebook: "Gradebook",
   messages: "Contact Messages",
@@ -404,7 +423,9 @@ export function UnifiedDashboard() {
           {section === "payments" && isAdmin && (
             <AdminPayments canManage={role === "super_admin"} />
           )}
+          {section === "refunds" && isAdmin && <AdminRefunds />}
           {section === "my-payments" && role === "student" && <StudentPayments />}
+          {section === "my-refunds" && role === "student" && <StudentRefunds />}
           {section === "trial-requests" && isAdmin && <AdminTrialRequests />}
           {section === "gradebook" && (role === "teacher" || isAdmin) && <GradebookView />}
           {section === "messages" && isAdmin && <AdminMessages />}
@@ -662,6 +683,9 @@ function StudentOverview() {
           <StatCard icon={Heart} label="Wishlist" value={stats.wishlist} color="bg-rose-100 text-rose-600" />
         </button>
       </div>
+
+      {/* Gamification — points, streak, badges */}
+      <GamificationWidget />
 
       {/* Two columns */}
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
@@ -1269,14 +1293,31 @@ function ProfileInline() {
 
 function StudentPayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [refundByPaymentId, setRefundByPaymentId] = useState<
+    Record<string, RefundRequest>
+  >({});
   const [loading, setLoading] = useState(true);
+  const [refundPaymentId, setRefundPaymentId] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let active = true;
-    api
-      .paymentHistory()
-      .then((r) => active && setPayments(r.payments))
-      .catch(() => active && setPayments([]))
+    Promise.all([
+      api.paymentHistory().catch(() => ({ payments: [] as Payment[] })),
+      api.refunds().catch(() => ({ refunds: [] as RefundRequest[] })),
+    ])
+      .then(([pRes, rRes]) => {
+        if (!active) return;
+        setPayments(pRes.payments);
+        const map: Record<string, RefundRequest> = {};
+        for (const r of rRes.refunds) {
+          // Keep only the latest record per payment (the API returns them
+          // sorted by createdAt desc, so the first one wins).
+          if (!map[r.paymentId]) map[r.paymentId] = r;
+        }
+        setRefundByPaymentId(map);
+      })
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
@@ -1286,6 +1327,86 @@ function StudentPayments() {
   const totalPaid = payments
     .filter((p) => p.status === "completed")
     .reduce((sum, p) => sum + p.amount, 0);
+
+  async function submitRefund() {
+    if (!refundPaymentId) return;
+    const trimmed = reason.trim();
+    if (!trimmed) {
+      toast.error("Please describe why you are requesting a refund");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await api.createRefund({ paymentId: refundPaymentId, reason: trimmed });
+      setRefundByPaymentId((prev) => ({ ...prev, [refundPaymentId]: res.refund }));
+      toast.success("Refund request submitted — we'll review it shortly");
+      setRefundPaymentId(null);
+      setReason("");
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "Failed to submit refund request"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function refundBadge(r: RefundRequest | undefined) {
+    if (!r) return null;
+    if (r.status === "approved") {
+      return (
+        <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
+          Refund approved
+        </Badge>
+      );
+    }
+    if (r.status === "rejected") {
+      return (
+        <Badge className="border-rose-200 bg-rose-50 text-rose-700">
+          Refund rejected
+        </Badge>
+      );
+    }
+    return (
+      <Badge className="border-amber-200 bg-amber-50 text-amber-700">
+        Refund pending
+      </Badge>
+    );
+  }
+
+  function refundCell(p: Payment) {
+    const refund = refundByPaymentId[p.id];
+    // Already refunded (payment status flipped) — show the badge only.
+    if (p.status === "refunded") {
+      return (
+        <Badge className="border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700">
+          Refunded
+        </Badge>
+      );
+    }
+    if (p.status !== "completed") {
+      return <span className="text-xs text-muted-foreground">—</span>;
+    }
+    if (refund && (refund.status === "pending" || refund.status === "approved")) {
+      return refundBadge(refund);
+    }
+    // No active refund — show the request button (and offer re-request after
+    // a previous rejection).
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => {
+          setRefundPaymentId(p.id);
+          setReason("");
+        }}
+        className="gap-1.5 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+      >
+        <RotateCcw className="h-3.5 w-3.5" />
+        Request Refund
+      </Button>
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -1317,7 +1438,8 @@ function StudentPayments() {
       <p className="text-sm text-muted-foreground">
         Download a printable invoice (PDF) for any completed payment. Click
         the download link to open the receipt page, then use your browser&apos;s
-        print dialog to save it.
+        print dialog to save it. If a payment didn&apos;t go as expected, you can
+        request a refund and our team will review it.
       </p>
 
       {loading ? (
@@ -1367,6 +1489,9 @@ function StudentPayments() {
                     </a>
                   )}
                 </div>
+                <div className="mt-2 flex items-center justify-end">
+                  {refundCell(p)}
+                </div>
               </Card>
             ))}
           </div>
@@ -1382,6 +1507,7 @@ function StudentPayments() {
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Invoice</th>
+                  <th className="px-4 py-3">Refund</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -1419,6 +1545,7 @@ function StudentPayments() {
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </td>
+                    <td className="px-4 py-3">{refundCell(p)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1426,6 +1553,72 @@ function StudentPayments() {
           </Card>
         </>
       )}
+
+      {/* Refund request dialog */}
+      <Dialog
+        open={refundPaymentId !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRefundPaymentId(null);
+            setReason("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request a refund</DialogTitle>
+            <DialogDescription>
+              Tell us why you are requesting a refund for this payment. Our
+              team will review your request and notify you once it&apos;s
+              processed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label
+              htmlFor="refund-reason"
+              className="text-xs font-semibold text-muted-foreground"
+            >
+              Reason
+            </label>
+            <Textarea
+              id="refund-reason"
+              placeholder="e.g. I was charged twice / the course didn&apos;t start / I enrolled by mistake..."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={5}
+              maxLength={2000}
+              disabled={submitting}
+            />
+            <p className="text-right text-[11px] text-muted-foreground">
+              {reason.length}/2000
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRefundPaymentId(null);
+                setReason("");
+              }}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={submitRefund}
+              disabled={submitting || !reason.trim()}
+              className="gap-1.5 bg-amber-600 hover:bg-amber-700"
+            >
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RotateCcw className="h-4 w-4" />
+              )}
+              Submit request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

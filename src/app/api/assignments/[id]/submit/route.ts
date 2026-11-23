@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
 import { jsonError, handleAuthError, limitRequest, safeBody } from "@/lib/api-helpers";
 import { decideCourseContentAccess, recordLearningEvent } from "@/lib/content-access";
+import { awardPoints, updateStreak, checkAndAwardBadges, POINTS } from "@/lib/gamification";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -48,6 +49,7 @@ export async function POST(req: Request, { params }: RouteContext) {
       where: { assignmentId_studentId: { assignmentId: id, studentId: user.id } },
       select: { grade: true },
     });
+    const isFirstSubmission = !existing;
 
     const submission = await db.submission.upsert({
       where: { assignmentId_studentId: { assignmentId: id, studentId: user.id } },
@@ -78,7 +80,16 @@ export async function POST(req: Request, { params }: RouteContext) {
       metadata: { hadFile: Boolean(fileUrl), hadGrade: existing?.grade != null },
     });
 
-    return NextResponse.json({ submission });
+    // Gamification: award on first submission only. A resubmission (after a
+    // grade was issued) does not re-award points.
+    let newBadges: string[] = [];
+    if (isFirstSubmission) {
+      await awardPoints(user.id, POINTS.assignmentSubmit, "assignment_submit");
+      await updateStreak(user.id);
+      newBadges = await checkAndAwardBadges(user.id);
+    }
+
+    return NextResponse.json({ submission, newBadges });
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;

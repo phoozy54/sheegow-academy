@@ -3,6 +3,9 @@ import type {
   AdminCourseOverview,
   Announcement,
   Assignment,
+  Bundle,
+  BundleCheckoutResult,
+  BundleWithCourses,
   Certificate,
   CertificateEligibility,
   ConversationSummary,
@@ -11,8 +14,10 @@ import type {
   DiscussionThreadDetail,
   DiscussionThreadSummary,
   Enrollment,
+  GamificationData,
   GradebookData,
   Invoice,
+  LeaderboardResponse,
   Lesson,
   LessonNote,
   LiveClass,
@@ -24,6 +29,7 @@ import type {
   Poll,
   Quiz,
   QuizResult,
+  RefundRequest,
   Review,
   Roadmap,
   SearchResponse,
@@ -789,4 +795,104 @@ export const api = {
     request<{ success: boolean }>(`/api/notifications/${id}`, {
       method: "DELETE",
     }),
+
+  // ─── COURSE BUNDLES ───────────────────────────────────
+  // A bundle is a discounted package of multiple courses. Students buy the
+  // bundle once and are auto-enrolled in every included course.
+
+  /** Public list of active bundles with their courses (teacher + image). */
+  bundles: () =>
+    request<{ bundles: BundleWithCourses[] }>("/api/bundles"),
+
+  /** Single bundle with courses — used by the bundle checkout page. */
+  bundle: (id: string) =>
+    request<{ bundle: BundleWithCourses }>(`/api/bundles/${id}`),
+
+  /** Admin: create a new bundle. Pass `courseIds` to set the included courses. */
+  createBundle: (body: {
+    title: string;
+    description: string;
+    price: number;
+    image?: string;
+    courseIds: string[];
+    isActive?: boolean;
+  }) =>
+    request<{ bundle: Bundle }>("/api/bundles", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  /** Admin: update a bundle's metadata and the courses it contains. */
+  updateBundle: (
+    id: string,
+    body: Partial<{
+      title: string;
+      description: string;
+      price: number;
+      image: string | null;
+      courseIds: string[];
+      isActive: boolean;
+    }>
+  ) =>
+    request<{ bundle: Bundle }>(`/api/bundles/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+
+  /** Admin: permanently delete a bundle (cascade removes BundleCourse rows). */
+  deleteBundle: (id: string) =>
+    request<{ success: boolean }>(`/api/bundles/${id}`, {
+      method: "DELETE",
+    }),
+
+  /** Authed: purchase a bundle. Creates a payment + enrolls the student in
+   *  every included course in one transaction. */
+  checkoutBundle: (id: string, body: { method: string; couponCode?: string }) =>
+    request<BundleCheckoutResult>(`/api/bundles/${id}/checkout`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  // ─── REFUND REQUESTS ──────────────────────────────────
+  // Students ask for their money back on a completed payment. Admins review
+  // the request from the admin console. Approving flips payment.status to
+  // "refunded" and notifies the student.
+
+  /** List refund requests. Students see their own; admins see all. */
+  refunds: () => request<{ refunds: RefundRequest[] }>("/api/refunds"),
+
+  /** Get a single refund request by id. */
+  refund: (id: string) =>
+    request<{ refund: RefundRequest }>(`/api/refunds/${id}`),
+
+  /** Create a refund request for a completed payment. Body: { paymentId, reason }. */
+  createRefund: (body: { paymentId: string; reason: string }) =>
+    request<{ refund: RefundRequest }>("/api/refunds", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  /** Admin: approve or reject a refund request. When approved, the payment
+   *  status is flipped to "refunded" and the student is notified. */
+  decideRefund: (
+    id: string,
+    body: { status: "approved" | "rejected"; adminNote?: string }
+  ) =>
+    request<{ refund: RefundRequest }>(`/api/refunds/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+
+  // ─── GAMIFICATION ─────────────────────────────────────
+  // Points, daily streaks and badges. /api/me/gamification returns the
+  // current viewer's data; /api/leaderboard returns the top 10 students.
+
+  /** Authed: returns the caller's points, streak and earned badges. */
+  gamification: () =>
+    request<GamificationData>("/api/me/gamification"),
+
+  /** Public: top 10 students by points. When the caller is signed in,
+   *  the response also includes their own rank + entry (even if outside top 10). */
+  leaderboard: () =>
+    request<LeaderboardResponse>("/api/leaderboard"),
 };

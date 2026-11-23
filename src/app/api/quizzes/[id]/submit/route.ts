@@ -8,6 +8,7 @@ import {
   recordLearningEvent,
   recomputeEnrollmentProgress,
 } from "@/lib/content-access";
+import { awardPoints, updateStreak, checkAndAwardBadges, POINTS } from "@/lib/gamification";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -156,6 +157,14 @@ export async function POST(req: Request, { params }: RouteContext) {
       metadata: { score, passed, attemptId, expired },
     });
 
+    // Gamification: points + streak + badge checks on a passing quiz.
+    let newBadges: string[] = [];
+    if (passed) {
+      await awardPoints(user.id, POINTS.quizPass, "quiz_pass");
+      await updateStreak(user.id);
+      newBadges = await checkAndAwardBadges(user.id);
+    }
+
     return NextResponse.json({
       result: {
         id: attempt.id,
@@ -169,6 +178,7 @@ export async function POST(req: Request, { params }: RouteContext) {
         questionCount: total === 0 ? quiz.questions.length : answerRows.length,
       },
       expired,
+      newBadges,
       // Revealed only after submission.
       correctAnswers: quiz.questions.map((q) => ({
         questionId: q.id,

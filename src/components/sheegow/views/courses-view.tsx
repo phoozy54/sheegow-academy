@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CourseCard } from "../course-card";
 import { AdminCourseOverview } from "./admin/admin-course-overview";
+import { BundlesSection } from "./bundles-section";
 import { useMyEnrollments } from "@/lib/use-my-enrollments";
 import {
   Search,
@@ -351,6 +352,11 @@ export function CoursesView() {
       </section>
         </>
       )}
+
+      {/* ─── BUNDLES ────────────────────────────────────── */}
+      {/* Always render the bundles section below the catalog (or admin view)
+          so students can discover discounted course packages. */}
+      <BundlesSection />
     </div>
   );
 }

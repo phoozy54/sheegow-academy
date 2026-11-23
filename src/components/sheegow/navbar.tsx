@@ -48,6 +48,7 @@ const NAV_LINKS: { labelKey: string; href: string }[] = [
   { labelKey: "nav.home", href: "/" },
   { labelKey: "nav.courses", href: "/courses" },
   { labelKey: "nav.liveClasses", href: "/live-classes" },
+  { labelKey: "nav.leaderboard", href: "/leaderboard" },
   { labelKey: "nav.calendar", href: "/calendar" },
   { labelKey: "nav.about", href: "/about" },
   { labelKey: "nav.contact", href: "/contact" },
