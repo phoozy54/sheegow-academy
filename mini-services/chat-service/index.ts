@@ -188,6 +188,43 @@ interface RtcSignalPayload {
 }
 
 // ----------------------------------------------------------------------------
+// Whiteboard — collaborative drawing synced over the existing socket room.
+// The teacher (host) draws; students receive strokes in real time. New
+// joiners ask for the current canvas via `whiteboard-request-state` and the
+// host responds with a PNG data URL on `whiteboard-state`.
+// ----------------------------------------------------------------------------
+interface WhiteboardStroke {
+  x0: number
+  y0: number
+  x1: number
+  y1: number
+  color: string
+  size: number
+}
+
+interface WhiteboardDrawPayload {
+  classId: string
+  userId?: string
+  stroke: WhiteboardStroke
+}
+
+interface WhiteboardClearPayload {
+  classId: string
+  userId?: string
+}
+
+interface WhiteboardStatePayload {
+  classId: string
+  userId?: string
+  state: string
+}
+
+interface WhiteboardRequestStatePayload {
+  classId: string
+  userId?: string
+}
+
+// ----------------------------------------------------------------------------
 // In-memory tracking
 // ----------------------------------------------------------------------------
 const classUsers = new Map<string, Set<OnlineUser>>()
@@ -518,6 +555,105 @@ io.on('connection', (socket) => {
     io.to(entry.classId).emit('screen-share-stopped', {
       classId: entry.classId,
       hostUserId: entry.user.userId,
+    })
+  })
+
+  // ------------------------------------------------------------------
+  // Whiteboard — collaborative drawing on the live class canvas.
+  //
+  // Only the host (admin/teacher/super_admin with canBroadcast) is allowed
+  // to draw or clear. State sync uses two events:
+  //   - whiteboard-request-state: viewer asks the room (host) for the canvas
+  //   - whiteboard-state:         host replies with the full PNG data URL
+  // State payloads can be large (a full canvas snapshot) so they bypass the
+  // usual 80 KB cap with a dedicated, more generous limit. Draw strokes are
+  // small and high-frequency, so the default limiter is plenty.
+  // ------------------------------------------------------------------
+  const WHITEBOARD_STATE_MAX_BYTES = 1_500_000
+
+  const isWhiteboardHost = (): boolean => {
+    const identity = identityOf(socket)
+    return Boolean(identity.canBroadcast)
+  }
+
+  socket.on('whiteboard-draw', (payload: WhiteboardDrawPayload) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!isWhiteboardHost()) {
+      socket.emit('error', { message: 'Only the teacher can draw on the whiteboard' })
+      return
+    }
+    if (payloadTooLarge(payload)) return
+    if (!allowEvent(socket.id, 'whiteboard-draw', 120, 10_000)) return
+
+    const s = payload.stroke
+    if (
+      typeof s !== 'object' || s === null ||
+      typeof s.x0 !== 'number' || typeof s.y0 !== 'number' ||
+      typeof s.x1 !== 'number' || typeof s.y1 !== 'number' ||
+      typeof s.color !== 'string' || s.color.length > 32 ||
+      typeof s.size !== 'number' || s.size < 1 || s.size > 50
+    ) return
+
+    // Broadcast to everyone EXCEPT the sender — they already drew locally.
+    socket.to(entry.classId).emit('whiteboard-draw', {
+      classId: entry.classId,
+      userId: entry.user.userId,
+      stroke: s,
+    })
+  })
+
+  socket.on('whiteboard-clear', (payload: WhiteboardClearPayload) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!isWhiteboardHost()) {
+      socket.emit('error', { message: 'Only the teacher can clear the whiteboard' })
+      return
+    }
+    if (!allowEvent(socket.id, 'whiteboard-clear', 10, 30_000)) return
+
+    socket.to(entry.classId).emit('whiteboard-clear', {
+      classId: entry.classId,
+      userId: entry.user.userId,
+    })
+  })
+
+  socket.on('whiteboard-request-state', (payload: WhiteboardRequestStatePayload) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!allowEvent(socket.id, 'whiteboard-request-state', 10, 60_000)) return
+    // Ask the host (everyone but the requester) to publish the current canvas.
+    // Only the host will actually respond — see the `whiteboard-state` handler.
+    socket.to(entry.classId).emit('whiteboard-request-state', {
+      classId: entry.classId,
+      userId: entry.user.userId,
+    })
+  })
+
+  socket.on('whiteboard-state', (payload: WhiteboardStatePayload) => {
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    if (!isWhiteboardHost()) {
+      socket.emit('error', { message: 'Only the teacher can publish whiteboard state' })
+      return
+    }
+    if (typeof payload.state !== 'string') return
+    // PNG data URLs can be large; allow up to ~1.5 MB for a full canvas snapshot.
+    try {
+      if (JSON.stringify(payload).length > WHITEBOARD_STATE_MAX_BYTES) return
+    } catch {
+      return
+    }
+    if (!allowEvent(socket.id, 'whiteboard-state', 8, 60_000)) return
+    // Include the sender so the host's UI stays in sync (and confirms delivery).
+    io.to(entry.classId).emit('whiteboard-state', {
+      classId: entry.classId,
+      userId: entry.user.userId,
+      state: payload.state,
     })
   })
 

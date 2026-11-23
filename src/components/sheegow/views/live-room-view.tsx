@@ -43,9 +43,11 @@ import {
   BarChart3,
   Plus,
   X,
+  Pencil,
 } from "lucide-react";
 import { cn, formatDateTime } from "@/lib/ui";
 import { toast } from "sonner";
+import { Whiteboard } from "@/components/sheegow/whiteboard";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -110,6 +112,9 @@ export function LiveRoomView({ classId }: { classId: string }) {
   const [handRaised, setHandRaised] = useState(false);
   const [screenSharing, setScreenSharing] = useState(false);
   const [hostSharingScreen, setHostSharingScreen] = useState(false);
+
+  // Collaborative whiteboard — host draws, students watch in real time.
+  const [whiteboardOpen, setWhiteboardOpen] = useState(false);
 
   // Live polls
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -895,6 +900,8 @@ export function LiveRoomView({ classId }: { classId: string }) {
               screenSharing={screenSharing}
               hostSharingScreen={hostSharingScreen}
               onToggleScreenShare={handleToggleScreenShare}
+              whiteboardOpen={whiteboardOpen}
+              onToggleWhiteboard={() => setWhiteboardOpen((v) => !v)}
               onEnablePlay={() => {
                 remoteVideoRef.current
                   ?.play()
@@ -906,6 +913,17 @@ export function LiveRoomView({ classId }: { classId: string }) {
               isLoggedIn={!!user}
               onLoginPrompt={() => openAuthModal("login")}
             />
+            {whiteboardOpen && (
+              <div className="mt-4">
+                <Whiteboard
+                  socket={socketRef.current}
+                  socketConnected={socketConnected}
+                  classId={classId}
+                  canDraw={canBroadcast}
+                  userId={user?.id || ""}
+                />
+              </div>
+            )}
             <div className="mt-4">
               <PollPanel
                 polls={polls}
@@ -969,6 +987,8 @@ function VideoArea({
   screenSharing,
   hostSharingScreen,
   onToggleScreenShare,
+  whiteboardOpen,
+  onToggleWhiteboard,
   onEnablePlay,
   onRaiseHand,
   onLeave,
@@ -994,6 +1014,8 @@ function VideoArea({
   screenSharing: boolean;
   hostSharingScreen: boolean;
   onToggleScreenShare: () => void;
+  whiteboardOpen: boolean;
+  onToggleWhiteboard: () => void;
   onEnablePlay: () => void;
   onRaiseHand: () => void;
   onLeave: () => void;
@@ -1201,6 +1223,33 @@ function VideoArea({
             </TooltipContent>
           </Tooltip>
         )}
+        {/* Whiteboard — visible to everyone; only the host can draw */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="shrink-0">
+              <button
+                onClick={onToggleWhiteboard}
+                aria-pressed={whiteboardOpen}
+                aria-label={whiteboardOpen ? "Hide whiteboard" : "Open whiteboard"}
+                className={cn(
+                  "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+                  whiteboardOpen
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700"
+                    : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                )}
+              >
+                <Pencil className="h-5 w-5" />
+              </button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            {whiteboardOpen
+              ? "Hide whiteboard"
+              : isHost
+                ? "Open whiteboard — draw with the class"
+                : "Open whiteboard — view the teacher's drawing"}
+          </TooltipContent>
+        </Tooltip>
         {/* Raise hand */}
         <button
           onClick={() => {
