@@ -260,6 +260,50 @@ html[data-device="mobile"] [data-device-container] {
   padding-right: 1rem;
 }
 
+/* ─── RTL (Arabic) layout support ───────────────────────────
+   When I18nProvider sets <html dir="rtl"> for Arabic, the browser handles
+   most of the layout mirroring automatically. These rules cover the few
+   physical-class cases that legacy markup relies on and that don't
+   auto-flip with Tailwind v4's logical properties. shadcn/ui components
+   use logical properties (ps-/pe-/ms-/me-/start-/end-) and so are
+   already RTL-aware. */
+html[dir="rtl"] body {
+  /* Arabic reads better with slightly looser line-height. */
+  line-height: 1.7;
+}
+
+/* The mobile sheet's nav links use text-left; flip them in RTL. */
+html[dir="rtl"] .text-left { text-align: right; }
+html[dir="rtl"] .text-right { text-align: left; }
+
+/* `origin-left` brand lockup in the mobile sheet should mirror. */
+html[dir="rtl"] .origin-left {
+  transform-origin: right;
+}
+
+/* Rotate the dropdown "open" chevron so it points the natural way. */
+html[dir="rtl"] [data-slot="dropdown-menu-sub-trigger"] svg:last-child {
+  transform: scaleX(-1);
+}
+
+/* Form inputs: text/search/tel/textarea flip to RTL, while LTR data
+   (email, url, number) stay LTR but right-aligned. */
+html[dir="rtl"] input[type="text"],
+html[dir="rtl"] input[type="password"],
+html[dir="rtl"] input[type="search"],
+html[dir="rtl"] input[type="tel"],
+html[dir="rtl"] textarea {
+  direction: rtl;
+  text-align: right;
+}
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="number"] {
+  direction: ltr;
+  text-align: right;
+}
+
+
 /* ─── Print: invoice / receipt ───────────────────────────
    When the user clicks "Download PDF" the invoice page calls
    window.print(). These rules hide the site chrome (navbar, footer,

@@ -574,3 +574,15 @@ export interface DirectMessageItem {
   createdAt: string;
   sender?: Pick<User, "id" | "fullName" | "profilePicture"> | null;
 }
+
+// ─── WISHLIST / FAVORITES ─────────────────────────────────
+// Courses a student saved to enroll in later. Returned by /api/wishlist with
+// the course (and teacher) included for rendering cards.
+
+export interface WishlistItem {
+  id: string;
+  studentId: string;
+  courseId: string;
+  createdAt: string;
+  course?: Course | null;
+}

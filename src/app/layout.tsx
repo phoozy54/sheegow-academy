@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { headers } from "next/headers";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { DeviceProvider } from "@/lib/device";
+import { I18nProvider } from "@/lib/i18n";
 import {
   OG_IMAGE,
   SITE_NAME,
@@ -128,11 +130,20 @@ export default async function RootLayout({
       <body
         className={`${poppins.variable} font-sans antialiased bg-background text-foreground`}
       >
-        <DeviceProvider>
-          {children}
-          <Toaster />
-          <SonnerToaster richColors position="top-right" />
-        </DeviceProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <I18nProvider>
+            <DeviceProvider>
+              {children}
+              <Toaster />
+              <SonnerToaster richColors position="top-right" />
+            </DeviceProvider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

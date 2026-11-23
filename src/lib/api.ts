@@ -27,6 +27,7 @@ import type {
   Stats,
   TrialRequest,
   User,
+  WishlistItem,
 } from "./types";
 
 export class ApiError extends Error {
@@ -725,5 +726,29 @@ export const api = {
     request<{ message: DirectMessageItem }>(
       `/api/conversations/${conversationId}/messages`,
       { method: "POST", body: JSON.stringify(body) }
+    ),
+
+  // ─── WISHLIST / FAVORITES ─────────────────────────────
+  // Per-user list of courses saved for later. Stored on the server so it syncs
+  // across devices once a student logs in.
+
+  wishlist: () =>
+    request<{ items: WishlistItem[] }>("/api/wishlist"),
+
+  addToWishlist: (courseId: string) =>
+    request<{ item: WishlistItem; alreadyExists?: boolean }>("/api/wishlist", {
+      method: "POST",
+      body: JSON.stringify({ courseId }),
+    }),
+
+  removeFromWishlist: (courseId: string) =>
+    request<{ success: boolean }>(`/api/wishlist/${encodeURIComponent(courseId)}`, {
+      method: "DELETE",
+    }),
+
+  /** Quick lookup used by course cards to show a filled heart. */
+  isWishlisted: (courseId: string) =>
+    request<{ wishlisted: boolean }>(
+      `/api/wishlist/${encodeURIComponent(courseId)}`
     ),
 };

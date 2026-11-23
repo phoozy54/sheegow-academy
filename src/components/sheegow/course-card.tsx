@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useStore } from "@/lib/store";
+import { api, ApiError } from "@/lib/api";
 import { coursePath } from "@/lib/slug";
 import type { Course, Enrollment } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -10,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Clock, Users, Play } from "lucide-react";
+import { Star, Clock, Users, Play, Heart, Loader2 } from "lucide-react";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
 import { trackConversion } from "@/lib/analytics";
 
@@ -18,14 +21,58 @@ export function CourseCard({
   course,
   enrollment,
   all,
+  /** Pre-seeded wishlist state (e.g. when rendering the wishlist page). */
+  wishlisted: initialWishlisted,
+  /** Optional callback fired after a successful toggle. Lets the parent
+   *  react to wishlist changes — e.g. the wishlist page removes the card
+   *  when the user just un-favorited it. */
+  onWishlistToggle,
 }: {
   course: Course;
   enrollment?: Enrollment | null;
   all: Pick<Course, "id" | "title">[];
+  wishlisted?: boolean;
+  onWishlistToggle?: (courseId: string, wishlisted: boolean) => void;
 }) {
   const { user, openAuthModal } = useStore();
   const router = useRouter();
   const href = coursePath(course, all);
+
+  const [wishlisted, setWishlisted] = useState<boolean>(!!initialWishlisted);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [wishlistToggling, setWishlistToggling] = useState(false);
+
+  // Sync when the parent pre-seeds state (e.g. moving from the wishlist page
+  // back to the catalog where the parent already knows the answer).
+  useEffect(() => {
+    if (initialWishlisted !== undefined) {
+      setWishlisted(initialWishlisted);
+    }
+  }, [initialWishlisted]);
+
+  // Only fetch the live wishlist flag when the parent did not provide one.
+  // This avoids an N+1 on the wishlist page (where every card is wishlisted)
+  // and on views that pre-compute the flag.
+  useEffect(() => {
+    if (!user) return;
+    if (initialWishlisted !== undefined) return;
+    let active = true;
+    setWishlistLoading(true);
+    api
+      .isWishlisted(course.id)
+      .then((r) => {
+        if (active) setWishlisted(r.wishlisted);
+      })
+      .catch(() => {
+        /* best-effort: card just renders as "not wishlisted" */
+      })
+      .finally(() => {
+        if (active) setWishlistLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [user, course.id, initialWishlisted]);
 
   const isManager =
     user?.role === "teacher" ||
@@ -33,8 +80,7 @@ export function CourseCard({
     user?.role === "super_admin";
   // Only admins / super admins can see course prices. Teachers and students
   // see "Price at checkout" instead.
-  const canSeePrice =
-    user?.role === "admin" || user?.role === "super_admin";
+  const canSeePrice = user?.role === "admin" || user?.role === "super_admin";
   const canContinue = !isManager && !!enrollment;
 
   const handleEnroll = () => {
@@ -46,8 +92,46 @@ export function CourseCard({
     router.push(`/checkout/${course.id}`);
   };
 
+  const toggleWishlist = async (e: React.MouseEvent) => {
+    // The heart lives inside the <Link> wrapper that points at the course
+    // detail page. Stop the event so clicking the heart doesn't navigate.
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      openAuthModal("register");
+      return;
+    }
+    if (wishlistToggling) return;
+
+    const wasWishlisted = wishlisted;
+    setWishlistToggling(true);
+    // Optimistic update — revert on failure so the UI never lies.
+    setWishlisted(!wasWishlisted);
+
+    try {
+      if (wasWishlisted) {
+        await api.removeFromWishlist(course.id);
+        toast.success("Removed from wishlist");
+      } else {
+        await api.addToWishlist(course.id);
+        toast.success("Saved to wishlist");
+      }
+      onWishlistToggle?.(course.id, !wasWishlisted);
+    } catch (err) {
+      setWishlisted(wasWishlisted);
+      const msg =
+        err instanceof ApiError
+          ? err.message
+          : "Could not update wishlist. Try again.";
+      toast.error(msg);
+    } finally {
+      setWishlistToggling(false);
+    }
+  };
+
   return (
-    <Card className="card-lift group flex h-full flex-col overflow-hidden p-0">
+    <Card className="card-lift group relative flex h-full flex-col overflow-hidden p-0">
       {/* Image */}
       <Link
         href={href}
@@ -71,11 +155,35 @@ export function CourseCard({
         </span>
         <Badge
           variant="outline"
-          className={`absolute right-3 top-3 border ${levelBadgeClass(course.level)}`}
+          className={`absolute bottom-3 left-3 border ${levelBadgeClass(course.level)}`}
         >
           {course.level}
         </Badge>
       </Link>
+
+      {/* Wishlist heart — only for logged-in users. Sits over the top-right
+          corner of the image, above the hover gradient. */}
+      {user && (
+        <button
+          type="button"
+          onClick={toggleWishlist}
+          disabled={wishlistToggling || wishlistLoading}
+          aria-label={wishlisted ? "Remove from wishlist" : "Save to wishlist"}
+          aria-pressed={wishlisted}
+          title={wishlisted ? "Remove from wishlist" : "Save to wishlist"}
+          className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-rose-500 shadow-md backdrop-blur transition-all hover:scale-110 hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {wishlistToggling ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Heart
+              className={`h-4 w-4 transition-all ${
+                wishlisted ? "fill-rose-500 text-rose-500" : "text-rose-500"
+              }`}
+            />
+          )}
+        </button>
+      )}
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-4">

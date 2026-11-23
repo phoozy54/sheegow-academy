@@ -31,18 +31,23 @@ import {
   LogOut,
   ChevronDown,
   Mail,
+  Heart,
 } from "lucide-react";
 import { AuthModal } from "./auth-modal";
 import { BrandLockup } from "./brand-mark";
+import { ThemeToggle } from "./theme-toggle";
+import { LanguageToggle } from "./language-toggle";
+import { useI18n } from "@/lib/i18n";
 
-/** Public pages are real routes — crawlable, shareable, openable in a new tab. */
-const NAV_LINKS: { label: string; href: string }[] = [
-  { label: "Home", href: "/" },
-  { label: "Courses", href: "/courses" },
-  { label: "Live Classes", href: "/live-classes" },
-  { label: "Calendar", href: "/calendar" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+/** Public pages are real routes — crawlable, shareable, openable in a new tab.
+ *  Labels are i18n keys resolved via `t()` at render time. */
+const NAV_LINKS: { labelKey: string; href: string }[] = [
+  { labelKey: "nav.home", href: "/" },
+  { labelKey: "nav.courses", href: "/courses" },
+  { labelKey: "nav.liveClasses", href: "/live-classes" },
+  { labelKey: "nav.calendar", href: "/calendar" },
+  { labelKey: "nav.about", href: "/about" },
+  { labelKey: "nav.contact", href: "/contact" },
 ];
 
 export function Navbar() {
@@ -58,6 +63,7 @@ export function Navbar() {
   const { isMobile, isTablet } = useDevice();
   const pathname = usePathname();
   const router = useRouter();
+  const { t, locale } = useI18n();
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -126,9 +132,10 @@ export function Navbar() {
                     active
                       ? "text-indigo-600"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  }`
+                }
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                   {active && (
                     <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-indigo-500" />
                   )}
@@ -140,6 +147,8 @@ export function Navbar() {
           <div
             className={`hidden items-center md:flex ${isTablet ? "gap-1.5" : "gap-2"}`}
           >
+            <ThemeToggle />
+            <LanguageToggle />
             {authLoading ? (
               <div className="h-9 w-24 animate-pulse rounded-lg bg-muted" />
             ) : user ? (
@@ -178,23 +187,26 @@ export function Navbar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> {t("nav.dashboard")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/messages")}>
-                    <Mail className="mr-2 h-4 w-4" /> Messages
+                    <Mail className="mr-2 h-4 w-4" /> {t("nav.messages")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/my-courses")}>
-                    <BookOpen className="mr-2 h-4 w-4" /> My Courses
+                    <BookOpen className="mr-2 h-4 w-4" /> {t("nav.myCourses")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/wishlist")}>
+                    <Heart className="mr-2 h-4 w-4" /> {t("nav.wishlist")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/profile")}>
-                    <UserIcon className="mr-2 h-4 w-4" /> Profile Settings
+                    <UserIcon className="mr-2 h-4 w-4" /> {t("nav.profile")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="text-red-600 focus:text-red-700"
                   >
-                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                    <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -205,13 +217,13 @@ export function Navbar() {
                   onClick={() => openAuthModal("login")}
                   className="text-sm font-medium"
                 >
-                  Log in
+                  {t("nav.login")}
                 </Button>
                 <Button
                   onClick={() => openAuthModal("register")}
                   className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-sm shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
                 >
-                  {isTablet ? "Join" : "Get Started"}
+                  {t("nav.getStarted")}
                 </Button>
               </>
             )}
@@ -246,13 +258,22 @@ export function Navbar() {
                             : "text-foreground hover:bg-muted"
                         }`}
                       >
-                        {link.label}
+                        {t(link.labelKey)}
                       </Link>
                     </SheetClose>
                   );
                 })}
               </nav>
-              <div className="mt-6 border-t pt-4">
+              <div className="mt-6 flex items-center justify-between border-t pt-4">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {locale === "ar" ? "المظهر" : locale === "so" ? "Muuqaalka" : "Appearance"}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <ThemeToggle />
+                  <LanguageToggle compact />
+                </div>
+              </div>
+              <div className="mt-4">
                 {user ? (
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2">
@@ -277,7 +298,7 @@ export function Navbar() {
                         className="justify-start"
                         onClick={() => router.push("/dashboard")}
                       >
-                        <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                        <LayoutDashboard className="mr-2 h-4 w-4" /> {t("nav.dashboard")}
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>
@@ -286,7 +307,7 @@ export function Navbar() {
                         className="justify-start"
                         onClick={() => router.push("/messages")}
                       >
-                        <Mail className="mr-2 h-4 w-4" /> Messages
+                        <Mail className="mr-2 h-4 w-4" /> {t("nav.messages")}
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>
@@ -295,7 +316,16 @@ export function Navbar() {
                         className="justify-start"
                         onClick={() => router.push("/my-courses")}
                       >
-                        <BookOpen className="mr-2 h-4 w-4" /> My Courses
+                        <BookOpen className="mr-2 h-4 w-4" /> {t("nav.myCourses")}
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button
+                        variant="outline"
+                        className="justify-start"
+                        onClick={() => router.push("/wishlist")}
+                      >
+                        <Heart className="mr-2 h-4 w-4" /> {t("nav.wishlist")}
                       </Button>
                     </SheetClose>
                     <Button
@@ -303,7 +333,7 @@ export function Navbar() {
                       className="justify-start"
                       onClick={handleLogout}
                     >
-                      <LogOut className="mr-2 h-4 w-4" /> Logout
+                      <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout")}
                     </Button>
                   </div>
                 ) : (
@@ -313,7 +343,7 @@ export function Navbar() {
                         variant="outline"
                         onClick={() => openAuthModal("login")}
                       >
-                        Log in
+                        {t("nav.login")}
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>
@@ -321,7 +351,7 @@ export function Navbar() {
                         className="bg-gradient-to-r from-indigo-500 to-indigo-600"
                         onClick={() => openAuthModal("register")}
                       >
-                        Get Started
+                        {t("nav.getStarted")}
                       </Button>
                     </SheetClose>
                   </div>

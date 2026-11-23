@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Enrollment, LiveClass, Payment, Role, User } from "@/lib/types";
+import type { Course, Enrollment, LiveClass, Payment, Role, User, WishlistItem } from "@/lib/types";
 import {
   cn,
   formatDate,
@@ -58,6 +58,7 @@ import {
   Library,
   Hammer,
   Download,
+  Heart,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -570,6 +571,7 @@ function StudentOverview() {
   const router = useRouter();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [activity, setActivity] = useState<Awaited<ReturnType<typeof api.activity>>>({
     completedLessons: 0,
     watchedSeconds: 0,
@@ -600,6 +602,11 @@ function StudentOverview() {
         learningHours: 0,
         certificates: 0,
       }));
+    // Wishlist — silent failure so the dashboard never breaks if the API hiccups.
+    api
+      .wishlist()
+      .then((r) => active && setWishlist(r.items))
+      .catch(() => active && setWishlist([]));
     return () => {
       active = false;
     };
@@ -614,8 +621,9 @@ function StudentOverview() {
       completedLessons: activity.completedLessons,
       learningHours: activity.learningHours,
       certificates: activity.certificates,
+      wishlist: wishlist.length,
     };
-  }, [enrollments, activity]);
+  }, [enrollments, activity, wishlist]);
 
   const firstName = user?.fullName.split(" ")[0] || "Student";
   const today = formatDate(new Date().toISOString());
@@ -640,11 +648,19 @@ function StudentOverview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-5">
         <StatCard icon={BookOpen} label="Active Courses" value={stats.activeCourses} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={CheckCircle2} label="Completed Lessons" value={stats.completedLessons} color="bg-emerald-100 text-emerald-600" />
         <StatCard icon={Clock} label="Learning Hours" value={`${stats.learningHours}h`} color="bg-amber-100 text-amber-600" />
         <StatCard icon={Award} label="Certificates" value={stats.certificates} color="bg-violet-100 text-violet-600" />
+        <button
+          type="button"
+          onClick={() => router.push("/wishlist")}
+          className="text-left transition-transform hover:scale-[1.02] focus:outline-none"
+          aria-label="Open your wishlist"
+        >
+          <StatCard icon={Heart} label="Wishlist" value={stats.wishlist} color="bg-rose-100 text-rose-600" />
+        </button>
       </div>
 
       {/* Two columns */}
@@ -807,6 +823,77 @@ function StudentOverview() {
                   onClick={() => router.push("/live-classes")}
                 >
                   View all classes <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Wishlist mini-widget — saved-for-later courses, with a CTA to the
+              full wishlist page. Hidden entirely when the student has none. */}
+          <Card className="p-0">
+            <CardHeader className="flex-row items-center justify-between border-b">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
+                  <Heart className="h-4 w-4" />
+                </span>
+                Wishlist
+              </CardTitle>
+              <Badge variant="secondary" className="font-semibold">
+                {wishlist.length}
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-0">
+              {wishlist.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50">
+                    <Heart className="h-5 w-5 text-rose-400" />
+                  </div>
+                  <p className="text-xs font-medium text-foreground">
+                    No saved courses yet
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Tap the heart on any course to save it for later.
+                  </p>
+                </div>
+              ) : (
+                <ul className="divide-y">
+                  {wishlist.slice(0, 4).map((item) => {
+                    const course = item.course;
+                    if (!course) return null;
+                    return (
+                      <li key={item.id}>
+                        <button
+                          onClick={() => router.push(`/course/${course.id}`)}
+                          className="flex w-full items-center gap-3 p-3 text-left transition-colors hover:bg-muted/40"
+                        >
+                          <div className="h-9 w-12 shrink-0 overflow-hidden rounded-md bg-muted">
+                            {course.image ? (
+                              <img
+                                loading="lazy"
+                                decoding="async"
+                                src={course.image}
+                                alt={course.title}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : null}
+                          </div>
+                          <p className="min-w-0 flex-1 truncate text-sm font-medium hover:text-indigo-600">
+                            {course.title}
+                          </p>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              <div className="p-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full gap-1 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                  onClick={() => router.push("/wishlist")}
+                >
+                  View wishlist <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </CardContent>
