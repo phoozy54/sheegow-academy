@@ -32,11 +32,14 @@ import {
   ChevronDown,
   Mail,
   Heart,
+  Bell,
 } from "lucide-react";
 import { AuthModal } from "./auth-modal";
 import { BrandLockup } from "./brand-mark";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
+import { SearchBar, MobileSearchButton } from "./search-bar";
+import { NotificationBell } from "./notification-bell";
 import { useI18n } from "@/lib/i18n";
 
 /** Public pages are real routes — crawlable, shareable, openable in a new tab.
@@ -144,11 +147,16 @@ export function Navbar() {
             })}
           </nav>
 
+          <SearchBar
+            className={`hidden ${isTablet ? "w-44" : "w-64"} lg:block`}
+          />
+
           <div
             className={`hidden items-center md:flex ${isTablet ? "gap-1.5" : "gap-2"}`}
           >
             <ThemeToggle />
             <LanguageToggle />
+            {user ? <NotificationBell /> : null}
             {authLoading ? (
               <div className="h-9 w-24 animate-pulse rounded-lg bg-muted" />
             ) : user ? (
@@ -229,6 +237,8 @@ export function Navbar() {
             )}
           </div>
 
+          <MobileSearchButton />
+
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button
@@ -308,6 +318,15 @@ export function Navbar() {
                         onClick={() => router.push("/messages")}
                       >
                         <Mail className="mr-2 h-4 w-4" /> {t("nav.messages")}
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button
+                        variant="outline"
+                        className="justify-start"
+                        onClick={() => router.push("/notifications")}
+                      >
+                        <Bell className="mr-2 h-4 w-4" /> Notifications
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>

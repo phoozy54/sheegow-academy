@@ -13,6 +13,7 @@ import {
   limitRequest,
 } from "@/lib/api-helpers";
 import { canManageCourse } from "@/lib/content-access";
+import { notifyMany } from "@/lib/notify";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -129,6 +130,38 @@ export async function POST(req: Request, { params }: RouteContext) {
       },
       include: { author: { select: authorSelect } },
     });
+
+    // Fan out a notification to every enrolled student so the bell lights up.
+    // Notifications are best-effort; failure here is logged but never blocks
+    // the announcement itself.
+    try {
+      const enrollments = await db.enrollment.findMany({
+        where: {
+          courseId,
+          status: { in: ["active", "completed"] },
+          studentId: { not: actor.id },
+        },
+        select: { studentId: true },
+      });
+      const studentIds = enrollments.map((e) => e.studentId);
+      const link = `/courses/${courseId}`;
+      const preview =
+        text.length > 140 ? `${text.slice(0, 140)}…` : text;
+      await notifyMany(
+        studentIds,
+        "announcement",
+        `New announcement: ${title}`,
+        preview,
+        link
+      );
+    } catch (fanErr) {
+      logger.error(
+        "[announcements/create]",
+        "notification fan-out failed",
+        fanErr,
+        { courseId }
+      );
+    }
 
     return jsonOk({ announcement }, 201);
   } catch (e) {

@@ -18,12 +18,15 @@ import type {
   LiveClass,
   Material,
   Module,
+  Notification,
+  NotificationListResponse,
   Payment,
   Poll,
   Quiz,
   QuizResult,
   Review,
   Roadmap,
+  SearchResponse,
   Stats,
   TrialRequest,
   User,
@@ -329,6 +332,20 @@ export const api = {
     if (params.role) q.set("role", params.role);
     if (params.search) q.set("search", params.search);
     return request<{ users: User[] }>(`/api/users?${q.toString()}`);
+  },
+
+  /** Global search across courses, live classes and (for admins/teachers) users.
+   *  Returns an empty payload when the query is shorter than 2 characters.
+   *  The default limit is 5 results per category; pass a higher number on the
+   *  dedicated search page to surface more matches. */
+  search: (query: string, limit?: number) => {
+    const q = new URLSearchParams();
+    const trimmed = query.trim();
+    if (trimmed) q.set("q", trimmed);
+    if (typeof limit === "number" && Number.isFinite(limit) && limit > 0) {
+      q.set("limit", String(Math.min(Math.floor(limit), 50)));
+    }
+    return request<SearchResponse>(`/api/search?${q.toString()}`);
   },
 
   updateUser: (id: string, body: Partial<User>) =>
@@ -751,4 +768,25 @@ export const api = {
     request<{ wishlisted: boolean }>(
       `/api/wishlist/${encodeURIComponent(courseId)}`
     ),
+
+  // ─── NOTIFICATIONS ────────────────────────────────────
+  // In-app bell notifications. Polling is handled by the NotificationBell
+  // component (every 30s while closed). Marking as read on click drives the
+  // unread badge to zero.
+
+  notifications: () =>
+    request<NotificationListResponse>("/api/notifications"),
+
+  markAllNotificationsRead: () =>
+    request<{ success: boolean }>("/api/notifications", { method: "POST" }),
+
+  markNotificationRead: (id: string) =>
+    request<{ notification: Notification }>(`/api/notifications/${id}`, {
+      method: "PATCH",
+    }),
+
+  deleteNotification: (id: string) =>
+    request<{ success: boolean }>(`/api/notifications/${id}`, {
+      method: "DELETE",
+    }),
 };

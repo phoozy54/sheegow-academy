@@ -52,6 +52,8 @@ model User {
   lessonNotes   LessonNote[]
   // Wishlist / favorites — courses a student saved to enroll in later.
   wishlist      Wishlist[]
+  // In-app notifications (announcements, replies, DMs, class reminders, etc.).
+  notifications Notification[]
 }
 
 // ─── COURSE ─────────────────────────────────────────────
@@ -574,4 +576,22 @@ model Wishlist {
   course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, courseId])
+}
+
+// ─── NOTIFICATIONS ──────────────────────────────────────
+// In-app notifications delivered to a single user. type discriminates the
+// icon/colour and the link target. readAt is null until the user opens it.
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   // recipient
+  type      String   // "announcement" | "reply" | "message" | "class" | "system"
+  title     String
+  body      String
+  link      String?  // URL to navigate to when clicked
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

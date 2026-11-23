@@ -586,3 +586,74 @@ export interface WishlistItem {
   createdAt: string;
   course?: Course | null;
 }
+
+// ─── NOTIFICATIONS ──────────────────────────────────────
+// In-app notifications shown in the navbar bell + the /notifications page.
+
+export type NotificationType =
+  | "announcement"
+  | "reply"
+  | "message"
+  | "class"
+  | "system";
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  link?: string | null;
+  readAt?: string | null;
+  createdAt: string;
+}
+
+/** Shape returned by GET /api/notifications — list + unread count. */
+export interface NotificationListResponse {
+  notifications: Notification[];
+  unreadCount: number;
+}
+
+// ─── GLOBAL SEARCH ────────────────────────────────────
+// Lightweight search results returned by GET /api/search?q=. The endpoint is
+// public for courses + live classes, but admin/teacher sessions additionally
+// receive a `users` section. Each result carries just the fields needed to
+// render a dropdown row + navigate to the right page.
+
+export interface SearchCourseResult {
+  id: string;
+  title: string;
+  description: string;
+  level: string;
+  image?: string | null;
+  /** Pre-computed URL segment matching the public /courses/[slug] route. */
+  slug: string;
+  /** Full path: /courses/<slug>. */
+  href: string;
+}
+
+export interface SearchLiveClassResult {
+  id: string;
+  title: string;
+  scheduledAt: string;
+  duration: number;
+  status: string;
+  /** Full path: /class/<id>. */
+  href: string;
+}
+
+export interface SearchUserResult {
+  id: string;
+  fullName: string;
+  email: string;
+  username?: string | null;
+  role: Role;
+  profilePicture?: string | null;
+}
+
+export interface SearchResponse {
+  courses: SearchCourseResult[];
+  liveClasses: SearchLiveClassResult[];
+  /** Only populated for admin / teacher sessions. */
+  users?: SearchUserResult[];
+}

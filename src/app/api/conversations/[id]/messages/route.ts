@@ -8,6 +8,7 @@ import {
   safeBody,
   limitRequest,
 } from "@/lib/api-helpers";
+import { notify } from "@/lib/notify";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -133,6 +134,25 @@ export async function POST(req: Request, { params }: RouteContext) {
       where: { id: conversationId },
       data: { updatedAt: new Date() },
     });
+
+    // Notify the OTHER participant so the bell lights up. Best-effort; a
+    // failure is logged but never blocks the message itself. The deep link
+    // carries the SENDER's id so the recipient opens the right conversation.
+    const recipientId =
+      conversation.user1Id === actor.id
+        ? conversation.user2Id
+        : conversation.user1Id;
+    if (recipientId) {
+      const preview =
+        text.length > 140 ? `${text.slice(0, 140)}…` : text;
+      await notify(
+        recipientId,
+        "message",
+        "New direct message",
+        preview,
+        `/messages?u=${encodeURIComponent(actor.id)}`
+      );
+    }
 
     return jsonOk(
       {

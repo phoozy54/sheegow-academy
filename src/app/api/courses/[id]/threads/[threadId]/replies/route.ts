@@ -11,6 +11,7 @@ import {
   safeBody,
   limitRequest,
 } from "@/lib/api-helpers";
+import { notify } from "@/lib/notify";
 
 type RouteContext = {
   params: Promise<{ id: string; threadId: string }>;
@@ -50,7 +51,7 @@ export async function POST(req: Request, { params }: RouteContext) {
 
     const thread = await db.discussionThread.findUnique({
       where: { id: threadId },
-      select: { id: true, courseId: true },
+      select: { id: true, courseId: true, studentId: true, title: true },
     });
     if (!thread || thread.courseId !== courseId) {
       return jsonError("Thread not found", 404);
@@ -99,6 +100,21 @@ export async function POST(req: Request, { params }: RouteContext) {
       where: { id: threadId },
       data: { updatedAt: new Date() },
     });
+
+    // Notify the thread author so they see the new answer. Best-effort:
+    // the reply itself already succeeded; never fail it because of the
+    // notification side-effect. Skip self-notifications.
+    if (thread.studentId && thread.studentId !== actor.id) {
+      const preview =
+        text.length > 140 ? `${text.slice(0, 140)}…` : text;
+      await notify(
+        thread.studentId,
+        "reply",
+        `New reply on: ${thread.title}`,
+        preview,
+        `/learn/${courseId}`
+      );
+    }
 
     return jsonOk(
       {
