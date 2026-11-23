@@ -126,6 +126,16 @@ export function LiveRoomView() {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
+  // Admin join-mode selector: "host" (broadcast) or "viewer" (observe as
+  // student). Non-admins skip the selector entirely.
+  const isEligibleForHost =
+    !!user &&
+    !!liveClass &&
+    (user.id === liveClass.teacherId ||
+      user.role === "admin" ||
+      user.role === "super_admin");
+  const [joinMode, setJoinMode] = useState<"host" | "viewer" | null>(null);
+
   // Socket instance — created on mount, destroyed on unmount
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
 
@@ -230,10 +240,18 @@ export function LiveRoomView() {
   };
 
   /* ─── Socket connection ─────────────────────────────── */
+  // Only connect once the user has picked a join mode (admins) or
+  // immediately for students/teachers who don't get a choice.
   useEffect(() => {
     if (!classId) return;
+    // Students and non-host-eligible users join as viewers automatically.
+    // Admins must pick "host" or "viewer" before the socket connects.
+    const effectiveMode = isEligibleForHost
+      ? joinMode
+      : "viewer";
+    if (!effectiveMode) return; // admin hasn't chosen yet — wait
 
-    const socket = getSocket(classId);
+    const socket = getSocket(classId, effectiveMode);
     socketRef.current = socket;
     setSocketConnected(socket.connected);
 
@@ -382,7 +400,7 @@ export function LiveRoomView() {
       socket.off("disconnect", onSocketDisconnect);
       disconnectSocket();
     };
-  }, [classId, user]);
+  }, [classId, user, isEligibleForHost, joinMode]);
 
   /* ─── Attendance — real minutes for enrolled students ──── */
   useEffect(() => {
@@ -417,12 +435,9 @@ export function LiveRoomView() {
   /* ─── Real audio/video (WebRTC over the signaling socket) ── */
   const userId = user?.id;
   const userName = user?.fullName;
-  const canBroadcast =
-    !!user &&
-    !!liveClass &&
-    (user.id === liveClass.teacherId ||
-      user.role === "admin" ||
-      user.role === "super_admin");
+  // canBroadcast is true only when the user is eligible (admin/teacher)
+  // AND has chosen "host" mode (not "viewer"). Students always get false.
+  const canBroadcast = isEligibleForHost && joinMode === "host";
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -706,6 +721,65 @@ export function LiveRoomView() {
           className="mt-6 gap-1.5"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Live Classes
+        </Button>
+      </div>
+    );
+  }
+
+  /* ─── Pre-join mode selector for admins ────────────── */
+  // Admins can choose to attend as a host (broadcast mic/cam) or as a
+  // student (observe only). Students skip this screen entirely.
+  if (isEligibleForHost && !joinMode) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-16 text-center sm:px-6 lg:px-8">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
+          <Video className="h-8 w-8 text-indigo-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-foreground">
+          How do you want to join?
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          You&apos;re joining <span className="font-semibold text-foreground">{liveClass.title}</span>.
+          Choose your role for this session.
+        </p>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {/* Host mode */}
+          <button
+            onClick={() => setJoinMode("host")}
+            className="group rounded-xl border-2 border-indigo-200 bg-card p-5 text-left transition-all hover:border-indigo-500 hover:shadow-lg"
+          >
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white">
+              <Video className="h-5 w-5" />
+            </div>
+            <p className="font-bold text-foreground">Join as Host</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Broadcast your camera and mic, manage the class, and share your
+              screen.
+            </p>
+          </button>
+
+          {/* Viewer mode */}
+          <button
+            onClick={() => setJoinMode("viewer")}
+            className="group rounded-xl border-2 border-border bg-card p-5 text-left transition-all hover:border-emerald-500 hover:shadow-lg"
+          >
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+              <Users className="h-5 w-5" />
+            </div>
+            <p className="font-bold text-foreground">Join as Student</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Watch and listen only. Use chat to participate. No camera or mic.
+            </p>
+          </button>
+        </div>
+
+        <Button
+          onClick={() => navigate("live")}
+          variant="ghost"
+          className="mt-4 gap-1.5 text-sm"
+        >
+          <ArrowLeft className="h-4 w-4" /> Cancel
         </Button>
       </div>
     );

@@ -7,13 +7,14 @@ import { hasApprovedTrial } from "@/lib/trial-access";
 import { TRIAL_METHOD } from "@/lib/trial";
 
 /**
- * GET /api/socket/token?classId=<id>
+ * GET /api/socket/token?classId=<id>&mode=<host|viewer>
  * Issue a short-lived (5 min) token scoped to ONE live class for the
  * Socket.io chat/WebRTC service. The service derives identity, class and
  * broadcast permission from this token — never from client-supplied fields.
  *
  * Access rules:
- *  - Admins: any class, can broadcast.
+ *  - Admins/super admins: any class. Can broadcast by default, but may
+ *    pass mode=viewer to attend as a student (observe only, no mic/cam).
  *  - Assigned teacher: their own class, can broadcast.
  *  - Other teachers: may observe as viewers.
  *  - Students: only classes they are enrolled in AND have paid for, or a
@@ -22,7 +23,9 @@ import { TRIAL_METHOD } from "@/lib/trial";
 export async function GET(req: Request) {
   try {
     const user = await requireAuth();
-    const classId = new URL(req.url).searchParams.get("classId")?.trim();
+    const url = new URL(req.url);
+    const classId = url.searchParams.get("classId")?.trim();
+    const mode = url.searchParams.get("mode")?.trim(); // "host" | "viewer"
     if (!classId) return jsonError("classId is required", 400);
 
     const liveClass = await db.liveClass.findUnique({
@@ -32,7 +35,11 @@ export async function GET(req: Request) {
     if (!liveClass) return jsonError("Live class not found", 404);
 
     const isAssignedTeacher = liveClass.teacherId === user.id;
-    const canBroadcast = isAdminRole(user.role) || isAssignedTeacher;
+    // Admins can choose to join as a viewer (student mode). If mode=viewer
+    // is explicitly requested, they lose broadcast rights for this session.
+    const wantsViewer = mode === "viewer";
+    const canBroadcast =
+      (isAdminRole(user.role) || isAssignedTeacher) && !wantsViewer;
 
     // Students must be enrolled in the course and have completed payment
     // before they are allowed into the live room — unless an admin approved

@@ -7,6 +7,7 @@ let socket: Socket | null = null;
 let tokenTimer: ReturnType<typeof setInterval> | null = null;
 let authPending: Promise<boolean> | null = null;
 let currentClassId: string | null = null;
+let currentMode: "host" | "viewer" | undefined = undefined;
 
 /**
  * Default production chat service (same URL used in DEPLOYMENT.md).
@@ -16,9 +17,15 @@ let currentClassId: string | null = null;
  */
 const PRODUCTION_CHAT_URL = "https://sheegow-chat.onrender.com";
 
-async function fetchSocketToken(classId: string | null): Promise<string | null> {
+async function fetchSocketToken(
+  classId: string | null,
+  mode?: "host" | "viewer"
+): Promise<string | null> {
   try {
-    const query = classId ? `?classId=${encodeURIComponent(classId)}` : "";
+    const params = new URLSearchParams();
+    if (classId) params.set("classId", classId);
+    if (mode) params.set("mode", mode);
+    const query = params.toString() ? `?${params.toString()}` : "";
     const res = await fetch(`/api/socket/token${query}`, {
       credentials: "include",
       cache: "no-store",
@@ -52,7 +59,7 @@ async function fetchSocketToken(classId: string | null): Promise<string | null> 
 async function authenticateAndConnect(s: Socket, isProd: boolean) {
   if (authPending) return authPending;
   authPending = (async () => {
-    const token = await fetchSocketToken(currentClassId);
+    const token = await fetchSocketToken(currentClassId, currentMode);
     if (token) {
       s.auth = { token };
       s.connect();
@@ -81,13 +88,18 @@ async function authenticateAndConnect(s: Socket, isProd: boolean) {
  * - Development (sandbox): connects through the Caddy gateway using the
  *   XTransformPort query so the local chat service on port 3003 is reachable.
  */
-export function getSocket(classId?: string): Socket {
+export function getSocket(classId?: string, mode?: "host" | "viewer"): Socket {
   const requestedClassId = classId || null;
-  if (socket && currentClassId !== requestedClassId) {
-    // Token is class-scoped — reconnect with a token for the new room.
+  const requestedMode = mode;
+  // Token is class+mode-scoped — reconnect if either changed.
+  if (
+    socket &&
+    (currentClassId !== requestedClassId || currentMode !== requestedMode)
+  ) {
     disconnectSocket();
   }
   currentClassId = requestedClassId;
+  currentMode = requestedMode;
 
   if (!socket) {
     const configured = process.env.NEXT_PUBLIC_CHAT_URL?.trim();
@@ -130,7 +142,7 @@ export function getSocket(classId?: string): Socket {
       tokenTimer = setInterval(async () => {
         const s = socket;
         if (!s) return;
-        const token = await fetchSocketToken(currentClassId);
+        const token = await fetchSocketToken(currentClassId, currentMode);
         if (token) s.auth = { token };
       }, 4 * 60 * 1000);
     }
