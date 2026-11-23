@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Middleware that generates a per-request nonce and injects it into the
+ * Proxy that generates a per-request nonce and injects it into the
  * Content-Security-Policy header so we can drop 'unsafe-inline' from
  * script-src. Next.js App Router automatically reads the `x-nonce` header
  * and applies the nonce to its inline scripts (hydration, boot, etc).
  *
  * Non-HTML responses (API routes, static assets, _next/static) skip the
- * middleware entirely to keep latency low.
+ * proxy entirely to keep latency low.
+ *
+ * Note: Next.js 16 renamed `middleware` to `proxy` — this file uses the
+ * new convention.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip non-page requests — assets, API, Next internals.
