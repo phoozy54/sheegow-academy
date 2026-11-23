@@ -179,7 +179,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
           userId: msg.senderId,
           userName: msg.sender?.fullName || "Student",
           userAvatar: msg.sender?.profilePicture || null,
-          text: msg.text,
+          text: (msg as { text?: string; body?: string }).text || (msg as { body?: string }).body || "",
           timestamp: msg.createdAt,
         }));
         setMessages(seeded);

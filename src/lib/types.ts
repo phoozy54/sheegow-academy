@@ -314,6 +314,43 @@ export interface Poll {
   results?: { optionIndex: number; votes: number }[];
 }
 
+// ─── ANNOUNCEMENTS ───────────────────────────────────────
+// Teachers/admins post announcements visible to enrolled students.
+
+export interface Announcement {
+  id: string;
+  courseId: string;
+  authorId: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  author?: Pick<User, "id" | "fullName" | "profilePicture"> | null;
+}
+
+// ─── INVOICE ─────────────────────────────────────────────
+// Returned by /api/payments/:id/invoice for the printable receipt page.
+
+export interface Invoice {
+  paymentId: string;
+  invoiceNumber: string;
+  amount: number;
+  method: string;
+  status: string;
+  transactionId: string | null;
+  couponCode: string | null;
+  createdAt: string;
+  student: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  course: {
+    id: string;
+    title: string;
+    level: string;
+  } | null;
+}
+
 // ─── ADMIN COURSE OVERVIEW ─────────────────────────────────
 // Admin/super-admin management view: real work and real student state.
 
@@ -401,4 +438,139 @@ export interface AdminCourseOverview {
   };
   courses: AdminCourseRow[];
   liveClasses: AdminLiveClass[];
+}
+
+// ─── DISCUSSION / Q&A ───────────────────────────────────
+// Threads let students ask course/lesson questions; teachers/admins answer.
+
+export interface DiscussionThreadSummary {
+  id: string;
+  courseId: string;
+  lessonId?: string | null;
+  lessonTitle?: string | null;
+  studentId: string;
+  title: string;
+  body: string;
+  isResolved: boolean;
+  replyCount: number;
+  createdAt: string;
+  updatedAt: string;
+  author?: Pick<User, "id" | "fullName" | "profilePicture"> | null;
+}
+
+export interface DiscussionReply {
+  id: string;
+  threadId: string;
+  authorId: string;
+  body: string;
+  createdAt: string;
+  author?: Pick<User, "id" | "fullName" | "profilePicture" | "role"> | null;
+}
+
+export interface DiscussionThreadDetail extends DiscussionThreadSummary {
+  replies: DiscussionReply[];
+}
+
+// ─── GRADEBOOK ──────────────────────────────────────────
+// Per-course gradebook: one row per enrolled student with quiz + assignment data.
+
+export interface GradebookQuizColumn {
+  id: string;
+  title: string;
+  passScore: number;
+}
+
+export interface GradebookAssignmentColumn {
+  id: string;
+  title: string;
+  maxPoints: number;
+  dueAt?: string | null;
+}
+
+export interface GradebookQuizAttempt {
+  id: string;
+  quizId: string;
+  score: number | null;
+  passed: boolean | null;
+  submittedAt: string | null;
+}
+
+export interface GradebookSubmission {
+  id: string;
+  assignmentId: string;
+  status: string;
+  grade: number | null;
+  feedback?: string | null;
+  submittedAt: string;
+  gradedAt?: string | null;
+}
+
+export interface GradebookStudentRow {
+  studentId: string;
+  fullName: string;
+  email: string;
+  profilePicture?: string | null;
+  enrollmentProgress: number;
+  enrollmentStatus: string;
+  quizAttempts: GradebookQuizAttempt[];
+  submissions: GradebookSubmission[];
+}
+
+export interface GradebookSummary {
+  studentCount: number;
+  averageQuizScore: number | null;
+  passRate: number | null;
+  averageProgress: number | null;
+  gradedSubmissions: number;
+  pendingSubmissions: number;
+}
+
+export interface GradebookData {
+  course: {
+    id: string;
+    title: string;
+    level: string;
+  };
+  quizzes: GradebookQuizColumn[];
+  assignments: GradebookAssignmentColumn[];
+  students: GradebookStudentRow[];
+  summary: GradebookSummary;
+}
+
+// ─── STUDENT NOTES ──────────────────────────────────────
+// Personal markdown note tied to one student + one lesson.
+
+export interface LessonNote {
+  id: string;
+  studentId: string;
+  lessonId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── DIRECT MESSAGING ───────────────────────────────────
+// Private 1-to-1 conversations between any two users.
+
+export interface ConversationSummary {
+  id: string;
+  otherUser: Pick<User, "id" | "fullName" | "profilePicture" | "role">;
+  lastMessage?: {
+    id: string;
+    body: string;
+    createdAt: string;
+    senderId: string;
+  } | null;
+  unreadCount: number;
+  updatedAt: string;
+}
+
+export interface DirectMessageItem {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+  readAt: string | null;
+  createdAt: string;
+  sender?: Pick<User, "id" | "fullName" | "profilePicture"> | null;
 }

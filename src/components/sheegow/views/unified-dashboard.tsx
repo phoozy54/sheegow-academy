@@ -5,11 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Enrollment, LiveClass, Role, User } from "@/lib/types";
+import type { Course, Enrollment, LiveClass, Payment, Role, User } from "@/lib/types";
 import {
   cn,
   formatDate,
   formatDateTime,
+  formatPrice,
   levelBadgeClass,
 } from "@/lib/ui";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ import {
   ClipboardCheck,
   Library,
   Hammer,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -69,6 +71,7 @@ import { AdminTeachers } from "./admin/admin-teachers";
 import { AdminMessages } from "./admin/admin-panel";
 import { AdminPayments } from "./admin/admin-payments";
 import { AdminTrialRequests } from "./admin/admin-trial-requests";
+import { GradebookView } from "./admin/gradebook-view";
 import { LibraryView } from "./library-view";
 import { ContentBuilderView } from "./content-builder-view";
 
@@ -83,7 +86,9 @@ type SectionId =
   | "live"
   | "teachers"
   | "payments"
+  | "my-payments"
   | "trial-requests"
+  | "gradebook"
   | "messages"
   | "profile";
 
@@ -104,6 +109,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, roles: ALL_ROLES },
   { id: "courses", label: "My Courses", icon: BookOpen, roles: ["student"] },
   { id: "library", label: "My Library", icon: Library, roles: ["student"] },
+  { id: "my-payments", label: "My Payments", icon: DollarSign, roles: ["student"] },
   { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", ...ADMIN_ROLES] },
   { id: "content-builder", label: "Content Builder", icon: Hammer, roles: ["teacher", ...ADMIN_ROLES] },
   { id: "live", label: "Live Classes", icon: Video, roles: ALL_ROLES },
@@ -112,6 +118,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["super_admin"] },
   { id: "payments", label: "Payments", icon: DollarSign, roles: ADMIN_ROLES },
   { id: "trial-requests", label: "Trial Requests", icon: ClipboardCheck, roles: ADMIN_ROLES },
+  { id: "gradebook", label: "Gradebook", icon: GraduationCap, roles: ["teacher", ...ADMIN_ROLES] },
   { id: "messages", label: "Messages", icon: MessageSquare, roles: ADMIN_ROLES },
   { id: "profile", label: "Profile", icon: UserIcon, roles: ALL_ROLES },
 ];
@@ -125,7 +132,9 @@ const SECTION_TITLES: Record<SectionId, string> = {
   live: "Live Classes",
   teachers: "Teachers",
   payments: "Payments & Revenue",
+  "my-payments": "My Payments",
   "trial-requests": "Trial Requests",
+  gradebook: "Gradebook",
   messages: "Contact Messages",
   profile: "Profile Settings",
 };
@@ -394,7 +403,9 @@ export function UnifiedDashboard() {
           {section === "payments" && isAdmin && (
             <AdminPayments canManage={role === "super_admin"} />
           )}
+          {section === "my-payments" && role === "student" && <StudentPayments />}
           {section === "trial-requests" && isAdmin && <AdminTrialRequests />}
+          {section === "gradebook" && (role === "teacher" || isAdmin) && <GradebookView />}
           {section === "messages" && isAdmin && <AdminMessages />}
           {section === "profile" && <ProfileInline />}
         </main>
@@ -1165,6 +1176,184 @@ function ProfileInline() {
       Opening profile settings...
     </div>
   );
+}
+
+/* ─── Student Payments — payment history + invoice download ── */
+
+function StudentPayments() {
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    api
+      .paymentHistory()
+      .then((r) => active && setPayments(r.payments))
+      .catch(() => active && setPayments([]))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const totalPaid = payments
+    .filter((p) => p.status === "completed")
+    .reduce((sum, p) => sum + p.amount, 0);
+
+  return (
+    <div className="space-y-5">
+      {/* Summary */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+        <Card className="p-3 sm:p-4">
+          <DollarSign className="mb-2 h-5 w-5 text-emerald-600" />
+          <p className="text-xl font-extrabold leading-none sm:text-2xl">
+            {formatPrice(totalPaid)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Total paid</p>
+        </Card>
+        <Card className="p-3 sm:p-4">
+          <CheckCircle2 className="mb-2 h-5 w-5 text-indigo-600" />
+          <p className="text-xl font-extrabold leading-none sm:text-2xl">
+            {payments.filter((p) => p.status === "completed").length}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Completed</p>
+        </Card>
+        <Card className="col-span-2 p-3 sm:p-4 md:col-span-1">
+          <Clock className="mb-2 h-5 w-5 text-amber-600" />
+          <p className="text-xl font-extrabold leading-none sm:text-2xl">
+            {payments.filter((p) => p.status === "pending").length}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Pending</p>
+        </Card>
+      </div>
+
+      <p className="text-sm text-muted-foreground">
+        Download a printable invoice (PDF) for any completed payment. Click
+        the download link to open the receipt page, then use your browser&apos;s
+        print dialog to save it.
+      </p>
+
+      {loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+          ))}
+        </div>
+      ) : payments.length === 0 ? (
+        <Card className="p-10 text-center">
+          <DollarSign className="mx-auto mb-3 h-9 w-9 text-muted-foreground" />
+          <p className="font-semibold">No payments yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your completed enrollments and invoices will appear here.
+          </p>
+        </Card>
+      ) : (
+        <>
+          {/* Mobile cards */}
+          <div className="space-y-3 md:hidden">
+            {payments.map((p) => (
+              <Card key={p.id} className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-bold">{formatPrice(p.amount)}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {p.course?.title ?? "No course"}
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={cn("capitalize", studentStatusClass(p.status))}
+                  >
+                    {p.status}
+                  </Badge>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{formatDate(p.createdAt)}</span>
+                  {p.status === "completed" && (
+                    <a
+                      href={`/invoice/${p.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-700"
+                    >
+                      <Download className="h-3.5 w-3.5" /> Invoice
+                    </a>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <Card className="hidden overflow-x-auto p-0 md:block">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b bg-muted/40 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">Course</th>
+                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Method</th>
+                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Invoice</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {payments.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/30">
+                    <td className="max-w-52 truncate px-4 py-3 font-medium">
+                      {p.course?.title ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 font-semibold">
+                      {formatPrice(p.amount)}
+                    </td>
+                    <td className="px-4 py-3 capitalize">{p.method}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {formatDate(p.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge
+                        variant="outline"
+                        className={cn("capitalize", studentStatusClass(p.status))}
+                      >
+                        {p.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      {p.status === "completed" ? (
+                        <a
+                          href={`/invoice/${p.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                        >
+                          <Download className="h-3.5 w-3.5" /> Download
+                        </a>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+}
+
+function studentStatusClass(status: string) {
+  switch (status) {
+    case "completed":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "pending":
+      return "border-amber-200 bg-amber-50 text-amber-700";
+    case "refunded":
+      return "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700";
+    default:
+      return "border-rose-200 bg-rose-50 text-rose-700";
+  }
 }
 
 /* ─── Stat Card helper ──────────────────────────────────── */

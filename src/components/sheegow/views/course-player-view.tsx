@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   Award,
@@ -29,8 +30,13 @@ import {
   Hammer,
   Pencil,
   Sparkles,
+  StickyNote,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
+import { AnnouncementsPanel } from "./announcements-panel";
+import { DiscussionPanel } from "./discussion-panel";
+import { NotesPanel } from "./notes-panel";
 
 type CurriculumData = Awaited<ReturnType<typeof api.curriculum>>;
 type RoadmapLesson = Lesson;
@@ -161,6 +167,16 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
             Browse courses
           </button>
         </Card>
+      )}
+
+      {data && (data.hasAccess || data.canManage) && (
+        <div className="mb-5">
+          <AnnouncementsPanel
+            courseId={courseId}
+            canManage={!!data.canManage}
+            compact
+          />
+        </div>
       )}
 
       {loading ? (
@@ -484,6 +500,36 @@ function LessonPanel({
 
       {showCertificate && (
         <CertificateQuickPanel courseId={courseId} onClose={() => setShowCertificate(false)} />
+      )}
+
+      {hasAccess && (
+        <Tabs defaultValue="notes" className="w-full">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+            <TabsTrigger
+              value="notes"
+              className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
+            >
+              <StickyNote className="h-4 w-4" /> My notes
+            </TabsTrigger>
+            <TabsTrigger
+              value="qa"
+              className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
+            >
+              <MessageSquare className="h-4 w-4" /> Q&amp;A for this lesson
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="notes" className="mt-4">
+            <NotesPanel lessonId={lesson.id} variant="card" />
+          </TabsContent>
+          <TabsContent value="qa" className="mt-4">
+            <DiscussionPanel
+              courseId={courseId}
+              compact
+              defaultOpen
+              filterLessonId={lesson.id}
+            />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );

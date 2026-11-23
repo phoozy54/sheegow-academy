@@ -41,6 +41,8 @@ import {
 } from "lucide-react";
 import { levelBadgeClass, formatDate, timeAgo, cn } from "@/lib/ui";
 import { toast } from "sonner";
+import { AnnouncementsPanel } from "./announcements-panel";
+import { DiscussionPanel } from "./discussion-panel";
 
 /* ─── Helpers ───────────────────────────────────────────── */
 
@@ -475,7 +477,13 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                         variant="outline"
                         size="sm"
                         className="mt-4 gap-1.5"
-                        onClick={() => router.push("/courses")}
+                        onClick={() => {
+                          if (course.teacher?.id) {
+                            router.push(`/messages?u=${encodeURIComponent(course.teacher.id)}`);
+                          } else {
+                            router.push("/courses");
+                          }
+                        }}
                       >
                         <Mail className="h-3.5 w-3.5" /> Contact teacher
                       </Button>
@@ -495,6 +503,24 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
               reviewCount={course.reviewCount}
               isLoggedIn={!!user}
               onReviewAdded={loadCourse}
+            />
+
+            <Separator />
+
+            {/* Announcements — collapsible, closed by default for visitors */}
+            <AnnouncementsPanel
+              courseId={course.id}
+              canManage={isManager}
+              defaultOpen={false}
+            />
+
+            <Separator />
+
+            {/* Discussion / Q&A — open for everyone with course visibility */}
+            <DiscussionPanel
+              courseId={course.id}
+              canManage={isManager}
+              defaultOpen={false}
             />
           </div>
 

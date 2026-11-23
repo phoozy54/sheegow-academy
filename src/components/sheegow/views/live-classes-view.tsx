@@ -281,6 +281,33 @@ export function LiveClassesView() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Calendar CTA — every visitor can see the monthly schedule */}
+        {!loading && !error && classes.length > 0 && (
+          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 to-white p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                <Calendar className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-bold text-foreground">
+                  See all classes on the monthly calendar
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Browse upcoming sessions by day and never miss a class.
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => router.push("/calendar")}
+              variant="outline"
+              size="sm"
+              className="self-start gap-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 sm:self-auto"
+            >
+              <Calendar className="h-3.5 w-3.5" /> View Calendar
+            </Button>
+          </div>
+        )}
+
         {/* Manager banner — admins see all statuses plus the management tools */}
         {isManager && (
           <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">

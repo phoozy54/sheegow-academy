@@ -42,6 +42,14 @@ model User {
   pollVotes      PollVote[]
   attendances    Attendance[]
   bookmarks      Bookmark[]
+  // New relations for e-learning features
+  announcements Announcement[]
+  threads       DiscussionThread[]
+  replies       DiscussionReply[]
+  conversationsAsUser1 Conversation[] @relation("ConversationUser1")
+  conversationsAsUser2 Conversation[] @relation("ConversationUser2")
+  directMessages DirectMessage[]
+  lessonNotes   LessonNote[]
 }
 
 // ─── COURSE ─────────────────────────────────────────────
@@ -71,6 +79,9 @@ model Course {
   quizzes          Quiz[]
   assignments      Assignment[]
   certificates     Certificate[]
+  // New relations for e-learning features
+  announcements Announcement[]
+  threads       DiscussionThread[]
 }
 
 // ─── ENROLLMENT ─────────────────────────────────────────
@@ -222,6 +233,8 @@ model Lesson {
   quiz       Quiz?
   assignment Assignment?
   bookmarks  Bookmark[]
+  threads    DiscussionThread[]
+  notes      LessonNote[]
 
   @@unique([moduleId, order])
 }
@@ -451,6 +464,94 @@ model Bookmark {
   createdAt   DateTime @default(now())
 
   student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+}
+
+// ─── ANNOUNCEMENT ───────────────────────────────────────
+// Teachers/admins post announcements visible to enrolled students.
+model Announcement {
+  id          String   @id @default(cuid())
+  courseId    String
+  authorId    String
+  title       String
+  body        String
+  createdAt   DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// ─── DISCUSSION / Q&A ────────────────────────────────────
+// Students ask questions about a course (optionally tied to a lesson).
+model DiscussionThread {
+  id          String   @id @default(cuid())
+  courseId    String
+  lessonId    String?
+  studentId   String
+  title       String
+  body        String
+  isResolved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson  Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  student User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  replies DiscussionReply[]
+}
+
+model DiscussionReply {
+  id          String   @id @default(cuid())
+  threadId    String
+  authorId    String
+  body        String
+  createdAt   DateTime @default(now())
+
+  thread DiscussionThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// ─── DIRECT MESSAGING ───────────────────────────────────
+// Private 1-to-1 conversations between any two users.
+model Conversation {
+  id        String   @id @default(cuid())
+  user1Id   String
+  user2Id   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user1 User @relation("ConversationUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2 User @relation("ConversationUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages DirectMessage[]
+
+  @@unique([user1Id, user2Id])
+}
+
+model DirectMessage {
+  id             String    @id @default(cuid())
+  conversationId  String
+  senderId       String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+// ─── STUDENT NOTES ───────────────────────────────────────
+// Personal notes a student takes while studying a lesson.
+model LessonNote {
+  id          String   @id @default(cuid())
+  studentId   String
+  lessonId    String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
   lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, lessonId])

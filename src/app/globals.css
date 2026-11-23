@@ -259,3 +259,54 @@ html[data-device="mobile"] [data-device-container] {
   padding-left: 1rem;
   padding-right: 1rem;
 }
+
+/* ─── Print: invoice / receipt ───────────────────────────
+   When the user clicks "Download PDF" the invoice page calls
+   window.print(). These rules hide the site chrome (navbar, footer,
+   cookie banner, action buttons) and render only the printable invoice
+   on a clean A4-style white sheet. The .print-area wrapper is the only
+   block allowed to remain on the page when printing. */
+
+@media print {
+  /* Force a white background and reasonable margins for A4 / Letter. */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide everything by default, then re-show only the print area. */
+  body * {
+    visibility: hidden !important;
+  }
+  body .print-area,
+  body .print-area * {
+    visibility: visible !important;
+  }
+  body .print-area {
+    position: absolute;
+    inset: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 800px;
+    padding: 0;
+  }
+
+  /* Drop the navbar, footer, cookie banner and any floating UI. */
+  header,
+  footer,
+  .cookie-consent,
+  .no-print,
+  [data-no-print] {
+    display: none !important;
+  }
+
+  /* Avoid awkward page breaks inside the invoice. */
+  .print-area {
+    page-break-inside: avoid;
+  }
+  .print-avoid-break {
+    page-break-inside: avoid;
+  }
+}

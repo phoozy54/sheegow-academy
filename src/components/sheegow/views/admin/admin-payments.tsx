@@ -22,6 +22,7 @@ import {
   RotateCcw,
   CreditCard,
   ShieldAlert,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -225,6 +226,16 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   {formatDate(p.createdAt)}
                 </p>
+                {p.status === "completed" && (
+                  <a
+                    href={`/invoice/${p.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Invoice
+                  </a>
+                )}
                 {canManage && (
                   <div className="mt-3 flex gap-2">
                     {STATUSES.filter((s) => s !== p.status).map((s) => (
@@ -256,6 +267,7 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                   <th className="px-4 py-3">Method</th>
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Invoice</th>
                   {canManage && <th className="px-4 py-3">Change</th>}
                 </tr>
               </thead>
@@ -282,6 +294,20 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                       <Badge variant="outline" className={statusClass(p.status)}>
                         {p.status}
                       </Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      {p.status === "completed" ? (
+                        <a
+                          href={`/invoice/${p.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                        >
+                          <Download className="h-3.5 w-3.5" /> Download
+                        </a>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </td>
                     {canManage && (
                       <td className="px-4 py-3">

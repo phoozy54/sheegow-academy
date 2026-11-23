@@ -30,6 +30,7 @@ import {
   User as UserIcon,
   LogOut,
   ChevronDown,
+  Mail,
 } from "lucide-react";
 import { AuthModal } from "./auth-modal";
 import { BrandLockup } from "./brand-mark";
@@ -39,6 +40,7 @@ const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Home", href: "/" },
   { label: "Courses", href: "/courses" },
   { label: "Live Classes", href: "/live-classes" },
+  { label: "Calendar", href: "/calendar" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
@@ -178,6 +180,9 @@ export function Navbar() {
                   <DropdownMenuItem onClick={() => router.push("/dashboard")}>
                     <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/messages")}>
+                    <Mail className="mr-2 h-4 w-4" /> Messages
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/my-courses")}>
                     <BookOpen className="mr-2 h-4 w-4" /> My Courses
                   </DropdownMenuItem>
@@ -273,6 +278,15 @@ export function Navbar() {
                         onClick={() => router.push("/dashboard")}
                       >
                         <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button
+                        variant="outline"
+                        className="justify-start"
+                        onClick={() => router.push("/messages")}
+                      >
+                        <Mail className="mr-2 h-4 w-4" /> Messages
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>

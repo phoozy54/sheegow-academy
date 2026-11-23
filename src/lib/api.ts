@@ -1,12 +1,20 @@
 // SHEEGOW ACADEMY — frontend API client
 import type {
   AdminCourseOverview,
+  Announcement,
   Assignment,
   Certificate,
   CertificateEligibility,
+  ConversationSummary,
   Course,
+  DirectMessageItem,
+  DiscussionThreadDetail,
+  DiscussionThreadSummary,
   Enrollment,
+  GradebookData,
+  Invoice,
   Lesson,
+  LessonNote,
   LiveClass,
   Material,
   Module,
@@ -600,4 +608,122 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ endedAt: new Date().toISOString() }),
     }),
+
+  // ANNOUNCEMENTS — course-scoped posts visible to enrolled students.
+  announcements: (courseId: string) =>
+    request<{ announcements: Announcement[] }>(
+      `/api/courses/${courseId}/announcements`
+    ),
+
+  createAnnouncement: (
+    courseId: string,
+    body: { title: string; body: string }
+  ) =>
+    request<{ announcement: Announcement }>(
+      `/api/courses/${courseId}/announcements`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      }
+    ),
+
+  deleteAnnouncement: (courseId: string, announcementId: string) =>
+    request<{ success: boolean }>(
+      `/api/courses/${courseId}/announcements/${announcementId}`,
+      { method: "DELETE" }
+    ),
+
+  // INVOICE — printable receipt data for a completed payment.
+  invoice: (paymentId: string) =>
+    request<Invoice>(`/api/payments/${paymentId}/invoice`),
+
+  // ─── DISCUSSION / Q&A ─────────────────────────────────
+  // Students ask questions, teachers/admins answer. Threaded replies.
+
+  threads: (courseId: string) =>
+    request<{ threads: DiscussionThreadSummary[] }>(
+      `/api/courses/${courseId}/threads`
+    ),
+
+  createThread: (
+    courseId: string,
+    body: { title: string; body: string; lessonId?: string }
+  ) =>
+    request<{ thread: DiscussionThreadDetail }>(
+      `/api/courses/${courseId}/threads`,
+      { method: "POST", body: JSON.stringify(body) }
+    ),
+
+  thread: (courseId: string, threadId: string) =>
+    request<{ thread: DiscussionThreadDetail }>(
+      `/api/courses/${courseId}/threads/${threadId}`
+    ),
+
+  updateThread: (
+    courseId: string,
+    threadId: string,
+    body: { isResolved: boolean }
+  ) =>
+    request<{ thread: DiscussionThreadDetail }>(
+      `/api/courses/${courseId}/threads/${threadId}`,
+      { method: "PATCH", body: JSON.stringify(body) }
+    ),
+
+  deleteThread: (courseId: string, threadId: string) =>
+    request<{ success: boolean }>(
+      `/api/courses/${courseId}/threads/${threadId}`,
+      { method: "DELETE" }
+    ),
+
+  replyToThread: (courseId: string, threadId: string, body: { body: string }) =>
+    request<{ reply: import("./types").DiscussionReply }>(
+      `/api/courses/${courseId}/threads/${threadId}/replies`,
+      { method: "POST", body: JSON.stringify(body) }
+    ),
+
+  // ─── GRADEBOOK ────────────────────────────────────────
+  // Teacher/admin per-course gradebook view (quizzes + assignments).
+
+  gradebook: (courseId: string) =>
+    request<GradebookData>(`/api/courses/${courseId}/gradebook`),
+
+  // ─── STUDENT NOTES ────────────────────────────────────
+  // Personal notes tied to one student + one lesson (auto-saved by the player).
+
+  lessonNote: (lessonId: string) =>
+    request<{ note: LessonNote | null }>(`/api/lessons/${lessonId}/notes`),
+
+  saveLessonNote: (lessonId: string, body: { content: string }) =>
+    request<{ note: LessonNote }>(`/api/lessons/${lessonId}/notes`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  deleteLessonNote: (lessonId: string, noteId: string) =>
+    request<{ success: boolean }>(`/api/lessons/${lessonId}/notes/${noteId}`, {
+      method: "DELETE",
+    }),
+
+  // ─── DIRECT MESSAGING ─────────────────────────────────
+  // Private 1-to-1 conversations between any two users.
+
+  conversations: () =>
+    request<{ conversations: ConversationSummary[] }>(`/api/conversations`),
+
+  startConversation: (userId: string) =>
+    request<{ conversation: ConversationSummary }>(`/api/conversations`, {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    }),
+
+  conversationMessages: (conversationId: string) =>
+    request<{ messages: DirectMessageItem[] }>(
+      `/api/conversations/${conversationId}/messages`
+    ),
+
+  sendDirectMessage: (conversationId: string, body: { body: string }) =>
+    request<{ message: DirectMessageItem }>(
+      `/api/conversations/${conversationId}/messages`,
+      { method: "POST", body: JSON.stringify(body) }
+    ),
 };

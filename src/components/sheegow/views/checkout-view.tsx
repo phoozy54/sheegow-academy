@@ -31,6 +31,7 @@ import {
   ShieldCheck,
   Clock,
   ArrowLeft,
+  ArrowRight,
   Tag,
   Lock,
   CheckCircle2,
@@ -41,6 +42,7 @@ import {
   Award,
   MessageSquare,
   Infinity as InfinityIcon,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
@@ -117,6 +119,9 @@ export function CheckoutView({ courseId }: { courseId: string }) {
   const [couponError, setCouponError] = useState<string>("");
 
   const [submitting, setSubmitting] = useState(false);
+  // Payment id captured after a successful checkout — drives the success
+  // card with the "Download Invoice" CTA.
+  const [paidPaymentId, setPaidPaymentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!courseId) {
@@ -265,13 +270,13 @@ export function CheckoutView({ courseId }: { courseId: string }) {
     }
     setSubmitting(true);
     try {
-      await api.checkout({
+      const res = await api.checkout({
         courseId: course!.id,
         method: method as PaymentMethod,
         couponCode: coupon?.code,
       });
+      setPaidPaymentId(res.payment.id);
       toast.success("Payment successful! You're enrolled.");
-      router.push("/my-courses");
     } catch (err) {
       const msg =
         err instanceof ApiError ? err.message : "Payment failed. Try again.";
@@ -304,7 +309,40 @@ export function CheckoutView({ courseId }: { courseId: string }) {
         <div className="w-16" />
       </div>
 
-      {loading ? (
+      {/* ─── Success state — shown after a completed payment ─── */}
+      {paidPaymentId ? (
+        <Card className="mx-auto max-w-xl border-emerald-200 bg-emerald-50/60 p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+          </div>
+          <h2 className="mb-2 text-2xl font-extrabold text-foreground">
+            Payment successful
+          </h2>
+          <p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground">
+            You&apos;re now enrolled in {course?.title}. Download your invoice
+            for your records, or jump straight into the course.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <a
+              href={`/invoice/${paidPaymentId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition-colors hover:bg-indigo-700"
+            >
+              <Download className="h-4 w-4" /> Download Invoice
+            </a>
+            <Button
+              size="lg"
+              variant="outline"
+              className="gap-2"
+              onClick={() => router.push("/my-courses")}
+            >
+              Go to My Courses
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </Card>
+      ) : loading ? (
         <div className="grid gap-6 md:grid-cols-3">
           <div className="space-y-4 md:col-span-2">
             <Skeleton className="h-32 w-full rounded-xl" />
