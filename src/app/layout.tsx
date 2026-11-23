@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
@@ -97,16 +98,22 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read the per-request nonce set by src/middleware.ts so Next.js can
+  // apply it to its inline scripts (hydration, boot, etc). This lets us
+  // drop 'unsafe-inline' from the CSP script-src directive.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={jsonLdScript([
             organizationJsonLd(),
             websiteJsonLd(),
