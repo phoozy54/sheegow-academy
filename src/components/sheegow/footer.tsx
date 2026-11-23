@@ -1,23 +1,36 @@
 "use client";
 
-import { useStore } from "@/lib/store";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useStore, type View } from "@/lib/store";
 import {
-  GraduationCap,
+
   Mail,
   Phone,
   MapPin,
-  Facebook,
-  Twitter,
-  Instagram,
-  Youtube,
   Send,
+  MessageCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { BrandLockup } from "./brand-mark";
+
+type FooterLink = {
+  label: string;
+  href?: string;
+  view?: View;
+};
 
 export function Footer() {
-  const { navigate } = useStore();
+  const { openAuthModal } = useStore();
+  const router = useRouter();
+
+  /** Interactive-only views get an addressable URL on the app root. */
+  const goApp = (view: View) => {
+    router.push(view === "home" ? "/" : `/?view=${view}`);
+  };
 
   return (
     <footer className="mt-auto border-t bg-gradient-to-b from-background to-indigo-50/40">
@@ -26,28 +39,47 @@ export function Footer() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row lg:px-8">
           <div className="text-center md:text-left">
             <h3 className="text-xl font-bold text-foreground">
-              Never miss a live class
+              Get the live class schedule
             </h3>
             <p className="text-sm text-muted-foreground">
-              Join our newsletter and never miss a live class schedule.
+              Send us your email and we will add you to the class schedule list.
             </p>
           </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              toast.success("Subscribed! Check your inbox for the trial link.");
-              (e.target as HTMLFormElement).reset();
+              const value = new FormData(e.currentTarget).get("email");
+              if (typeof value !== "string" || !value.trim()) return;
+              const subject = encodeURIComponent(
+                "Live class schedule — please add my email"
+              );
+              const body = encodeURIComponent(
+                `Hello SHEEGOW ACADEMY,\n\nPlease add ${value.trim()} to the live class schedule list.\n\nThank you.`
+              );
+              window.location.href = `mailto:info@sheegowacademy.com?subject=${subject}&body=${body}`;
+              toast.info(
+                "Your email app will open — send the message to join the list."
+              );
             }}
-            className="flex w-full max-w-md items-center gap-2"
+            className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center"
           >
+            <Label htmlFor="newsletter-email" className="sr-only">
+              Email address
+            </Label>
             <Input
+              id="newsletter-email"
+              name="email"
               type="email"
+              autoComplete="email"
               placeholder="Enter your email"
               required
               className="bg-background"
             />
-            <Button type="submit" className="gap-1.5">
-              <Send className="h-4 w-4" /> Subscribe
+            <Button
+              type="submit"
+              className="gap-1.5 bg-indigo-700 text-white hover:bg-indigo-800"
+            >
+              <Send className="h-4 w-4" /> Request schedule
             </Button>
           </form>
         </div>
@@ -58,45 +90,22 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <button
-              onClick={() => navigate("home")}
-              className="mb-4 flex items-center gap-2.5"
+            <Link
+              href="/"
+              aria-label="SHEEGOW ACADEMY — home"
+              className="mb-4 inline-flex"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
-                <GraduationCap className="h-6 w-6" />
-              </span>
-              <span className="flex flex-col leading-none">
-                <span className="text-lg font-extrabold tracking-tight">
-                  SHEEGOW
-                </span>
-                <span className="text-[10px] font-semibold tracking-[0.2em] text-indigo-500">
-                  ACADEMY
-                </span>
-              </span>
-            </button>
+              <BrandLockup />
+            </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Live English learning platform built for Somali-speaking students
-              worldwide. Learn with expert teachers in real-time interactive
-              classes.
+              Live English learning platform for students everywhere. Learn with
+              expert teachers in real-time interactive classes.
             </p>
-            <div className="mt-4 flex gap-2">
-              {[
-                { Icon: Facebook, label: "Facebook" },
-                { Icon: Twitter, label: "Twitter" },
-                { Icon: Instagram, label: "Instagram" },
-                { Icon: Youtube, label: "YouTube" },
-              ].map(({ Icon, label }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  onClick={(e) => e.preventDefault()}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
+            {/* No real profiles exist yet — never render fake '#' links. */}
+            <p className="mt-4 text-xs text-muted-foreground">
+              Facebook · YouTube · TikTok · Instagram —{" "}
+              <span className="font-semibold text-foreground">Coming soon</span>
+            </p>
           </div>
 
           {/* Quick links */}
@@ -105,19 +114,28 @@ export function Footer() {
               Learn
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {[
-                { label: "All Courses", view: "courses" as const },
-                { label: "Live Classes", view: "live" as const },
+              {([
+                { label: "All Courses", href: "/courses" },
+                { label: "Live Classes", href: "/live-classes" },
                 { label: "My Dashboard", view: "dashboard" as const },
                 { label: "My Courses", view: "my-courses" as const },
-              ].map((l) => (
+              ] as FooterLink[]).map((l) => (
                 <li key={l.label}>
-                  <button
-                    onClick={() => navigate(l.view)}
-                    className="text-muted-foreground transition-colors hover:text-indigo-600"
-                  >
-                    {l.label}
-                  </button>
+                  {l.href ? (
+                    <Link
+                      href={l.href}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => l.view && goApp(l.view)}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -129,19 +147,29 @@ export function Footer() {
               Company
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {[
-                { label: "About Us", view: "about" as const },
-                { label: "Contact", view: "contact" as const },
-                { label: "Become a Teacher", view: "register" as const },
-                { label: "Terms & Privacy", view: "about" as const },
-              ].map((l) => (
+              {([
+                { label: "About Us", href: "/about" },
+                { label: "Contact", href: "/contact" },
+                { label: "Become a Teacher" },
+                { label: "Terms", href: "/terms" },
+                { label: "Privacy Policy", href: "/privacy" },
+              ] as FooterLink[]).map((l) => (
                 <li key={l.label}>
-                  <button
-                    onClick={() => navigate(l.view)}
-                    className="text-muted-foreground transition-colors hover:text-indigo-600"
-                  >
-                    {l.label}
-                  </button>
+                  {l.href ? (
+                    <Link
+                      href={l.href}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => openAuthModal("register")}
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
+                    >
+                      {l.label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -156,15 +184,31 @@ export function Footer() {
               <li className="flex items-start gap-2.5 text-muted-foreground">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
                 <a
-                  href="mailto:hello@sheegow.academy"
+                  href="mailto:info@sheegowacademy.com"
                   className="hover:text-indigo-600"
                 >
-                  hello@sheegow.academy
+                  info@sheegowacademy.com
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
-                <span>+252 61 555 0199</span>
+                <a
+                  href="tel:+252634085151"
+                  className="hover:text-indigo-600"
+                >
+                  +252 63 4085151
+                </a>
+              </li>
+              <li className="flex items-start gap-2.5 text-muted-foreground">
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                <a
+                  href="https://wa.me/252634085151"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-emerald-600"
+                >
+                  Chat on WhatsApp
+                </a>
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
@@ -180,10 +224,10 @@ export function Footer() {
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} SHEEGOW ACADEMY. All rights reserved.
-            Built with care for Somali learners.
+            Built with care for learners everywhere.
           </p>
           <p className="text-xs text-muted-foreground">
-            Made with <span className="text-indigo-500">live classes</span>, not
+            Made with <span className="text-indigo-700">live classes</span>, not
             recorded videos.
           </p>
         </div>

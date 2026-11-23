@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Enrollment, LiveClass, User } from "@/lib/types";
+import type { Course, Enrollment, LiveClass, Role, User } from "@/lib/types";
 import {
   cn,
   formatDate,
@@ -52,25 +53,37 @@ import {
   DollarSign,
   TrendingUp,
   BookMarked,
+  ClipboardCheck,
+  Library,
+  Hammer,
 } from "lucide-react";
 import { toast } from "sonner";
 
 // Reuse existing admin sub-views
 import { AdminDashboard } from "./admin/admin-dashboard";
 import { AdminCourses } from "./admin/admin-courses";
+import { AdminCourseOverview } from "./admin/admin-course-overview";
 import { AdminStudents } from "./admin/admin-students";
 import { AdminLive } from "./admin/admin-live";
 import { AdminTeachers } from "./admin/admin-teachers";
 import { AdminMessages } from "./admin/admin-panel";
+import { AdminPayments } from "./admin/admin-payments";
+import { AdminTrialRequests } from "./admin/admin-trial-requests";
+import { LibraryView } from "./library-view";
+import { ContentBuilderView } from "./content-builder-view";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
 type SectionId =
   | "overview"
   | "courses"
+  | "library"
+  | "content-builder"
   | "students"
   | "live"
   | "teachers"
+  | "payments"
+  | "trial-requests"
   | "messages"
   | "profile";
 
@@ -78,30 +91,41 @@ interface NavItem {
   id: SectionId;
   label: string;
   icon: typeof LayoutDashboard;
-  roles: Array<"student" | "teacher" | "admin">;
+  roles: Role[];
 }
 
-/* Role-aware navigation. Every role gets Overview, Courses, Live Classes,
-   and Profile. Teachers can also see Students (their own). Admins see the
-   full management suite (Students, Teachers, Messages). */
+const ALL_ROLES: Role[] = ["student", "teacher", "admin", "super_admin"];
+const ADMIN_ROLES: Role[] = ["admin", "super_admin"];
+
+/* Role-aware navigation. Every role gets Overview, Live Classes and Profile.
+   Teachers also see their own students. Admins and super admins see the full
+   management suite, with Payments available to both (edits are super-admin only). */
 const NAV_ITEMS: NavItem[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard, roles: ["student", "teacher", "admin"] },
+  { id: "overview", label: "Overview", icon: LayoutDashboard, roles: ALL_ROLES },
   { id: "courses", label: "My Courses", icon: BookOpen, roles: ["student"] },
-  { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", "admin"] },
-  { id: "live", label: "Live Classes", icon: Video, roles: ["student", "teacher", "admin"] },
+  { id: "library", label: "My Library", icon: Library, roles: ["student"] },
+  { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", ...ADMIN_ROLES] },
+  { id: "content-builder", label: "Content Builder", icon: Hammer, roles: ["teacher", ...ADMIN_ROLES] },
+  { id: "live", label: "Live Classes", icon: Video, roles: ALL_ROLES },
   { id: "students", label: "My Students", icon: Users, roles: ["teacher"] },
-  { id: "students", label: "Manage Students", icon: Users, roles: ["admin"] },
-  { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["admin"] },
-  { id: "messages", label: "Messages", icon: MessageSquare, roles: ["admin"] },
-  { id: "profile", label: "Profile", icon: UserIcon, roles: ["student", "teacher", "admin"] },
+  { id: "students", label: "Manage Students", icon: Users, roles: ADMIN_ROLES },
+  { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["super_admin"] },
+  { id: "payments", label: "Payments", icon: DollarSign, roles: ADMIN_ROLES },
+  { id: "trial-requests", label: "Trial Requests", icon: ClipboardCheck, roles: ADMIN_ROLES },
+  { id: "messages", label: "Messages", icon: MessageSquare, roles: ADMIN_ROLES },
+  { id: "profile", label: "Profile", icon: UserIcon, roles: ALL_ROLES },
 ];
 
 const SECTION_TITLES: Record<SectionId, string> = {
   overview: "Dashboard Overview",
   courses: "Courses",
+  library: "My Library",
+  "content-builder": "Content Builder",
   students: "Students",
   live: "Live Classes",
   teachers: "Teachers",
+  payments: "Payments & Revenue",
+  "trial-requests": "Trial Requests",
   messages: "Contact Messages",
   profile: "Profile Settings",
 };
@@ -110,20 +134,33 @@ const ROLE_LABELS: Record<string, string> = {
   student: "Student Portal",
   teacher: "Teacher Console",
   admin: "Admin Console",
+  super_admin: "Super Admin Console",
 };
 
 const ROLE_BADGE_STYLES: Record<string, string> = {
   student: "border-emerald-200 bg-emerald-50 text-emerald-700",
   teacher: "border-amber-200 bg-amber-50 text-amber-700",
   admin: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  super_admin: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700",
 };
 
 /* ─── Main Unified Dashboard ─────────────────────────────── */
 
 export function UnifiedDashboard() {
   const { user, authLoading, openAuthModal, navigate } = useStore();
-  const [section, setSection] = useState<SectionId>("overview");
+  const dashboardSection = useStore((s) => s.dashboardSection);
+  const clearDashboardSection = useStore((s) => s.clearDashboardSection);
+  const { isMobile, isTablet } = useDevice();
+  const [section, setSection] = useState<SectionId>(
+    () => (dashboardSection as SectionId) || "overview"
+  );
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // A public view can ask the dashboard to open a specific section (e.g. the
+  // teacher controls for a course or live class). Consume it once on mount.
+  useEffect(() => {
+    if (dashboardSection) clearDashboardSection();
+  }, [dashboardSection, clearDashboardSection]);
 
   // Auth gate — every role must be logged in
   if (authLoading) {
@@ -161,7 +198,8 @@ export function UnifiedDashboard() {
     );
   }
 
-  const role = user.role as "student" | "teacher" | "admin";
+  const role = user.role as Role;
+  const isAdmin = role === "admin" || role === "super_admin";
   // Filter nav items by the current user's role
   const visibleNav = NAV_ITEMS.filter((item) => item.roles.includes(role));
   const activeTitle = SECTION_TITLES[section];
@@ -182,27 +220,62 @@ export function UnifiedDashboard() {
   return (
     <div className="flex bg-muted/20">
       {/* Desktop sidebar */}
-      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r bg-card lg:flex lg:flex-col">
+      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:flex lg:flex-col xl:w-80">
         {sidebar}
       </aside>
 
-      {/* Mobile sidebar */}
+      {/* Tablet icon rail — persistent navigation without taking horizontal space */}
+      {isTablet && (
+        <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-20 shrink-0 flex-col items-center border-r bg-card py-4 md:flex lg:hidden">
+          <nav className="flex w-full flex-1 flex-col items-center gap-2">
+            {visibleNav.map((item, idx) => {
+              const active = section === item.id;
+              return (
+                <button
+                  key={`rail-${item.id}-${idx}`}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => setSection(item.id)}
+                  className={cn(
+                    "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
+                    active
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                </button>
+              );
+            })}
+          </nav>
+          <button
+            title="Back to site"
+            aria-label="Back to site"
+            onClick={() => navigate("home")}
+            className="flex h-12 w-12 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        </aside>
+      )}
+
+      {/* Mobile sidebar — wider drawer with larger touch targets */}
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
           <SheetTitle className="sr-only">Dashboard navigation</SheetTitle>
           {sidebar}
         </SheetContent>
       </Sheet>
 
       {/* Main area */}
-      <div className="flex min-h-[calc(100vh-4rem)] flex-1 flex-col">
+      <div className="flex min-h-[calc(100vh-4rem)] min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <header className="sticky top-16 z-30 flex items-center justify-between gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 shrink-0 lg:hidden"
+              className={`h-11 w-11 shrink-0 lg:hidden ${isTablet ? "hidden" : ""}`}
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -269,18 +342,55 @@ export function UnifiedDashboard() {
           </div>
         </header>
 
+        {/* Mobile quick navigation — switch sections without opening the drawer */}
+        <nav
+          className={`border-b bg-background/80 px-3 py-2 lg:hidden ${isTablet ? "hidden" : ""}`}
+        >
+          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {visibleNav.map((item, idx) => {
+              const active = section === item.id;
+              return (
+                <button
+                  key={`quick-${item.id}-${idx}`}
+                  onClick={() => setSection(item.id)}
+                  className={cn(
+                    "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
+                    active
+                      ? "border-indigo-500 bg-indigo-600 text-white shadow-sm"
+                      : "border-border bg-card text-muted-foreground hover:bg-accent"
+                  )}
+                >
+                  <item.icon className="h-3.5 w-3.5" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
         {/* Content area — renders role-appropriate content */}
-        <main className="flex-1 p-4 sm:p-6">
+        <main
+          className={`flex-1 pb-8 pt-4 sm:pt-6 ${
+            isMobile ? "px-3" : isTablet ? "px-5" : "px-6"
+          }`}
+        >
           {section === "overview" && <RoleOverview role={role} />}
           {section === "courses" && role === "student" && <StudentMyCourses />}
-          {section === "courses" && (role === "teacher" || role === "admin") && (
-            <AdminCourses />
+          {section === "courses" && role === "teacher" && <AdminCourses />}
+          {section === "courses" && isAdmin && <AdminCoursesSection />}
+          {section === "library" && role === "student" && <LibraryView />}
+          {section === "content-builder" && (role === "teacher" || isAdmin) && (
+            <ContentBuilderView />
           )}
           {section === "students" && role === "teacher" && <TeacherStudents />}
-          {section === "students" && role === "admin" && <AdminStudents />}
+          {section === "students" && isAdmin && <AdminStudents />}
           {section === "live" && <AdminLive />}
-          {section === "teachers" && role === "admin" && <AdminTeachers />}
-          {section === "messages" && role === "admin" && <AdminMessages />}
+          {section === "teachers" && role === "super_admin" && <AdminTeachers />}
+          {section === "payments" && isAdmin && (
+            <AdminPayments canManage={role === "super_admin"} />
+          )}
+          {section === "trial-requests" && isAdmin && <AdminTrialRequests />}
+          {section === "messages" && isAdmin && <AdminMessages />}
           {section === "profile" && <ProfileInline />}
         </main>
       </div>
@@ -306,7 +416,7 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       {/* Logo / brand */}
-      <div className="flex items-center gap-2 border-b px-5 py-4">
+      <div className="flex items-center gap-2 border-b px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md">
           <GraduationCap className="h-5 w-5" />
         </div>
@@ -332,7 +442,7 @@ function SidebarContent({
               key={`${item.id}-${idx}`}
               onClick={() => onSelect(item.id)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium transition-colors",
                 active
                   ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -340,7 +450,7 @@ function SidebarContent({
             >
               <item.icon
                 className={cn(
-                  "h-4 w-4 shrink-0",
+                  "h-5 w-5 shrink-0",
                   active ? "text-white" : "text-muted-foreground"
                 )}
               />
@@ -392,9 +502,46 @@ function SidebarContent({
   );
 }
 
+/* ─── Admin Courses: overview + management ─────────────── */
+
+function AdminCoursesSection() {
+  const [tab, setTab] = useState<"overview" | "manage">("overview");
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant={tab === "overview" ? "default" : "outline"}
+          aria-pressed={tab === "overview"}
+          onClick={() => setTab("overview")}
+          className={cn(
+            "gap-1.5",
+            tab === "overview" && "bg-indigo-600 hover:bg-indigo-700"
+          )}
+        >
+          <LayoutDashboard className="h-4 w-4" /> Overview
+        </Button>
+        <Button
+          size="sm"
+          variant={tab === "manage" ? "default" : "outline"}
+          aria-pressed={tab === "manage"}
+          onClick={() => setTab("manage")}
+          className={cn(
+            "gap-1.5",
+            tab === "manage" && "bg-indigo-600 hover:bg-indigo-700"
+          )}
+        >
+          <BookOpen className="h-4 w-4" /> Manage courses
+        </Button>
+      </div>
+      {tab === "overview" ? <AdminCourseOverview /> : <AdminCourses />}
+    </div>
+  );
+}
+
 /* ─── Role-specific Overview ────────────────────────────── */
 
-function RoleOverview({ role }: { role: "student" | "teacher" | "admin" }) {
+function RoleOverview({ role }: { role: Role }) {
   if (role === "student") return <StudentOverview />;
   if (role === "teacher") return <TeacherOverview />;
   return <AdminDashboard />;
@@ -403,9 +550,15 @@ function RoleOverview({ role }: { role: "student" | "teacher" | "admin" }) {
 /* ─── Student Overview ─────────────────────────────────── */
 
 function StudentOverview() {
-  const { user, navigate, openCourse, openClass } = useStore();
+  const { user, navigate, openPlayer, openClass } = useStore();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
+  const [activity, setActivity] = useState<Awaited<ReturnType<typeof api.activity>>>({
+    completedLessons: 0,
+    watchedSeconds: 0,
+    learningHours: 0,
+    certificates: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -418,11 +571,18 @@ function StudentOverview() {
     api
       .upcomingClasses()
       .then((r) => {
-        if (!active) return;
-        const list = (r as unknown as { items?: LiveClass[] }).items;
-        setUpcoming(list ? list.slice(0, 3) : []);
+        if (active) setUpcoming(r.classes.slice(0, 3));
       })
       .catch(() => active && setUpcoming([]));
+    api
+      .activity()
+      .then((r) => active && setActivity(r))
+      .catch(() => active && setActivity({
+        completedLessons: 0,
+        watchedSeconds: 0,
+        learningHours: 0,
+        certificates: 0,
+      }));
     return () => {
       active = false;
     };
@@ -432,20 +592,13 @@ function StudentOverview() {
     const activeCourses = enrollments.filter(
       (e) => e.status === "active"
     ).length;
-    const completedLessons = enrollments.reduce((sum, e) => {
-      if (e.completedLessons) {
-        const parsed = String(e.completedLessons).split(",").filter(Boolean)
-          .length;
-        if (parsed > 0) return sum + parsed;
-      }
-      return sum + Math.round((e.progress || 0) / 10);
-    }, 0);
-    const learningHours = enrollments.length * 2;
-    const certificates = enrollments.filter(
-      (e) => e.status === "completed"
-    ).length;
-    return { activeCourses, completedLessons, learningHours, certificates };
-  }, [enrollments]);
+    return {
+      activeCourses,
+      completedLessons: activity.completedLessons,
+      learningHours: activity.learningHours,
+      certificates: activity.certificates,
+    };
+  }, [enrollments, activity]);
 
   const firstName = user?.fullName.split(" ")[0] || "Student";
   const today = formatDate(new Date().toISOString());
@@ -470,7 +623,7 @@ function StudentOverview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <StatCard icon={BookOpen} label="Active Courses" value={stats.activeCourses} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={CheckCircle2} label="Completed Lessons" value={stats.completedLessons} color="bg-emerald-100 text-emerald-600" />
         <StatCard icon={Clock} label="Learning Hours" value={`${stats.learningHours}h`} color="bg-amber-100 text-amber-600" />
@@ -478,7 +631,7 @@ function StudentOverview() {
       </div>
 
       {/* Two columns */}
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="h-full p-0">
             <CardHeader className="flex-row items-center justify-between border-b">
@@ -529,7 +682,7 @@ function StudentOverview() {
                         className="flex flex-col gap-3 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center"
                       >
                         <button
-                          onClick={() => openCourse(course.id)}
+                          onClick={() => openPlayer(course.id)}
                           className="relative h-16 w-full shrink-0 overflow-hidden rounded-lg sm:w-28"
                         >
                           {course.image ? (
@@ -546,7 +699,7 @@ function StudentOverview() {
                         </button>
                         <div className="min-w-0 flex-1">
                           <button
-                            onClick={() => openCourse(course.id)}
+                            onClick={() => openPlayer(course.id)}
                             className="block truncate text-left text-sm font-bold hover:text-indigo-600"
                           >
                             {course.title}
@@ -567,7 +720,7 @@ function StudentOverview() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => openCourse(course.id)}
+                          onClick={() => openPlayer(course.id)}
                           className="shrink-0 gap-1"
                         >
                           Continue <ArrowRight className="h-3.5 w-3.5" />
@@ -653,10 +806,15 @@ function TeacherOverview() {
   const { user, openClass, openCourse } = useStore();
   const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof api.teacherStats>> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
+    api
+      .teacherStats()
+      .then((r) => active && setStats(r))
+      .catch(() => active && setStats(null));
     // Get all courses and filter the ones this teacher teaches
     api
       .courses({ limit: 50 })
@@ -698,14 +856,14 @@ function TeacherOverview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard icon={BookOpen} label="My Courses" value={myCourses.length} color="bg-indigo-100 text-indigo-600" />
-        <StatCard icon={Video} label="Upcoming Classes" value={upcoming.length} color="bg-rose-100 text-rose-600" />
-        <StatCard icon={Users} label="Total Enrollments" value={myCourses.reduce((s, c) => s + (c.reviewCount || 0), 0)} color="bg-emerald-100 text-emerald-600" />
-        <StatCard icon={Award} label="Avg Rating" value={myCourses.length ? (myCourses.reduce((s, c) => s + c.rating, 0) / myCourses.length).toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        <StatCard icon={BookOpen} label="My Courses" value={stats?.courses ?? myCourses.length} color="bg-indigo-100 text-indigo-600" />
+        <StatCard icon={Video} label="Upcoming Classes" value={stats?.upcoming ?? upcoming.length} color="bg-rose-100 text-rose-600" />
+        <StatCard icon={Users} label="Total Enrollments" value={stats?.enrollments ?? 0} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={Award} label="Avg Rating" value={stats?.averageRating != null ? stats.averageRating.toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
         {/* My teaching courses */}
         <div className="lg:col-span-2">
           <Card className="h-full p-0">
@@ -826,7 +984,7 @@ function TeacherOverview() {
 /* ─── Student: My Courses (full list within portal) ─────── */
 
 function StudentMyCourses() {
-  const { openCourse, navigate } = useStore();
+  const { openPlayer, navigate } = useStore();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -896,7 +1054,7 @@ function StudentMyCourses() {
                 )}
               </div>
               <button
-                onClick={() => openCourse(c.id)}
+                onClick={() => openPlayer(c.id)}
                 className="block text-left font-bold hover:text-indigo-600"
               >
                 {c.title}
@@ -910,7 +1068,7 @@ function StudentMyCourses() {
               <Button
                 size="sm"
                 className="mt-3 w-full gap-1 bg-indigo-600 hover:bg-indigo-700"
-                onClick={() => openCourse(c.id)}
+                onClick={() => openPlayer(c.id)}
               >
                 Continue Learning <ArrowRight className="h-3.5 w-3.5" />
               </Button>

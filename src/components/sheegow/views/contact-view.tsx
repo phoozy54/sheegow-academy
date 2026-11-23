@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api, ApiError } from "@/lib/api";
+import { PhoneInput } from "../phone-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import {
   CreditCard,
   CalendarClock,
   Award,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,18 +41,26 @@ const CONTACT_INFO = [
   {
     icon: Mail,
     label: "Email",
-    value: "hello@sheegow.academy",
-    href: "mailto:hello@sheegow.academy",
+    value: "info@sheegowacademy.com",
+    href: "mailto:info@sheegowacademy.com",
     hint: "We reply within 24 hours",
     color: "from-indigo-500 to-indigo-600",
   },
   {
     icon: Phone,
     label: "Phone",
-    value: "+252 61 555 0199",
-    href: "tel:+252615550199",
+    value: "+252 63 4085151",
+    href: "tel:+252634085151",
     hint: "Sat – Thu, 8AM – 10PM EAT",
     color: "from-emerald-500 to-teal-600",
+  },
+  {
+    icon: MessageCircle,
+    label: "WhatsApp",
+    value: "Chat with us",
+    href: "https://wa.me/252634085151",
+    hint: "Fastest response — same number",
+    color: "from-green-500 to-emerald-600",
   },
   {
     icon: MapPin,
@@ -76,8 +86,8 @@ const FAQS = [
     a: "Every SHEEGOW ACADEMY class is a real-time, interactive video session. You join live with your teacher and classmates — you can speak, ask questions in chat, and raise your hand. We never use recorded videos for live classes.",
   },
   {
-    q: "How do I pay? Do you accept EVC Plus and Zaad?",
-    a: "Yes. We accept EVC Plus, Zaad, and Stripe (for international students). After you click Enroll, you'll be taken to a checkout page where you can choose your payment method. Once payment is confirmed, you're instantly enrolled in the course.",
+    q: "How do I pay?",
+    a: "After you click Enroll, you'll be taken to a secure checkout page where the full amount and available payment methods are shown. Once payment is confirmed, you're instantly enrolled in the course.",
   },
   {
     q: "What happens if I miss a live class?",
@@ -89,7 +99,7 @@ const FAQS = [
   },
   {
     q: "How do I enroll and pay for a course?",
-    a: "Browse our courses page, choose your course, and click Enroll. You'll be taken to our secure checkout where you can pay with Credit Card (Stripe), EVC Plus, or Zaad. Once payment is confirmed, you're instantly enrolled and can join live classes right away.",
+    a: "Browse our courses page, choose your course, and click Enroll. You'll be taken to our secure checkout where the full amount and payment options are shown. Once payment is confirmed, you're instantly enrolled and can join live classes right away.",
   },
 ];
 
@@ -216,12 +226,12 @@ export function ContactView() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="phone">Phone (optional)</Label>
-                      <Input
+                      <PhoneInput
                         id="phone"
-                        type="tel"
                         value={form.phone}
-                        onChange={update("phone")}
-                        placeholder="+252 61 555 0199"
+                        onChange={(phone) =>
+                          setForm((f) => ({ ...f, phone }))
+                        }
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -298,6 +308,12 @@ export function ContactView() {
                   {info.href ? (
                     <a
                       href={info.href}
+                      target={info.href.startsWith("http") ? "_blank" : undefined}
+                      rel={
+                        info.href.startsWith("http")
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                       className="mt-0.5 block text-sm font-bold text-foreground hover:text-indigo-600"
                     >
                       {info.value}
@@ -374,7 +390,7 @@ export function ContactView() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { icon: Video, label: "Live Classes" },
-                { icon: CreditCard, label: "Payments (EVC Plus / Zaad)" },
+                { icon: CreditCard, label: "Secure payments" },
                 { icon: CalendarClock, label: "Class Scheduling" },
                 { icon: Award, label: "Certificates" },
               ].map(({ icon: Icon, label }) => (

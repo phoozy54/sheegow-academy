@@ -35,13 +35,13 @@ const VALUES = [
   {
     icon: Globe2,
     title: "Accessible to all",
-    desc: "Quality English education should reach every Somali learner — in Hargeisa, Mogadishu, Kismayo, or the diaspora.",
+    desc: "Quality English education should reach every learner, in every country — no matter where you start.",
     color: "from-indigo-500 to-indigo-600",
   },
   {
     icon: GraduationCap,
     title: "Quality teaching",
-    desc: "Our teachers are TESOL-certified and specialize in teaching English to Somali-speaking students.",
+    desc: "Our teachers are TESOL-certified and specialize in teaching English to students from every background.",
     color: "from-amber-500 to-orange-600",
   },
   {
@@ -53,7 +53,7 @@ const VALUES = [
   {
     icon: HandHeart,
     title: "Cultural respect",
-    desc: "We honor Somali culture and language. Our lessons respect your background while opening new doors.",
+    desc: "We respect every culture and background. Our lessons help you open new doors without leaving your identity behind.",
     color: "from-violet-500 to-purple-600",
   },
   {
@@ -64,33 +64,11 @@ const VALUES = [
   },
 ];
 
-const TEACHERS = [
-  {
-    name: "Yusuf Ali",
-    bio: "TESOL-certified instructor focused on business English and grammar. Former corporate trainer at international firms with a passion for clear, professional communication.",
-    image: "/images/teacher-1.png",
-    specialty: "Business English · Grammar",
-  },
-  {
-    name: "Amina Mohamed",
-    bio: "Certified English teacher with 8+ years of experience. Specializes in conversation and IELTS preparation. Loves helping Somali students gain confidence in speaking English.",
-    image: "/images/teacher-2.png",
-    specialty: "Conversation · IELTS Prep",
-  },
-  {
-    name: "Fatima Ibrahim",
-    bio: "Specialist in teaching English to children and beginners. Creates fun, engaging lessons for young Somali learners using games, songs, and stories.",
-    image: "/images/teacher-3.png",
-    specialty: "Kids · Beginners",
-  },
-];
-
-const STATS = [
-  { label: "Active Students", value: "2,400+", icon: Users },
-  { label: "Live Classes Held", value: "150+", icon: Video },
-  { label: "Expert Teachers", value: "25+", icon: GraduationCap },
-  { label: "Success Rate", value: "94%", icon: Award },
-];
+const TEACHER = {
+  name: "Ciise Mohamed Sheeq (SHEEGOW)",
+  bio: "English language expert with a university degree, multiple language certifications and 15 years of teaching experience. He personally leads every live course at SHEEGOW ACADEMY.",
+  specialty: "English Language Expert · 15+ Years",
+};
 
 /* ─── Main view ──────────────────────────────────────────── */
 
@@ -114,9 +92,9 @@ export function AboutView() {
               About <span className="gradient-text">SHEEGOW ACADEMY</span>
             </h1>
             <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-              We exist to bring quality, live English education to Somali-speaking
-              students everywhere. No recorded videos. No lonely self-study. Just
-              real teachers, real conversations, real progress.
+              We exist to bring quality, live English education to students
+              everywhere. No recorded videos. No lonely self-study. Just real
+              teachers, real conversations, real progress.
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -151,7 +129,7 @@ export function AboutView() {
             <h2 className="mb-3 text-xl font-bold text-foreground">Our Mission</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               To make high-quality, interactive English education accessible to
-              every Somali learner — through live classes taught by caring expert
+              every learner — through live classes taught by caring expert
               teachers. We exist to break the barrier of recorded, passive
               learning and replace it with conversation, practice, and
               confidence.
@@ -164,7 +142,7 @@ export function AboutView() {
             </div>
             <h2 className="mb-3 text-xl font-bold text-foreground">Our Vision</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              A Somaliland where every student — from primary school to working
+              A world where every student — from primary school to working
               professional — can speak English confidently. Where live classes
               replace lonely videos, where teachers know their students by name,
               and where a better future is just a live class away.
@@ -183,30 +161,34 @@ export function AboutView() {
             <BookOpen className="h-3 w-3" /> The Story
           </Badge>
           <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Built by Somali learners, for Somali learners
+            Built for learners, by learners
           </h2>
 
           <div className="space-y-5 text-base leading-relaxed text-muted-foreground">
             <p>
               SHEEGOW ACADEMY started with a simple frustration: too many English
-              courses for Somali students were just recordings. You watched a
-              video, took a quiz, and forgot everything. There was no speaking,
-              no practice, no real conversation — the very things that make a
-              language stick.
+              courses were just recordings. You watched a video, took a quiz, and
+              forgot everything. There was no speaking, no practice, no real
+              conversation — the very things that make a language stick.
             </p>
             <p>
-              Our founders — teachers and engineers from Hargeisa and the
-              diaspora — decided to fix this. We built a platform where every
-              single class is <span className="font-semibold text-foreground">LIVE</span>.
-              Where you see your teacher, hear your classmates, raise your hand,
-              and speak English out loud from day one.
+              Our founder and general manager,{" "}
+              <span className="font-semibold text-foreground">
+                Ciise Mohamed Sheeq (SHEEGOW)
+              </span>
+              , decided to fix this. An English language expert with a university
+              degree, he holds multiple language certifications and brings 15
+              years of hands-on teaching experience. We built a platform
+              where every single class is{" "}
+              <span className="font-semibold text-foreground">LIVE</span>. Where you
+              see your teacher, hear your classmates, raise your hand, and speak
+              English out loud from day one.
             </p>
             <p>
-              Today, thousands of Somali students learn with us — from absolute
-              beginners in Hargeisa to IELTS candidates preparing for
-              university abroad. We pay with EVC Plus and Zaad. We learn on
-              phones and laptops. We come from different cities, but we share one
-              goal: to speak English with confidence.
+              Today, students learn with us — from absolute beginners taking
+              their first class to IELTS candidates preparing for university
+              abroad. We learn on phones and laptops. We come from different
+              countries, but we share one goal: to speak English with confidence.
             </p>
             <p>
               That&apos;s the SHEEGOW difference. <span className="font-semibold text-foreground">Live classes, not recorded videos.</span>
@@ -250,6 +232,78 @@ export function AboutView() {
         </div>
       </section>
 
+      {/* ─── FOUNDER / GENERAL MANAGER ──────────────────── */}
+      <section className="bg-gradient-to-b from-indigo-50/40 to-background py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <Badge
+              variant="outline"
+              className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+            >
+              <Award className="h-3 w-3" /> Leadership
+            </Badge>
+            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              Meet the founder &amp; general manager
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              The English language expert behind SHEEGOW ACADEMY.
+            </p>
+          </div>
+
+          <Card className="card-lift overflow-hidden border-indigo-100 bg-gradient-to-br from-white via-indigo-50/40 to-amber-50/50 p-0">
+            <div className="grid gap-0 lg:grid-cols-[auto,1fr]">
+              <div className="flex items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 p-10 lg:p-14">
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white/30 text-3xl font-extrabold text-white sm:h-36 sm:w-36 sm:text-4xl">
+                  CS
+                </div>
+              </div>
+              <div className="p-6 sm:p-10">
+                <Badge className="mb-3 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                  Founder &amp; General Manager
+                </Badge>
+                <h3 className="text-2xl font-extrabold tracking-tight text-foreground">
+                  Ciise Mohamed Sheeq (SHEEGOW)
+                </h3>
+                <p className="mt-1 text-sm font-semibold text-indigo-600">
+                  English Language Expert · 15+ Years of Experience
+                </p>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                  Ciise holds a university degree in English and multiple
+                  language certifications. With 15 years of teaching experience,
+                  he leads SHEEGOW ACADEMY with one goal: helping
+                  learners everywhere speak English with confidence through
+                  live, interactive classes.
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {[
+                    {
+                      icon: GraduationCap,
+                      label: "University degree",
+                    },
+                    {
+                      icon: Award,
+                      label: "Multiple language certificates",
+                    },
+                    {
+                      icon: BookOpen,
+                      label: "15 years of teaching experience",
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-2 rounded-xl border border-indigo-100 bg-white/80 px-3 py-2.5 text-xs font-semibold text-foreground"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0 text-indigo-600" />
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
       {/* ─── TEACHERS ───────────────────────────────────── */}
       <section className="bg-gradient-to-b from-background to-indigo-50/40 py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -258,80 +312,49 @@ export function AboutView() {
               variant="outline"
               className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
             >
-              <GraduationCap className="h-3 w-3" /> Meet the Teachers
+              <GraduationCap className="h-3 w-3" /> Meet Your Teacher
             </Badge>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Certified, caring, and Somali-speaking
+              One expert. Every class live.
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              Our teachers specialize in teaching English to Somali learners.
-              Every one of them runs live, interactive classes.
+              All courses are taught by founder Ciise Mohamed Sheeq (SHEEGOW),
+              an English language expert with 15 years of experience — live and
+              interactive, never recorded.
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            {TEACHERS.map((t) => (
-              <Card key={t.name} className="card-lift flex flex-col overflow-hidden p-0">
-                <div className="relative aspect-[4/3] w-full overflow-hidden">
-                  <img loading="lazy" decoding="async"
-                    src={t.image}
-                    alt={t.name}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
-                  <Badge
-                    variant="outline"
-                    className="absolute left-3 top-3 border-white/30 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur"
-                  >
-                    Teacher
-                  </Badge>
+          <div className="mx-auto max-w-2xl">
+            <Card className="card-lift flex flex-col overflow-hidden p-0 sm:flex-row">
+              <div className="flex min-h-40 items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 sm:w-56">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white/30 text-2xl font-extrabold text-white">
+                  CS
                 </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h3 className="text-lg font-bold text-foreground">{t.name}</h3>
-                  <p className="mt-1 text-xs font-semibold text-indigo-600">
-                    {t.specialty}
-                  </p>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-                    {t.bio}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate("courses")}
-                    className="mt-4 gap-1.5 self-start"
-                  >
-                    <BookOpen className="h-3.5 w-3.5" /> View Courses
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── STATS STRIP ──────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border bg-card p-8 shadow-sm sm:p-10">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-              Trusted by thousands of Somali learners
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Real numbers from real students learning with SHEEGOW ACADEMY.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {STATS.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30">
-                  <s.icon className="h-7 w-7" />
-                </div>
-                <p className="text-3xl font-extrabold text-foreground">{s.value}</p>
-                <p className="mt-1 text-xs font-medium text-muted-foreground">
-                  {s.label}
-                </p>
               </div>
-            ))}
+              <div className="flex flex-1 flex-col p-6">
+                <Badge
+                  variant="outline"
+                  className="mb-3 w-fit border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700"
+                >
+                  Founder &amp; Teacher
+                </Badge>
+                <h3 className="text-lg font-bold text-foreground">{TEACHER.name}</h3>
+                <p className="mt-1 text-xs font-semibold text-indigo-600">
+                  {TEACHER.specialty}
+                </p>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                  {TEACHER.bio}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("courses")}
+                  className="mt-4 gap-1.5 self-start"
+                >
+                  <BookOpen className="h-3.5 w-3.5" /> View Courses
+                </Button>
+              </div>
+            </Card>
           </div>
         </div>
       </section>
@@ -404,7 +427,7 @@ export function AboutView() {
               address, and phone number. When you enroll in a course or make a
               payment, we record the transaction details. We do not store
               credit card numbers — payments are processed by our payment
-              providers (Stripe, EVC Plus, Zaad).
+              providers.
             </p>
           </div>
           <div>
@@ -450,10 +473,10 @@ export function AboutView() {
               You can request access to, correction of, or deletion of your
               personal data at any time by contacting us at{" "}
               <a
-                href="mailto:hello@sheegow.academy"
+                href="mailto:info@sheegowacademy.com"
                 className="font-medium text-indigo-600 hover:underline"
               >
-                hello@sheegow.academy
+                info@sheegowacademy.com
               </a>
               .
             </p>

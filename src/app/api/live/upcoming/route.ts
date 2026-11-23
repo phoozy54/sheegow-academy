@@ -9,7 +9,6 @@ const includeRelations = {
     select: {
       id: true,
       fullName: true,
-      email: true,
       profilePicture: true,
     },
   },

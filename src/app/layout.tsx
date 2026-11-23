@@ -3,6 +3,15 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { DeviceProvider } from "@/lib/device";
+import {
+  OG_IMAGE,
+  SITE_NAME,
+  SITE_URL,
+  jsonLdScript,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -14,21 +23,21 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "SHEEGOW ACADEMY | Live English Learning Platform",
-    template: "%s | SHEEGOW ACADEMY",
+    default: "SHEEGOW ACADEMY | Live English Classes",
+    template: `%s | ${SITE_NAME}`,
   },
   description:
-    "SHEEGOW ACADEMY teaches English to Somali-speaking students through LIVE interactive online classes. Learn English with expert teachers, real-time video, and live chat.",
+    "Live interactive English classes for learners everywhere. Speak with a real teacher, practise every lesson, and learn at your pace.",
   keywords: [
     "SHEEGOW ACADEMY",
     "learn English",
     "live English classes",
-    "English for Somalis",
     "online English course",
     "IELTS preparation",
-    "English teacher Somaliland",
-    "Hargeisa English school",
+    "live English teacher",
+    "online English school",
   ],
   authors: [{ name: "SHEEGOW ACADEMY" }],
   creator: "SHEEGOW ACADEMY",
@@ -47,18 +56,21 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   openGraph: {
-    title: "SHEEGOW ACADEMY | Live English Learning Platform",
+    title: "SHEEGOW ACADEMY | Live English Classes",
     description:
-      "Learn English through LIVE interactive classes with expert teachers. Built for Somali-speaking students worldwide.",
-    siteName: "SHEEGOW ACADEMY",
+      "Learn English through live interactive classes with a real teacher. Open to learners in every country.",
+    url: "/",
+    siteName: SITE_NAME,
     type: "website",
     locale: "en_US",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SHEEGOW ACADEMY",
+    title: "SHEEGOW ACADEMY | Live English Classes",
     description:
-      "Learn English through LIVE interactive classes with expert teachers.",
+      "Learn English through live interactive classes with a real teacher.",
+    images: [OG_IMAGE.url],
   },
   robots: {
     index: true,
@@ -70,7 +82,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://sheegowacademy.com",
+    canonical: "/",
   },
 };
 
@@ -93,6 +105,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLdScript([
+            organizationJsonLd(),
+            websiteJsonLd(),
+          ])}
+        />
         {/* PWA / iOS web app capabilities */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -102,9 +121,11 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} font-sans antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
-        <SonnerToaster richColors position="top-right" />
+        <DeviceProvider>
+          {children}
+          <Toaster />
+          <SonnerToaster richColors position="top-right" />
+        </DeviceProvider>
       </body>
     </html>
   );

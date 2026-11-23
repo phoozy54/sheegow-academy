@@ -1,10 +1,102 @@
 import type { NextConfig } from "next";
 
+/** Origins the browser is allowed to talk to (chat service over HTTPS/WSS). */
+const chatOrigins = new Set<string>();
+for (const value of [
+  process.env.NEXT_PUBLIC_CHAT_URL,
+  "https://sheegow-chat.onrender.com",
+]) {
+  if (!value) continue;
+  try {
+    const parsed = new URL(value);
+    chatOrigins.add(`${parsed.protocol}//${parsed.host}`);
+    chatOrigins.add(`wss://${parsed.host}`);
+  } catch {
+    // Ignore malformed URLs — they are warned about in the socket client.
+  }
+}
+
+// Cloudinary is used for signed PDF / media uploads by course authors.
+const connectSources = ["'self'", ...chatOrigins, "https://api.cloudinary.com"].join(" ");
+
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  `connect-src ${connectSources}`,
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "media-src 'self' blob:",
+  // Next.js injects inline scripts/styles; nonces would require a larger refactor.
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+].join("; ");
+
+/** Only the canonical site origin may read responses cross-origin. */
+const appOrigin = "https://www.sheegowacademy.com";
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
+  { key: "Access-Control-Allow-Origin", value: appOrigin },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(self), microphone=(self), display-capture=(self), geolocation=(), interest-cohort=()",
+  },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+];
+
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: false,
+  /**
+   * One canonical origin: https://www.sheegowacademy.com
+   * Vercel's platform-level HTTP→HTTPS / apex→www redirects run before this
+   * code and use 308 (which Google treats the same as 301 for canonicalization).
+   * These rules cover hostnames we control inside the deployment.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sheegowacademy\\.com" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "sheegow-academy\\.vercel\\.app" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www\\.sheegow-academy\\.vercel\\.app" }],
+        destination: "https://www.sheegowacademy.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
+  },
+  async headers() {
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/api/auth/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+        ],
+      },
+    ];
   },
   // Compress responses (Vercel does this anyway, but good for self-hosting)
   compress: true,

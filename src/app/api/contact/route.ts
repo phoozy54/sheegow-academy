@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import { clientIp } from "@/lib/rate-limit";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 
 interface ContactBody {
   name?: string;
@@ -17,18 +19,27 @@ interface ContactBody {
  */
 export async function POST(req: Request) {
   try {
+    const limited = limitRequest(`contact:${clientIp(req)}`, 5, 60 * 60_000);
+    if (limited) return limited;
+
     const body = await safeBody<ContactBody>(req);
     if (!body) return jsonError("Invalid request body", 400);
 
     const name = body.name?.trim();
     const email = body.email?.trim().toLowerCase();
-    const phone = body.phone?.trim() || null;
+    const normalizedPhone = normalizeSomaliPhone(body.phone || "");
+    const phone = normalizedPhone || null;
     const subject = body.subject?.trim();
     const message = body.message?.trim();
 
     if (!name) return jsonError("Name is required", 400);
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return jsonError("A valid email is required", 400);
+    if (phone && !isValidSomaliPhone(phone))
+      return jsonError(
+        "Enter a valid Somali phone number starting with 61, 63 or 65",
+        400
+      );
     if (!subject) return jsonError("Subject is required", 400);
     if (!message) return jsonError("Message is required", 400);
 

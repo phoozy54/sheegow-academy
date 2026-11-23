@@ -59,16 +59,25 @@ const SENSITIVE_KEYS = new Set([
   'accessToken',
 ])
 
-function redact(ctx: LogContext): LogContext {
+function redactValue(value: unknown, depth: number): unknown {
+  if (value instanceof Error) return { message: value.message, name: value.name }
+  if (value instanceof Date) return value.toISOString()
+  if (Array.isArray(value)) {
+    return depth > 4 ? '[TRUNCATED]' : value.map((item) => redactValue(item, depth + 1))
+  }
+  if (value && typeof value === 'object') {
+    return depth > 4 ? '[TRUNCATED]' : redact(value as LogContext, depth + 1)
+  }
+  return value
+}
+
+/** Redact sensitive keys at every nesting level, not just the top level. */
+function redact(ctx: LogContext, depth = 0): LogContext {
   const safe: LogContext = {}
   for (const [key, value] of Object.entries(ctx)) {
-    if (SENSITIVE_KEYS.has(key.toLowerCase())) {
-      safe[key] = '[REDACTED]'
-    } else if (value instanceof Error) {
-      safe[key] = { message: value.message, name: value.name }
-    } else {
-      safe[key] = value
-    }
+    safe[key] = SENSITIVE_KEYS.has(key.toLowerCase())
+      ? '[REDACTED]'
+      : redactValue(value, depth)
   }
   return safe
 }

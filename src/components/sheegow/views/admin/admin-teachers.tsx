@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { Course, User } from "@/lib/types";
 import { cn, levelBadgeClass } from "@/lib/ui";
+import { normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../../phone-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +37,6 @@ import {
   BookOpen,
   GraduationCap,
   UserCircle,
-  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,7 +45,9 @@ const LEVELS = ["Beginner", "Intermediate", "Advanced", "IELTS", "Kids"];
 interface TeacherForm {
   fullName: string;
   email: string;
+  username: string;
   phone: string;
+  password: string;
   bio: string;
   level: string;
 }
@@ -52,7 +55,9 @@ interface TeacherForm {
 const EMPTY_FORM: TeacherForm = {
   fullName: "",
   email: "",
+  username: "",
   phone: "",
+  password: "",
   bio: "",
   level: "Intermediate",
 };
@@ -80,10 +85,16 @@ export function AdminTeachers() {
     setLoading(true);
     try {
       const [teacherRes, courseRes] = await Promise.all([
-        api.users({ role: "teacher" }),
+        api.users(),
         api.courses({ limit: 50 }).catch(() => ({ items: [] as Course[] })),
       ]);
-      setTeachers(teacherRes.users);
+      // The founder/super admin also teaches every course. Show all teaching
+      // roles so the teacher directory never looks empty.
+      setTeachers(
+        teacherRes.users.filter((u) =>
+          ["teacher", "admin", "super_admin"].includes(u.role)
+        )
+      );
       setCourses(courseRes.items);
     } catch (err) {
       const msg =
@@ -113,7 +124,9 @@ export function AdminTeachers() {
     setForm({
       fullName: t.fullName,
       email: t.email,
-      phone: t.phone ?? "",
+      username: t.username ?? "",
+      phone: normalizeSomaliPhone(t.phone ?? ""),
+      password: "",
       bio: t.bio ?? "",
       level: t.level,
     });
@@ -132,6 +145,7 @@ export function AdminTeachers() {
       await api.updateUser(editing.id, {
         fullName: form.fullName.trim(),
         email: form.email.trim(),
+        username: form.username.trim() || undefined,
         phone: form.phone.trim() || null,
         bio: form.bio.trim() || null,
         level: form.level,
@@ -159,15 +173,32 @@ export function AdminTeachers() {
       toast.error("Name and email are required");
       return;
     }
+    if (addForm.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
     setAdding(true);
-    // Demo: no create-teacher endpoint exists; just simulate delay + info toast
-    await new Promise((r) => setTimeout(r, 500));
-    toast.info(
-      "In production this would create a teacher account. Use the register flow with elevated role.",
-      { duration: 6000 }
-    );
-    setAdding(false);
-    setAddOpen(false);
+    try {
+      await api.createUser({
+        fullName: addForm.fullName.trim(),
+        email: addForm.email.trim(),
+        username: addForm.username.trim() || undefined,
+        phone: addForm.phone.trim() || undefined,
+        password: addForm.password,
+        role: "teacher",
+        level: addForm.level,
+        bio: addForm.bio.trim() || undefined,
+      });
+      toast.success("Teacher account created");
+      setAddOpen(false);
+      await fetchAll();
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : "Failed to create teacher";
+      toast.error(msg);
+    } finally {
+      setAdding(false);
+    }
   }
 
   return (
@@ -246,6 +277,12 @@ export function AdminTeachers() {
                     <Mail className="h-3.5 w-3.5" />
                     <span className="truncate">{t.email}</span>
                   </div>
+                  {t.username && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <UserCircle className="h-3.5 w-3.5" />
+                      <span className="truncate">@{t.username}</span>
+                    </div>
+                  )}
                   {t.phone && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Phone className="h-3.5 w-3.5" />
@@ -323,6 +360,22 @@ export function AdminTeachers() {
               />
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="username">Login Username</Label>
+              <Input
+                id="username"
+                value={form.username}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, username: e.target.value }))
+                }
+                placeholder="ahmed.hassan"
+                minLength={3}
+                maxLength={30}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Used to log in alongside email and phone.
+              </p>
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
@@ -337,13 +390,12 @@ export function AdminTeachers() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
-                <Input
+                <PhoneInput
                   id="phone"
                   value={form.phone}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, phone: e.target.value }))
+                  onChange={(phone) =>
+                    setForm((f) => ({ ...f, phone }))
                   }
-                  placeholder="+252 61 2345678"
                 />
               </div>
               <div className="space-y-1.5">
@@ -412,16 +464,8 @@ export function AdminTeachers() {
               Invite a new instructor to the platform.
             </DialogDescription>
           </DialogHeader>
-          <div className="mb-4 flex items-start gap-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-800">
-            <Info className="mt-0.5 h-4 w-4 shrink-0" />
-            <div>
-              <p className="font-semibold">Demo notice</p>
-              <p className="mt-0.5">
-                There is no dedicated &quot;create teacher&quot; endpoint yet.
-                In production, submitting this form would create an account with
-                the teacher role and email an invitation.
-              </p>
-            </div>
+          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+            The teacher can log in with the username, email or phone number set here.
           </div>
           <form onSubmit={handleAddSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
@@ -436,6 +480,22 @@ export function AdminTeachers() {
               />
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="add-username">Login Username (optional)</Label>
+              <Input
+                id="add-username"
+                value={addForm.username}
+                onChange={(e) =>
+                  setAddForm((f) => ({ ...f, username: e.target.value }))
+                }
+                placeholder="ahmed.hassan"
+                minLength={3}
+                maxLength={30}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Leave blank to generate one from the name.
+              </p>
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="add-email">Email Address</Label>
               <Input
                 id="add-email"
@@ -447,14 +507,29 @@ export function AdminTeachers() {
                 required
               />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="add-password">Initial Password</Label>
+              <Input
+                id="add-password"
+                type="password"
+                autoComplete="new-password"
+                value={addForm.password}
+                onChange={(e) =>
+                  setAddForm((f) => ({ ...f, password: e.target.value }))
+                }
+                placeholder="At least 6 characters"
+                minLength={6}
+                required
+              />
+            </div>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="add-phone">Phone</Label>
-                <Input
+                <PhoneInput
                   id="add-phone"
                   value={addForm.phone}
-                  onChange={(e) =>
-                    setAddForm((f) => ({ ...f, phone: e.target.value }))
+                  onChange={(phone) =>
+                    setAddForm((f) => ({ ...f, phone }))
                   }
                 />
               </div>
@@ -547,6 +622,12 @@ export function AdminTeachers() {
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span>{viewing.email}</span>
                 </div>
+                {viewing.username && (
+                  <div className="flex items-center gap-2">
+                    <UserCircle className="h-4 w-4 text-muted-foreground" />
+                    <span>@{viewing.username}</span>
+                  </div>
+                )}
                 {viewing.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />

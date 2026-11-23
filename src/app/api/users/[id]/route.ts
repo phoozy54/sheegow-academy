@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, isAdminRole } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
+import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
+import { allocateUsername, usernameErrorResponse } from "@/lib/username";
 
 interface UpdateUserBody {
   fullName?: string;
   email?: string;
+  username?: string;
   phone?: string;
   role?: string;
   level?: string;
@@ -15,7 +18,7 @@ interface UpdateUserBody {
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-const VALID_ROLES = new Set(["student", "teacher", "admin"]);
+const VALID_ROLES = new Set(["student", "teacher", "admin", "super_admin"]);
 const VALID_LEVELS = new Set([
   "Beginner",
   "Intermediate",
@@ -28,6 +31,7 @@ const userSelect = {
   id: true,
   fullName: true,
   email: true,
+  username: true,
   phone: true,
   role: true,
   profilePicture: true,
@@ -70,13 +74,52 @@ export async function PUT(req: Request, { params }: RouteContext) {
         return jsonError("Email already in use", 409);
       data.email = v;
     }
-    if (body.phone !== undefined) data.phone = body.phone.trim() || null;
+    if (body.username !== undefined) {
+      const preferred = body.username.trim();
+      if (!preferred) return jsonError("Username cannot be empty", 400);
+      try {
+        data.username = await allocateUsername({
+          fullName: (body.fullName ?? existing.fullName).trim(),
+          role: (body.role ?? existing.role).trim(),
+          preferred,
+          userId: id,
+        });
+      } catch (e) {
+        const err = usernameErrorResponse(e);
+        if (err) return jsonError(err.message, err.status);
+        throw e;
+      }
+    }
+    if (body.phone !== undefined) {
+      const phone = normalizeSomaliPhone(body.phone);
+      if (!phone) {
+        data.phone = null;
+      } else if (!isValidSomaliPhone(phone)) {
+        return jsonError(
+          "Enter a valid Somali phone number starting with 61, 63 or 65",
+          400
+        );
+      } else {
+        data.phone = phone;
+      }
+    }
     if (body.role !== undefined) {
       const v = body.role.trim();
       if (!VALID_ROLES.has(v))
         return jsonError("Invalid role", 400);
-      // Prevent self-demotion of the last admin (best-effort)
-      if (existing.role === "admin" && v !== "admin" && admin.id === id)
+      // Only the super admin may change roles — including assigning or
+      // revoking the teacher role. This keeps staff management centralised.
+      if (v !== existing.role && admin.role !== "super_admin") {
+        return jsonError("Only a super admin can change user roles", 403);
+      }
+      // Only a super admin may grant or revoke super-admin access.
+      if (
+        (v === "super_admin" || existing.role === "super_admin") &&
+        admin.role !== "super_admin"
+      )
+        return jsonError("Only a super admin can manage super-admin accounts", 403);
+      // Prevent an admin from stripping their own management role.
+      if (isAdminRole(existing.role) && !isAdminRole(v) && admin.id === id)
         return jsonError("You cannot demote your own admin account", 400);
       data.role = v;
     }
@@ -120,6 +163,8 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
 
     const existing = await db.user.findUnique({ where: { id } });
     if (!existing) return jsonError("User not found", 404);
+    if (existing.role === "super_admin" && admin.role !== "super_admin")
+      return jsonError("Only a super admin can delete a super admin", 403);
 
     await db.user.delete({ where: { id } });
 

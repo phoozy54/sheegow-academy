@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import type { Course } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CourseCard } from "../course-card";
-import { Search, ChevronLeft, ChevronRight, BookOpen, Loader2 } from "lucide-react";
+import { AdminCourseOverview } from "./admin/admin-course-overview";
+import { useMyEnrollments } from "@/lib/use-my-enrollments";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  BookOpen,
+  LayoutDashboard,
+  Loader2,
+} from "lucide-react";
 import { cn } from "@/lib/ui";
 
 // Levels offered by the platform — used to drive the filter pills
@@ -20,6 +30,24 @@ const PAGE_SIZE = 9;
 
 export function CoursesView() {
   const navigate = useStore((s) => s.navigate);
+  const user = useStore((s) => s.user);
+  const { byCourse } = useMyEnrollments();
+  const { isMobile, isTablet } = useDevice();
+
+  // Managers land in the admin control center; they can still switch to the
+  // public catalog when they want to see the student-facing view.
+  const isManager = user?.role === "admin" || user?.role === "super_admin";
+  const [mode, setMode] = useState<"overview" | "catalog">(
+    isManager ? "overview" : "catalog"
+  );
+  useEffect(() => {
+    setMode(isManager ? "overview" : "catalog");
+  }, [isManager]);
+  const padClass = isMobile
+    ? "px-3"
+    : isTablet
+      ? "px-5"
+      : "px-4 sm:px-6 lg:px-8";
 
   // Filter + pagination state
   const [level, setLevel] = useState<LevelFilter>("All");
@@ -77,27 +105,80 @@ export function CoursesView() {
       {/* ─── HEADER ───────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/60 to-background">
         <div className="hero-mesh absolute inset-0 opacity-70" />
-        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className={`relative mx-auto max-w-7xl py-12 lg:py-16 ${padClass}`}>
           <Badge
             variant="outline"
             className="mb-4 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
           >
-            <BookOpen className="h-3 w-3" /> All Courses
+            {mode === "overview" ? (
+              <LayoutDashboard className="h-3 w-3" />
+            ) : (
+              <BookOpen className="h-3 w-3" />
+            )}
+            {mode === "overview" ? "Admin Overview" : "All Courses"}
           </Badge>
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            Explore Live English <span className="gradient-text">Courses</span>
+            {mode === "overview" ? (
+              <>
+                Courses <span className="gradient-text">Control Center</span>
+              </>
+            ) : (
+              <>
+                Explore Live English <span className="gradient-text">Courses</span>
+              </>
+            )}
           </h1>
           <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Browse our full catalog of LIVE English courses — every class is taught
-            in real-time by an expert teacher. Choose your level and start speaking
-            today.
+            {mode === "overview"
+              ? "All courses, the work inside each one, every enrolled student and all live classes — the full admin view."
+              : "Browse our full catalog of LIVE English courses — every class is taught in real-time by an expert teacher. Choose your level and start speaking today."}
           </p>
         </div>
       </section>
 
+      {/* Manager mode switch */}
+      {isManager && (
+        <section className={`mx-auto max-w-7xl pt-6 ${padClass}`}>
+          <div className="inline-flex flex-wrap gap-2 rounded-xl border bg-card p-1.5">
+            <button
+              onClick={() => setMode("overview")}
+              aria-pressed={mode === "overview"}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
+                mode === "overview"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              <LayoutDashboard className="h-4 w-4" /> Admin overview
+            </button>
+            <button
+              onClick={() => setMode("catalog")}
+              aria-pressed={mode === "catalog"}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
+                mode === "catalog"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              <BookOpen className="h-4 w-4" /> Student catalog
+            </button>
+          </div>
+        </section>
+      )}
+
+      {mode === "overview" && (
+        <section className={`mx-auto max-w-7xl py-8 sm:py-10 ${padClass}`}>
+          <AdminCourseOverview />
+        </section>
+      )}
+
+      {mode === "catalog" && (
+        <>
       {/* ─── CONTROLS ─────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className={`mx-auto max-w-7xl pt-8 ${padClass}`}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Search */}
           <div className="relative w-full lg:max-w-sm">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -172,7 +253,7 @@ export function CoursesView() {
       </section>
 
       {/* ─── COURSES GRID ──────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <section className={`mx-auto max-w-7xl py-8 lg:py-12 ${padClass}`}>
         {loading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -195,7 +276,7 @@ export function CoursesView() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((c) => (
-              <CourseCard key={c.id} course={c} />
+              <CourseCard key={c.id} course={c} enrollment={byCourse.get(c.id)} all={courses} />
             ))}
           </div>
         )}
@@ -267,6 +348,8 @@ export function CoursesView() {
           </Button>
         </div>
       </section>
+        </>
+      )}
     </div>
   );
 }

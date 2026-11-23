@@ -2,9 +2,11 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
 import { getSocket, disconnectSocket } from "@/lib/socket";
-import type { LiveClass } from "@/lib/types";
+import { LiveStreamManager } from "@/lib/webrtc";
+import type { LiveClass, Poll } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +34,14 @@ import {
   Loader2,
   Lock,
   MessageSquare,
+  Volume2,
+  RadioTower,
+  Sparkles,
+  CheckCircle2,
+  ClipboardList,
+  BarChart3,
+  Plus,
+  X,
 } from "lucide-react";
 import { cn, formatDateTime } from "@/lib/ui";
 import { toast } from "sonner";
@@ -46,6 +56,8 @@ interface ChatMsg {
   userAvatar?: string | null;
   text: string;
   timestamp: string;
+  /** Used to ignore our own socket echo after persisting the message. */
+  clientId?: string;
 }
 
 // A "system" message — joined / left / raised hand, rendered centered
@@ -62,16 +74,6 @@ function isSystem(m: AnyMsg): m is SystemMsg {
   return (m as SystemMsg).kind !== undefined;
 }
 
-// Mock participant bubbles for the video area (purely decorative)
-const PARTICIPANT_COLORS = [
-  "from-rose-400 to-rose-600",
-  "from-amber-400 to-amber-600",
-  "from-emerald-400 to-emerald-600",
-  "from-violet-400 to-violet-600",
-  "from-sky-400 to-sky-600",
-  "from-pink-400 to-pink-600",
-];
-const PARTICIPANT_NAMES = ["Hodan", "Mahamed", "Fadumo", "Abdi", "Leyla", "Yusuf"];
 
 /* ─── Main view ──────────────────────────────────────────── */
 
@@ -80,24 +82,69 @@ export function LiveRoomView() {
   const navigate = useStore((s) => s.navigate);
   const user = useStore((s) => s.user);
   const openAuthModal = useStore((s) => s.openAuthModal);
+  const { isMobile, isTablet } = useDevice();
+
+  // On phones the video and chat panels are shown one at a time.
+  const [mobileTab, setMobileTab] = useState<"video" | "chat">("video");
 
   const [liveClass, setLiveClass] = useState<LiveClass | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [accessBlocked, setAccessBlocked] = useState(false);
+  const [requestingTrial, setRequestingTrial] = useState(false);
+  const [trialRequested, setTrialRequested] = useState(false);
 
   // Chat state
   const [messages, setMessages] = useState<AnyMsg[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [participants, setParticipants] = useState<
+    { userId: string; userName: string; userAvatar?: string }[]
+  >([]);
   const [chatInput, setChatInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   // Video controls
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [handRaised, setHandRaised] = useState(false);
+  const [screenSharing, setScreenSharing] = useState(false);
+  const [hostSharingScreen, setHostSharingScreen] = useState(false);
+
+  // Live polls
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollOptions, setPollOptions] = useState(["", ""]);
+  const [busyPoll, setBusyPoll] = useState("");
+
+  // Real WebRTC stream state
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [hostPresent, setHostPresent] = useState(false);
+  const [needsPlay, setNeedsPlay] = useState(false);
+  const streamManagerRef = useRef<LiveStreamManager | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // Socket instance — created on mount, destroyed on unmount
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
+
+  /* ─── Live polls ─────────────────────────────────────── */
+  const loadPolls = useCallback(async (id: string) => {
+    try {
+      const r = await api.polls(id);
+      setPolls(r.polls);
+    } catch {
+      // Polls are an extra interaction layer — never block the class.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!classId) return;
+    void loadPolls(classId);
+    const timer = setInterval(() => void loadPolls(classId), 15_000);
+    return () => clearInterval(timer);
+  }, [classId, loadPolls]);
 
   /* ─── Load live class + initial messages ─────────────── */
   const loadClass = useCallback(async () => {
@@ -108,6 +155,8 @@ export function LiveRoomView() {
     }
     setLoading(true);
     setError(null);
+    setAccessBlocked(false);
+    setTrialRequested(false);
     try {
       const r = await api.liveClass(classId);
       setLiveClass(r.liveClass);
@@ -139,12 +188,59 @@ export function LiveRoomView() {
     loadClass();
   }, [loadClass]);
 
+  /* ─── Access errors (e.g. payment required) ─────────── */
+  useEffect(() => {
+    const onAccessError = (event: Event) => {
+      const detail = (event as CustomEvent<{ message?: string; status?: number }>)
+        .detail;
+      if (detail?.message) toast.error(detail.message);
+      // 402 = payment required, 403 = enrollment required. Show the dedicated
+      // access screen with a trial CTA instead of a dead video room.
+      if (detail?.status === 402 || detail?.status === 403) {
+        setAccessBlocked(true);
+      }
+    };
+    window.addEventListener("sheegow:socket-auth-error", onAccessError);
+    return () =>
+      window.removeEventListener("sheegow:socket-auth-error", onAccessError);
+  }, []);
+
+  const handleRequestTrial = async () => {
+    if (!user) {
+      openAuthModal("register");
+      return;
+    }
+    if (!classId) return;
+    setRequestingTrial(true);
+    try {
+      const res = await api.requestTrial(classId);
+      setTrialRequested(true);
+      if (res.alreadyExists) {
+        toast.info("You already have a trial request for this class.");
+      } else {
+        toast.success("Trial request sent. An admin will review it shortly.");
+      }
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError ? e.message : "Could not send the trial request"
+      );
+    } finally {
+      setRequestingTrial(false);
+    }
+  };
+
   /* ─── Socket connection ─────────────────────────────── */
   useEffect(() => {
     if (!classId) return;
 
-    const socket = getSocket();
+    const socket = getSocket(classId);
     socketRef.current = socket;
+    setSocketConnected(socket.connected);
+
+    const onSocketConnect = () => setSocketConnected(true);
+    const onSocketDisconnect = () => setSocketConnected(false);
+    socket.on("connect", onSocketConnect);
+    socket.on("disconnect", onSocketDisconnect);
 
     const addSystem = (text: string, kind: SystemMsg["kind"] = "system") => {
       setMessages((prev) => [
@@ -160,6 +256,17 @@ export function LiveRoomView() {
 
     /* Listeners ───────────────────────────────────────── */
     const onNewMessage = (m: ChatMsg) => {
+      // The socket echoes our own message back. We already rendered it
+      // optimistically (and replaced it with the persisted DB row).
+      if (m.clientId && user && m.userId === user.id) {
+        setMessages((prev) => {
+          if (prev.some((item) => !isSystem(item) && item.clientId === m.clientId)) {
+            return prev;
+          }
+          return [...prev, m];
+        });
+        return;
+      }
       setMessages((prev) => [...prev, m]);
     };
 
@@ -169,6 +276,11 @@ export function LiveRoomView() {
       onlineCount?: number;
     }) => {
       addSystem(`${payload.userName} joined the class`, "join");
+      setParticipants((prev) =>
+        prev.some((p) => p.userId === payload.userId)
+          ? prev
+          : [...prev, { userId: payload.userId, userName: payload.userName }]
+      );
       if (typeof payload.onlineCount === "number") {
         setOnlineCount(payload.onlineCount);
       }
@@ -179,6 +291,7 @@ export function LiveRoomView() {
       userName: string;
       onlineCount?: number;
     }) => {
+      setParticipants((prev) => prev.filter((p) => p.userId !== payload.userId));
       addSystem(`${payload.userName} left the class`, "leave");
       if (typeof payload.onlineCount === "number") {
         setOnlineCount(payload.onlineCount);
@@ -188,6 +301,12 @@ export function LiveRoomView() {
     const onOnlineCount = (payload: { classId: string; onlineCount?: number; count?: number }) => {
       const n = payload.onlineCount ?? payload.count;
       if (typeof n === "number") setOnlineCount(n);
+    };
+
+    const onUsersList = (payload: {
+      users?: { userId: string; userName: string; userAvatar?: string }[];
+    }) => {
+      setParticipants(Array.isArray(payload?.users) ? payload.users : []);
     };
 
     const onHandRaised = (payload: { userId: string; userName: string }) => {
@@ -206,12 +325,24 @@ export function LiveRoomView() {
       }
     };
 
+    const onScreenShareStarted = () => {
+      setHostSharingScreen(true);
+      addSystem("The teacher is now sharing their screen", "system");
+    };
+    const onScreenShareStopped = () => {
+      setHostSharingScreen(false);
+      addSystem("Screen sharing ended", "system");
+    };
+
     socket.on("new-message", onNewMessage);
     socket.on("user-joined", onUserJoined);
     socket.on("user-left", onUserLeft);
     socket.on("online-count", onOnlineCount);
+    socket.on("users-list", onUsersList);
     socket.on("hand-raised", onHandRaised);
     socket.on("class-status", onClassStatus);
+    socket.on("screen-share-started", onScreenShareStarted);
+    socket.on("screen-share-stopped", onScreenShareStopped);
 
     // Join the class — only if user is logged in. Guests still listen.
     if (user && socket.connected) {
@@ -241,33 +372,253 @@ export function LiveRoomView() {
       socket.off("user-joined", onUserJoined);
       socket.off("user-left", onUserLeft);
       socket.off("online-count", onOnlineCount);
+      socket.off("users-list", onUsersList);
       socket.off("hand-raised", onHandRaised);
       socket.off("class-status", onClassStatus);
+      socket.off("screen-share-started", onScreenShareStarted);
+      socket.off("screen-share-stopped", onScreenShareStopped);
       socket.off("connect", onConnect);
+      socket.off("connect", onSocketConnect);
+      socket.off("disconnect", onSocketDisconnect);
       disconnectSocket();
     };
   }, [classId, user]);
 
-  /* ─── Send a chat message ───────────────────────────── */
+  /* ─── Attendance — real minutes for enrolled students ──── */
+  useEffect(() => {
+    if (!classId || !user || user.role !== "student" || !socketConnected) return;
+
+    void api.attendance(classId, "join").catch(() => undefined);
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void api.attendance(classId, "heartbeat").catch(() => undefined);
+      }
+    }, 60_000);
+
+    const leave = () => {
+      const url = `/api/live/${classId}/attendance`;
+      const body = JSON.stringify({ action: "leave" });
+      if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+        navigator.sendBeacon(url, new Blob([body], { type: "application/json" }));
+      } else {
+        void api.attendance(classId, "leave").catch(() => undefined);
+      }
+    };
+    const onPageHide = () => leave();
+    window.addEventListener("pagehide", onPageHide);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("pagehide", onPageHide);
+      leave();
+    };
+  }, [classId, user, socketConnected]);
+
+  /* ─── Real audio/video (WebRTC over the signaling socket) ── */
+  const userId = user?.id;
+  const userName = user?.fullName;
+  const canBroadcast =
+    !!user &&
+    !!liveClass &&
+    (user.id === liveClass.teacherId ||
+      user.role === "admin" ||
+      user.role === "super_admin");
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket || !classId || !userId || !userName || !liveClass) return;
+
+    const manager = new LiveStreamManager({
+      socket,
+      classId,
+      userId,
+      userName,
+      mode: canBroadcast ? "host" : "viewer",
+      onRemoteStream: (stream) => {
+        setRemoteStream(stream);
+        setHostPresent(true);
+      },
+      onBroadcastStarted: () => setHostPresent(true),
+      onBroadcastStopped: () => {
+        setRemoteStream(null);
+        setHostPresent(false);
+      },
+      onError: (message) => toast.error(message),
+    });
+    streamManagerRef.current = manager;
+
+    return () => {
+      manager.destroy();
+      streamManagerRef.current = null;
+      setRemoteStream(null);
+      setHostPresent(false);
+      setIsBroadcasting(false);
+    };
+  }, [classId, userId, userName, liveClass, canBroadcast]);
+
+  // Attach the teacher's local preview once the stream is live.
+  useEffect(() => {
+    const video = localVideoRef.current;
+    const stream = streamManagerRef.current?.getLocalStream();
+    if (video && stream) {
+      video.srcObject = stream;
+      video.play().catch(() => undefined);
+    }
+  }, [isBroadcasting]);
+
+  // Attach the incoming teacher stream to the student's video element.
+  useEffect(() => {
+    const video = remoteVideoRef.current;
+    if (!video || !remoteStream) return;
+    video.srcObject = remoteStream;
+    video
+      .play()
+      .then(() => setNeedsPlay(false))
+      .catch(() => setNeedsPlay(true));
+  }, [remoteStream]);
+
+  async function handleToggleBroadcast() {
+    const manager = streamManagerRef.current;
+    if (!manager) return;
+    if (manager.isBroadcasting) {
+      manager.stopBroadcast();
+      setIsBroadcasting(false);
+      toast.success("Camera and microphone turned off");
+      return;
+    }
+    const result = await manager.startBroadcast();
+    if (result.ok) {
+      setIsBroadcasting(true);
+      toast.success("Your camera and microphone are live");
+    } else {
+      toast.error(result.error || "Could not start the stream");
+    }
+  }
+
+  function handleToggleMic() {
+    const next = !micOn;
+    setMicOn(next);
+    streamManagerRef.current?.toggleMic(next);
+  }
+
+  function handleToggleCam() {
+    const next = !camOn;
+    setCamOn(next);
+    streamManagerRef.current?.toggleCam(next);
+  }
+
+  async function handleToggleScreenShare() {
+    const manager = streamManagerRef.current;
+    if (!manager) return;
+    if (manager.isScreenSharing) {
+      manager.stopScreenShare();
+      setScreenSharing(false);
+      return;
+    }
+    const result = await manager.startScreenShare();
+    if (result.ok) {
+      setScreenSharing(true);
+      toast.success("You are sharing your screen");
+    } else {
+      toast.error(result.error || "Could not share your screen");
+    }
+  }
+
+  /* ─── Live polls ─────────────────────────────────────── */
+  async function handleCreatePoll() {
+    if (!classId || !pollQuestion.trim()) return;
+    const options = pollOptions.map((o) => o.trim()).filter(Boolean);
+    if (options.length < 2) {
+      toast.error("Add at least two options");
+      return;
+    }
+    setBusyPoll("create");
+    try {
+      await api.createPoll(classId, { question: pollQuestion.trim(), options });
+      setPollQuestion("");
+      setPollOptions(["", ""]);
+      toast.success("Poll started");
+      await loadPolls(classId);
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Could not start poll");
+    } finally {
+      setBusyPoll("");
+    }
+  }
+
+  async function handleVotePoll(pollId: string, optionIndex: number) {
+    setBusyPoll(pollId);
+    try {
+      await api.votePoll(pollId, optionIndex);
+      await loadPolls(classId!);
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Could not submit vote");
+    } finally {
+      setBusyPoll("");
+    }
+  }
+
+  async function handleEndPoll(pollId: string) {
+    setBusyPoll(pollId);
+    try {
+      await api.endPoll(pollId);
+      await loadPolls(classId!);
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Could not end poll");
+    } finally {
+      setBusyPoll("");
+    }
+  }
+
+  /* ─── Send a chat message (persisted + delivered live) ─ */
   const handleSend = async () => {
     const text = chatInput.trim();
     if (!text || !classId || !user) return;
     setSending(true);
+
+    const clientId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `c-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const optimistic: ChatMsg = {
+      id: `client-${clientId}`,
+      clientId,
+      userId: user.id,
+      userName: user.fullName,
+      userAvatar: user.profilePicture,
+      text,
+      timestamp: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimistic]);
+    setChatInput("");
+
     try {
+      // Persist first so the message survives a reload, then deliver live.
+      const saved = await api.sendMessage(classId, text, clientId);
+      setMessages((prev) =>
+        prev.map((m) =>
+          !isSystem(m) && m.clientId === clientId
+            ? { ...m, id: saved.message.id, timestamp: saved.message.createdAt }
+            : m
+        )
+      );
       const socket = socketRef.current;
       if (socket && socket.connected) {
         socket.emit("send-message", {
           classId,
+          clientId,
           userId: user.id,
           userName: user.fullName,
           userAvatar: user.profilePicture,
           text,
         });
       }
-      // Optimistic UI: socket emits back to sender too — so we just clear.
-      setChatInput("");
-    } catch {
-      toast.error("Failed to send message");
+    } catch (e) {
+      setMessages((prev) =>
+        prev.filter((m) => !(!isSystem(m) && m.clientId === clientId))
+      );
+      setChatInput(text);
+      toast.error(e instanceof ApiError ? e.message : "Message could not be sent");
     } finally {
       setSending(false);
     }
@@ -308,17 +659,47 @@ export function LiveRoomView() {
     );
   }
 
-  /* ─── Error ─────────────────────────────────────────── */
-  if (error || !liveClass) {
+  /* ─── Error / access denied ─────────────────────────── */
+  if (error || !liveClass || accessBlocked) {
+    const message = accessBlocked
+      ? "You need access to join this class. Enroll with a completed payment, or ask an admin for a free trial."
+      : error || "This live class could not be loaded.";
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <Radio className="h-8 w-8 text-red-500" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Class unavailable</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {error || "This live class could not be loaded."}
-        </p>
+        <h2 className="text-2xl font-bold text-foreground">
+          {accessBlocked ? "Access required" : "Class unavailable"}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+
+        {accessBlocked && user?.role === "student" && (
+          <div className="mx-auto mt-6 max-w-sm rounded-xl border bg-card p-4 shadow-sm">
+            {trialRequested ? (
+              <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700">
+                <CheckCircle2 className="h-4 w-4" /> Trial request sent — awaiting admin approval
+              </div>
+            ) : (
+              <Button
+                onClick={handleRequestTrial}
+                disabled={requestingTrial}
+                className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700"
+              >
+                {requestingTrial ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                Request a free trial
+              </Button>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              An admin or super admin reviews every request. No payment needed.
+            </p>
+          </div>
+        )}
+
         <Button
           onClick={() => navigate("live")}
           variant="outline"
@@ -334,7 +715,11 @@ export function LiveRoomView() {
     <div className="bg-background">
       {/* ─── Top bar ─────────────────────────────────────── */}
       <div className="border-b bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div
+          className={`mx-auto flex max-w-7xl items-center justify-between gap-3 py-3 ${
+            isMobile ? "px-3" : isTablet ? "px-5" : "px-4 sm:px-6 lg:px-8"
+          }`}
+        >
           <button
             onClick={() => navigate("live")}
             className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -350,6 +735,17 @@ export function LiveRoomView() {
               {liveClass.title}
             </span>
           </div>
+          <span
+            className={cn(
+              "hidden shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold sm:inline-flex",
+              socketConnected
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-amber-100 text-amber-700"
+            )}
+            title="Live video & chat signaling connection"
+          >
+            {socketConnected ? "Connected" : "Connecting…"}
+          </span>
           <Badge variant="outline" className="hidden shrink-0 border-red-200 bg-red-50 text-red-700 sm:inline-flex">
             <Radio className="mr-1 h-3 w-3" /> LIVE
           </Badge>
@@ -357,27 +753,108 @@ export function LiveRoomView() {
       </div>
 
       {/* ─── Main grid ──────────────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+      <div
+        className={`mx-auto max-w-7xl py-4 ${
+          isMobile ? "px-3" : isTablet ? "px-5" : "px-4 sm:px-6 lg:px-8"
+        }`}
+      >
+        {/* Phone tabs: switch between the video and the chat without
+            scrolling past two stacked panels. Both panels stay mounted so
+            the WebRTC stream and chat socket are never interrupted. */}
+        {isMobile && (
+          <div className="mb-3 grid grid-cols-2 gap-1 rounded-xl border bg-card p-1">
+            <button
+              onClick={() => setMobileTab("video")}
+              className={cn(
+                "flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-colors",
+                mobileTab === "video"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground"
+              )}
+            >
+              <Video className="h-4 w-4" /> Video
+            </button>
+            <button
+              onClick={() => setMobileTab("chat")}
+              className={cn(
+                "flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-colors",
+                mobileTab === "chat"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground"
+              )}
+            >
+              <MessageSquare className="h-4 w-4" /> Chat
+              {messages.length > 0 && mobileTab !== "chat" && (
+                <span className="ml-0.5 rounded-full bg-indigo-100 px-1.5 text-[10px] font-bold text-indigo-700">
+                  {messages.length}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
+
         <div className="grid gap-4 lg:grid-cols-3">
           {/* ─── Video area ───────────────────────────── */}
-          <div className="lg:col-span-2">
+          <div
+            className="lg:col-span-2"
+            style={
+              isMobile ? { display: mobileTab === "video" ? "block" : "none" } : undefined
+            }
+          >
             <VideoArea
               liveClass={liveClass}
               onlineCount={onlineCount}
+              participants={participants}
               micOn={micOn}
               camOn={camOn}
               handRaised={handRaised}
-              onToggleMic={() => setMicOn((v) => !v)}
-              onToggleCam={() => setCamOn((v) => !v)}
+              isHost={canBroadcast}
+              isBroadcasting={isBroadcasting}
+              remoteStream={remoteStream}
+              hostPresent={hostPresent}
+              needsPlay={needsPlay}
+              localVideoRef={localVideoRef}
+              remoteVideoRef={remoteVideoRef}
+              onToggleMic={handleToggleMic}
+              onToggleCam={handleToggleCam}
+              onToggleBroadcast={handleToggleBroadcast}
+              screenSharing={screenSharing}
+              hostSharingScreen={hostSharingScreen}
+              onToggleScreenShare={handleToggleScreenShare}
+              onEnablePlay={() => {
+                remoteVideoRef.current
+                  ?.play()
+                  .then(() => setNeedsPlay(false))
+                  .catch(() => undefined);
+              }}
               onRaiseHand={handleRaiseHand}
               onLeave={() => navigate("live")}
               isLoggedIn={!!user}
               onLoginPrompt={() => openAuthModal("login")}
             />
+            <div className="mt-4">
+              <PollPanel
+                polls={polls}
+                isHost={canBroadcast}
+                pollQuestion={pollQuestion}
+                setPollQuestion={setPollQuestion}
+                pollOptions={pollOptions}
+                setPollOptions={setPollOptions}
+                busyPoll={busyPoll}
+                onCreate={handleCreatePoll}
+                onVote={handleVotePoll}
+                onEnd={handleEndPoll}
+              />
+            </div>
           </div>
 
           {/* ─── Chat sidebar ─────────────────────────── */}
-          <div className="lg:col-span-1">
+          <div
+            className="lg:col-span-1"
+            style={
+              isMobile ? { display: mobileTab === "chat" ? "block" : "none" } : undefined
+            }
+          >
             <ChatSidebar
               messages={messages}
               onlineCount={onlineCount}
@@ -401,11 +878,24 @@ export function LiveRoomView() {
 function VideoArea({
   liveClass,
   onlineCount,
+  participants,
   micOn,
   camOn,
   handRaised,
+  isHost,
+  isBroadcasting,
+  remoteStream,
+  hostPresent,
+  needsPlay,
+  localVideoRef,
+  remoteVideoRef,
   onToggleMic,
   onToggleCam,
+  onToggleBroadcast,
+  screenSharing,
+  hostSharingScreen,
+  onToggleScreenShare,
+  onEnablePlay,
   onRaiseHand,
   onLeave,
   isLoggedIn,
@@ -413,11 +903,24 @@ function VideoArea({
 }: {
   liveClass: LiveClass;
   onlineCount: number;
+  participants: { userId: string; userName: string; userAvatar?: string }[];
   micOn: boolean;
   camOn: boolean;
   handRaised: boolean;
+  isHost: boolean;
+  isBroadcasting: boolean;
+  remoteStream: MediaStream | null;
+  hostPresent: boolean;
+  needsPlay: boolean;
+  localVideoRef: React.RefObject<HTMLVideoElement | null>;
+  remoteVideoRef: React.RefObject<HTMLVideoElement | null>;
   onToggleMic: () => void;
   onToggleCam: () => void;
+  onToggleBroadcast: () => void;
+  screenSharing: boolean;
+  hostSharingScreen: boolean;
+  onToggleScreenShare: () => void;
+  onEnablePlay: () => void;
   onRaiseHand: () => void;
   onLeave: () => void;
   isLoggedIn: boolean;
@@ -455,86 +958,175 @@ function VideoArea({
           </div>
         </div>
 
-        {/* Center: teacher avatar + class info */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center sm:px-6">
-          <div className="relative">
-            <div className="absolute -inset-3 animate-pulse rounded-full bg-red-500/20 blur-xl" />
-            <Avatar className="relative h-20 w-20 border-4 border-white/30 shadow-2xl sm:h-28 sm:w-28 lg:h-32 lg:w-32">
-              <AvatarImage src={teacherAvatar || undefined} />
-              <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-xl font-bold text-white sm:text-2xl">
-                {teacherName.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 ring-4 ring-slate-900">
-              <Radio className="h-3 w-3 text-white" />
-            </span>
-          </div>
-          <h3 className="mt-4 line-clamp-2 text-base font-bold text-white sm:text-lg lg:text-xl">{liveClass.title}</h3>
-          <p className="mt-1 text-xs text-indigo-200 sm:text-sm">
-            with <span className="font-semibold">{teacherName}</span>
-          </p>
-          <p className="mt-3 line-clamp-3 max-w-md text-xs text-slate-300">
-            {liveClass.description || "Live interactive English class in session."}
-          </p>
-        </div>
-
-        {/* Participant bubbles — bottom left, hidden on very small screens */}
-        <div className="absolute bottom-16 left-3 hidden sm:flex lg:bottom-20 lg:left-4">
-          <div className="flex flex-wrap gap-2">
-            {PARTICIPANT_NAMES.slice(0, 5).map((name, i) => (
-              <div
-                key={name}
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-lg ring-2 ring-white/20",
-                  PARTICIPANT_COLORS[i]
-                )}
-                title={`${name} (joined)`}
-              >
-                {name.slice(0, 2).toUpperCase()}
+        {/* Center: real video, local preview, or waiting state */}
+        {remoteStream ? (
+          <>
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className="absolute inset-0 h-full w-full bg-black object-contain"
+            />
+            {needsPlay && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/70 p-4 text-center">
+                <Volume2 className="h-8 w-8 text-white" />
+                <p className="text-sm font-semibold text-white">Tap to enable sound</p>
+                <Button size="sm" onClick={onEnablePlay}>
+                  Enable audio
+                </Button>
               </div>
-            ))}
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800/80 text-xs font-bold text-white ring-2 ring-white/20">
-              +{Math.max(0, onlineCount - 5)}
+            )}
+            <div className="absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+              {teacherName} · {hostSharingScreen ? "sharing screen" : "live"}
+            </div>
+          </>
+        ) : isHost && isBroadcasting ? (
+          <>
+            <video
+              ref={localVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 h-full w-full scale-x-[-1] bg-black object-cover"
+            />
+            {!camOn && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 text-sm font-medium text-white">
+                Camera is off
+              </div>
+            )}
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+              <Radio className="h-3 w-3 text-red-400" /> You are live
+              {screenSharing ? " · screen" : ""} · {onlineCount} watching
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center sm:px-6">
+            <div className="relative">
+              <div className="absolute -inset-3 animate-pulse rounded-full bg-red-500/20 blur-xl" />
+              <Avatar className="relative h-20 w-20 border-4 border-white/30 shadow-2xl sm:h-28 sm:w-28 lg:h-32 lg:w-32">
+                <AvatarImage src={teacherAvatar || undefined} />
+                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-xl font-bold text-white sm:text-2xl">
+                  {teacherName.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 ring-4 ring-slate-900">
+                <Radio className="h-3 w-3 text-white" />
+              </span>
+            </div>
+            <h3 className="mt-4 line-clamp-2 text-base font-bold text-white sm:text-lg lg:text-xl">{liveClass.title}</h3>
+            <p className="mt-1 text-xs text-indigo-200 sm:text-sm">
+              with <span className="font-semibold">{teacherName}</span>
+            </p>
+            <p className="mt-3 line-clamp-3 max-w-md text-xs text-slate-300">
+              {liveClass.description || "Live interactive English class in session."}
+            </p>
+            <p className="mt-4 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-indigo-100 backdrop-blur">
+              {isHost
+                ? 'Press "Start Camera & Mic" to begin teaching'
+                : hostPresent
+                  ? "Connecting to the teacher's video…"
+                  : "Waiting for the teacher to start the camera…"}
+            </p>
+          </div>
+        )}
+
+        {/* Real participants reported by the chat service */}
+        {participants.length > 0 && (
+          <div className="absolute bottom-16 left-3 hidden sm:flex lg:bottom-20 lg:left-4">
+            <div className="flex flex-wrap gap-2">
+              {participants.slice(0, 5).map((p) => (
+                <Avatar key={p.userId} className="h-10 w-10 ring-2 ring-white/20" title={p.userName}>
+                  <AvatarImage src={p.userAvatar || undefined} />
+                  <AvatarFallback className="bg-indigo-600 text-xs font-bold text-white">
+                    {p.userName.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {participants.length > 5 && (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800/80 text-xs font-bold text-white ring-2 ring-white/20">
+                  +{participants.length - 5}
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Control bar */}
       <div className="flex items-center justify-center gap-2 overflow-x-auto border-t bg-card p-3 sm:gap-3 lg:overflow-visible">
-        {/* Mic */}
-        <ControlButton
-          active={micOn}
-          onClick={onToggleMic}
-          activeIcon={Mic}
-          inactiveIcon={MicOff}
-          activeLabel="Mute microphone"
-          inactiveLabel="Unmute microphone"
-        />
-        {/* Camera */}
-        <ControlButton
-          active={camOn}
-          onClick={onToggleCam}
-          activeIcon={Video}
-          inactiveIcon={VideoOff}
-          activeLabel="Turn off camera"
-          inactiveLabel="Turn on camera"
-        />
-        {/* Screen share — disabled */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="shrink-0">
-              <button
-                disabled
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-muted-foreground opacity-60"
-                aria-label="Screen share (coming soon)"
-              >
-                <ScreenShare className="h-5 w-5" />
-              </button>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>Coming soon</TooltipContent>
-        </Tooltip>
+        {/* Teacher controls — mic/cam toggle the real MediaStream tracks */}
+        {isHost && (
+          <>
+            <ControlButton
+              active={micOn}
+              onClick={onToggleMic}
+              activeIcon={Mic}
+              inactiveIcon={MicOff}
+              activeLabel="Mute microphone"
+              inactiveLabel="Unmute microphone"
+            />
+            <ControlButton
+              active={camOn}
+              onClick={onToggleCam}
+              activeIcon={Video}
+              inactiveIcon={VideoOff}
+              activeLabel="Turn off camera"
+              inactiveLabel="Turn on camera"
+            />
+            <Button
+              size="sm"
+              onClick={onToggleBroadcast}
+              className={cn(
+                "h-11 shrink-0 gap-1.5 rounded-full px-3 text-xs font-semibold sm:px-4",
+                isBroadcasting
+                  ? "bg-amber-500 text-white hover:bg-amber-600"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+              )}
+            >
+              <RadioTower className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isBroadcasting ? "Stop Camera" : "Start Camera & Mic"}
+              </span>
+              <span className="sm:hidden">{isBroadcasting ? "Stop" : "Go Live"}</span>
+            </Button>
+          </>
+        )}
+        {/* Students only receive — they listen and chat */}
+        {!isHost && (
+          <div className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-emerald-100 px-3 text-xs font-semibold text-emerald-700">
+            <Volume2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Listening</span>
+          </div>
+        )}
+        {/* Screen sharing — real getDisplayMedia capture for hosts */}
+        {isHost && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="shrink-0">
+                <button
+                  onClick={onToggleScreenShare}
+                  disabled={!isBroadcasting && !screenSharing}
+                  className={cn(
+                    "flex h-11 w-11 items-center justify-center rounded-full transition-colors disabled:opacity-50",
+                    screenSharing
+                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
+                      : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                  )}
+                  aria-label={screenSharing ? "Stop sharing screen" : "Share screen"}
+                >
+                  <ScreenShare className="h-5 w-5" />
+                </button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              {screenSharing
+                ? "Stop sharing screen"
+                : isBroadcasting
+                  ? "Share your screen"
+                  : "Start camera first, then share"}
+            </TooltipContent>
+          </Tooltip>
+        )}
         {/* Raise hand */}
         <button
           onClick={() => {
@@ -565,6 +1157,177 @@ function VideoArea({
           <span className="hidden sm:inline">Leave</span>
         </button>
       </div>
+    </Card>
+  );
+}
+
+/* ─── Live polls ────────────────────────────────────────── */
+
+function PollPanel({
+  polls,
+  isHost,
+  pollQuestion,
+  setPollQuestion,
+  pollOptions,
+  setPollOptions,
+  busyPoll,
+  onCreate,
+  onVote,
+  onEnd,
+}: {
+  polls: Poll[];
+  isHost: boolean;
+  pollQuestion: string;
+  setPollQuestion: (v: string) => void;
+  pollOptions: string[];
+  setPollOptions: (v: string[]) => void;
+  busyPoll: string;
+  onCreate: () => void;
+  onVote: (pollId: string, optionIndex: number) => void;
+  onEnd: (pollId: string) => void;
+}) {
+  const active = polls.filter((p) => !p.endedAt);
+
+  return (
+    <Card className="p-4 sm:p-5">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4 text-indigo-600" />
+          <h3 className="text-sm font-bold">Live Polls</h3>
+        </div>
+        <Badge variant="outline">{active.length} open</Badge>
+      </div>
+
+      {isHost && (
+        <div className="mb-4 space-y-2 rounded-lg border border-dashed p-3">
+          <p className="text-xs font-semibold text-muted-foreground">Ask the class a question</p>
+          <Input
+            value={pollQuestion}
+            onChange={(e) => setPollQuestion(e.target.value)}
+            placeholder="e.g. Which word is a noun?"
+            className="h-9 text-sm"
+          />
+          <div className="grid gap-2 sm:grid-cols-2">
+            {pollOptions.map((option, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <Input
+                  value={option}
+                  onChange={(e) =>
+                    setPollOptions(pollOptions.map((o, idx) => (idx === i ? e.target.value : o)))
+                  }
+                  placeholder={`Option ${i + 1}`}
+                  className="h-9 text-sm"
+                />
+                {pollOptions.length > 2 && (
+                  <button
+                    onClick={() => setPollOptions(pollOptions.filter((_, idx) => idx !== i))}
+                    className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+                    aria-label={`Remove option ${i + 1}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {pollOptions.length < 8 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 gap-1 text-xs"
+                onClick={() => setPollOptions([...pollOptions, ""])}
+              >
+                <Plus className="h-3 w-3" /> Option
+              </Button>
+            )}
+            <Button
+              size="sm"
+              className="h-8 gap-1 bg-indigo-600 text-xs hover:bg-indigo-700"
+              disabled={busyPoll === "create" || !pollQuestion.trim()}
+              onClick={onCreate}
+            >
+              {busyPoll === "create" ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Radio className="h-3 w-3" />
+              )}
+              Start poll
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {polls.length === 0 ? (
+        <p className="py-3 text-center text-xs text-muted-foreground">
+          {isHost ? "No polls yet. Ask your first question above." : "No polls right now."}
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {polls.slice(0, 5).map((poll) => {
+            const showResults = Boolean(poll.endedAt || poll.voted);
+            const totalVotes = poll.results?.reduce((sum, r) => sum + r.votes, 0) ?? 0;
+            return (
+              <div key={poll.id} className="rounded-lg border p-3">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <p className="text-sm font-semibold">{poll.question}</p>
+                  {poll.endedAt ? (
+                    <Badge variant="secondary" className="shrink-0 text-[10px]">Ended</Badge>
+                  ) : (
+                    <Badge className="shrink-0 bg-emerald-600 text-[10px] text-white">Live</Badge>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {poll.options.map((option, i) => {
+                    const votes = poll.results?.find((r) => r.optionIndex === i)?.votes ?? 0;
+                    const percent = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
+                    return showResults ? (
+                      <div key={i} className="relative overflow-hidden rounded-md bg-muted/50 px-3 py-2 text-xs">
+                        <div
+                          className="absolute inset-y-0 left-0 bg-indigo-100"
+                          style={{ width: `${percent}%` }}
+                        />
+                        <div className="relative flex items-center justify-between gap-2">
+                          <span className="font-medium">{option}</span>
+                          <span className="shrink-0 font-bold text-indigo-700">{percent}%</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        key={i}
+                        disabled={busyPoll === poll.id}
+                        onClick={() => onVote(poll.id, i)}
+                        className="flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-xs font-medium transition-colors hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-60"
+                      >
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[10px] font-bold text-indigo-700">
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <BarChart3 className="h-3 w-3" /> {totalVotes} vote{totalVotes === 1 ? "" : "s"}
+                  </span>
+                  {isHost && !poll.endedAt && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-2 text-[11px]"
+                      disabled={busyPoll === poll.id}
+                      onClick={() => onEnd(poll.id)}
+                    >
+                      End poll
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </Card>
   );
 }

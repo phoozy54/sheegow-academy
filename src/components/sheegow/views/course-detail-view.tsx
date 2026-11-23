@@ -2,12 +2,15 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useStore } from "@/lib/store";
+import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Review } from "@/lib/types";
+import type { Course, Enrollment, Review } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useMyEnrollments } from "@/lib/use-my-enrollments";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -25,14 +28,12 @@ import {
   Loader2,
   Sparkles,
   ShieldCheck,
+  Pencil,
+  Hammer,
+  BookOpen,
+  LayoutDashboard,
 } from "lucide-react";
-import {
-  levelBadgeClass,
-  formatPrice,
-  formatDate,
-  timeAgo,
-  cn,
-} from "@/lib/ui";
+import { levelBadgeClass, formatDate, timeAgo, cn } from "@/lib/ui";
 import { toast } from "sonner";
 
 /* ─── Helpers ───────────────────────────────────────────── */
@@ -72,11 +73,20 @@ export function CourseDetailView() {
   const navigate = useStore((s) => s.navigate);
   const openCheckout = useStore((s) => s.openCheckout);
   const openAuthModal = useStore((s) => s.openAuthModal);
+  const openDashboard = useStore((s) => s.openDashboard);
+  const openPlayer = useStore((s) => s.openPlayer);
   const user = useStore((s) => s.user);
+  const { isMobile, isTablet } = useDevice();
+  const padClass = isMobile
+    ? "px-3"
+    : isTablet
+      ? "px-5"
+      : "px-4 sm:px-6 lg:px-8";
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { byCourse } = useMyEnrollments();
 
   const loadCourse = useCallback(async () => {
     if (!courseId) {
@@ -104,10 +114,10 @@ export function CourseDetailView() {
   /* ─── Loading state ─────────────────────────────────── */
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className={`mx-auto max-w-7xl py-10 ${padClass}`}>
         <div className="h-9 w-32 animate-pulse rounded bg-muted" />
-        <div className="mt-6 grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className="mt-6 grid gap-8 md:grid-cols-3">
+          <div className="md:col-span-2">
             <div className="aspect-[16/9] animate-pulse rounded-2xl bg-muted" />
             <div className="mt-6 h-8 w-3/4 animate-pulse rounded bg-muted" />
             <div className="mt-4 h-4 w-1/2 animate-pulse rounded bg-muted" />
@@ -126,7 +136,7 @@ export function CourseDetailView() {
   /* ─── Error state ───────────────────────────────────── */
   if (error || !course) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8">
+      <div className={`mx-auto max-w-3xl py-20 text-center ${padClass}`}>
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <PlayCircle className="h-8 w-8 text-red-500" />
         </div>
@@ -147,6 +157,13 @@ export function CourseDetailView() {
 
   const bullets = parseWhatYouLearn(course.whatYouLearn);
   const reviews: Review[] = course.reviews || [];
+  // Teachers, admins and super admins manage courses — they are never shown
+  // the student enroll/pay flow.
+  const isManager =
+    user?.role === "teacher" ||
+    user?.role === "admin" ||
+    user?.role === "super_admin";
+  const enrollment = byCourse.get(course.id);
 
   const handleEnroll = () => {
     if (!user) {
@@ -161,7 +178,7 @@ export function CourseDetailView() {
       {/* ─── HERO ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b">
         <div className="hero-mesh absolute inset-0" />
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className={`relative mx-auto max-w-7xl py-8 lg:py-10 ${padClass}`}>
           <button
             onClick={() => navigate("courses")}
             className="mb-6 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -169,9 +186,9 @@ export function CourseDetailView() {
             <ArrowLeft className="h-4 w-4" /> All Courses
           </button>
 
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3">
             {/* Hero image */}
-            <div className="lg:col-span-2">
+            <div className="md:col-span-2">
               <div className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
                 {course.image ? (
                   <img loading="lazy" decoding="async"
@@ -250,13 +267,29 @@ export function CourseDetailView() {
             </div>
 
             {/* Sticky enrollment card */}
-            <div className="lg:col-span-1">
-              <div className="lg:sticky lg:top-20">
-                <EnrollmentCard
-                  course={course}
-                  onEnroll={handleEnroll}
-                  isLoggedIn={!!user}
-                />
+            <div className="md:col-span-1">
+              <div className="md:sticky md:top-20">
+                {isManager ? (
+                  <ManagerCourseCard
+                    course={course}
+                    role={user?.role}
+                    onEdit={() => openDashboard("courses")}
+                    onContent={() => openDashboard("content-builder")}
+                    onOpen={() => openPlayer(course.id)}
+                  />
+                ) : enrollment ? (
+                  <EnrolledCourseCard
+                    course={course}
+                    enrollment={enrollment}
+                    onContinue={() => openPlayer(course.id)}
+                  />
+                ) : (
+                  <EnrollmentCard
+                    course={course}
+                    onEnroll={handleEnroll}
+                    isLoggedIn={!!user}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -264,10 +297,10 @@ export function CourseDetailView() {
       </section>
 
       {/* ─── MAIN CONTENT ─────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-3">
+      <section className={`mx-auto max-w-7xl py-12 ${padClass}`}>
+        <div className="grid gap-10 md:grid-cols-3">
           {/* Left: description + what you'll learn + reviews */}
-          <div className="space-y-10 lg:col-span-2">
+          <div className="space-y-10 md:col-span-2">
             {/* Description */}
             <div>
               <h2 className="mb-3 text-xl font-bold text-foreground">
@@ -357,7 +390,7 @@ export function CourseDetailView() {
           </div>
 
           {/* Right: secondary info card (mobile-friendly spacer) */}
-          <div className="lg:col-span-1">
+          <div className="md:col-span-1">
             <Card className="card-lift p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Award className="h-5 w-5 text-amber-500" />
@@ -389,6 +422,104 @@ export function CourseDetailView() {
   );
 }
 
+/* ─── Teacher / admin controls (never shown to students) ── */
+
+function ManagerCourseCard({
+  course,
+  role,
+  onEdit,
+  onContent,
+  onOpen,
+}: {
+  course: Course;
+  role?: string;
+  onEdit: () => void;
+  onContent: () => void;
+  onOpen: () => void;
+}) {
+  const isAdmin = role === "admin" || role === "super_admin";
+  return (
+    <Card className="card-lift overflow-hidden p-0 shadow-xl">
+      <div className="bg-gradient-to-br from-fuchsia-600 to-indigo-800 p-6 text-white">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-100">
+          <LayoutDashboard className="h-4 w-4" /> {isAdmin ? "Admin access" : "Teacher controls"}
+        </div>
+        <p className="mt-2 text-lg font-extrabold leading-tight">
+          {isAdmin ? "Open this course directly" : "You manage this course"}
+        </p>
+        <p className="mt-1 text-xs text-indigo-100">
+          {isAdmin
+            ? "As admin you can open lessons, edit the course and manage content — no enrollment required."
+            : "Edit details, build lessons and deliver live classes — no enrollment needed."}
+        </p>
+      </div>
+
+      <div className="space-y-2.5 p-6">
+        <Button onClick={onOpen} size="lg" className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <BookOpen className="h-4 w-4" /> Open course
+        </Button>
+        <Button onClick={onContent} size="lg" variant="outline" className="w-full gap-2">
+          <Hammer className="h-4 w-4" /> Manage lessons &amp; quizzes
+        </Button>
+        <Button onClick={onEdit} size="lg" variant="ghost" className="w-full gap-2">
+          <Pencil className="h-4 w-4" /> Edit course
+        </Button>
+        <p className="pt-1 text-center text-xs text-muted-foreground">
+          {course.title}
+        </p>
+      </div>
+    </Card>
+  );
+}
+
+/* ─── Enrolled student card ─────────────────────────────── */
+
+function EnrolledCourseCard({
+  course,
+  enrollment,
+  onContinue,
+}: {
+  course: Course;
+  enrollment: Enrollment;
+  onContinue: () => void;
+}) {
+  const complete = enrollment.status === "completed" || enrollment.progress >= 100;
+
+  return (
+    <Card className="card-lift overflow-hidden p-0 shadow-xl">
+      <div className="bg-gradient-to-br from-emerald-600 to-indigo-800 p-6 text-white">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-100">
+          <CheckCircle2 className="h-4 w-4" />
+          {complete ? "Course complete" : "You're enrolled"}
+        </div>
+        <p className="mt-2 text-lg font-extrabold leading-tight">
+          {complete ? "Review your course anytime" : "Pick up where you left off"}
+        </p>
+        <p className="mt-1 text-xs text-emerald-100">
+          Your lessons, tests and homework are ready.
+        </p>
+      </div>
+
+      <div className="p-6">
+        <div className="mb-1.5 flex justify-between text-xs">
+          <span className="font-medium text-muted-foreground">Course progress</span>
+          <span className="font-bold text-foreground">{enrollment.progress}%</span>
+        </div>
+        <Progress value={enrollment.progress} className="h-2" />
+        <Button
+          onClick={onContinue}
+          size="lg"
+          className="mt-5 w-full gap-2 bg-indigo-600 shadow-lg shadow-indigo-500/30 hover:bg-indigo-700"
+        >
+          <BookOpen className="h-4 w-4" />
+          {complete ? "Open course" : "Continue learning"}
+        </Button>
+        <p className="pt-3 text-center text-xs text-muted-foreground">{course.title}</p>
+      </div>
+    </Card>
+  );
+}
+
 /* ─── Enrollment card ───────────────────────────────────── */
 
 function EnrollmentCard({
@@ -403,16 +534,11 @@ function EnrollmentCard({
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
       <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-extrabold">
-            {formatPrice(course.price)}
-          </span>
-          <span className="text-sm text-indigo-200">
-            / {course.duration} weeks
-          </span>
-        </div>
+        <p className="text-sm font-semibold text-indigo-100">
+          {course.duration}-week live course
+        </p>
         <p className="mt-1 text-xs text-indigo-200">
-          One-time payment. Lifetime access.
+          Full price and payment options are shown at checkout.
         </p>
       </div>
 

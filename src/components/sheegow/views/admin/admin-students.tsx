@@ -5,6 +5,8 @@ import { api, ApiError } from "@/lib/api";
 import type { User } from "@/lib/types";
 import { useStore } from "@/lib/store";
 import { cn, formatDate, levelBadgeClass } from "@/lib/ui";
+import { normalizeSomaliPhone } from "@/lib/phone";
+import { PhoneInput } from "../../phone-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -68,11 +70,12 @@ import { toast } from "sonner";
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "IELTS", "Kids"];
 
-type RoleFilter = "all" | "student" | "teacher" | "admin";
+type RoleFilter = "all" | "student" | "teacher" | "admin" | "super_admin";
 
 interface EditForm {
   fullName: string;
   email: string;
+  username: string;
   phone: string;
   level: string;
 }
@@ -91,6 +94,7 @@ export function AdminStudents() {
   const [editForm, setEditForm] = useState<EditForm>({
     fullName: "",
     email: "",
+    username: "",
     phone: "",
     level: "Beginner",
   });
@@ -127,6 +131,7 @@ export function AdminStudents() {
       (u) =>
         u.fullName.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
+        (u.username ?? "").toLowerCase().includes(q) ||
         (u.phone ?? "").toLowerCase().includes(q)
     );
   }, [users, search]);
@@ -136,7 +141,8 @@ export function AdminStudents() {
     setEditForm({
       fullName: u.fullName,
       email: u.email,
-      phone: u.phone ?? "",
+      username: u.username ?? "",
+      phone: normalizeSomaliPhone(u.phone ?? ""),
       level: u.level,
     });
     setEditOpen(true);
@@ -154,6 +160,7 @@ export function AdminStudents() {
       const body: Partial<User> = {
         fullName: editForm.fullName.trim(),
         email: editForm.email.trim(),
+        username: editForm.username.trim() || undefined,
         phone: editForm.phone.trim() || null,
         level: editForm.level,
       };
@@ -205,6 +212,7 @@ export function AdminStudents() {
       student: 0,
       teacher: 0,
       admin: 0,
+      super_admin: 0,
     };
     // Note: counts reflect the currently loaded list (filtered by role).
     // We still want to show a count next to the current tab.
@@ -237,6 +245,7 @@ export function AdminStudents() {
               Teachers
             </TabsTrigger>
             <TabsTrigger value="admin">Admins</TabsTrigger>
+            <TabsTrigger value="super_admin">Super Admins</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -274,7 +283,7 @@ export function AdminStudents() {
             </p>
           </div>
         ) : (
-          <div className="-mx-4 overflow-x-auto sm:mx-0">
+          <div className="-mx-3 overflow-x-auto sm:mx-0">
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
@@ -299,11 +308,13 @@ export function AdminStudents() {
                           <AvatarFallback
                             className={cn(
                               "text-xs font-bold",
-                              u.role === "admin"
-                                ? "bg-amber-100 text-amber-700"
-                                : u.role === "teacher"
-                                  ? "bg-indigo-100 text-indigo-700"
-                                  : "bg-emerald-100 text-emerald-700"
+                              u.role === "super_admin"
+                                ? "bg-fuchsia-100 text-fuchsia-700"
+                                : u.role === "admin"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : u.role === "teacher"
+                                    ? "bg-indigo-100 text-indigo-700"
+                                    : "bg-emerald-100 text-emerald-700"
                             )}
                           >
                             {u.fullName.slice(0, 2).toUpperCase()}
@@ -321,6 +332,11 @@ export function AdminStudents() {
                           <p className="truncate text-xs text-muted-foreground">
                             {u.email}
                           </p>
+                          {u.username && (
+                            <p className="truncate text-xs font-medium text-indigo-600">
+                              @{u.username}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </TableCell>
@@ -332,11 +348,13 @@ export function AdminStudents() {
                         variant="outline"
                         className={cn(
                           "border",
-                          u.role === "admin"
-                            ? "border-amber-200 bg-amber-50 text-amber-700"
-                            : u.role === "teacher"
-                              ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-                              : "border-muted bg-muted text-muted-foreground"
+                          u.role === "super_admin"
+                            ? "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700"
+                            : u.role === "admin"
+                              ? "border-amber-200 bg-amber-50 text-amber-700"
+                              : u.role === "teacher"
+                                ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                                : "border-muted bg-muted text-muted-foreground"
                         )}
                       >
                         {u.role}
@@ -452,6 +470,22 @@ export function AdminStudents() {
               />
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="username">Login Username</Label>
+              <Input
+                id="username"
+                value={editForm.username}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, username: e.target.value }))
+                }
+                placeholder="ahmed.hassan"
+                minLength={3}
+                maxLength={30}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                The user can log in with this, their email or their phone.
+              </p>
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
@@ -466,13 +500,12 @@ export function AdminStudents() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
-                <Input
+                <PhoneInput
                   id="phone"
                   value={editForm.phone}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, phone: e.target.value }))
+                  onChange={(phone) =>
+                    setEditForm((f) => ({ ...f, phone }))
                   }
-                  placeholder="+252 61 2345678"
                 />
               </div>
               <div className="space-y-1.5">

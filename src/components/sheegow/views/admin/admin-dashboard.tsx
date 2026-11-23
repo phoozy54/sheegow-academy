@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
-import type { Stats } from "@/lib/types";
+import { useStore } from "@/lib/store";
+import type { LiveClass, Stats } from "@/lib/types";
 import {
   cn,
   formatPrice,
   formatDate,
+  formatDateTime,
   timeAgo,
 } from "@/lib/ui";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,7 +28,6 @@ import {
   BookOpen,
   DollarSign,
   Video,
-  TrendingUp,
   ArrowUpRight,
   GraduationCap,
 } from "lucide-react";
@@ -60,7 +62,6 @@ const STAT_CARDS: {
   >;
   label: string;
   icon: typeof Users;
-  trend: string;
   gradient: string;
   isCurrency?: boolean;
 }[] = [
@@ -68,21 +69,18 @@ const STAT_CARDS: {
     key: "totalStudents",
     label: "Total Students",
     icon: Users,
-    trend: "+12%",
     gradient: "from-indigo-500 to-indigo-600",
   },
   {
     key: "totalCourses",
     label: "Total Courses",
     icon: BookOpen,
-    trend: "+8%",
     gradient: "from-amber-500 to-orange-600",
   },
   {
     key: "totalRevenue",
     label: "Total Revenue",
     icon: DollarSign,
-    trend: "+18%",
     gradient: "from-emerald-500 to-teal-600",
     isCurrency: true,
   },
@@ -90,13 +88,14 @@ const STAT_CARDS: {
     key: "liveClassesCount",
     label: "Live Classes",
     icon: Video,
-    trend: "+5%",
     gradient: "from-violet-500 to-purple-600",
   },
 ];
 
 export function AdminDashboard() {
+  const openDashboard = useStore((s) => s.openDashboard);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -117,6 +116,14 @@ export function AdminDashboard() {
       .finally(() => {
         if (active) setLoading(false);
       });
+    api
+      .liveClasses()
+      .then((r) => {
+        if (active) setLiveClasses(r.classes.slice(0, 5));
+      })
+      .catch(() => {
+        // Non-fatal: the stat card above still reports the class count.
+      });
     return () => {
       active = false;
     };
@@ -125,13 +132,13 @@ export function AdminDashboard() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28 w-full rounded-xl sm:h-32" />
           ))}
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Skeleton className="h-80 w-full rounded-xl lg:col-span-2" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Skeleton className="h-80 w-full rounded-xl md:col-span-2" />
           <Skeleton className="h-80 w-full rounded-xl" />
         </div>
         <Skeleton className="h-72 w-full rounded-xl" />
@@ -162,7 +169,7 @@ export function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         {STAT_CARDS.map((s) => {
           const raw = stats[s.key] as number;
           const display = s.isCurrency ? formatPrice(raw) : raw.toLocaleString();
@@ -183,13 +190,6 @@ export function AdminDashboard() {
                 >
                   <s.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <Badge
-                  variant="outline"
-                  className="hidden border-emerald-200 bg-emerald-50 text-emerald-700 sm:inline-flex"
-                >
-                  <TrendingUp className="h-3 w-3" />
-                  {s.trend}
-                </Badge>
               </div>
               <div className="mt-3 sm:mt-4">
                 <p className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
@@ -205,9 +205,9 @@ export function AdminDashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {/* Revenue */}
-        <Card className="p-4 sm:p-6 lg:col-span-2">
+        <Card className="p-4 sm:p-6 md:col-span-2">
           <div className="mb-4 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <h3 className="text-sm font-semibold text-foreground sm:text-base">
@@ -290,7 +290,7 @@ export function AdminDashboard() {
               Distribution across course levels
             </p>
           </div>
-          <div className="w-full">
+          <div className="w-full min-w-0">
             {levelData.length === 0 ? (
               <EmptyChart label="No enrollments yet" />
             ) : (
@@ -350,7 +350,7 @@ export function AdminDashboard() {
             {stats.totalEnrollments.toLocaleString()} total
           </Badge>
         </div>
-        <div className="-mx-4 overflow-x-auto sm:mx-0">
+        <div className="-mx-3 overflow-x-auto sm:mx-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -394,6 +394,64 @@ export function AdminDashboard() {
           </TableBody>
         </Table>
         </div>
+      </Card>
+
+      {/* Live classes — visible on the admin overview too */}
+      <Card className="p-4 sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground sm:text-base">
+              Live Classes
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Scheduled, live and ended sessions
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => openDashboard("live")}
+            className="shrink-0 gap-1.5"
+          >
+            <Video className="h-3.5 w-3.5" /> Manage
+          </Button>
+        </div>
+        {liveClasses.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            No classes scheduled yet.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {liveClasses.map((lc) => (
+              <div
+                key={lc.id}
+                className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {lc.title}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {lc.course?.title ?? "No course"} · {formatDateTime(lc.scheduledAt)} · {lc.duration}m
+                  </p>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "w-fit shrink-0",
+                    lc.status === "live"
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : lc.status === "ended"
+                        ? "border-muted bg-muted text-muted-foreground"
+                        : "border-indigo-200 bg-indigo-50 text-indigo-700"
+                  )}
+                >
+                  {lc.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   );
