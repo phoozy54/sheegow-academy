@@ -58,11 +58,7 @@ export function CourseSeoGrid({
               </p>
               <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
                 <div className="text-sm">
-                  {typeof course.price === "number" && course.price > 0 ? (
-                    <span className="font-bold text-foreground">${course.price} <span className="text-xs font-normal text-muted-foreground">USD</span></span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Price at checkout</span>
-                  )}
+                  <span className="text-xs text-muted-foreground">Price at checkout</span>
                 </div>
                 <Link
                   href={path}

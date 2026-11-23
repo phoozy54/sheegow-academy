@@ -9,7 +9,6 @@ import {
   cn,
   formatDate,
   formatDateTime,
-  formatPrice,
   levelBadgeClass,
 } from "@/lib/ui";
 import { Button } from "@/components/ui/button";
@@ -914,7 +913,6 @@ function TeacherOverview() {
                           <Badge variant="outline" className={cn("border", levelBadgeClass(c.level))}>
                             {c.level}
                           </Badge>
-                          <span>{formatPrice(c.price)}</span>
                         </div>
                       </button>
                     </li>
@@ -1132,7 +1130,7 @@ function TeacherStudents() {
             <div className="min-w-0">
               <p className="truncate font-bold">{c.title}</p>
               <p className="text-xs text-muted-foreground">
-                {c.level} • {formatPrice(c.price)}
+                {c.level}
               </p>
             </div>
             <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">

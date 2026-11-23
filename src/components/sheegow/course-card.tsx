@@ -29,6 +29,10 @@ export function CourseCard({
     user?.role === "teacher" ||
     user?.role === "admin" ||
     user?.role === "super_admin";
+  // Only admins / super admins can see course prices. Teachers and students
+  // see "Price at checkout" instead.
+  const canSeePrice =
+    user?.role === "admin" || user?.role === "super_admin";
   const canContinue = !isManager && !!enrollment;
 
   const handleEnroll = () => {
@@ -137,22 +141,29 @@ export function CourseCard({
           </p>
         )}
 
-        {/* Real price from the catalogue — full total is confirmed at checkout */}
+        {/* Price is hidden from public — only admins see it for management.
+            Students learn the price at checkout. */}
         <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
-          <span className="text-sm font-bold text-foreground">
-            {typeof course.price === "number" && Number.isFinite(course.price) ? (
-              <>
-                {formatPrice(course.price)}
-                <span className="ml-1 text-xs font-normal text-muted-foreground">
-                  USD
+          {canSeePrice ? (
+            <span className="text-sm font-bold text-foreground">
+              {typeof course.price === "number" && Number.isFinite(course.price) ? (
+                <>
+                  {formatPrice(course.price)}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">
+                    USD
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs font-normal text-muted-foreground">
+                  No price set
                 </span>
-              </>
-            ) : (
-              <span className="text-xs font-normal text-muted-foreground">
-                Price at checkout
-              </span>
-            )}
-          </span>
+              )}
+            </span>
+          ) : (
+            <span className="text-xs font-medium text-muted-foreground">
+              Price at checkout
+            </span>
+          )}
           <Button
             size="sm"
             onClick={
