@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
@@ -29,8 +30,8 @@ type LevelFilter = (typeof LEVELS)[number];
 const PAGE_SIZE = 9;
 
 export function CoursesView() {
-  const navigate = useStore((s) => s.navigate);
   const user = useStore((s) => s.user);
+  const router = useRouter();
   const { byCourse } = useMyEnrollments();
   const { isMobile, isTablet } = useDevice();
 
@@ -341,7 +342,7 @@ export function CoursesView() {
             course for your goals and level.
           </p>
           <Button
-            onClick={() => navigate("contact")}
+            onClick={() => router.push("/contact")}
             className="mt-5 gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
           >
             Talk to an Advisor

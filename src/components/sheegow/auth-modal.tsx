@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
 import { isValidSomaliPhone } from "@/lib/phone";
@@ -23,8 +24,8 @@ import { BrandMark } from "./brand-mark";
 import { toast } from "sonner";
 
 export function AuthModal() {
-  const { authModal, closeAuthModal, openAuthModal, setUser, navigate } =
-    useStore();
+  const { authModal, closeAuthModal, openAuthModal, setUser } = useStore();
+  const router = useRouter();
   const isLogin = authModal === "login";
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -55,7 +56,7 @@ export function AuthModal() {
         closeAuthModal();
         resetForm();
         // All roles (student, teacher, admin) land on the unified dashboard.
-        navigate("dashboard");
+        router.push("/dashboard");
       } else {
         if (!agree) {
           toast.error("Please accept the terms to continue.");
@@ -78,7 +79,7 @@ export function AuthModal() {
         toast.success("Account created! Welcome to SHEEGOW ACADEMY.");
         closeAuthModal();
         resetForm();
-        navigate("dashboard");
+        router.push("/dashboard");
       }
     } catch (err) {
       const msg =

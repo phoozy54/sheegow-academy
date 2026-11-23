@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import type { Course, LiveClass, User } from "@/lib/types";
-import { useStore } from "@/lib/store";
 import { cn, formatDateTime } from "@/lib/ui";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -74,7 +74,7 @@ function toLocalInput(iso: string): string {
 }
 
 export function AdminLive() {
-  const openClass = useStore((s) => s.openClass);
+  const router = useRouter();
 
   const [classes, setClasses] = useState<LiveClass[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -266,7 +266,7 @@ export function AdminLive() {
               onStart={handleStart}
               onEnd={handleEnd}
               onEdit={() => openEdit(c)}
-              onViewRoom={() => openClass(c.id)}
+              onViewRoom={() => router.push(`/class/${c.id}`)}
             />
           ))}
         </div>

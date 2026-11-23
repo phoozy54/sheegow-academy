@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
@@ -77,11 +78,10 @@ function isSystem(m: AnyMsg): m is SystemMsg {
 
 /* ─── Main view ──────────────────────────────────────────── */
 
-export function LiveRoomView() {
-  const classId = useStore((s) => s.selectedClassId);
-  const navigate = useStore((s) => s.navigate);
+export function LiveRoomView({ classId }: { classId: string }) {
   const user = useStore((s) => s.user);
   const openAuthModal = useStore((s) => s.openAuthModal);
+  const router = useRouter();
   const { isMobile, isTablet } = useDevice();
 
   // On phones the video and chat panels are shown one at a time.
@@ -716,7 +716,7 @@ export function LiveRoomView() {
         )}
 
         <Button
-          onClick={() => navigate("live")}
+          onClick={() => router.push("/live-classes")}
           variant="outline"
           className="mt-6 gap-1.5"
         >
@@ -775,7 +775,7 @@ export function LiveRoomView() {
         </div>
 
         <Button
-          onClick={() => navigate("live")}
+          onClick={() => router.push("/live-classes")}
           variant="ghost"
           className="mt-4 gap-1.5 text-sm"
         >
@@ -795,7 +795,7 @@ export function LiveRoomView() {
           }`}
         >
           <button
-            onClick={() => navigate("live")}
+            onClick={() => router.push("/live-classes")}
             className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Leave</span>
@@ -902,7 +902,7 @@ export function LiveRoomView() {
                   .catch(() => undefined);
               }}
               onRaiseHand={handleRaiseHand}
-              onLeave={() => navigate("live")}
+              onLeave={() => router.push("/live-classes")}
               isLoggedIn={!!user}
               onLoginPrompt={() => openAuthModal("login")}
             />

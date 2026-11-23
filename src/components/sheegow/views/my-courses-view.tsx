@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import type { Enrollment } from "@/lib/types";
@@ -43,7 +44,8 @@ import { formatDate, levelBadgeClass } from "@/lib/ui";
 type TabValue = "all" | "in-progress" | "completed";
 
 export function MyCoursesView() {
-  const { user, authLoading, openAuthModal, navigate, openCourse, openPlayer } = useStore();
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabValue>("all");
@@ -174,7 +176,7 @@ export function MyCoursesView() {
       ) : filtered.length === 0 ? (
         <EmptyState
           tab={tab}
-          onBrowse={() => navigate("courses")}
+          onBrowse={() => router.push("/courses")}
         />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -183,7 +185,7 @@ export function MyCoursesView() {
               key={enr.id}
               enrollment={enr}
               onContinue={() => {
-                if (enr.course) openPlayer(enr.course.id);
+                if (enr.course) router.push(`/learn/${enr.course.id}`);
               }}
               onViewCertificate={() => setCertOpen(enr)}
             />

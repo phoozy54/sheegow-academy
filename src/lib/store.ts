@@ -1,58 +1,26 @@
 // SHEEGOW ACADEMY — global UI store (Zustand)
+//
+// Navigation is now handled by the Next.js App Router (useRouter / Link / URL
+// params). This store only retains cross-cutting client UI state: the current
+// user, the auth modal, the mobile nav drawer and cookie consent.
 import { create } from "zustand";
 import type { User } from "./types";
 
-export type View =
-  | "home"
-  | "courses"
-  | "course-detail"
-  | "live"
-  | "live-room"
-  | "about"
-  | "contact"
-  | "login"
-  | "register"
-  | "dashboard"
-  | "my-courses"
-  | "profile"
-  | "checkout"
-  | "course-player"
-  | "library"
-  | "certificate"
-  | "admin"
-  | "admin-courses"
-  | "admin-students"
-  | "admin-live"
-  | "admin-teachers";
-
 interface AppState {
-  // Navigation
-  view: View;
-  selectedCourseId: string | null;
-  selectedClassId: string | null;
-  checkoutCourseId: string | null;
-  /** Dashboard section to open when navigating from a public view. */
-  dashboardSection: string | null;
-  authModal: "login" | "register" | null;
-
   // Auth
   user: User | null;
   authLoading: boolean;
 
-  // Mobile menu
+  // Auth modal (login / register overlay shown from anywhere)
+  authModal: "login" | "register" | null;
+
+  // Mobile menu (navbar sheet)
   mobileMenuOpen: boolean;
 
-  // Cookie consent
+  // Cookie consent banner
   cookieConsent: "accepted" | "rejected" | null;
 
   // Actions
-  navigate: (view: View) => void;
-  openDashboard: (section?: string) => void;
-  clearDashboardSection: () => void;
-  openCourse: (id: string) => void;
-  openPlayer: (id: string) => void;
-  openClass: (id: string) => void;
-  openCheckout: (courseId: string) => void;
   openAuthModal: (modal: "login" | "register") => void;
   closeAuthModal: () => void;
   setUser: (user: User | null) => void;
@@ -61,65 +29,12 @@ interface AppState {
   setCookieConsent: (consent: "accepted" | "rejected") => void;
 }
 
-/** Scroll to top instantly — used on every view change for a native-app feel. */
-function scrollToTop() {
-  if (typeof window === "undefined") return;
-  // Instant scroll on mobile for snappy navigation; smooth on desktop.
-  const behavior: ScrollBehavior =
-    window.matchMedia("(min-width: 768px)").matches ? "smooth" : "auto";
-  window.scrollTo({ top: 0, left: 0, behavior });
-  // Also scroll the main element if it has its own scroll context (admin panel).
-  const main = document.querySelector("main");
-  if (main) main.scrollTo({ top: 0, left: 0, behavior });
-}
-
-export const useStore = create<AppState>((set, get) => ({
-  view: "home",
-  selectedCourseId: null,
-  selectedClassId: null,
-  checkoutCourseId: null,
-  dashboardSection: null,
-  authModal: null,
+export const useStore = create<AppState>((set) => ({
   user: null,
   authLoading: true,
+  authModal: null,
   mobileMenuOpen: false,
   cookieConsent: null,
-
-  navigate: (view) => {
-    set({ view, dashboardSection: null, mobileMenuOpen: false });
-    scrollToTop();
-  },
-
-  openDashboard: (section) => {
-    set({
-      view: "dashboard",
-      dashboardSection: section ?? null,
-      mobileMenuOpen: false,
-    });
-    scrollToTop();
-  },
-
-  clearDashboardSection: () => set({ dashboardSection: null }),
-
-  openCourse: (id) => {
-    set({ view: "course-detail", selectedCourseId: id, mobileMenuOpen: false });
-    scrollToTop();
-  },
-
-  openPlayer: (id) => {
-    set({ view: "course-player", selectedCourseId: id, mobileMenuOpen: false });
-    scrollToTop();
-  },
-
-  openClass: (id) => {
-    set({ view: "live-room", selectedClassId: id, mobileMenuOpen: false });
-    scrollToTop();
-  },
-
-  openCheckout: (courseId) => {
-    set({ view: "checkout", checkoutCourseId: courseId, mobileMenuOpen: false });
-    scrollToTop();
-  },
 
   openAuthModal: (modal) => set({ authModal: modal, mobileMenuOpen: false }),
   closeAuthModal: () => set({ authModal: null }),

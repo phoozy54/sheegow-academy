@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
 import type { LiveClass, TrialRequest } from "@/lib/types";
@@ -53,11 +54,9 @@ function requestStatus(request?: TrialRequest): TrialStatus | undefined {
 }
 
 export function LiveClassesView() {
-  const openClass = useStore((s) => s.openClass);
-  const navigate = useStore((s) => s.navigate);
-  const openDashboard = useStore((s) => s.openDashboard);
   const user = useStore((s) => s.user);
   const openAuthModal = useStore((s) => s.openAuthModal);
+  const router = useRouter();
 
   const [classes, setClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -220,7 +219,7 @@ export function LiveClassesView() {
             : "Check back soon — new LIVE English classes are added every week."}
         </p>
         <Button
-          onClick={() => (isManager ? openDashboard("live") : navigate("courses"))}
+          onClick={() => (isManager ? router.push("/dashboard?section=live") : router.push("/courses"))}
           variant="outline"
           className="mt-6 gap-1.5"
         >
@@ -295,7 +294,7 @@ export function LiveClassesView() {
               </p>
             </div>
             <Button
-              onClick={() => openDashboard("live")}
+              onClick={() => router.push("/dashboard?section=live")}
               className="self-start gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:self-auto"
               size="sm"
             >
@@ -323,8 +322,8 @@ export function LiveClassesView() {
                 <LiveNowCard
                   key={lc.id}
                   liveClass={lc}
-                  onJoin={() => openClass(lc.id)}
-                  onManage={() => openDashboard("live")}
+                  onJoin={() => router.push(`/class/${lc.id}`)}
+                  onManage={() => router.push("/dashboard?section=live")}
                   isManager={isManager}
                   trial={trialProps(lc.id)}
                 />
@@ -352,8 +351,8 @@ export function LiveClassesView() {
                 <LiveClassCard
                   key={lc.id}
                   liveClass={lc}
-                  onJoin={() => openClass(lc.id)}
-                  onManage={() => openDashboard("live")}
+                  onJoin={() => router.push(`/class/${lc.id}`)}
+                  onManage={() => router.push("/dashboard?section=live")}
                   isManager={isManager}
                   trial={trialProps(lc.id)}
                 />

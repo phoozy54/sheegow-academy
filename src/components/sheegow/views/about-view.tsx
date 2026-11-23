@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -73,7 +74,8 @@ const TEACHER = {
 /* ─── Main view ──────────────────────────────────────────── */
 
 export function AboutView() {
-  const { navigate, openAuthModal, user } = useStore();
+  const { openAuthModal, user } = useStore();
+  const router = useRouter();
 
   return (
     <div className="bg-background">
@@ -100,7 +102,7 @@ export function AboutView() {
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
                 size="lg"
-                onClick={() => navigate("courses")}
+                onClick={() => router.push("/courses")}
                 className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
               >
                 Explore Courses
@@ -109,7 +111,7 @@ export function AboutView() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => navigate("contact")}
+                onClick={() => router.push("/contact")}
                 className="w-full gap-2 sm:w-auto"
               >
                 Get in Touch
@@ -348,7 +350,7 @@ export function AboutView() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate("courses")}
+                  onClick={() => router.push("/courses")}
                   className="mt-4 gap-1.5 self-start"
                 >
                   <BookOpen className="h-3.5 w-3.5" /> View Courses
@@ -381,7 +383,7 @@ export function AboutView() {
               <Button
                 size="lg"
                 onClick={() =>
-                  user ? navigate("courses") : openAuthModal("register")
+                  user ? router.push("/courses") : openAuthModal("register")
                 }
                 className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
               >
@@ -391,7 +393,7 @@ export function AboutView() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => navigate("contact")}
+                onClick={() => router.push("/contact")}
                 className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
               >
                 <MessageSquare className="h-4 w-4" /> Ask a Question

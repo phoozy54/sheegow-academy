@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
@@ -146,20 +147,25 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
 /* ─── Main Unified Dashboard ─────────────────────────────── */
 
 export function UnifiedDashboard() {
-  const { user, authLoading, openAuthModal, navigate } = useStore();
-  const dashboardSection = useStore((s) => s.dashboardSection);
-  const clearDashboardSection = useStore((s) => s.clearDashboardSection);
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sectionParam = searchParams.get("section") as SectionId | null;
   const { isMobile, isTablet } = useDevice();
   const [section, setSection] = useState<SectionId>(
-    () => (dashboardSection as SectionId) || "overview"
+    () => (sectionParam as SectionId) || "overview"
   );
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // A public view can ask the dashboard to open a specific section (e.g. the
-  // teacher controls for a course or live class). Consume it once on mount.
-  useEffect(() => {
-    if (dashboardSection) clearDashboardSection();
-  }, [dashboardSection, clearDashboardSection]);
+  // teacher controls for a course or live class) via ?section=... Sync the
+  // local section state when the URL param changes (adjusting state during
+  // render to avoid a cascading-render effect).
+  const [lastParam, setLastParam] = useState(sectionParam);
+  if (sectionParam !== lastParam) {
+    setLastParam(sectionParam);
+    if (sectionParam) setSection(sectionParam as SectionId);
+  }
 
   // Auth gate — every role must be logged in
   if (authLoading) {
@@ -212,7 +218,7 @@ export function UnifiedDashboard() {
         setSection(v);
         setMobileNavOpen(false);
       }}
-      onBackToSite={() => navigate("home")}
+      onBackToSite={() => router.push("/")}
     />
   );
 
@@ -250,7 +256,7 @@ export function UnifiedDashboard() {
           <button
             title="Back to site"
             aria-label="Back to site"
-            onClick={() => navigate("home")}
+            onClick={() => router.push("/")}
             className="flex h-12 w-12 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -293,7 +299,7 @@ export function UnifiedDashboard() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("home")}
+              onClick={() => router.push("/")}
               className="gap-1.5"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -332,7 +338,7 @@ export function UnifiedDashboard() {
                   Dashboard Overview
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("home")}>
+                <DropdownMenuItem onClick={() => router.push("/")}>
                   <ArrowLeft className="h-4 w-4" />
                   Back to site
                 </DropdownMenuItem>
@@ -549,7 +555,8 @@ function RoleOverview({ role }: { role: Role }) {
 /* ─── Student Overview ─────────────────────────────────── */
 
 function StudentOverview() {
-  const { user, navigate, openPlayer, openClass } = useStore();
+  const { user } = useStore();
+  const router = useRouter();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
   const [activity, setActivity] = useState<Awaited<ReturnType<typeof api.activity>>>({
@@ -615,7 +622,7 @@ function StudentOverview() {
             closer to fluency.
           </p>
         </div>
-        <Button onClick={() => navigate("courses")} variant="outline" className="w-full gap-2 sm:w-auto">
+        <Button onClick={() => router.push("/courses")} variant="outline" className="w-full gap-2 sm:w-auto">
           <Sparkles className="h-4 w-4 text-indigo-600" />
           Explore courses
         </Button>
@@ -666,7 +673,7 @@ function StudentOverview() {
                       Browse our catalog to start learning.
                     </p>
                   </div>
-                  <Button size="sm" onClick={() => navigate("courses")} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
+                  <Button size="sm" onClick={() => router.push("/courses")} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
                     Browse Courses <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -681,7 +688,7 @@ function StudentOverview() {
                         className="flex flex-col gap-3 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center"
                       >
                         <button
-                          onClick={() => openPlayer(course.id)}
+                          onClick={() => router.push(`/learn/${course.id}`)}
                           className="relative h-16 w-full shrink-0 overflow-hidden rounded-lg sm:w-28"
                         >
                           {course.image ? (
@@ -698,7 +705,7 @@ function StudentOverview() {
                         </button>
                         <div className="min-w-0 flex-1">
                           <button
-                            onClick={() => openPlayer(course.id)}
+                            onClick={() => router.push(`/learn/${course.id}`)}
                             className="block truncate text-left text-sm font-bold hover:text-indigo-600"
                           >
                             {course.title}
@@ -719,7 +726,7 @@ function StudentOverview() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => openPlayer(course.id)}
+                          onClick={() => router.push(`/learn/${course.id}`)}
                           className="shrink-0 gap-1"
                         >
                           Continue <ArrowRight className="h-3.5 w-3.5" />
@@ -760,7 +767,7 @@ function StudentOverview() {
                   {upcoming.map((lc) => (
                     <li key={lc.id} className="p-3">
                       <button
-                        onClick={() => openClass(lc.id)}
+                        onClick={() => router.push(`/class/${lc.id}`)}
                         className="block w-full text-left"
                       >
                         <p className="truncate text-sm font-semibold hover:text-indigo-600">
@@ -786,7 +793,7 @@ function StudentOverview() {
                   variant="ghost"
                   size="sm"
                   className="w-full gap-1 text-indigo-600"
-                  onClick={() => navigate("live")}
+                  onClick={() => router.push("/live-classes")}
                 >
                   View all classes <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
@@ -802,7 +809,8 @@ function StudentOverview() {
 /* ─── Teacher Overview ──────────────────────────────────── */
 
 function TeacherOverview() {
-  const { user, openClass, openCourse } = useStore();
+  const { user } = useStore();
+  const router = useRouter();
   const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
   const [stats, setStats] = useState<Awaited<ReturnType<typeof api.teacherStats>> | null>(null);
@@ -903,7 +911,7 @@ function TeacherOverview() {
                         )}
                       </div>
                       <button
-                        onClick={() => openCourse(c.id)}
+                        onClick={() => router.push(`/course/${c.id}`)}
                         className="min-w-0 flex-1 text-left"
                       >
                         <p className="truncate text-sm font-semibold hover:text-indigo-600">
@@ -950,7 +958,7 @@ function TeacherOverview() {
                   {upcoming.map((lc) => (
                     <li key={lc.id} className="p-3">
                       <button
-                        onClick={() => openClass(lc.id)}
+                        onClick={() => router.push(`/class/${lc.id}`)}
                         className="block w-full text-left"
                       >
                         <p className="truncate text-sm font-semibold hover:text-indigo-600">
@@ -982,7 +990,7 @@ function TeacherOverview() {
 /* ─── Student: My Courses (full list within portal) ─────── */
 
 function StudentMyCourses() {
-  const { openPlayer, navigate } = useStore();
+  const router = useRouter();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -1017,7 +1025,7 @@ function StudentMyCourses() {
           Browse the catalog to enroll in your first course.
         </p>
         <Button
-          onClick={() => navigate("courses")}
+          onClick={() => router.push("/courses")}
           className="mt-4 gap-1.5 bg-indigo-600 hover:bg-indigo-700"
         >
           <BookOpen className="h-4 w-4" /> Browse Courses
@@ -1052,7 +1060,7 @@ function StudentMyCourses() {
                 )}
               </div>
               <button
-                onClick={() => openPlayer(c.id)}
+                onClick={() => router.push(`/learn/${c.id}`)}
                 className="block text-left font-bold hover:text-indigo-600"
               >
                 {c.title}
@@ -1066,7 +1074,7 @@ function StudentMyCourses() {
               <Button
                 size="sm"
                 className="mt-3 w-full gap-1 bg-indigo-600 hover:bg-indigo-700"
-                onClick={() => openPlayer(c.id)}
+                onClick={() => router.push(`/learn/${c.id}`)}
               >
                 Continue Learning <ArrowRight className="h-3.5 w-3.5" />
               </Button>
@@ -1146,11 +1154,11 @@ function TeacherStudents() {
 /* ─── Inline Profile (redirects to full profile view) ──── */
 
 function ProfileInline() {
-  const { navigate } = useStore();
+  const router = useRouter();
   // Delegate to the dedicated profile view
   useEffect(() => {
-    navigate("profile");
-  }, [navigate]);
+    router.push("/profile");
+  }, [router]);
   return (
     <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

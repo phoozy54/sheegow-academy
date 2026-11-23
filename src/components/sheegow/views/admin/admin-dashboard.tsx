@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
-import { useStore } from "@/lib/store";
 import type { LiveClass, Stats } from "@/lib/types";
 import {
   cn,
@@ -93,7 +93,7 @@ const STAT_CARDS: {
 ];
 
 export function AdminDashboard() {
-  const openDashboard = useStore((s) => s.openDashboard);
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -410,7 +410,7 @@ export function AdminDashboard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => openDashboard("live")}
+            onClick={() => router.push("/dashboard?section=live")}
             className="shrink-0 gap-1.5"
           >
             <Video className="h-3.5 w-3.5" /> Manage

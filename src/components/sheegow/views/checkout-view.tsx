@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
@@ -85,14 +86,13 @@ const INCLUDED = [
   { icon: InfinityIcon, label: "Lifetime access" },
 ];
 
-export function CheckoutView() {
+export function CheckoutView({ courseId }: { courseId: string }) {
   const {
     user,
     authLoading,
     openAuthModal,
-    navigate,
-    checkoutCourseId,
   } = useStore();
+  const router = useRouter();
   const { isMobile, isTablet } = useDevice();
 
   const [course, setCourse] = useState<Course | null>(null);
@@ -119,20 +119,20 @@ export function CheckoutView() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!checkoutCourseId) {
+    if (!courseId) {
       setLoading(false);
       return;
     }
     setLoading(true);
     api
-      .course(checkoutCourseId)
+      .course(courseId)
       .then((r) => setCourse(r.course))
       .catch(() => {
         setCourse(null);
         toast.error("Could not load course details");
       })
       .finally(() => setLoading(false));
-  }, [checkoutCourseId]);
+  }, [courseId]);
 
   // Pre-fill the wallet number from the student's profile (9 digits only).
   useEffect(() => {
@@ -184,7 +184,7 @@ export function CheckoutView() {
     );
   }
 
-  if (!checkoutCourseId) {
+  if (!courseId) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
@@ -196,7 +196,7 @@ export function CheckoutView() {
             Choose a course to start the checkout process.
           </p>
           <Button
-            onClick={() => navigate("courses")}
+            onClick={() => router.push("/courses")}
             className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -271,7 +271,7 @@ export function CheckoutView() {
         couponCode: coupon?.code,
       });
       toast.success("Payment successful! You're enrolled.");
-      navigate("my-courses");
+      router.push("/my-courses");
     } catch (err) {
       const msg =
         err instanceof ApiError ? err.message : "Payment failed. Try again.";
@@ -292,7 +292,7 @@ export function CheckoutView() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("courses")}
+          onClick={() => router.push("/courses")}
           className="gap-1.5 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -318,7 +318,7 @@ export function CheckoutView() {
             This course could not be loaded.
           </p>
           <Button
-            onClick={() => navigate("courses")}
+            onClick={() => router.push("/courses")}
             className="mt-4 bg-indigo-600 hover:bg-indigo-700"
           >
             Browse courses

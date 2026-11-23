@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import type {
   AdminCourseOverview as Overview,
@@ -81,9 +81,7 @@ const SUMMARY_CARDS: {
  * real progress, and ALL live classes (including ended ones).
  */
 export function AdminCourseOverview() {
-  const openClass = useStore((s) => s.openClass);
-  const openCourse = useStore((s) => s.openCourse);
-  const openDashboard = useStore((s) => s.openDashboard);
+  const router = useRouter();
 
   const [data, setData] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -225,7 +223,7 @@ export function AdminCourseOverview() {
             </p>
           </div>
           <Button
-            onClick={() => openDashboard("live")}
+            onClick={() => router.push("/dashboard?section=live")}
             variant="outline"
             size="sm"
             className="self-start gap-1.5"
@@ -263,8 +261,8 @@ export function AdminCourseOverview() {
               <LiveRow
                 key={lc.id}
                 liveClass={lc}
-                onJoin={() => openClass(lc.id)}
-                onManage={() => openDashboard("live")}
+                onJoin={() => router.push(`/class/${lc.id}`)}
+                onManage={() => router.push("/dashboard?section=live")}
               />
             ))}
           </div>
@@ -302,7 +300,7 @@ export function AdminCourseOverview() {
               {search ? "Try a different search." : "Create a course to get started."}
             </p>
             <Button
-              onClick={() => openDashboard("courses")}
+              onClick={() => router.push("/dashboard?section=courses")}
               variant="outline"
               className="mt-4 gap-1.5"
             >
@@ -322,10 +320,10 @@ export function AdminCourseOverview() {
               onToggleWork={() =>
                 setExpandedWork((id) => (id === course.id ? null : course.id))
               }
-              onContent={() => openDashboard("content-builder")}
-              onEdit={() => openDashboard("courses")}
-              onLive={() => openDashboard("live")}
-              onView={() => openCourse(course.id)}
+              onContent={() => router.push("/dashboard?section=content-builder")}
+              onEdit={() => router.push("/dashboard?section=courses")}
+              onLive={() => router.push("/dashboard?section=live")}
+              onView={() => router.push(`/course/${course.id}`)}
             />
           ))
         )}

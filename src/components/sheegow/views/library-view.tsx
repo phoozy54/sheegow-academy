@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,8 @@ import {
 type LibraryData = Awaited<ReturnType<typeof api.library>>;
 
 export function LibraryView() {
-  const { user, authLoading, openAuthModal, openPlayer, navigate } = useStore();
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
   const [data, setData] = useState<LibraryData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +52,7 @@ export function LibraryView() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => navigate("dashboard")}>
+        <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => router.push("/dashboard")}>
           ← Dashboard
         </Button>
         <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
@@ -70,7 +72,7 @@ export function LibraryView() {
           <BookOpen className="mx-auto mb-3 h-10 w-10 text-indigo-400" />
           <h2 className="font-bold">Your library is empty</h2>
           <p className="mt-1 text-sm text-muted-foreground">Enroll in a course to start collecting materials.</p>
-          <Button className="mt-4" onClick={() => navigate("courses")}>Browse courses</Button>
+          <Button className="mt-4" onClick={() => router.push("/courses")}>Browse courses</Button>
         </Card>
       ) : (
         <div className="space-y-5">
@@ -102,7 +104,7 @@ export function LibraryView() {
                     </div>
                   </summary>
                   <div className="border-t p-5">
-                    <Button size="sm" className="mb-4 gap-2 bg-indigo-600" onClick={() => openPlayer(course.courseId)}>
+                    <Button size="sm" className="mb-4 gap-2 bg-indigo-600" onClick={() => router.push(`/learn/${course.courseId}`)}>
                       <BookOpen className="h-4 w-4" /> Continue course
                     </Button>
                     <div className="space-y-5">
@@ -114,7 +116,7 @@ export function LibraryView() {
                               <div key={lesson.id} className="rounded-lg border p-3">
                                 <button
                                   className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:text-indigo-700"
-                                  onClick={() => openPlayer(course.courseId)}
+                                  onClick={() => router.push(`/learn/${course.courseId}`)}
                                 >
                                   <span>{lesson.title}</span>
                                   <span className="shrink-0 text-xs text-muted-foreground">

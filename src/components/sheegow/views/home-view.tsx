@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api } from "@/lib/api";
@@ -81,7 +82,8 @@ const FEATURES: Array<{
 ];
 
 export function HomeView() {
-  const { navigate, openAuthModal, openPlayer, user } = useStore();
+  const { openAuthModal, user } = useStore();
+  const router = useRouter();
   const { enrollments, byCourse, loading: loadingEnrollments } = useMyEnrollments();
   const { isMobile, isTablet } = useDevice();
   const padClass = isMobile
@@ -237,7 +239,7 @@ export function HomeView() {
             </div>
             <Button
               variant="ghost"
-              onClick={() => navigate("dashboard")}
+              onClick={() => router.push("/dashboard")}
               className="gap-1.5"
             >
               My dashboard <ArrowRight className="h-4 w-4" />
@@ -259,7 +261,7 @@ export function HomeView() {
                 <Progress value={enrollment.progress} className="h-1.5" />
                 <Button
                   className="mt-4 w-full gap-1.5 bg-indigo-600 hover:bg-indigo-700"
-                  onClick={() => openPlayer(enrollment.courseId)}
+                  onClick={() => router.push(`/learn/${enrollment.courseId}`)}
                 >
                   Continue lesson <ArrowRight className="h-4 w-4" />
                 </Button>

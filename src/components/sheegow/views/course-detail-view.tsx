@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
@@ -175,14 +176,10 @@ function Stars({ rating, size = "h-4 w-4" }: { rating: number; size?: string }) 
 
 /* ─── Main view ─────────────────────────────────────────── */
 
-export function CourseDetailView() {
-  const courseId = useStore((s) => s.selectedCourseId);
-  const navigate = useStore((s) => s.navigate);
-  const openCheckout = useStore((s) => s.openCheckout);
+export function CourseDetailView({ courseId }: { courseId: string }) {
   const openAuthModal = useStore((s) => s.openAuthModal);
-  const openDashboard = useStore((s) => s.openDashboard);
-  const openPlayer = useStore((s) => s.openPlayer);
   const user = useStore((s) => s.user);
+  const router = useRouter();
   const { isMobile, isTablet } = useDevice();
   const padClass = isMobile
     ? "px-3"
@@ -252,7 +249,7 @@ export function CourseDetailView() {
           {error || "The course you're looking for may have been removed."}
         </p>
         <Button
-          onClick={() => navigate("courses")}
+          onClick={() => router.push("/courses")}
           variant="outline"
           className="mt-6 gap-1.5"
         >
@@ -277,7 +274,7 @@ export function CourseDetailView() {
       openAuthModal("register");
       return;
     }
-    openCheckout(course.id);
+    router.push(`/checkout/${course.id}`);
   };
 
   return (
@@ -287,7 +284,7 @@ export function CourseDetailView() {
         <div className="hero-mesh absolute inset-0" />
         <div className={`relative mx-auto max-w-7xl py-8 lg:py-10 ${padClass}`}>
           <button
-            onClick={() => navigate("courses")}
+            onClick={() => router.push("/courses")}
             className="mb-6 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" /> All Courses
@@ -353,7 +350,7 @@ export function CourseDetailView() {
                 {/* Teacher chip */}
                 {course.teacher && (
                   <button
-                    onClick={() => navigate("courses")}
+                    onClick={() => router.push("/courses")}
                     className="mt-5 inline-flex items-center gap-3 rounded-xl border bg-card p-2 pr-4 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50/50"
                   >
                     <Avatar className="h-10 w-10">
@@ -380,15 +377,15 @@ export function CourseDetailView() {
                   <ManagerCourseCard
                     course={course}
                     role={user?.role}
-                    onEdit={() => openDashboard("courses")}
-                    onContent={() => openDashboard("content-builder")}
-                    onOpen={() => openPlayer(course.id)}
+                    onEdit={() => router.push("/dashboard?section=courses")}
+                    onContent={() => router.push("/dashboard?section=content-builder")}
+                    onOpen={() => router.push(`/learn/${course.id}`)}
                   />
                 ) : enrollment ? (
                   <EnrolledCourseCard
                     course={course}
                     enrollment={enrollment}
-                    onContinue={() => openPlayer(course.id)}
+                    onContinue={() => router.push(`/learn/${course.id}`)}
                   />
                 ) : (
                   <EnrollmentCard
@@ -478,7 +475,7 @@ export function CourseDetailView() {
                         variant="outline"
                         size="sm"
                         className="mt-4 gap-1.5"
-                        onClick={() => navigate("courses")}
+                        onClick={() => router.push("/courses")}
                       >
                         <Mail className="h-3.5 w-3.5" /> Contact teacher
                       </Button>

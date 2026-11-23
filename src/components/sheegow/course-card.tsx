@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { coursePath } from "@/lib/slug";
 import type { Course, Enrollment } from "@/lib/types";
@@ -22,7 +23,8 @@ export function CourseCard({
   enrollment?: Enrollment | null;
   all: Pick<Course, "id" | "title">[];
 }) {
-  const { openCheckout, openDashboard, openPlayer, user, openAuthModal } = useStore();
+  const { user, openAuthModal } = useStore();
+  const router = useRouter();
   const href = coursePath(course, all);
 
   const isManager =
@@ -41,7 +43,7 @@ export function CourseCard({
       return;
     }
     trackConversion("checkout_start", { courseId: course.id });
-    openCheckout(course.id);
+    router.push(`/checkout/${course.id}`);
   };
 
   return (
@@ -168,9 +170,9 @@ export function CourseCard({
             size="sm"
             onClick={
               isManager
-                ? () => openPlayer(course.id)
+                ? () => router.push(`/learn/${course.id}`)
                 : canContinue
-                  ? () => openPlayer(course.id)
+                  ? () => router.push(`/learn/${course.id}`)
                   : handleEnroll
             }
             className="bg-indigo-600 hover:bg-indigo-700"

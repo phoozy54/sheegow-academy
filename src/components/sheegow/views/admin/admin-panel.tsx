@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
 import {
@@ -110,7 +111,8 @@ function allowedViewsFor(role: string): Set<AdminView> {
 }
 
 export function AdminPanel() {
-  const { user, authLoading, openAuthModal, navigate } = useStore();
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
   const [adminView, setAdminView] = useState<AdminView>("dashboard");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -169,7 +171,7 @@ export function AdminPanel() {
             Your account does not have permission to view the admin panel.
             Only administrators and teachers can access this area.
           </p>
-          <Button variant="outline" onClick={() => navigate("home")} className="gap-2">
+          <Button variant="outline" onClick={() => router.push("/")} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to site
           </Button>
@@ -239,7 +241,7 @@ export function AdminPanel() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("home")}
+              onClick={() => router.push("/")}
               className="gap-1.5"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -269,16 +271,16 @@ export function AdminPanel() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate("profile")}>
+                <DropdownMenuItem onClick={() => router.push("/profile")}>
                   <Users className="h-4 w-4" />
                   My Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("dashboard")}>
+                <DropdownMenuItem onClick={() => router.push("/dashboard")}>
                   <LayoutDashboard className="h-4 w-4" />
                   Student Dashboard
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("home")}>
+                <DropdownMenuItem onClick={() => router.push("/")}>
                   <ArrowLeft className="h-4 w-4" />
                   Back to site
                 </DropdownMenuItem>
@@ -310,7 +312,8 @@ function SidebarContent({
   activeView: AdminView;
   onSelect: (v: AdminView) => void;
 }) {
-  const { user, navigate } = useStore();
+  const { user } = useStore();
+  const router = useRouter();
 
   return (
     <div className="flex h-full flex-col">
@@ -393,7 +396,7 @@ function SidebarContent({
               variant="ghost"
               size="sm"
               className="mt-2 w-full justify-start gap-2 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => navigate("home")}
+              onClick={() => router.push("/")}
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to site

@@ -1,10 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useStore, type View } from "@/lib/store";
+import { useStore } from "@/lib/store";
 import {
-
   Mail,
   Phone,
   MapPin,
@@ -20,17 +18,10 @@ import { BrandLockup } from "./brand-mark";
 type FooterLink = {
   label: string;
   href?: string;
-  view?: View;
 };
 
 export function Footer() {
   const { openAuthModal } = useStore();
-  const router = useRouter();
-
-  /** Interactive-only views get an addressable URL on the app root. */
-  const goApp = (view: View) => {
-    router.push(view === "home" ? "/" : `/?view=${view}`);
-  };
 
   return (
     <footer className="mt-auto border-t bg-gradient-to-b from-background to-indigo-50/40">
@@ -117,8 +108,8 @@ export function Footer() {
               {([
                 { label: "All Courses", href: "/courses" },
                 { label: "Live Classes", href: "/live-classes" },
-                { label: "My Dashboard", view: "dashboard" as const },
-                { label: "My Courses", view: "my-courses" as const },
+                { label: "My Dashboard", href: "/dashboard" },
+                { label: "My Courses", href: "/my-courses" },
               ] as FooterLink[]).map((l) => (
                 <li key={l.label}>
                   {l.href ? (
@@ -130,7 +121,7 @@ export function Footer() {
                     </Link>
                   ) : (
                     <button
-                      onClick={() => l.view && goApp(l.view)}
+                      onClick={() => openAuthModal("register")}
                       className="text-muted-foreground transition-colors hover:text-indigo-600"
                     >
                       {l.label}

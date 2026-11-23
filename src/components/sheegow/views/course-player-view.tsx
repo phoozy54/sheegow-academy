@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { useStore } from "@/lib/store";
 import { api, ApiError } from "@/lib/api";
@@ -43,19 +44,20 @@ const TYPE_ICONS: Record<string, typeof BookOpen> = {
   assignment: ClipboardList,
 };
 
-export function CoursePlayerView() {
-  const { selectedCourseId, user, authLoading, navigate, openAuthModal, openPlayer, openDashboard, openCheckout } = useStore();
+export function CoursePlayerView({ courseId }: { courseId: string }) {
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
   const [data, setData] = useState<CurriculumData | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!selectedCourseId) return;
+    if (!courseId) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await api.curriculum(selectedCourseId);
+      const res = await api.curriculum(courseId);
       setData(res);
       setActiveId((current) => {
         if (current && res.roadmap.modules.some((m) => m.lessons.some((l) => l.id === current))) {
@@ -68,7 +70,7 @@ export function CoursePlayerView() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCourseId]);
+  }, [courseId]);
 
   useEffect(() => {
     if (!user) return;
@@ -108,7 +110,7 @@ export function CoursePlayerView() {
     <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Button variant="ghost" size="sm" className="mb-2 gap-1.5 -ml-2" onClick={() => navigate("dashboard")}>
+          <Button variant="ghost" size="sm" className="mb-2 gap-1.5 -ml-2" onClick={() => router.push("/dashboard")}>
             <ArrowLeft className="h-4 w-4" /> Dashboard
           </Button>
           <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
@@ -126,16 +128,16 @@ export function CoursePlayerView() {
         )}
       </div>
 
-      {data?.canManage && selectedCourseId && (
+      {data?.canManage && courseId && (
         <Card className="mb-5 flex flex-wrap items-center justify-between gap-3 border-fuchsia-200 bg-fuchsia-50/60 p-4 dark:bg-fuchsia-950/20">
           <div className="flex items-center gap-2 text-sm font-semibold text-fuchsia-800 dark:text-fuchsia-200">
             <Hammer className="h-4 w-4" /> Teacher mode — you can edit and deliver this course
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openDashboard("courses")}>
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => router.push("/dashboard?section=courses")}>
               <Pencil className="h-3.5 w-3.5" /> Edit course
             </Button>
-            <Button size="sm" className="gap-1.5" onClick={() => openDashboard("content-builder")}>
+            <Button size="sm" className="gap-1.5" onClick={() => router.push("/dashboard?section=content-builder")}>
               <Hammer className="h-3.5 w-3.5" /> Manage lessons
             </Button>
           </div>
@@ -155,7 +157,7 @@ export function CoursePlayerView() {
       {error && (
         <Card className="mb-5 border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           {error}{" "}
-          <button className="font-semibold underline" onClick={() => navigate("courses")}>
+          <button className="font-semibold underline" onClick={() => router.push("/courses")}>
             Browse courses
           </button>
         </Card>
@@ -233,9 +235,9 @@ export function CoursePlayerView() {
                 key={activeLesson.id}
                 lesson={activeLesson}
                 hasAccess={data.hasAccess || activeLesson.isPreview}
-                courseId={selectedCourseId!}
+                courseId={courseId}
                 onRefresh={refresh}
-                onEnroll={() => openCheckout(selectedCourseId!)}
+                onEnroll={() => router.push(`/checkout/${courseId}`)}
                 onNext={() => {
                   const index = allLessons.findIndex((l) => l.id === activeLesson.id);
                   const next = allLessons[index + 1];
@@ -253,7 +255,7 @@ export function CoursePlayerView() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Your teacher is preparing the course content.
                 </p>
-                <Button className="mt-4" variant="outline" onClick={() => openPlayer(selectedCourseId!)}>
+                <Button className="mt-4" variant="outline" onClick={() => router.push(`/learn/${courseId}`)}>
                   Refresh
                 </Button>
               </Card>

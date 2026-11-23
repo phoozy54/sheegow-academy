@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import type { Certificate } from "@/lib/types";
@@ -10,7 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Award, ExternalLink, Loader2, LogIn } from "lucide-react";
 
 export function CertificateView() {
-  const { user, authLoading, openAuthModal, navigate } = useStore();
+  const { user, authLoading, openAuthModal } = useStore();
+  const router = useRouter();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +57,7 @@ export function CertificateView() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => navigate("dashboard")}>
+        <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => router.push("/dashboard")}>
           ← Dashboard
         </Button>
         <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
@@ -79,7 +81,7 @@ export function CertificateView() {
           <p className="mt-1 text-sm text-muted-foreground">
             Complete all course requirements to earn a verifiable certificate.
           </p>
-          <Button className="mt-4" onClick={() => navigate("courses")}>
+          <Button className="mt-4" onClick={() => router.push("/courses")}>
             Continue learning
           </Button>
         </Card>

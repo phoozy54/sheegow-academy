@@ -34,38 +34,17 @@ import {
 import { AuthModal } from "./auth-modal";
 import { BrandLockup } from "./brand-mark";
 
-type View =
-  | "home"
-  | "courses"
-  | "course-detail"
-  | "live"
-  | "live-room"
-  | "about"
-  | "contact"
-  | "login"
-  | "register"
-  | "dashboard"
-  | "my-courses"
-  | "profile"
-  | "checkout"
-  | "admin"
-  | "admin-courses"
-  | "admin-students"
-  | "admin-live"
-  | "admin-teachers";
-
 /** Public pages are real routes — crawlable, shareable, openable in a new tab. */
-const NAV_LINKS: { label: string; href: string; view: View }[] = [
-  { label: "Home", href: "/", view: "home" },
-  { label: "Courses", href: "/courses", view: "courses" },
-  { label: "Live Classes", href: "/live-classes", view: "live" },
-  { label: "About", href: "/about", view: "about" },
-  { label: "Contact", href: "/contact", view: "contact" },
+const NAV_LINKS: { label: string; href: string }[] = [
+  { label: "Home", href: "/" },
+  { label: "Courses", href: "/courses" },
+  { label: "Live Classes", href: "/live-classes" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Navbar() {
   const {
-    view,
     user,
     setUser,
     authLoading,
@@ -104,13 +83,8 @@ export function Navbar() {
     router.push("/");
   };
 
-  /** Interactive-only views get an addressable URL on the app root. */
-  const goApp = (v: View) => {
-    router.push(v === "home" ? "/" : `/?view=${v}`);
-  };
-
   const isActive = (link: (typeof NAV_LINKS)[number]) =>
-    pathname === "/" ? view === link.view : pathname === link.href;
+    pathname === link.href;
 
   return (
     <>
@@ -201,13 +175,13 @@ export function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => goApp("dashboard")}>
+                  <DropdownMenuItem onClick={() => router.push("/dashboard")}>
                     <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => goApp("my-courses")}>
+                  <DropdownMenuItem onClick={() => router.push("/my-courses")}>
                     <BookOpen className="mr-2 h-4 w-4" /> My Courses
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => goApp("profile")}>
+                  <DropdownMenuItem onClick={() => router.push("/profile")}>
                     <UserIcon className="mr-2 h-4 w-4" /> Profile Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -296,7 +270,7 @@ export function Navbar() {
                       <Button
                         variant="outline"
                         className="justify-start"
-                        onClick={() => goApp("dashboard")}
+                        onClick={() => router.push("/dashboard")}
                       >
                         <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                       </Button>
@@ -305,7 +279,7 @@ export function Navbar() {
                       <Button
                         variant="outline"
                         className="justify-start"
-                        onClick={() => goApp("my-courses")}
+                        onClick={() => router.push("/my-courses")}
                       >
                         <BookOpen className="mr-2 h-4 w-4" /> My Courses
                       </Button>
