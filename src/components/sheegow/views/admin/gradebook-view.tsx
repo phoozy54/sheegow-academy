@@ -31,8 +31,11 @@ import {
   TrendingUp,
   CheckCircle2,
   Inbox,
+  Download,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 /**
  * Teacher/Admin gradebook view. Course selector + table of enrolled students
@@ -40,11 +43,13 @@ import { toast } from "sonner";
  * screens.
  */
 export function GradebookView() {
+  const t = useT();
   const [courses, setCourses] = useState<Course[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(true);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [data, setData] = useState<GradebookData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,6 +96,29 @@ export function GradebookView() {
     if (selectedCourseId) void loadGradebook(selectedCourseId);
   }, [selectedCourseId, loadGradebook]);
 
+  const handleExportCsv = useCallback(async () => {
+    if (!selectedCourseId) return;
+    setExporting(true);
+    try {
+      const blob = await api.exportCourseProgressCsv(selectedCourseId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "course-progress.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      // Revoke on the next tick so the download has time to start in Safari.
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+      toast.success(t("gradebook.exportSuccess"));
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : t("gradebook.exportFailed");
+      toast.error(msg);
+    } finally {
+      setExporting(false);
+    }
+  }, [selectedCourseId, t]);
+
   return (
     <div className="space-y-5">
       {/* Course selector + summary */}
@@ -130,6 +158,21 @@ export function GradebookView() {
               <Badge variant="outline" className="capitalize">
                 {data.course.level}
               </Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleExportCsv}
+                disabled={exporting || data.students.length === 0}
+                className="gap-1.5"
+                aria-label={t("gradebook.exportCsv")}
+              >
+                {exporting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
+                {t("gradebook.exportCsv")}
+              </Button>
             </div>
           )}
         </div>

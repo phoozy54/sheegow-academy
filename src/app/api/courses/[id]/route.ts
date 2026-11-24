@@ -38,41 +38,65 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/courses/:id
- * Single course with teacher, reviews (with student info) and reviewCount.
+ * Single course with teacher, reviews (with student info), reviewCount and a
+ * per-star rating breakdown (how many 5★, 4★, … 1★ reviews) used by the
+ * histogram on the course detail page.
  */
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
     const viewer = await getCurrentUser();
 
-    const course = await db.course.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        level: true,
-        ...(viewer ? { price: true } : {}),
-        duration: true,
-        image: true,
-        teacherId: true,
-        rating: true,
-        reviewCount: true,
-        whatYouLearn: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-        teacher: { select: teacherSelect },
-        reviews: {
-          orderBy: { createdAt: "desc" },
-          include: { student: { select: reviewStudentSelect } },
+    const [course, ratingGroups] = await Promise.all([
+      db.course.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          level: true,
+          ...(viewer ? { price: true } : {}),
+          duration: true,
+          image: true,
+          teacherId: true,
+          rating: true,
+          reviewCount: true,
+          whatYouLearn: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+          teacher: { select: teacherSelect },
+          reviews: {
+            orderBy: { createdAt: "desc" },
+            include: { student: { select: reviewStudentSelect } },
+          },
         },
-      },
-    });
+      }),
+      // Count reviews grouped by star rating (1-5). Prisma's groupBy returns
+      // one row per rating value with the matching count; we normalise into a
+      // { "5": N, "4": N, ... } object so the client never has to worry about
+      // missing keys.
+      db.review.groupBy({
+        by: ["rating"],
+        where: { courseId: id },
+        _count: { _all: true },
+      }),
+    ]);
 
     if (!course) return jsonError("Course not found", 404);
 
-    return NextResponse.json({ course });
+    const ratingBreakdown: Record<string, number> = {
+      "5": 0,
+      "4": 0,
+      "3": 0,
+      "2": 0,
+      "1": 0,
+    };
+    for (const g of ratingGroups) {
+      ratingBreakdown[String(g.rating)] = g._count._all;
+    }
+
+    return NextResponse.json({ course, ratingBreakdown });
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;

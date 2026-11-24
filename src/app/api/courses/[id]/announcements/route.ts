@@ -14,6 +14,7 @@ import {
 } from "@/lib/api-helpers";
 import { canManageCourse } from "@/lib/content-access";
 import { notifyMany } from "@/lib/notify";
+import { sendAnnouncementEmail } from "@/lib/email";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -110,7 +111,7 @@ export async function POST(req: Request, { params }: RouteContext) {
 
     const course = await db.course.findUnique({
       where: { id: courseId },
-      select: { id: true, teacherId: true },
+      select: { id: true, teacherId: true, title: true },
     });
     if (!course) return jsonError("Course not found", 404);
     if (!canManageCourse(actor, course)) return jsonError("Forbidden", 403);
@@ -141,7 +142,10 @@ export async function POST(req: Request, { params }: RouteContext) {
           status: { in: ["active", "completed"] },
           studentId: { not: actor.id },
         },
-        select: { studentId: true },
+        select: {
+          studentId: true,
+          student: { select: { id: true, fullName: true, email: true } },
+        },
       });
       const studentIds = enrollments.map((e) => e.studentId);
       const link = `/courses/${courseId}`;
@@ -153,6 +157,31 @@ export async function POST(req: Request, { params }: RouteContext) {
         `New announcement: ${title}`,
         preview,
         link
+      );
+
+      // Best-effort: also email each enrolled student. We send in parallel
+      // but every send is wrapped in its own try/catch (via sendEmail), so
+      // one bad address never aborts the rest. A missing RESEND_API_KEY
+      // makes this a no-op.
+      const courseTitle = course.title;
+      const emailBody = text.length > 1_000 ? `${text.slice(0, 1_000)}…` : text;
+      await Promise.all(
+        enrollments.map((e) =>
+          sendAnnouncementEmail(
+            e.student.email,
+            e.student.fullName,
+            courseTitle,
+            title,
+            emailBody
+          ).catch((err) => {
+            logger.error(
+              "[announcements/create]",
+              "announcement email failed",
+              err,
+              { courseId, studentId: e.student.id }
+            );
+          })
+        )
       );
     } catch (fanErr) {
       logger.error(

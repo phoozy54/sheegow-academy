@@ -10,6 +10,7 @@ import {
   ensureUsernameSchema,
   usernameErrorResponse,
 } from "@/lib/username";
+import { sendWelcomeEmail } from "@/lib/email";
 
 interface RegisterBody {
   fullName?: string;
@@ -106,6 +107,16 @@ export async function POST(req: Request) {
       role: user.role,
       email: user.email,
     });
+
+    // Send a welcome email. Best-effort: failures are logged but never
+    // crash the registration flow (the user is already created + signed in).
+    try {
+      await sendWelcomeEmail(user.email, user.fullName);
+    } catch (e) {
+      logger.error("[auth/register]", "welcome email failed", e, {
+        userId: user.id,
+      });
+    }
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (e) {

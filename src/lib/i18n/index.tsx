@@ -45,12 +45,30 @@ let currentLocale: Locale = DEFAULT_LOCALE;
  * Translate a key for the *current* locale. Usable anywhere — inside or
  * outside React components. Falls back to English, then to the key itself.
  *
+ * An optional `params` map performs simple `{placeholder}` substitution:
+ *   t("greet", { name: "Asha" }) with "greet": "Hi {name}" → "Hi Asha".
+ * Missing placeholders are left untouched; non-string values are stringified.
+ *
  * NOTE: on the server this always returns the English string. Components
  * that need to render with a specific locale should use the `useT()` hook
  * from a client component instead, which respects the user's preference.
  */
-export function t(key: string): string {
-  return translate(currentLocale, key);
+export function t(key: string, params?: Record<string, string | number>): string {
+  return applyParams(translate(currentLocale, key), params);
+}
+
+/** Replace `{name}` placeholders with values from `params`. */
+function applyParams(
+  str: string,
+  params?: Record<string, string | number>
+): string {
+  if (!params) return str;
+  return str.replace(/\{(\w+)\}/g, (match, name: string) => {
+    if (Object.prototype.hasOwnProperty.call(params, name)) {
+      return String(params[name]);
+    }
+    return match;
+  });
 }
 
 /** Internal lookup with English fallback + key fallback. */
@@ -71,8 +89,9 @@ interface I18nContextValue {
   locale: Locale;
   /** Switch the active locale (also persists to localStorage + sets <html lang/dir>). */
   setLocale: (locale: Locale) => void;
-  /** Translation function bound to the active locale. */
-  t: (key: string) => string;
+  /** Translation function bound to the active locale.
+   *  Accepts optional `{placeholder: value}` params for simple substitution. */
+  t: (key: string, params?: Record<string, string | number>) => string;
   /** True until the provider has read localStorage on the client. */
   hydrated: boolean;
   /** Whether the current locale renders RTL. */
@@ -155,7 +174,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     () => ({
       locale,
       setLocale,
-      t: (key: string) => translate(locale, key),
+      t: (key: string, params?: Record<string, string | number>) =>
+        applyParams(translate(locale, key), params),
       hydrated,
       isRtl: LOCALE_META[locale].dir === "rtl",
     }),
@@ -181,7 +201,7 @@ export function useI18n(): I18nContextValue {
 }
 
 /** Convenience hook that returns just the `t` function bound to the active locale. */
-export function useT(): (key: string) => string {
+export function useT(): (key: string, params?: Record<string, string | number>) => string {
   return useI18n().t;
 }
 

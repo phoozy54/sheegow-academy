@@ -413,6 +413,7 @@ export function UnifiedDashboard() {
             isMobile ? "px-3" : isTablet ? "px-5" : "px-6"
           }`}
         >
+          <LiveClassReminderBanner role={role} />
           {section === "overview" && <RoleOverview role={role} />}
           {section === "courses" && role === "student" && <StudentMyCourses />}
           {section === "courses" && role === "teacher" && <AdminCourses />}
@@ -583,6 +584,148 @@ function AdminCoursesSection() {
         </Button>
       </div>
       {tab === "overview" ? <AdminCourseOverview /> : <AdminCourses />}
+    </div>
+  );
+}
+
+/* ─── Live class reminder banner ──────────────────────────
+ * Polls /api/live/upcoming every 60 seconds while there's at least one class
+ * starting within the next hour, and shows a prominent banner when a class is
+ * about to start (within 15 minutes). Students only see classes whose course
+ * they're enrolled in (or classes without a course); teachers/admins see all
+ * upcoming classes.
+ */
+function LiveClassReminderBanner({ role }: { role: Role }) {
+  const t = useT();
+  const router = useRouter();
+  const { user } = useStore();
+  const [upcoming, setUpcoming] = useState<LiveClass[]>([]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [now, setNow] = useState(() => Date.now());
+
+  // Load upcoming live classes + the student's enrolled course ids once on
+  // mount. The enrolled set lets us filter classes by course for students so
+  // we never nag them about a class for a course they didn't buy.
+  useEffect(() => {
+    let active = true;
+    const loadEnrollments =
+      role === "student"
+        ? api
+            .myCourses()
+            .then((r) => {
+              if (!active) return;
+              const ids = new Set<string>();
+              for (const e of r.enrollments) {
+                if (e.courseId) ids.add(e.courseId);
+              }
+              setEnrolledCourseIds(ids);
+            })
+            .catch(() => {
+              /* silent — students without enrollments just see no banner */
+            })
+        : Promise.resolve();
+
+    const loadClasses = () =>
+      api
+        .upcomingClasses()
+        .then((r) => {
+          if (active) setUpcoming(r.classes);
+        })
+        .catch(() => {
+          /* silent — banner is best-effort, never blocks the dashboard */
+        });
+
+    void loadEnrollments.then(loadClasses).catch(() => undefined);
+    loadClasses();
+    return () => {
+      active = false;
+    };
+  }, [role]);
+
+  // Tick `now` every 60 seconds so the "starts in X minutes" stays accurate.
+  // The interval runs continuously while mounted; the cost is trivial because
+  // the only work done on each tick is a cheap state update.
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Only consider classes that haven't ended and are scheduled within the
+  // next hour. Students see only their enrolled classes; teachers/admins see
+  // every class. A class with no course is shown to everyone (e.g. an open
+  // orientation session).
+  const isStaff = role === "teacher" || role === "admin" || role === "super_admin";
+  const soonest = useMemo(() => {
+    const ONE_HOUR = 60 * 60 * 1000;
+    const candidates = upcoming.filter((lc) => {
+      const start = new Date(lc.scheduledAt).getTime();
+      const inWindow = start - now <= ONE_HOUR && start + lc.duration * 60_000 >= now;
+      if (!inWindow) return false;
+      if (isStaff) return true;
+      // Student: must be enrolled in the class's course, or the class has no
+      // course attached (open session).
+      if (!lc.courseId) return true;
+      return enrolledCourseIds.has(lc.courseId);
+    });
+    // Sort by soonest start; the banner shows the very next class.
+    candidates.sort(
+      (a, b) =>
+        new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+    );
+    return candidates[0] ?? null;
+  }, [upcoming, now, isStaff, enrolledCourseIds]);
+
+  if (!soonest || !user) return null;
+
+  const start = new Date(soonest.scheduledAt).getTime();
+  const minutesUntil = Math.round((start - now) / 60_000);
+
+  // Banner appears only when the class is starting within 15 minutes (and
+  // hasn't ended yet). Live classes (status === "live") are always shown.
+  const isLive = soonest.status === "live";
+  const within15 = minutesUntil <= 15 && minutesUntil >= -1;
+  if (!isLive && !within15) return null;
+
+  const label = isLive
+    ? t("dashboard.classLiveNow")
+    : minutesUntil <= 1
+      ? t("dashboard.classStartingNow")
+      : t("dashboard.classStartingSoon");
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="mb-4 flex flex-col gap-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-900 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4 dark:border-amber-500/40 dark:bg-amber-950/30 dark:text-amber-100"
+    >
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white">
+          <Clock className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-bold sm:text-base">
+            {label}: {soonest.title}
+          </p>
+          <p className="mt-0.5 text-xs text-amber-800/90 sm:text-sm dark:text-amber-100/80">
+            {isLive
+              ? t("dashboard.classIsLive")
+              : t("dashboard.startsInMinutes", {
+                  count: Math.max(1, minutesUntil),
+                })}
+            {soonest.course?.title ? ` · ${soonest.course.title}` : ""}
+          </p>
+        </div>
+      </div>
+      <Button
+        size="sm"
+        onClick={() => router.push(`/class/${soonest.id}`)}
+        className="shrink-0 gap-1.5 bg-amber-600 text-white hover:bg-amber-700"
+      >
+        <Video className="h-4 w-4" />
+        {t("dashboard.joinNow")}
+      </Button>
     </div>
   );
 }

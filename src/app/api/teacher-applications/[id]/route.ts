@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireAdmin, isAdminRole } from "@/lib/auth";
 import { notify } from "@/lib/notify";
+import { sendTeacherApplicationEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { handleAuthError, jsonError, safeBody } from "@/lib/api-helpers";
 
@@ -298,6 +299,25 @@ export async function PATCH(req: Request, { params }: RouteContext) {
           adminNote ? ` Note: ${adminNote}` : ""
         }`,
         "/teach"
+      );
+    }
+
+    // Best-effort: also email the applicant so the decision reaches their inbox.
+    // `sendTeacherApplicationEmail` is a no-op when RESEND_API_KEY is missing
+    // and never throws — but we wrap in try/catch as an extra safety net.
+    try {
+      await sendTeacherApplicationEmail(
+        app.email,
+        app.fullName,
+        status as "approved" | "rejected" | "under_review",
+        adminNote || null
+      );
+    } catch (emailErr) {
+      logger.error(
+        "[teacher-applications/decide]",
+        "decision email failed",
+        emailErr,
+        { applicationId: app.id }
       );
     }
 

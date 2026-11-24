@@ -34,6 +34,7 @@ import {
   ChevronRight,
   ClipboardList,
   Clock,
+  Download,
   FileText,
   GraduationCap,
   Hammer,
@@ -57,6 +58,8 @@ import {
   levelBadgeClass,
   timeAgo,
 } from "@/lib/ui";
+import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 type LiveFilter = "all" | "live" | "scheduled" | "ended";
 
@@ -82,6 +85,10 @@ const SUMMARY_CARDS: {
  */
 export function AdminCourseOverview() {
   const router = useRouter();
+  const t = useT();
+  const [exportingCourseId, setExportingCourseId] = useState<string | null>(
+    null
+  );
 
   const [data, setData] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,6 +134,32 @@ export function AdminCourseOverview() {
     if (liveFilter === "all") return list;
     return list.filter((l) => l.status === liveFilter);
   }, [data?.liveClasses, liveFilter]);
+
+  const handleExport = useCallback(
+    async (courseId: string) => {
+      setExportingCourseId(courseId);
+      try {
+        const blob = await api.exportCourseProgressCsv(courseId);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "course-progress.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Revoke on the next tick so Safari has time to start the download.
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+        toast.success(t("gradebook.exportSuccess"));
+      } catch (e) {
+        const msg =
+          e instanceof ApiError ? e.message : t("gradebook.exportFailed");
+        toast.error(msg);
+      } finally {
+        setExportingCourseId(null);
+      }
+    },
+    [t]
+  );
 
   if (loading) {
     return (
@@ -314,6 +347,7 @@ export function AdminCourseOverview() {
               course={course}
               expanded={expanded === course.id}
               workExpanded={expandedWork === course.id}
+              exporting={exportingCourseId === course.id}
               onToggle={() =>
                 setExpanded((id) => (id === course.id ? null : course.id))
               }
@@ -324,6 +358,7 @@ export function AdminCourseOverview() {
               onEdit={() => router.push("/dashboard?section=courses")}
               onLive={() => router.push("/dashboard?section=live")}
               onView={() => router.push(`/course/${course.id}`)}
+              onExport={() => handleExport(course.id)}
             />
           ))
         )}
@@ -427,23 +462,28 @@ function CourseOverviewCard({
   course,
   expanded,
   workExpanded,
+  exporting,
   onToggle,
   onToggleWork,
   onContent,
   onEdit,
   onLive,
   onView,
+  onExport,
 }: {
   course: AdminCourseRow;
   expanded: boolean;
   workExpanded: boolean;
+  exporting: boolean;
   onToggle: () => void;
   onToggleWork: () => void;
   onContent: () => void;
   onEdit: () => void;
   onLive: () => void;
   onView: () => void;
+  onExport: () => void;
 }) {
+  const t = useT();
   return (
     <Card className="overflow-hidden p-0">
       <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:p-5">
@@ -502,6 +542,22 @@ function CourseOverviewCard({
           </Button>
           <Button size="sm" variant="outline" onClick={onLive} className="gap-1.5">
             <Video className="h-3.5 w-3.5" /> Live
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onExport}
+            disabled={exporting || course.enrolledCount === 0}
+            className="gap-1.5"
+            aria-label={t("gradebook.exportCsv")}
+            title={t("gradebook.exportCsv")}
+          >
+            {exporting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">{t("gradebook.exportCsv")}</span>
           </Button>
         </div>
       </div>

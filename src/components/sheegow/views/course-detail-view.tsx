@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useDevice } from "@/lib/device";
 import { api, ApiError } from "@/lib/api";
-import type { Course, Enrollment, Review } from "@/lib/types";
+import type { Course, Enrollment, RatingBreakdown, Review } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -178,6 +178,87 @@ function Stars({ rating, size = "h-4 w-4" }: { rating: number; size?: string }) 
   );
 }
 
+/* ─── Rating breakdown histogram ───────────────────────────
+ * Five horizontal bars (5★ down to 1★) showing how many reviews each star
+ * level received. The average rating + total review count sit next to the
+ * bars so visitors can see both the headline number and the distribution.
+ * Bars are amber (filled) on a muted track and scale to the largest bucket.
+ */
+function RatingBreakdownHistogram({
+  rating,
+  reviewCount,
+  breakdown,
+}: {
+  rating: number;
+  reviewCount: number;
+  breakdown: RatingBreakdown;
+}) {
+  const t = useT();
+  const buckets: Array<{ stars: 5 | 4 | 3 | 2 | 1; count: number }> = [
+    { stars: 5, count: breakdown["5"] ?? 0 },
+    { stars: 4, count: breakdown["4"] ?? 0 },
+    { stars: 3, count: breakdown["3"] ?? 0 },
+    { stars: 2, count: breakdown["2"] ?? 0 },
+    { stars: 1, count: breakdown["1"] ?? 0 },
+  ];
+  const max = Math.max(1, ...buckets.map((b) => b.count));
+
+  return (
+    <Card className="mb-6 p-5">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
+        {/* Average + total — the headline number */}
+        <div className="flex shrink-0 flex-row items-center gap-4 sm:flex-col sm:items-center sm:justify-center sm:gap-1">
+          <div className="text-center">
+            <p className="text-4xl font-extrabold leading-none text-foreground sm:text-5xl">
+              {rating.toFixed(1)}
+            </p>
+            <div className="mt-2 flex justify-center">
+              <Stars rating={rating} size="h-4 w-4" />
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {reviewCount} {t("courseDetail.reviewsCount")}
+            </p>
+          </div>
+        </div>
+
+        {/* Bars — stack vertically on mobile, single column on desktop */}
+        <div className="min-w-0 flex-1 space-y-2">
+          {buckets.map(({ stars, count }) => {
+            const pct = Math.round((count / max) * 100);
+            return (
+              <div
+                key={stars}
+                className="flex items-center gap-3 text-sm"
+                aria-label={`${stars} ${t("courseDetail.starLabel")}: ${count} ${t("courseDetail.reviewsCount")}`}
+              >
+                <span className="flex w-8 shrink-0 items-center gap-0.5 font-medium text-foreground">
+                  {stars}
+                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                </span>
+                <div
+                  className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted"
+                  role="progressbar"
+                  aria-valuenow={count}
+                  aria-valuemin={0}
+                  aria-valuemax={max}
+                >
+                  <div
+                    className="h-full rounded-full bg-amber-400 transition-[width] duration-500 ease-out"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span className="w-10 shrink-0 text-right tabular-nums text-muted-foreground">
+                  {count}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 /* ─── Main view ─────────────────────────────────────────── */
 
 export function CourseDetailView({ courseId }: { courseId: string }) {
@@ -193,6 +274,13 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
       : "px-4 sm:px-6 lg:px-8";
 
   const [course, setCourse] = useState<Course | null>(null);
+  const [ratingBreakdown, setRatingBreakdown] = useState<RatingBreakdown>({
+    "5": 0,
+    "4": 0,
+    "3": 0,
+    "2": 0,
+    "1": 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { byCourse } = useMyEnrollments();
@@ -208,6 +296,13 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
     try {
       const res = await api.course(courseId);
       setCourse(res.course);
+      setRatingBreakdown(res.ratingBreakdown ?? {
+        "5": 0,
+        "4": 0,
+        "3": 0,
+        "2": 0,
+        "1": 0,
+      });
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : "Failed to load course";
       setError(msg);
@@ -522,6 +617,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
               reviews={reviews}
               rating={course.rating}
               reviewCount={course.reviewCount}
+              ratingBreakdown={ratingBreakdown}
               isLoggedIn={!!user}
               onReviewAdded={loadCourse}
             />
@@ -746,6 +842,7 @@ function ReviewsSection({
   reviews,
   rating,
   reviewCount,
+  ratingBreakdown,
   isLoggedIn,
   onReviewAdded,
 }: {
@@ -753,6 +850,7 @@ function ReviewsSection({
   reviews: Review[];
   rating: number;
   reviewCount: number;
+  ratingBreakdown: RatingBreakdown;
   isLoggedIn: boolean;
   onReviewAdded: () => void;
 }) {
@@ -814,6 +912,13 @@ function ReviewsSection({
           </Button>
         )}
       </div>
+
+      {/* Rating breakdown histogram */}
+      <RatingBreakdownHistogram
+        rating={rating}
+        reviewCount={reviewCount}
+        breakdown={ratingBreakdown}
+      />
 
       {/* Add review form */}
       {isLoggedIn && showForm && (

@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
 import { jsonError, handleAuthError, limitRequest, safeBody } from "@/lib/api-helpers";
 import { decideCourseContentAccess, recordLearningEvent } from "@/lib/content-access";
+import { sendCertificateEmail } from "@/lib/email";
 import type { CertificateEligibility } from "@/lib/types";
 
 /** GET /api/certificates — the current user's issued certificates. */
@@ -123,6 +124,36 @@ export async function POST(req: Request) {
       where: { studentId: user.id, courseId },
       data: { status: "completed", completedAt: new Date(), progress: 100 },
     });
+
+    // Best-effort: email the student a congratulations + link to the cert.
+    // We need the course title for the email body, so fetch it (one extra
+    // query, only when actually issuing). Skipped on re-issue of an already
+    // valid certificate to avoid spamming.
+    if (!existing || existing.revokedAt) {
+      try {
+        const course = await db.course.findUnique({
+          where: { id: courseId },
+          select: { title: true },
+        });
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
+          "https://www.sheegowacademy.com";
+        const certUrl = `${appUrl}/certificate/${certificate.id}`;
+        await sendCertificateEmail(
+          user.email,
+          user.fullName,
+          course?.title ?? "your course",
+          certUrl
+        );
+      } catch (emailErr) {
+        logger.error(
+          "[certificates/issue]",
+          "certificate email failed",
+          emailErr,
+          { certificateId: certificate.id, courseId }
+        );
+      }
+    }
 
     return NextResponse.json({ certificate }, { status: 201 });
   } catch (e) {

@@ -29,6 +29,7 @@ import type {
   Poll,
   Quiz,
   QuizResult,
+  RatingBreakdown,
   RefundRequest,
   Review,
   Roadmap,
@@ -172,7 +173,10 @@ export const api = {
     }>(`/api/courses?${q.toString()}`);
   },
 
-  course: (id: string) => request<{ course: Course }>(`/api/courses/${id}`),
+  course: (id: string) =>
+    request<{ course: Course; ratingBreakdown: RatingBreakdown }>(
+      `/api/courses/${id}`
+    ),
 
   /** Admin/super-admin control center: courses, their work, students and all live classes. */
   adminCourseOverview: () =>
@@ -713,6 +717,32 @@ export const api = {
 
   gradebook: (courseId: string) =>
     request<GradebookData>(`/api/courses/${courseId}/gradebook`),
+
+  /**
+   * Teacher/admin: download a CSV snapshot of student progress for a course.
+   * Returns a Blob (text/csv) that the caller can turn into an object URL and
+   * trigger as a browser download. Uses a raw fetch because the response is
+   * not JSON; the standard `request` helper parses JSON and would mangle it.
+   */
+  exportCourseProgressCsv: async (courseId: string): Promise<Blob> => {
+    const res = await fetch(`/api/courses/${courseId}/export`, {
+      credentials: "include",
+    });
+    if (!res.ok) {
+      // Try to surface the JSON error message from the standard error shape.
+      let message = "Failed to export CSV";
+      try {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        if (data.error) message = data.error;
+      } catch {
+        /* ignore — non-JSON error body */
+      }
+      throw new ApiError(message, res.status);
+    }
+    return res.blob();
+  },
 
   // ─── STUDENT NOTES ────────────────────────────────────
   // Personal notes tied to one student + one lesson (auto-saved by the player).

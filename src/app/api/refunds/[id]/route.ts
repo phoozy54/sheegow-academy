@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, requireAuth, isAdminRole } from "@/lib/auth";
 import { notify } from "@/lib/notify";
+import { sendRefundEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { handleAuthError, jsonError, safeBody } from "@/lib/api-helpers";
 
@@ -206,12 +207,16 @@ export async function PATCH(req: Request, { params }: RouteContext) {
     // Notify the student. Best-effort: notify() swallows its own errors so a
     // notification failure never aborts the refund decision.
     const courseTitle = updated.payment?.course?.title ?? "your course";
+    const amount = updated.payment?.amount.toFixed(2) ?? "0.00";
+    const studentEmail = updated.student?.email;
+    const studentName = updated.student?.fullName ?? "Student";
+
     if (approved) {
       await notify(
         refund.studentId,
         "system",
         "Refund approved",
-        `Your refund request for "${courseTitle}" has been approved. The payment of $${updated.payment?.amount.toFixed(2) ?? "0.00"} has been marked as refunded.${
+        `Your refund request for "${courseTitle}" has been approved. The payment of $${amount} has been marked as refunded.${
           adminNote ? ` Note: ${adminNote}` : ""
         }`,
         "/dashboard?section=my-refunds"
@@ -226,6 +231,26 @@ export async function PATCH(req: Request, { params }: RouteContext) {
         }`,
         "/dashboard?section=my-refunds"
       );
+    }
+
+    // Best-effort: email the student the decision as well.
+    // `sendRefundEmail` is a no-op when RESEND_API_KEY is missing and never
+    // throws — but we wrap in try/catch as an extra safety net.
+    if (studentEmail) {
+      try {
+        await sendRefundEmail(
+          studentEmail,
+          studentName,
+          approved ? "approved" : "rejected",
+          `$${amount}`,
+          courseTitle,
+          adminNote
+        );
+      } catch (emailErr) {
+        logger.error("[refunds/decide]", "refund email failed", emailErr, {
+          refundId: refund.id,
+        });
+      }
     }
 
     logger.info("[refunds/decide]", approved ? "refund approved" : "refund rejected", {

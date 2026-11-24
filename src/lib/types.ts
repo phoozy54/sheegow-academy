@@ -38,6 +38,13 @@ export interface Course {
   reviews?: Review[];
 }
 
+/**
+ * Per-star review counts returned alongside a single course by
+ * GET /api/courses/:id. Keys are "1".."5"; values are the number of reviews
+ * with that star rating. Always present — missing buckets default to 0.
+ */
+export type RatingBreakdown = Record<"5" | "4" | "3" | "2" | "1", number>;
+
 export interface Review {
   id: string;
   rating: number;

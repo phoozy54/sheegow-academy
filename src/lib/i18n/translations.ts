@@ -1359,6 +1359,22 @@ export const translations: Record<Locale, Record<string, string>> = {
     /* Dashboard nav */
     "dashboard.teacherApplications": "Teacher Applications",
     "dashboard.sectionTeacherApplications": "Teacher Applications",
+
+    /* Gradebook CSV export */
+    "gradebook.exportCsv": "Export CSV",
+    "gradebook.exportSuccess": "Course progress exported.",
+    "gradebook.exportFailed": "Failed to export CSV",
+
+    /* Course detail — rating breakdown histogram */
+    "courseDetail.starLabel": "star",
+
+    /* Live class reminder banner */
+    "dashboard.classLiveNow": "Live class now",
+    "dashboard.classStartingNow": "Class starting now",
+    "dashboard.classStartingSoon": "Class starting soon",
+    "dashboard.classIsLive": "The class is live — join now",
+    "dashboard.startsInMinutes": "Starts in {count} minutes",
+    "dashboard.joinNow": "Join now",
   },
   so: {
     "nav.home": "Bogga Hore",
@@ -2592,6 +2608,22 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "dashboard.teacherApplications": "Codsigyada Macallimiinta",
     "dashboard.sectionTeacherApplications": "Codsigyada Macallimiinta",
+
+    /* Gradebook CSV export */
+    "gradebook.exportCsv": "Soo saar CSV",
+    "gradebook.exportSuccess": "Habka koorso ayaa la soo saaray.",
+    "gradebook.exportFailed": "Soo saarista CSV ma guulaysan",
+
+    /* Course detail — rating breakdown histogram */
+    "courseDetail.starLabel": "hoodo",
+
+    /* Live class reminder banner */
+    "dashboard.classLiveNow": "Fasal live hadda",
+    "dashboard.classStartingNow": "Fasal waa bilaabmayaa hadda",
+    "dashboard.classStartingSoon": "Fasal waa bilaabmayaa dhawaan",
+    "dashboard.classIsLive": "Fasalku waa live — hadda soo gala",
+    "dashboard.startsInMinutes": "Wuu bilaabanayaa {count} daqiiqo gudahood",
+    "dashboard.joinNow": "Hadda soo gala",
   },
   ar: {
     "nav.home": "الرئيسية",
@@ -3824,5 +3856,21 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     "dashboard.teacherApplications": "طلبات المعلمين",
     "dashboard.sectionTeacherApplications": "طلبات المعلمين",
+
+    /* Gradebook CSV export */
+    "gradebook.exportCsv": "تصدير CSV",
+    "gradebook.exportSuccess": "تم تصدير تقدم الدورة.",
+    "gradebook.exportFailed": "فشل تصدير CSV",
+
+    /* Course detail — rating breakdown histogram */
+    "courseDetail.starLabel": "نجمة",
+
+    /* Live class reminder banner */
+    "dashboard.classLiveNow": "فصل مباشر الآن",
+    "dashboard.classStartingNow": "الفصل يبدأ الآن",
+    "dashboard.classStartingSoon": "الفصل يبدأ قريبًا",
+    "dashboard.classIsLive": "الفصل مباشر — انضم الآن",
+    "dashboard.startsInMinutes": "يبدأ خلال {count} دقيقة",
+    "dashboard.joinNow": "انضم الآن",
   },
 };
