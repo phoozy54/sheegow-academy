@@ -130,6 +130,13 @@ export default async function RootLayout({
       <body
         className={`${poppins.variable} font-sans antialiased bg-background text-foreground`}
       >
+        {/* Skip-to-content link for keyboard/screen-reader users */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-indigo-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+        >
+          Skip to content
+        </a>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

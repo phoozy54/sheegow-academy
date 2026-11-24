@@ -38,6 +38,7 @@ import {
   ListChecks,
   Target,
   GraduationCap,
+  Share2,
 } from "lucide-react";
 import { levelBadgeClass, formatDate, timeAgo, cn } from "@/lib/ui";
 import { toast } from "sonner";
@@ -347,6 +348,24 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                     <Calendar className="h-4 w-4 text-indigo-500" />
                     Added {formatDate(course.createdAt)}
                   </span>
+                  {/* Share button */}
+                  <button
+                    onClick={() => {
+                      if (typeof navigator !== "undefined" && navigator.share) {
+                        navigator.share({
+                          title: course.title,
+                          url: window.location.href,
+                        }).catch(() => undefined);
+                      } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+                        navigator.clipboard.writeText(window.location.href);
+                        toast.success("Course link copied to clipboard!");
+                      }
+                    }}
+                    className="flex items-center gap-1.5 text-indigo-600 transition-colors hover:text-indigo-700"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    Share
+                  </button>
                 </div>
 
                 {/* Teacher chip */}
