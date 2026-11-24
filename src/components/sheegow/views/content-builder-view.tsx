@@ -19,14 +19,17 @@ import {
   FilePlus2,
   Hammer,
   Loader2,
+  Lock,
   Plus,
   Upload,
   Video,
   FileText,
   ClipboardList,
+  CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { formatDateTime } from "@/lib/ui";
 
 type Curriculum = Awaited<ReturnType<typeof api.curriculum>>;
 
@@ -240,40 +243,12 @@ function ModuleEditor({
           {module.lessons.length > 0 && (
             <div className="space-y-2">
               {module.lessons.map((lesson) => (
-                <div key={lesson.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    {lesson.type === "video" ? (
-                      <Video className="h-4 w-4 shrink-0 text-indigo-500" />
-                    ) : lesson.type === "pdf" ? (
-                      <FileText className="h-4 w-4 shrink-0 text-rose-500" />
-                    ) : lesson.type === "quiz" ? (
-                      <ClipboardList className="h-4 w-4 shrink-0 text-amber-600" />
-                    ) : (
-                      <BookOpen className="h-4 w-4 shrink-0 text-emerald-600" />
-                    )}
-                    <span className="truncate text-sm font-medium">{lesson.title}</span>
-                    <Badge variant="outline" className="capitalize text-[10px]">{lesson.type}</Badge>
-                    {lesson.isPreview && <Badge variant="secondary" className="text-[10px]">Preview</Badge>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialUploader lessonId={lesson.id} courseId={courseId} onDone={onRefresh} />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={async () => {
-                        try {
-                          await api.updateLesson(lesson.id, { isPublished: !lesson.isPublished });
-                          toast.success(lesson.isPublished ? "Lesson hidden" : "Lesson published");
-                          onRefresh();
-                        } catch (e) {
-                          toast.error(e instanceof Error ? e.message : "Update failed");
-                        }
-                      }}
-                    >
-                      {lesson.isPublished ? t("contentBuilder.unpublish") : t("contentBuilder.publish")}
-                    </Button>
-                  </div>
-                </div>
+                <LessonRow
+                  key={lesson.id}
+                  lesson={lesson}
+                  courseId={courseId}
+                  onRefresh={onRefresh}
+                />
               ))}
             </div>
           )}
@@ -287,17 +262,173 @@ function ModuleEditor({
   );
 }
 
+/** Format a Date as a `datetime-local`-compatible string (YYYY-MM-DDTHH:MM). */
+function toDatetimeLocalValue(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function LessonRow({
+  lesson,
+  courseId,
+  onRefresh,
+}: {
+  lesson: Module["lessons"][number];
+  courseId: string;
+  onRefresh: () => void;
+}) {
+  const t = useT();
+  const [editingUnlock, setEditingUnlock] = useState(false);
+  const [unlockValue, setUnlockValue] = useState("");
+  const [savingUnlock, setSavingUnlock] = useState(false);
+
+  const unlockAt = lesson.unlockAt ? new Date(lesson.unlockAt) : null;
+  const isLocked = !!unlockAt && unlockAt.getTime() > Date.now();
+
+  const startEditUnlock = () => {
+    setUnlockValue(unlockAt ? toDatetimeLocalValue(unlockAt) : "");
+    setEditingUnlock(true);
+  };
+
+  const saveUnlock = async () => {
+    setSavingUnlock(true);
+    try {
+      // Empty value clears the schedule (lesson becomes immediately available).
+      const payload = unlockValue
+        ? new Date(unlockValue).toISOString()
+        : null;
+      await api.updateLesson(lesson.id, { unlockAt: payload } as any);
+      toast.success(t("contentBuilder.unlockSaved"));
+      setEditingUnlock(false);
+      onRefresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save unlock date");
+    } finally {
+      setSavingUnlock(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {lesson.type === "video" ? (
+            <Video className="h-4 w-4 shrink-0 text-indigo-500" />
+          ) : lesson.type === "pdf" ? (
+            <FileText className="h-4 w-4 shrink-0 text-rose-500" />
+          ) : lesson.type === "quiz" ? (
+            <ClipboardList className="h-4 w-4 shrink-0 text-amber-600" />
+          ) : (
+            <BookOpen className="h-4 w-4 shrink-0 text-emerald-600" />
+          )}
+          <span className="truncate text-sm font-medium">{lesson.title}</span>
+          <Badge variant="outline" className="capitalize text-[10px]">{lesson.type}</Badge>
+          {lesson.isPreview && <Badge variant="secondary" className="text-[10px]">Preview</Badge>}
+          {unlockAt && (
+            <Badge
+              variant="outline"
+              className={`gap-1 text-[10px] ${
+                isLocked
+                  ? "border-amber-300 bg-amber-50 text-amber-700"
+                  : "border-emerald-300 bg-emerald-50 text-emerald-700"
+              }`}
+            >
+              {isLocked ? <Lock className="h-3 w-3" /> : <CalendarClock className="h-3 w-3" />}
+              {t("contentBuilder.lockedUntil", { date: formatDateTime(unlockAt.toISOString()) })}
+            </Badge>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={startEditUnlock}
+          >
+            <CalendarClock className="h-3.5 w-3.5" />
+            {unlockAt ? t("contentBuilder.editUnlock") : t("contentBuilder.scheduleUnlock")}
+          </Button>
+          <MaterialUploader lessonId={lesson.id} courseId={courseId} onDone={onRefresh} />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              try {
+                await api.updateLesson(lesson.id, { isPublished: !lesson.isPublished });
+                toast.success(lesson.isPublished ? "Lesson hidden" : "Lesson published");
+                onRefresh();
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Update failed");
+              }
+            }}
+          >
+            {lesson.isPublished ? t("contentBuilder.unpublish") : t("contentBuilder.publish")}
+          </Button>
+        </div>
+      </div>
+
+      {editingUnlock && (
+        <div className="mt-3 flex flex-wrap items-end gap-2 rounded-md border border-dashed bg-muted/30 p-3">
+          <div className="min-w-[220px] flex-1">
+            <Label className="mb-1 block text-xs">{t("contentBuilder.unlockDate")}</Label>
+            <Input
+              type="datetime-local"
+              value={unlockValue}
+              onChange={(e) => setUnlockValue(e.target.value)}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {t("contentBuilder.unlockDateHint")}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setUnlockValue("");
+              }}
+              disabled={savingUnlock}
+            >
+              {t("contentBuilder.clearUnlock")}
+            </Button>
+            <Button
+              size="sm"
+              className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+              onClick={saveUnlock}
+              disabled={savingUnlock}
+            >
+              {savingUnlock ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+              {t("contentBuilder.saveUnlock")}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setEditingUnlock(false)}
+              disabled={savingUnlock}
+            >
+              {t("common.cancel")}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CreateLessonForm({ moduleId, onCreated }: { moduleId: string; onCreated: () => void }) {
   const t = useT();
   const [title, setTitle] = useState("");
   const [type, setType] = useState("video");
   const [videoUrl, setVideoUrl] = useState("");
   const [body, setBody] = useState("");
+  const [unlockAt, setUnlockAt] = useState("");
   const [busy, setBusy] = useState(false);
 
   return (
     <div className="rounded-lg border border-dashed p-4">
-      <p className="mb-3 text-sm font-semibold">Add lesson</p>
+      <p className="mb-3 text-sm font-semibold">{t("contentBuilder.addLesson")}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <Label className="text-xs">{t("contentBuilder.lessonTitle")}</Label>
@@ -325,6 +456,17 @@ function CreateLessonForm({ moduleId, onCreated }: { moduleId: string; onCreated
           <Label className="text-xs">{t("contentBuilder.notesContent")}</Label>
           <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} placeholder="Lesson notes, summary, or reading text" />
         </div>
+        <div className="sm:col-span-2">
+          <Label className="text-xs">{t("contentBuilder.unlockDate")}</Label>
+          <Input
+            type="datetime-local"
+            value={unlockAt}
+            onChange={(e) => setUnlockAt(e.target.value)}
+          />
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {t("contentBuilder.unlockDateHint")}
+          </p>
+        </div>
       </div>
       <Button
         className="mt-3 gap-2"
@@ -339,10 +481,15 @@ function CreateLessonForm({ moduleId, onCreated }: { moduleId: string; onCreated
               videoUrl: videoUrl.trim() || undefined,
               body: body.trim() || undefined,
               isPublished: true,
-            });
+              // Send the unlock date as ISO string when set; omit otherwise.
+              ...(unlockAt
+                ? { unlockAt: new Date(unlockAt).toISOString() }
+                : {}),
+            } as any);
             setTitle("");
             setVideoUrl("");
             setBody("");
+            setUnlockAt("");
             toast.success("Lesson created");
             onCreated();
           } catch (e) {
@@ -353,7 +500,7 @@ function CreateLessonForm({ moduleId, onCreated }: { moduleId: string; onCreated
         }}
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FilePlus2 className="h-4 w-4" />}
-        Add lesson
+        {t("contentBuilder.addLessonBtn")}
       </Button>
     </div>
   );

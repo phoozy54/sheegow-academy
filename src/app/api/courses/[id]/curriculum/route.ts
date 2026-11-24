@@ -78,14 +78,42 @@ export async function GET(_req: Request, { params }: RouteContext) {
       },
     });
 
+    // Drip content — a lesson is locked when its `unlockAt` is in the future.
+    // Managers (admin/owner) always see locked lessons as unlocked so they can
+    // preview content during authoring. The title is always returned so
+    // students can see what's coming; we strip the body/videoUrl for non-
+    // managers so the actual content stays gated until the unlock date.
+    const now = Date.now();
+    const attachLockState = (lesson: Record<string, unknown>) => {
+      const unlockAt = lesson.unlockAt as Date | null;
+      const isLocked = !isManager && unlockAt !== null && unlockAt.getTime() > now;
+      (lesson as Record<string, unknown>).isLocked = isLocked;
+      if (isLocked) {
+        // Hide the actual content (but keep title/type/etc. for the roadmap).
+        lesson.body = null;
+        lesson.videoUrl = null;
+      }
+      return lesson;
+    };
+
+    for (const m of modules) {
+      for (const lesson of m.lessons) {
+        attachLockState(lesson as unknown as Record<string, unknown>);
+      }
+    }
+
     const lessons = modules.flatMap((m) => m.lessons);
     const totalLessons = lessons.length;
     const completedLessons = lessons.filter(
       (l) => Array.isArray(l.progress) && l.progress[0]?.status === "completed"
     ).length;
     const percent = totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
+    // Skip locked lessons when suggesting "next" — the student can't start
+    // them yet, so a locked lesson shouldn't be the recommended next step.
     const nextLesson = lessons.find(
-      (l) => !Array.isArray(l.progress) || l.progress[0]?.status !== "completed"
+      (l) =>
+        !(l as unknown as { isLocked?: boolean }).isLocked &&
+        (!Array.isArray(l.progress) || l.progress[0]?.status !== "completed")
     );
 
     const enrollment = user

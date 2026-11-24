@@ -18,6 +18,8 @@ interface CreateLessonBody {
   durationSec?: number;
   isPreview?: boolean;
   isPublished?: boolean;
+  // Drip content — when set, lesson is locked until this date.
+  unlockAt?: string | null;
 }
 
 /** POST /api/modules/:id/lessons — create a lesson in an owned module. */
@@ -47,6 +49,17 @@ export async function POST(req: Request, { params }: RouteContext) {
         ? Math.max(0, Math.floor(body.order))
         : (await db.lesson.count({ where: { moduleId: id } })) + 1;
 
+    // Drip content — optional schedule. null = immediately available.
+    let unlockAt: Date | null = null;
+    const rawUnlock = body?.unlockAt;
+    if (rawUnlock !== null && rawUnlock !== undefined && String(rawUnlock).trim()) {
+      const parsed = new Date(String(rawUnlock));
+      if (Number.isNaN(parsed.getTime())) {
+        return jsonError("Invalid unlockAt date", 400);
+      }
+      unlockAt = parsed;
+    }
+
     const lesson = await db.lesson.create({
       data: {
         moduleId: id,
@@ -61,6 +74,7 @@ export async function POST(req: Request, { params }: RouteContext) {
             : null,
         isPreview: Boolean(body?.isPreview),
         isPublished: Boolean(body?.isPublished),
+        unlockAt,
       },
       include: { materials: true },
     });

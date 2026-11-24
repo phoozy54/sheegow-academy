@@ -65,8 +65,10 @@ import {
   Play,
   BookOpen,
   DollarSign,
+  GitBranch,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 const LEVELS = [
   "Beginner",
@@ -85,6 +87,7 @@ interface CourseFormValues {
   image: string;
   teacherId: string;
   whatYouLearn: string;
+  prerequisiteCourseId: string;
 }
 
 const EMPTY_FORM: CourseFormValues = {
@@ -96,9 +99,11 @@ const EMPTY_FORM: CourseFormValues = {
   image: "",
   teacherId: "",
   whatYouLearn: "",
+  prerequisiteCourseId: "",
 };
 
 export function AdminCourses() {
+  const t = useT();
   const [courses, setCourses] = useState<Course[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -174,6 +179,7 @@ export function AdminCourses() {
       image: c.image ?? "",
       teacherId: c.teacherId ?? "",
       whatYouLearn: c.whatYouLearn ?? "",
+      prerequisiteCourseId: c.prerequisiteCourseId ?? "",
     });
     setFormOpen(true);
   }
@@ -195,6 +201,8 @@ export function AdminCourses() {
         image: form.image.trim() || null,
         teacherId: form.teacherId || null,
         whatYouLearn: form.whatYouLearn.trim() || null,
+        // Empty string = no prerequisite (clears the field server-side).
+        prerequisiteCourseId: form.prerequisiteCourseId || null,
       };
       if (editing) {
         const { course } = await api.updateCourse(editing.id, body);
@@ -390,6 +398,7 @@ export function AdminCourses() {
                                 image: c.image ?? "",
                                 teacherId: c.teacherId ?? "",
                                 whatYouLearn: c.whatYouLearn ?? "",
+                                prerequisiteCourseId: c.prerequisiteCourseId ?? "",
                               });
                               setFormOpen(true);
                             }}
@@ -624,6 +633,49 @@ export function AdminCourses() {
               <p className="text-xs text-muted-foreground">
                 One bullet point per line.
               </p>
+            </div>
+
+            {/* Prerequisite course — students must complete this course first
+                before they can enroll. Lists all other active courses. */}
+            <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white">
+                  <GitBranch className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-foreground">
+                    {t("contentBuilder.prerequisite")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("contentBuilder.prerequisiteHint")}
+                  </p>
+                </div>
+              </div>
+              <Select
+                value={form.prerequisiteCourseId || "__none__"}
+                onValueChange={(v) =>
+                  setForm((f) => ({
+                    ...f,
+                    prerequisiteCourseId: v === "__none__" ? "" : v,
+                  }))
+                }
+              >
+                <SelectTrigger id="prerequisite" className="w-full">
+                  <SelectValue placeholder={t("contentBuilder.noPrerequisite")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">
+                    {t("contentBuilder.noPrerequisite")}
+                  </SelectItem>
+                  {courses
+                    .filter((c) => c.id !== editing?.id)
+                    .map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.title}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <DialogFooter>

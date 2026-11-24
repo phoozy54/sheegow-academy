@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { DeviceProvider } from "@/lib/device";
 import { I18nProvider } from "@/lib/i18n";
+import { CompareTray } from "@/components/sheegow/compare-tray";
 import {
   OG_IMAGE,
   SITE_NAME,
@@ -146,6 +147,7 @@ export default async function RootLayout({
           <I18nProvider>
             <DeviceProvider>
               {children}
+              <CompareTray />
               <Toaster />
               <SonnerToaster richColors position="top-right" />
             </DeviceProvider>

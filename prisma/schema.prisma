@@ -64,6 +64,11 @@ model User {
   teacherApplications     TeacherApplication[] @relation("TeacherApplicationApplicant")
   // Teacher applications this user has reviewed (as admin/super_admin).
   reviewedApplications    TeacherApplication[] @relation("TeacherApplicationReviewer")
+  // Affiliate / referral program — one code per user, plus the referrals they made.
+  referralCode            ReferralCode?
+  referralsMade           Referral[]           @relation("ReferralReferrer")
+  // The referral record when THIS user signed up via someone else's code (one max).
+  referredBy              Referral?            @relation("ReferralReferred")
 }
 
 // ─── TEACHER APPLICATIONS ─────────────────────────────────
@@ -121,6 +126,9 @@ model Course {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Course prerequisite — students must complete this course first.
+  prerequisiteCourseId String?
+
   teacher          User?         @relation(fields: [teacherId], references: [id])
   enrollments      Enrollment[]
   liveClasses      LiveClass[]
@@ -138,6 +146,10 @@ model Course {
   wishlistItems Wishlist[]
   // Bundle membership — courses grouped into a discounted package.
   bundleItems  BundleCourse[]
+  // Self-relation for course prerequisites — Course A must be completed
+  // before a student can enroll in Course B.
+  prerequisiteCourse Course?  @relation("CoursePrerequisite", fields: [prerequisiteCourseId], references: [id])
+  prerequisiteFor    Course[] @relation("CoursePrerequisite")
 }
 
 // ─── ENROLLMENT ─────────────────────────────────────────
@@ -282,6 +294,9 @@ model Lesson {
   durationSec Int?
   isPreview   Boolean  @default(false) // visible before enrollment
   isPublished Boolean  @default(false)
+  // Drip content — when set, the lesson is locked until this date.
+  // When null, the lesson is immediately available.
+  unlockAt    DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -729,4 +744,36 @@ model Badge {
   student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, badgeType])
+}
+
+// ─── AFFILIATE / REFERRAL PROGRAM ──────────────────────────────
+// Every user can claim a unique referral code (e.g. "AHMED10"). When a new
+// student signs up via a referral link (?ref=CODE) or applies the code in
+// their dashboard, they get a one-time discount coupon and the referrer
+// accumulates successful referrals (used to compute the "discount earned"
+// stat shown on their dashboard widget).
+
+model ReferralCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  code      String   @unique // e.g. "AHMED10"
+  discount  Float    @default(10) // percentage discount for the referred person
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([code])
+}
+
+model Referral {
+  id         String   @id @default(cuid())
+  referrerId String   // the person who shared the code
+  referredId String   @unique // the person who used the code
+  code       String
+  createdAt  DateTime @default(now())
+
+  referrer User @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User @relation("ReferralReferred", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId, createdAt])
 }

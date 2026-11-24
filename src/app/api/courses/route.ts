@@ -13,6 +13,8 @@ interface CreateCourseBody {
   image?: string;
   teacherId?: string;
   whatYouLearn?: string;
+  // Prerequisite — students must complete this course first.
+  prerequisiteCourseId?: string | null;
 }
 
 /** Public projection for nested teacher includes — never expose email,
@@ -72,6 +74,9 @@ export async function GET(req: Request) {
       reviewCount: true,
       whatYouLearn: true,
       isActive: true,
+      // Prerequisite is part of the course metadata (not user-specific) and
+      // is needed by the admin course editor + the public course detail page.
+      prerequisiteCourseId: true,
       createdAt: true,
       updatedAt: true,
       teacher: { select: teacherSelect },
@@ -128,6 +133,19 @@ export async function POST(req: Request) {
     if (duration === undefined || duration <= 0)
       return jsonError("Valid duration is required", 400);
 
+    // Prerequisite — optional. Validate the referenced course exists, is
+    // active, and is NOT the course being created (no self-referencing).
+    const rawPrereq = body.prerequisiteCourseId?.trim() || null;
+    if (rawPrereq) {
+      const prereq = await db.course.findUnique({
+        where: { id: rawPrereq },
+        select: { id: true, isActive: true },
+      });
+      if (!prereq || !prereq.isActive) {
+        return jsonError("Prerequisite course not found or inactive", 400);
+      }
+    }
+
     const course = await db.course.create({
       data: {
         title,
@@ -142,6 +160,7 @@ export async function POST(req: Request) {
           ? body.teacherId?.trim() || actor.id
           : actor.id,
         whatYouLearn: body.whatYouLearn?.trim() || null,
+        prerequisiteCourseId: rawPrereq,
       },
       include: { teacher: { select: teacherSelect } },
     });

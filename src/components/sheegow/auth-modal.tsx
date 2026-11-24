@@ -45,6 +45,17 @@ export function AuthModal() {
 
   const passwordScore = scorePassword(password);
 
+  /** Read the `?ref=CODE` query param from the current URL. Returns an empty
+   *  string when no referral code is present (the common case). */
+  function readRefParam(): string {
+    if (typeof window === "undefined") return "";
+    try {
+      return new URLSearchParams(window.location.search).get("ref") ?? "";
+    } catch {
+      return "";
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -74,6 +85,9 @@ export function AuthModal() {
           username: username || undefined,
           phone,
           password,
+          // Forward the `?ref=CODE` referral param (if present in the URL) so
+          // the server can auto-link the referral + create the discount coupon.
+          ref: readRefParam(),
         });
         setUser(user);
         toast.success("Account created! Welcome to SHEEGOW ACADEMY.");

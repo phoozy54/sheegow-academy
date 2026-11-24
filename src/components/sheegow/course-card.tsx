@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
+import { useCompareStore, COMPARE_MAX } from "@/lib/compare-store";
 import { api, ApiError } from "@/lib/api";
 import { coursePath } from "@/lib/slug";
 import type { Course, Enrollment } from "@/lib/types";
@@ -13,9 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Clock, Users, Play, Heart, Loader2 } from "lucide-react";
+import { Star, Clock, Users, Play, Heart, Loader2, GitCompare } from "lucide-react";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
 import { trackConversion } from "@/lib/analytics";
+import { useT } from "@/lib/i18n";
 
 export function CourseCard({
   course,
@@ -36,7 +38,10 @@ export function CourseCard({
 }) {
   const { user, openAuthModal } = useStore();
   const router = useRouter();
+  const t = useT();
   const href = coursePath(course, all);
+  const { has, toggle: toggleCompare } = useCompareStore();
+  const inCompare = has(course.id);
 
   const [wishlisted, setWishlisted] = useState<boolean>(!!initialWishlisted);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -90,6 +95,21 @@ export function CourseCard({
     }
     trackConversion("checkout_start", { courseId: course.id });
     router.push(`/checkout/${course.id}`);
+  };
+
+  const onToggleCompare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = toggleCompare(course.id);
+    if (next) {
+      toast.success(t("compare.added"));
+    } else if (inCompare) {
+      toast.success(t("compare.removed"));
+    } else {
+      // The tray is full — surface the limit so the visitor knows why their
+      // tap was a no-op.
+      toast.error(t("compare.trayMax"));
+    }
   };
 
   const toggleWishlist = async (e: React.MouseEvent) => {
@@ -274,19 +294,37 @@ export function CourseCard({
               Price at checkout
             </span>
           )}
-          <Button
-            size="sm"
-            onClick={
-              isManager
-                ? () => router.push(`/learn/${course.id}`)
-                : canContinue
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onToggleCompare}
+              aria-pressed={inCompare}
+              aria-label={t("compare.button")}
+              title={t("compare.button")}
+              className={
+                "flex h-8 items-center gap-1 rounded-md border px-2 text-[11px] font-semibold transition-colors " +
+                (inCompare
+                  ? "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                  : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700")
+              }
+            >
+              <GitCompare className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{t("compare.button")}</span>
+            </button>
+            <Button
+              size="sm"
+              onClick={
+                isManager
                   ? () => router.push(`/learn/${course.id}`)
-                  : handleEnroll
-            }
-            className="bg-indigo-600 hover:bg-indigo-700"
-          >
-            {isManager ? "Open course" : canContinue ? "Continue" : "Enroll"}
-          </Button>
+                  : canContinue
+                    ? () => router.push(`/learn/${course.id}`)
+                    : handleEnroll
+              }
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {isManager ? "Open course" : canContinue ? "Continue" : "Enroll"}
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

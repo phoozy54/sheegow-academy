@@ -2,12 +2,14 @@
 import type {
   AdminCourseOverview,
   Announcement,
+  ApplyReferralResult,
   Assignment,
   Bundle,
   BundleCheckoutResult,
   BundleWithCourses,
   Certificate,
   CertificateEligibility,
+  CompareCourse,
   ConversationSummary,
   Course,
   DirectMessageItem,
@@ -30,6 +32,7 @@ import type {
   Quiz,
   QuizResult,
   RatingBreakdown,
+  ReferralStats,
   RefundRequest,
   Review,
   Roadmap,
@@ -121,11 +124,23 @@ export const api = {
     username?: string;
     phone: string;
     password: string;
-  }) =>
-    request<{ user: User }>("/api/auth/register", {
+    /** Optional referral code (?ref=CODE) — auto-links on signup. */
+    ref?: string;
+  }) => {
+    // Forward the referral code as a `ref` query param so the server can
+    // auto-link it during registration. The body is preserved as-is.
+    const ref = body.ref?.trim();
+    const url = ref
+      ? `/api/auth/register?ref=${encodeURIComponent(ref)}`
+      : "/api/auth/register";
+    // Strip `ref` from the body — it's already in the query string.
+    const { ref: _omit, ...payload } = body;
+    void _omit;
+    return request<{ user: User }>(url, {
       method: "POST",
-      body: JSON.stringify(body),
-    }),
+      body: JSON.stringify(payload),
+    });
+  },
 
   /** One identifier is enough: username, email or Somali phone number. */
   login: (body: {
@@ -971,4 +986,43 @@ export const api = {
         body: JSON.stringify(body),
       }
     ),
+
+  // ─── AFFILIATE / REFERRAL ────────────────────────────
+  // Students get a unique referral code (e.g. "AHMED10"). When someone signs
+  // up via their link, the referred student gets a one-time discount coupon
+  // and the referrer accumulates successful referrals. Stats are shown on
+  // the dashboard referral widget.
+
+  /** Authed: returns the caller's referral code (if any) + aggregate stats. */
+  referralStats: () => request<ReferralStats>("/api/referral"),
+
+  /** Authed: claim a referral code. Auto-generates one from the user's name
+   *  when no `code` is supplied. Returns the existing code if already set. */
+  generateReferralCode: (body?: { code?: string }) =>
+    request<{ code: ReferralStats }>("/api/referral", {
+      method: "POST",
+      body: JSON.stringify(body ?? {}),
+    }),
+
+  /** Authed: apply a referral code. Validates the code, creates a Referral
+   *  record and generates a one-time discount coupon for the caller. */
+  applyReferralCode: (body: { code: string }) =>
+    request<ApplyReferralResult>("/api/referral/apply", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  // ─── COURSE COMPARISON ───────────────────────────────
+  // Up to 3 courses can be compared side-by-side. The compare tray (floating
+  // bottom bar) holds the selected course ids and the compare page renders
+  // the comparison table.
+
+  /** Public: returns comparison data for up to 3 courses by id. */
+  compareCourses: (ids: string[]) => {
+    const q = new URLSearchParams();
+    q.set("ids", ids.filter(Boolean).join(","));
+    return request<{ courses: CompareCourse[] }>(
+      `/api/courses/compare?${q.toString()}`
+    );
+  },
 };

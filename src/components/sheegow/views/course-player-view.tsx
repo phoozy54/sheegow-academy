@@ -32,12 +32,14 @@ import {
   Sparkles,
   StickyNote,
   MessageSquare,
+  CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AnnouncementsPanel } from "./announcements-panel";
 import { DiscussionPanel } from "./discussion-panel";
 import { NotesPanel } from "./notes-panel";
 import { useT } from "@/lib/i18n";
+import { formatDateTime } from "@/lib/ui";
 
 type CurriculumData = Awaited<ReturnType<typeof api.curriculum>>;
 type RoadmapLesson = Lesson;
@@ -68,10 +70,20 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
       const res = await api.curriculum(courseId);
       setData(res);
       setActiveId((current) => {
-        if (current && res.roadmap.modules.some((m) => m.lessons.some((l) => l.id === current))) {
-          return current;
+        // Keep the current lesson if it still exists AND isn't locked.
+        if (current) {
+          const match = res.roadmap.modules
+            .flatMap((m) => m.lessons)
+            .find((l) => l.id === current);
+          if (match && !match.isLocked) return current;
         }
-        return res.roadmap.nextLessonId ?? res.roadmap.modules[0]?.lessons[0]?.id ?? null;
+        // nextLessonId from the API already skips locked lessons, so prefer it.
+        if (res.roadmap.nextLessonId) return res.roadmap.nextLessonId;
+        // Fall back to the first non-locked lesson in the roadmap.
+        const firstAvailable = res.roadmap.modules
+          .flatMap((m) => m.lessons)
+          .find((l) => !l.isLocked);
+        return firstAvailable?.id ?? res.roadmap.modules[0]?.lessons[0]?.id ?? null;
       });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Could not load this course.");
@@ -213,17 +225,38 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                         const done = lesson.progress?.[0]?.status === "completed";
                         const isActive = lesson.id === activeId;
                         const Icon = TYPE_ICONS[lesson.type] || BookOpen;
+                        const isLocked = !!lesson.isLocked;
+                        const unlockLabel = lesson.unlockAt
+                          ? t("coursePlayer.availableOn", {
+                              date: formatDateTime(lesson.unlockAt),
+                            })
+                          : t("coursePlayer.lockedLesson");
                         return (
                           <button
                             key={lesson.id}
-                            onClick={() => setActiveId(lesson.id)}
+                            onClick={() => {
+                              // Locked lessons can't be opened — show a toast
+                              // explaining when they unlock.
+                              if (isLocked) {
+                                toast.info(unlockLabel);
+                                return;
+                              }
+                              setActiveId(lesson.id);
+                            }}
+                            disabled={isLocked}
+                            aria-disabled={isLocked}
+                            title={isLocked ? unlockLabel : undefined}
                             className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors ${
                               isActive
                                 ? "bg-indigo-50 font-semibold text-indigo-700"
-                                : "text-muted-foreground hover:bg-muted"
+                                : isLocked
+                                  ? "cursor-not-allowed text-muted-foreground/60"
+                                  : "text-muted-foreground hover:bg-muted"
                             }`}
                           >
-                            {done ? (
+                            {isLocked ? (
+                              <LockKeyhole className="h-4 w-4 shrink-0 text-amber-600" />
+                            ) : done ? (
                               <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                             ) : isActive ? (
                               <Circle className="h-4 w-4 shrink-0 fill-indigo-500 text-indigo-500" />
@@ -233,7 +266,13 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                               <LockKeyhole className="h-4 w-4 shrink-0" />
                             )}
                             <span className="line-clamp-2 flex-1">{lesson.title}</span>
-                            {lesson.type === "quiz" && (
+                            {isLocked && lesson.unlockAt && (
+                              <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-600">
+                                <CalendarClock className="h-3 w-3" />
+                                {unlockLabel}
+                              </span>
+                            )}
+                            {!isLocked && lesson.type === "quiz" && (
                               <span className="text-[10px] font-bold uppercase text-amber-600">{t("coursePlayer.test")}</span>
                             )}
                           </button>
@@ -257,11 +296,14 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                 onRefresh={refresh}
                 onEnroll={() => router.push(`/checkout/${courseId}`)}
                 onNext={() => {
+                  // Skip locked lessons when advancing — jump to the next
+                  // available (non-locked) lesson in the roadmap.
                   const index = allLessons.findIndex((l) => l.id === activeLesson.id);
-                  const next = allLessons[index + 1];
-                  if (next) {
-                    setActiveId(next.id);
-                    return true;
+                  for (let i = index + 1; i < allLessons.length; i++) {
+                    if (!allLessons[i].isLocked) {
+                      setActiveId(allLessons[i].id);
+                      return true;
+                    }
                   }
                   return false;
                 }}
@@ -347,6 +389,10 @@ function LessonPanel({
   };
 
   const done = lesson.progress?.[0]?.status === "completed";
+  const isLocked = !!lesson.isLocked;
+  const unlockLabel = lesson.unlockAt
+    ? t("coursePlayer.lessonLockedDesc", { date: formatDateTime(lesson.unlockAt) })
+    : t("coursePlayer.lessonLocked");
 
   return (
     <div className="space-y-5">
@@ -354,6 +400,11 @@ function LessonPanel({
         <div className="border-b p-5 sm:p-6">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="capitalize">{lesson.type}</Badge>
+            {isLocked && (
+              <Badge className="gap-1 bg-amber-500">
+                <LockKeyhole className="h-3 w-3" /> {t("coursePlayer.lockedLesson")}
+              </Badge>
+            )}
             {done && (
               <Badge className="gap-1 bg-emerald-600">
                 <CheckCircle2 className="h-3 w-3" /> {t("coursePlayer.completed")}
@@ -370,7 +421,18 @@ function LessonPanel({
         </div>
 
         <CardContent className="p-5 sm:p-6">
-          {!hasAccess ? (
+          {isLocked ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-8 text-center">
+              <CalendarClock className="mx-auto mb-3 h-10 w-10 text-amber-600" />
+              <p className="text-lg font-bold text-amber-900">
+                {t("coursePlayer.lessonLocked")}
+              </p>
+              <p className="mt-1 text-sm text-amber-800">{unlockLabel}</p>
+              <p className="mt-3 text-xs text-amber-700/80">
+                {t("coursePlayer.comeBackLater")}
+              </p>
+            </div>
+          ) : !hasAccess ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
               <LockKeyhole className="mx-auto mb-2 h-7 w-7 text-amber-600" />
               <p className="font-semibold text-amber-900">{t("coursePlayer.thisLessonEnrolled")}</p>
@@ -505,7 +567,7 @@ function LessonPanel({
         <CertificateQuickPanel courseId={courseId} onClose={() => setShowCertificate(false)} />
       )}
 
-      {hasAccess && (
+      {hasAccess && !isLocked && (
         <Tabs defaultValue="notes" className="w-full">
           <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-muted p-1">
             <TabsTrigger

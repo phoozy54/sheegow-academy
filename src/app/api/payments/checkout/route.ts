@@ -71,6 +71,36 @@ export async function POST(req: Request) {
     if (!course.isActive)
       return jsonError("Course is not currently available", 400);
 
+    // Prerequisite check — block checkout (and thus enrollment) when the
+    // student hasn't completed the required prerequisite course. Managers
+    // (admin / owning teacher) are exempt.
+    const isManager =
+      user.role === "admin" ||
+      user.role === "super_admin" ||
+      (user.role === "teacher" && course.teacherId === user.id);
+    if (course.prerequisiteCourseId && !isManager) {
+      const prereqEnrollment = await db.enrollment.findUnique({
+        where: {
+          studentId_courseId: {
+            studentId: user.id,
+            courseId: course.prerequisiteCourseId,
+          },
+        },
+        select: { status: true },
+      });
+      if (!prereqEnrollment || prereqEnrollment.status !== "completed") {
+        const prereqCourse = await db.course.findUnique({
+          where: { id: course.prerequisiteCourseId },
+          select: { title: true },
+        });
+        const prereqTitle = prereqCourse?.title ?? "the prerequisite course";
+        return jsonError(
+          `You must complete ${prereqTitle} first.`,
+          403
+        );
+      }
+    }
+
     // ── Coupon validation (optional) ──
     let discount = 0;
     let appliedCouponCode: string | null = null;

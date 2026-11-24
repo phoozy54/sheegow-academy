@@ -35,6 +35,11 @@ export interface Course {
   whatYouLearn?: string | null;
   isActive: boolean;
   createdAt: string;
+  // Course prerequisite — students must complete this course first.
+  prerequisiteCourseId?: string | null;
+  // Resolved prerequisite course (public fields only) returned by the
+  // single-course GET endpoint for display on the course detail page.
+  prerequisiteCourse?: Pick<Course, "id" | "title" | "level" | "image"> | null;
   reviews?: Review[];
 }
 
@@ -174,6 +179,13 @@ export interface Lesson {
   durationSec?: number | null;
   isPreview: boolean;
   isPublished: boolean;
+  // Drip content — when set, the lesson is locked until this date (ISO string).
+  // null/undefined means immediately available.
+  unlockAt?: string | null;
+  // Computed by the curriculum endpoint for the current viewer. true when the
+  // lesson is still locked (unlockAt is in the future). Managers always see
+  // false here so they can preview during authoring.
+  isLocked?: boolean;
   materials?: Material[];
   quiz?: Quiz | null;
   assignment?: Assignment | null;
@@ -856,4 +868,68 @@ export interface TeacherApplication {
   > | null;
   /** Populated when the application has been reviewed. */
   reviewer?: Pick<User, "id" | "fullName"> | null;
+}
+
+// ─── AFFILIATE / REFERRAL ─────────────────────────────────
+// Every user can claim one referral code (e.g. "AHMED10"). When a new student
+// signs up via ?ref=CODE — or applies the code in their dashboard — they
+// receive a one-time discount coupon and the referrer accumulates a
+// successful referral. The dashboard widget surfaces both stats.
+
+export interface ReferralCodeInfo {
+  id: string;
+  code: string;
+  discount: number;
+  createdAt: string;
+}
+
+/** Aggregated referral stats returned alongside the code by GET /api/referral. */
+export interface ReferralStats {
+  /** The user's referral code (null when they haven't claimed one yet). */
+  code: ReferralCodeInfo | null;
+  /** Total number of successful referrals (people who signed up via the code). */
+  totalReferrals: number;
+  /** Sum of discount percentages earned across those referrals. */
+  totalDiscountEarned: number;
+  /** True once the user has been referred themselves (cannot self-refer). */
+  wasReferred: boolean;
+}
+
+/** Payload returned by POST /api/referral/apply when a user redeems a code. */
+export interface ApplyReferralResult {
+  success: boolean;
+  couponCode: string;
+  discount: number;
+  referrerName: string;
+}
+
+// ─── COURSE COMPARISON ────────────────────────────────────
+// Side-by-side course comparison data. GET /api/courses/compare?ids=... returns
+// up to 3 courses with the fields needed for the comparison table (image,
+// price, duration, level, rating, teacher, what you'll learn bullets).
+
+export interface CompareCourseBullet {
+  text: string;
+}
+
+export interface CompareCourse {
+  id: string;
+  title: string;
+  description: string;
+  level: string;
+  price: number;
+  duration: number;
+  image?: string | null;
+  rating: number;
+  reviewCount: number;
+  whatYouLearn: CompareCourseBullet[];
+  /** Whether the course awards a completion certificate. Always true. */
+  certificate: boolean;
+  /** Estimated weekly live class hours (2 hours per week by default). */
+  liveClassHours: number;
+  teacher?: {
+    id: string;
+    fullName: string;
+    profilePicture?: string | null;
+  } | null;
 }

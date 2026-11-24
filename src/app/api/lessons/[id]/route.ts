@@ -18,6 +18,9 @@ interface UpdateLessonBody {
   durationSec?: number;
   isPreview?: boolean;
   isPublished?: boolean;
+  // Drip content — when set, lesson is locked until this date.
+  // Pass null/empty to clear the schedule.
+  unlockAt?: string | null;
 }
 
 /** GET /api/lessons/:id — lesson detail with materials and the student's progress. */
@@ -96,6 +99,18 @@ export async function PATCH(req: Request, { params }: RouteContext) {
       data.durationSec = Math.max(0, Math.floor(body.durationSec));
     if (body.isPreview !== undefined) data.isPreview = Boolean(body.isPreview);
     if (body.isPublished !== undefined) data.isPublished = Boolean(body.isPublished);
+    if (body.unlockAt !== undefined) {
+      const raw = body.unlockAt;
+      if (raw === null || raw === "" || raw === undefined) {
+        data.unlockAt = null;
+      } else {
+        const parsed = new Date(raw);
+        if (Number.isNaN(parsed.getTime())) {
+          return jsonError("Invalid unlockAt date", 400);
+        }
+        data.unlockAt = parsed;
+      }
+    }
 
     const updated = await db.lesson.update({
       where: { id },
@@ -133,3 +148,9 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
     return jsonError("Internal server error", 500);
   }
 }
+
+/**
+ * PUT /api/lessons/:id — alias of PATCH. Accepts the same body so callers can
+ * use either verb to update a lesson (including the `unlockAt` drip field).
+ */
+export const PUT = PATCH;

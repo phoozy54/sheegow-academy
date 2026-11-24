@@ -89,6 +89,7 @@ import { StudentRefunds } from "./student-refunds";
 import { LibraryView } from "./library-view";
 import { ContentBuilderView } from "./content-builder-view";
 import { GamificationWidget } from "@/components/sheegow/gamification-widget";
+import { ReferralWidget } from "@/components/sheegow/referral-widget";
 import { useT } from "@/lib/i18n";
 
 /* ─── Types ─────────────────────────────────────────────── */
@@ -839,6 +840,9 @@ function StudentOverview() {
 
       {/* Gamification — points, streak, badges */}
       <GamificationWidget />
+
+      {/* Referral / affiliate program — code, link, stats, apply-a-code */}
+      <ReferralWidget />
 
       {/* Two columns */}
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">

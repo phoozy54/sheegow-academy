@@ -39,6 +39,8 @@ import {
   Target,
   GraduationCap,
   Share2,
+  Lock,
+  AlertTriangle,
 } from "lucide-react";
 import { levelBadgeClass, formatDate, timeAgo, cn } from "@/lib/ui";
 import { toast } from "sonner";
@@ -369,9 +371,29 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
     user?.role === "super_admin";
   const enrollment = byCourse.get(course.id);
 
+  // Prerequisite handling — when the course requires another course to be
+  // completed first, students who haven't done so cannot enroll. Managers are
+  // always exempt (they manage the course). Logged-out visitors are blocked
+  // by the normal "create an account" path, so the enroll button stays
+  // enabled to send them through registration.
+  const prerequisite = course.prerequisiteCourse ?? null;
+  const prereqEnrollment = prerequisite
+    ? byCourse.get(prerequisite.id)
+    : undefined;
+  const prereqCompleted = !!prereqEnrollment && prereqEnrollment.status === "completed";
+  const prereqBlocksEnroll = !!prerequisite && !isManager && !prereqCompleted;
+
   const handleEnroll = () => {
     if (!user) {
       openAuthModal("register");
+      return;
+    }
+    if (prereqBlocksEnroll) {
+      toast.error(
+        t("courseDetail.completePrereqFirst", {
+          title: prerequisite?.title ?? "",
+        })
+      );
       return;
     }
     router.push(`/checkout/${course.id}`);
@@ -490,7 +512,42 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
 
             {/* Sticky enrollment card */}
             <div className="md:col-span-1">
-              <div className="md:sticky md:top-20">
+              <div className="md:sticky md:top-20 space-y-3">
+                {prerequisite && !isManager && (
+                  <div
+                    className={`rounded-xl border p-4 text-sm ${
+                      prereqCompleted
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                        : "border-amber-200 bg-amber-50 text-amber-900"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      {prereqCompleted ? (
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                      ) : (
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold uppercase tracking-wide opacity-70">
+                          {t("courseDetail.prerequisite")}
+                        </p>
+                        <p className="mt-0.5 text-sm font-medium">
+                          {prereqCompleted
+                            ? t("courseDetail.prereqCompleted")
+                            : t("courseDetail.prerequisiteNotice", {
+                                title: prerequisite.title,
+                              })}
+                        </p>
+                        <button
+                          onClick={() => router.push(`/course/${prerequisite.id}`)}
+                          className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold underline-offset-2 hover:underline"
+                        >
+                          {prerequisite.title}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {isManager ? (
                   <ManagerCourseCard
                     course={course}
@@ -510,6 +567,8 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                     course={course}
                     onEnroll={handleEnroll}
                     isLoggedIn={!!user}
+                    prereqBlocksEnroll={prereqBlocksEnroll}
+                    prerequisiteTitle={prerequisite?.title ?? null}
                   />
                 )}
               </div>
@@ -778,12 +837,21 @@ function EnrollmentCard({
   course,
   onEnroll,
   isLoggedIn,
+  prereqBlocksEnroll,
+  prerequisiteTitle,
 }: {
   course: Course;
   onEnroll: () => void;
   isLoggedIn: boolean;
+  prereqBlocksEnroll: boolean;
+  prerequisiteTitle: string | null;
 }) {
   const t = useT();
+  const enrollLabel = prereqBlocksEnroll && prerequisiteTitle
+    ? t("courseDetail.completePrereqFirst", { title: prerequisiteTitle })
+    : course.price === 0
+      ? t("course.startNow")
+      : t("course.enrollNow");
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
       <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
@@ -799,13 +867,24 @@ function EnrollmentCard({
         <Button
           onClick={onEnroll}
           size="lg"
-          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+          disabled={prereqBlocksEnroll}
+          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <Sparkles className="h-4 w-4" />
-          {course.price === 0 ? t("course.startNow") : t("course.enrollNow")}
+          {prereqBlocksEnroll ? (
+            <Lock className="h-4 w-4" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
+          {enrollLabel}
         </Button>
 
-        {!isLoggedIn && (
+        {prereqBlocksEnroll && (
+          <p className="mt-2 text-center text-xs text-amber-700">
+            {t("courseDetail.prerequisiteRequired")}
+          </p>
+        )}
+
+        {!isLoggedIn && !prereqBlocksEnroll && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             You&apos;ll need to create an account to enroll.
           </p>

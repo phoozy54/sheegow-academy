@@ -27,6 +27,45 @@ export async function POST(req: Request) {
     const course = await db.course.findUnique({ where: { id: courseId } });
     if (!course || !course.isActive) return jsonError("Course not found", 404);
 
+    // Prerequisite check — if this course requires another course to be
+    // completed first, verify the student has a completed enrollment for it.
+    // Managers (admin / owning teacher) are exempt.
+    const isManager =
+      user.role === "admin" ||
+      user.role === "super_admin" ||
+      (user.role === "teacher" && course.teacherId === user.id);
+    if (course.prerequisiteCourseId && !isManager) {
+      // If already enrolled in THIS course, no need to re-check (idempotency).
+      const alreadyEnrolledHere = await db.enrollment.findUnique({
+        where: {
+          studentId_courseId: { studentId: user.id, courseId },
+        },
+        select: { id: true },
+      });
+      if (!alreadyEnrolledHere) {
+        const prereqEnrollment = await db.enrollment.findUnique({
+          where: {
+            studentId_courseId: {
+              studentId: user.id,
+              courseId: course.prerequisiteCourseId,
+            },
+          },
+          select: { status: true },
+        });
+        if (!prereqEnrollment || prereqEnrollment.status !== "completed") {
+          const prereqCourse = await db.course.findUnique({
+            where: { id: course.prerequisiteCourseId },
+            select: { title: true },
+          });
+          const prereqTitle = prereqCourse?.title ?? "the prerequisite course";
+          return jsonError(
+            `You must complete ${prereqTitle} first.`,
+            403
+          );
+        }
+      }
+    }
+
     // A paid course requires a completed payment. Without this check this
     // endpoint would be a free-enrollment bypass around the checkout flow.
     if (course.price > 0) {

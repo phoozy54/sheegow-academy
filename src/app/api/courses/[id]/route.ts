@@ -19,6 +19,9 @@ interface UpdateCourseBody {
   teacherId?: string;
   whatYouLearn?: string;
   isActive?: boolean;
+  // Prerequisite — students must complete this course first.
+  // Pass null/empty to clear.
+  prerequisiteCourseId?: string | null;
 }
 
 /** Public-safe teacher projection. */
@@ -65,6 +68,11 @@ export async function GET(_req: Request, { params }: RouteContext) {
           isActive: true,
           createdAt: true,
           updatedAt: true,
+          // Prerequisite course — only public fields so the detail page can
+          // show the name and link students to it.
+          prerequisiteCourse: {
+            select: { id: true, title: true, level: true, image: true },
+          },
           teacher: { select: teacherSelect },
           reviews: {
             orderBy: { createdAt: "desc" },
@@ -139,11 +147,31 @@ export async function PUT(req: Request, { params }: RouteContext) {
     if (body.whatYouLearn !== undefined)
       data.whatYouLearn = body.whatYouLearn.trim() || null;
     if (body.isActive !== undefined) data.isActive = body.isActive;
+    if (body.prerequisiteCourseId !== undefined) {
+      const rawPrereq = body.prerequisiteCourseId?.trim() || null;
+      if (rawPrereq) {
+        // Reject self-referencing and ensure the referenced course exists.
+        if (rawPrereq === id) {
+          return jsonError("A course cannot be its own prerequisite", 400);
+        }
+        const prereq = await db.course.findUnique({
+          where: { id: rawPrereq },
+          select: { id: true, isActive: true },
+        });
+        if (!prereq || !prereq.isActive) {
+          return jsonError("Prerequisite course not found or inactive", 400);
+        }
+      }
+      data.prerequisiteCourseId = rawPrereq;
+    }
 
     const course = await db.course.update({
       where: { id },
       data,
-      include: { teacher: { select: teacherSelect } },
+      include: {
+        teacher: { select: teacherSelect },
+        prerequisiteCourse: { select: { id: true, title: true, level: true, image: true } },
+      },
     });
 
     return NextResponse.json({ course });
