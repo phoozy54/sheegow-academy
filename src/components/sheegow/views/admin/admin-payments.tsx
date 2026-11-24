@@ -150,9 +150,7 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
       {!canManage && (
         <div className="flex items-start gap-2 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-800">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>
-            You can view payments. Only a super admin can change payment status.
-          </span>
+          <span>You can view payments. Admin access is required to change payment status.</span>
         </div>
       )}
 

@@ -22,7 +22,7 @@ function getSecret(name: "JWT_SECRET" | "JWT_REFRESH_SECRET"): string {
 }
 
 export const ACCESS_TOKEN_MAX_AGE = 60 * 15; // 15 minutes
-export const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+export const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 export function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -53,7 +53,7 @@ export function signAccessToken(payload: TokenPayload): string {
 
 export function signRefreshToken(payload: TokenPayload): string {
   return jwt.sign(payload, getSecret("JWT_REFRESH_SECRET"), {
-    expiresIn: "7d",
+    expiresIn: "30d",
   });
 }
 
@@ -233,10 +233,11 @@ export async function requireTeacherOrAdmin() {
   return user;
 }
 
-/** Require the highest privilege level — used for financial and role changes. */
+/** Highest-privilege actions. This app runs with a single admin; admins
+ * receive super-admin capabilities. */
 export async function requireSuperAdmin() {
   const user = await requireAuth();
-  if (user.role !== "super_admin") {
+  if (!isAdminRole(user.role)) {
     throw new Error("FORBIDDEN");
   }
   return user;
