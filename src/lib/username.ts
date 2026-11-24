@@ -46,29 +46,34 @@ export function isValidUsername(input: string): boolean {
 
 export type IdentifierKind = "email" | "phone" | "username" | "invalid";
 
+function isUsernameShape(raw: string): boolean {
+  const trimmed = raw.trim().replace(/^@/, "");
+  if (!trimmed) return false;
+  if (/^\d+$/.test(trimmed)) return false;
+  const normalized = normalizeUsername(trimmed);
+  return normalized.length >= 3 && /^[a-z0-9][a-z0-9._]*[a-z0-9]$/.test(normalized);
+}
+
 /**
  * Login accepts one identifier field. Emails are detected by '@', Somali
  * phones by their normalized 9-digit national form, everything else is a
- * username. Purely numeric usernames are rejected at creation, so there is no
- * ambiguity with phone numbers.
+ * username. Reserved usernames are allowed here so existing accounts like
+ * "superadmin" can log in; creation/rename still uses isValidUsername().
  */
 export function classifyIdentifier(input: string): IdentifierKind {
   const raw = input.trim();
   if (!raw) return "invalid";
 
-  // A leading "@" is a handle prefix (@superadmin), not an email address.
-  // normalizeUsername() strips the "@" before the database lookup.
   if (raw.startsWith("@")) {
-    return /^[a-z0-9][a-z0-9._]*$/i.test(raw.slice(1)) ? "username" : "invalid";
+    return isUsernameShape(raw) ? "username" : "invalid";
   }
 
-  // Any other "@" is an email address.
   if (raw.includes("@")) return "email";
   if (isValidSomaliPhone(raw) || isValidSomaliPhone(normalizeSomaliPhone(raw))) {
     return "phone";
   }
-  if (/^\d+$/.test(raw)) return "invalid";
-  return "username";
+  if (isUsernameShape(raw)) return "username";
+  return "invalid";
 }
 
 function baseFromFullName(fullName: string, role: string): string {
