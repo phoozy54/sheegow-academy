@@ -60,6 +60,48 @@ model User {
   studentPoints StudentPoints?
   streak        Streak?
   badges        Badge[]
+  // Teacher applications submitted by this user (as applicant).
+  teacherApplications     TeacherApplication[] @relation("TeacherApplicationApplicant")
+  // Teacher applications this user has reviewed (as admin/super_admin).
+  reviewedApplications    TeacherApplication[] @relation("TeacherApplicationReviewer")
+}
+
+// ─── TEACHER APPLICATIONS ─────────────────────────────────
+// Students apply to become teachers by submitting an application with their
+// qualifications. Admins review and approve (upgrading the user's role to
+// "teacher") or reject. Mirrors the application flow on platforms like
+// Udemy / Coursera / Teachable.
+model TeacherApplication {
+  id                 String   @id @default(cuid())
+  applicantId        String   // the user applying
+  fullName           String
+  email              String
+  phone              String
+  city               String   // e.g. Hargeisa, Mogadishu, diaspora city
+  country            String   // e.g. Somaliland, Somalia, UK, USA
+  nativeLanguage     String   // e.g. Somali, Arabic
+  englishLevel       String   // Beginner | Intermediate | Advanced | Native
+  teachingExperience String   // "0" | "1-3" | "3-5" | "5-10" | "10+"
+  certifications     String?  // TESOL, CELTA, degree, etc.
+  bio                String   // professional bio (max 2000 chars)
+  teachingPhilosophy String?  // why they want to teach
+  sampleLesson       String?  // URL to a sample lesson/video
+  linkedinUrl        String?
+  resumeUrl          String?
+  preferredCourses   String?  // what courses they'd like to teach
+  availability       String   // "Weekday mornings", "Weekend evenings", etc.
+  status             String   @default("pending") // pending | under_review | approved | rejected
+  adminNote          String?
+  reviewedBy         String?
+  reviewedAt         DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  applicant  User  @relation("TeacherApplicationApplicant", fields: [applicantId], references: [id], onDelete: Cascade)
+  reviewer   User? @relation("TeacherApplicationReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([applicantId])
 }
 
 // ─── COURSE ─────────────────────────────────────────────

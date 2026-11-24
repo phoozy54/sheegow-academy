@@ -34,6 +34,9 @@ import type {
   Roadmap,
   SearchResponse,
   Stats,
+  TeacherApplication,
+  TeacherApplicationInput,
+  TeacherApplicationStatus,
   TrialRequest,
   User,
   WishlistItem,
@@ -895,4 +898,47 @@ export const api = {
    *  the response also includes their own rank + entry (even if outside top 10). */
   leaderboard: () =>
     request<LeaderboardResponse>("/api/leaderboard"),
+
+  // ─── TEACHER APPLICATIONS ────────────────────────────
+  // Students apply to become teachers; admins review and approve (which
+  // upgrades the user's role to "teacher") or reject. Approving/rejecting
+  // also notifies the applicant in-app.
+
+  /** Authed: list applications. Students see their own; admins see all. */
+  teacherApplications: () =>
+    request<{ applications: TeacherApplication[] }>(
+      "/api/teacher-applications"
+    ),
+
+  /** Authed: get a single application (own or admin). */
+  teacherApplication: (id: string) =>
+    request<{ application: TeacherApplication }>(
+      `/api/teacher-applications/${id}`
+    ),
+
+  /** Student: submit a new teacher application. */
+  createTeacherApplication: (body: TeacherApplicationInput) =>
+    request<{ application: TeacherApplication }>(
+      "/api/teacher-applications",
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      }
+    ),
+
+  /** Admin: update an application's status (under_review | approved | rejected)
+   *  and attach an optional admin note. Approving upgrades the applicant's
+   *  role to "teacher" and notifies them; rejecting notifies them with the
+   *  reason. */
+  decideTeacherApplication: (
+    id: string,
+    body: { status: TeacherApplicationStatus; adminNote?: string }
+  ) =>
+    request<{ application: TeacherApplication }>(
+      `/api/teacher-applications/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }
+    ),
 };

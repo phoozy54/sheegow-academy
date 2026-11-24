@@ -141,7 +141,7 @@ export function Footer() {
               {([
                 { label: "About Us", href: "/about" },
                 { label: "Contact", href: "/contact" },
-                { label: "Become a Teacher" },
+                { label: "Become a Teacher", href: "/teach" },
                 { label: "Terms", href: "/terms" },
                 { label: "Privacy Policy", href: "/privacy" },
               ] as FooterLink[]).map((l) => (

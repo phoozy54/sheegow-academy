@@ -779,3 +779,74 @@ export interface BundleCheckoutResult {
   finalAmount: number;
   alreadyEnrolledCourseIds: string[];
 }
+
+// ─── TEACHER APPLICATIONS ──────────────────────────────────
+// Students apply to become teachers by submitting an application. Admins
+// review and approve (upgrading the user's role to "teacher") or reject.
+// Mirrors the application flow on Udemy / Coursera / Teachable.
+
+export type TeacherApplicationStatus =
+  | "pending"
+  | "under_review"
+  | "approved"
+  | "rejected";
+
+export type EnglishLevel = "Beginner" | "Intermediate" | "Advanced" | "Native";
+
+export type TeachingExperience = "0" | "1-3" | "3-5" | "5-10" | "10+";
+
+/** Payload accepted by POST /api/teacher-applications. */
+export interface TeacherApplicationInput {
+  fullName: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  nativeLanguage: string;
+  englishLevel: EnglishLevel;
+  teachingExperience: TeachingExperience;
+  certifications?: string;
+  bio: string;
+  teachingPhilosophy?: string;
+  sampleLesson?: string;
+  linkedinUrl?: string;
+  resumeUrl?: string;
+  preferredCourses?: string;
+  availability: string;
+  /** Background-check consent. The server rejects the application when false. */
+  consent: boolean;
+}
+
+export interface TeacherApplication {
+  id: string;
+  applicantId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  nativeLanguage: string;
+  englishLevel: EnglishLevel;
+  teachingExperience: TeachingExperience;
+  certifications?: string | null;
+  bio: string;
+  teachingPhilosophy?: string | null;
+  sampleLesson?: string | null;
+  linkedinUrl?: string | null;
+  resumeUrl?: string | null;
+  preferredCourses?: string | null;
+  availability: string;
+  status: TeacherApplicationStatus;
+  adminNote?: string | null;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Populated when the application is fetched by an admin (cross-user). */
+  applicant?: Pick<
+    User,
+    "id" | "fullName" | "email" | "phone" | "profilePicture" | "role"
+  > | null;
+  /** Populated when the application has been reviewed. */
+  reviewer?: Pick<User, "id" | "fullName"> | null;
+}

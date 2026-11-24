@@ -79,6 +79,7 @@ import { AdminCourseOverview } from "./admin/admin-course-overview";
 import { AdminStudents } from "./admin/admin-students";
 import { AdminLive } from "./admin/admin-live";
 import { AdminTeachers } from "./admin/admin-teachers";
+import { AdminTeacherApplications } from "./admin/admin-teacher-applications";
 import { AdminMessages } from "./admin/admin-panel";
 import { AdminPayments } from "./admin/admin-payments";
 import { AdminTrialRequests } from "./admin/admin-trial-requests";
@@ -100,6 +101,7 @@ type SectionId =
   | "students"
   | "live"
   | "teachers"
+  | "teacher-applications"
   | "payments"
   | "my-payments"
   | "my-refunds"
@@ -134,6 +136,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "students", label: "dashboard.myStudents", icon: Users, roles: ["teacher"] },
   { id: "students", label: "dashboard.manageStudents", icon: Users, roles: ADMIN_ROLES },
   { id: "teachers", label: "dashboard.teachers", icon: GraduationCap, roles: ADMIN_ROLES },
+  { id: "teacher-applications", label: "dashboard.teacherApplications", icon: ClipboardCheck, roles: ADMIN_ROLES },
   { id: "payments", label: "dashboard.payments", icon: DollarSign, roles: ADMIN_ROLES },
   { id: "refunds", label: "dashboard.refunds", icon: RotateCcw, roles: ADMIN_ROLES },
   { id: "trial-requests", label: "dashboard.trialRequests", icon: ClipboardCheck, roles: ADMIN_ROLES },
@@ -150,6 +153,7 @@ const SECTION_TITLES: Record<SectionId, string> = {
   students: "dashboard.sectionStudents",
   live: "dashboard.sectionLive",
   teachers: "dashboard.sectionTeachers",
+  "teacher-applications": "dashboard.sectionTeacherApplications",
   payments: "dashboard.sectionPayments",
   "my-payments": "dashboard.sectionMyPayments",
   "my-refunds": "dashboard.sectionMyRefunds",
@@ -421,6 +425,9 @@ export function UnifiedDashboard() {
           {section === "students" && isAdmin && <AdminStudents />}
           {section === "live" && <AdminLive />}
           {section === "teachers" && isAdmin && <AdminTeachers />}
+          {section === "teacher-applications" && isAdmin && (
+            <AdminTeacherApplications />
+          )}
           {section === "payments" && isAdmin && (
             <AdminPayments canManage={isAdmin} />
           )}

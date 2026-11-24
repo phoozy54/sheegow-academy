@@ -144,8 +144,12 @@ export function ProfileView() {
     try {
       const body: Record<string, string> = {
         fullName: fullName.trim(),
-        level,
       };
+      // Only students have a learning level — don't send it for
+      // teachers/admins (the API would reject it anyway).
+      if (user.role === "student") {
+        body.level = level;
+      }
       if (
         username.trim() &&
         username.trim() !== (user.username || "")
@@ -242,12 +246,15 @@ export function ProfileView() {
               <Badge className="bg-indigo-100 capitalize text-indigo-700">
                 {user.role}
               </Badge>
-              <Badge
-                variant="outline"
-                className={`border ${levelBadgeClass(user.level)}`}
-              >
-                {user.level || "Beginner"}
-              </Badge>
+              {/* Learning level badge — only for students */}
+              {user.role === "student" && (
+                <Badge
+                  variant="outline"
+                  className={`border ${levelBadgeClass(user.level)}`}
+                >
+                  {user.level || "Beginner"}
+                </Badge>
+              )}
             </div>
 
             <Button
@@ -376,21 +383,25 @@ export function ProfileView() {
                   <PhoneInput id="phone" value={phone} onChange={setPhone} />
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="level">{t("profile.learningLevel")}</Label>
-                  <Select value={level} onValueChange={setLevel}>
-                    <SelectTrigger id="level" className="w-full">
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LEVELS.map((lv) => (
-                        <SelectItem key={lv} value={lv}>
-                          {lv}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Learning level — only for students. Teachers and admins
+                    are not learners, so this field is irrelevant for them. */}
+                {user.role === "student" && (
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="level">{t("profile.learningLevel")}</Label>
+                    <Select value={level} onValueChange={setLevel}>
+                      <SelectTrigger id="level" className="w-full">
+                        <SelectValue placeholder="Select level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LEVELS.map((lv) => (
+                          <SelectItem key={lv} value={lv}>
+                            {lv}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 flex justify-end">
