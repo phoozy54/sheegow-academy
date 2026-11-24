@@ -477,14 +477,21 @@ export function LiveRoomView({ classId }: { classId: string }) {
   }, [classId, userId, userName, liveClass, canBroadcast]);
 
   // Attach the teacher's local preview once the stream is live.
+  // Re-attach when screen sharing starts/stops — the stream reference
+  // changes (camera → screen → camera), so the video element must pick
+  // up the new srcObject to avoid a frozen/flickering preview on mobile.
   useEffect(() => {
     const video = localVideoRef.current;
     const stream = streamManagerRef.current?.getLocalStream();
     if (video && stream) {
-      video.srcObject = stream;
-      video.play().catch(() => undefined);
+      // Only update if the srcObject actually changed — prevents
+      // unnecessary reloads that cause flicker.
+      if (video.srcObject !== stream) {
+        video.srcObject = stream;
+        video.play().catch(() => undefined);
+      }
     }
-  }, [isBroadcasting]);
+  }, [isBroadcasting, screenSharing]);
 
   // Attach the incoming teacher stream to the student's video element.
   useEffect(() => {
@@ -1083,7 +1090,10 @@ function VideoArea({
               autoPlay
               playsInline
               muted
-              className="absolute inset-0 h-full w-full scale-x-[-1] bg-black object-cover"
+              className={cn(
+                "absolute inset-0 h-full w-full bg-black object-contain transition-opacity duration-200",
+                !screenSharing && "scale-x-[-1]"
+              )}
             />
             {!camOn && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 text-sm font-medium text-white">
@@ -1148,8 +1158,8 @@ function VideoArea({
         )}
       </div>
 
-      {/* Control bar */}
-      <div className="flex items-center justify-center gap-2 overflow-x-auto border-t bg-card p-3 sm:gap-3 lg:overflow-visible">
+      {/* Control bar — wraps on mobile, single row on desktop */}
+      <div className="flex flex-wrap items-center justify-center gap-2 border-t bg-card p-3 sm:flex-nowrap sm:gap-3">
         {/* Teacher controls — mic/cam toggle the real MediaStream tracks */}
         {isHost && (
           <>
