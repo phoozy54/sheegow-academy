@@ -130,7 +130,7 @@ const COURSE_COPY: Record<string, CourseSeoCopy> = {
   cmwmpcctz0008vs0niuafulzh: {
     title: "Intermediate English — Live Speaking Classes",
     description:
-      "Build fluent conversation and stronger grammar in live interactive classes. Practice speaking every session with teacher Ciise and learners worldwide.",
+      "Build fluent conversation and stronger grammar in live interactive classes. Practice speaking every session with teacher Ciise and learners around the world who want to learn English.",
   },
   cmwmpcdif000gvs0nvyvknqdy: {
     title: "Advanced English & Academic Writing — Live",

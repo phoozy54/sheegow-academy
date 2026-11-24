@@ -107,17 +107,10 @@ export async function PUT(req: Request, { params }: RouteContext) {
       const v = body.role.trim();
       if (!VALID_ROLES.has(v))
         return jsonError("Invalid role", 400);
-      // Only the super admin may change roles — including assigning or
-      // revoking the teacher role. This keeps staff management centralised.
-      if (v !== existing.role && admin.role !== "super_admin") {
-        return jsonError("Only a super admin can change user roles", 403);
+      // Admins manage roles in this single-admin app.
+      if (v !== existing.role && !isAdminRole(admin.role)) {
+        return jsonError("Only an admin can change user roles", 403);
       }
-      // Only a super admin may grant or revoke super-admin access.
-      if (
-        (v === "super_admin" || existing.role === "super_admin") &&
-        admin.role !== "super_admin"
-      )
-        return jsonError("Only a super admin can manage super-admin accounts", 403);
       // Prevent an admin from stripping their own management role.
       if (isAdminRole(existing.role) && !isAdminRole(v) && admin.id === id)
         return jsonError("You cannot demote your own admin account", 400);
@@ -163,8 +156,7 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
 
     const existing = await db.user.findUnique({ where: { id } });
     if (!existing) return jsonError("User not found", 404);
-    if (existing.role === "super_admin" && admin.role !== "super_admin")
-      return jsonError("Only a super admin can delete a super admin", 403);
+    // Single-admin app: admins can manage accounts. Self-delete is blocked above.
 
     await db.user.delete({ where: { id } });
 

@@ -108,10 +108,10 @@ export async function POST(req: Request) {
       return jsonError("Password must be at least 12 characters", 400);
     if (!CREATABLE_ROLES.has(role)) return jsonError("Invalid role", 400);
     if (!VALID_LEVELS.has(level)) return jsonError("Invalid level", 400);
-    // Only the super admin may create privileged accounts — including teachers.
-    if (role !== "student" && actor.role !== "super_admin") {
+    // This app has a single admin; admins can create privileged accounts.
+    if (role !== "student" && !["admin", "super_admin"].includes(actor.role)) {
       return jsonError(
-        "Only a super admin can create teacher and admin accounts",
+        "Only an admin can create teacher and admin accounts",
         403
       );
     }

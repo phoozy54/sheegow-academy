@@ -132,7 +132,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "live", label: "Live Classes", icon: Video, roles: ALL_ROLES },
   { id: "students", label: "My Students", icon: Users, roles: ["teacher"] },
   { id: "students", label: "Manage Students", icon: Users, roles: ADMIN_ROLES },
-  { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ["super_admin"] },
+  { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ADMIN_ROLES },
   { id: "payments", label: "Payments", icon: DollarSign, roles: ADMIN_ROLES },
   { id: "refunds", label: "Refund Requests", icon: RotateCcw, roles: ADMIN_ROLES },
   { id: "trial-requests", label: "Trial Requests", icon: ClipboardCheck, roles: ADMIN_ROLES },
@@ -419,9 +419,9 @@ export function UnifiedDashboard() {
           {section === "students" && role === "teacher" && <TeacherStudents />}
           {section === "students" && isAdmin && <AdminStudents />}
           {section === "live" && <AdminLive />}
-          {section === "teachers" && role === "super_admin" && <AdminTeachers />}
+          {section === "teachers" && isAdmin && <AdminTeachers />}
           {section === "payments" && isAdmin && (
-            <AdminPayments canManage={role === "super_admin"} />
+            <AdminPayments canManage={isAdmin} />
           )}
           {section === "refunds" && isAdmin && <AdminRefunds />}
           {section === "my-payments" && role === "student" && <StudentPayments />}

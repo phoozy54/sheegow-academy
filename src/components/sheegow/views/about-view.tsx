@@ -36,7 +36,7 @@ const VALUES = [
   {
     icon: Globe2,
     title: "Accessible to all",
-    desc: "Quality English education should reach every learner, in every country — no matter where you start.",
+    desc: "Quality English education should reach every learner around the world who wants to learn English — no matter where you start.",
     color: "from-indigo-500 to-indigo-600",
   },
   {

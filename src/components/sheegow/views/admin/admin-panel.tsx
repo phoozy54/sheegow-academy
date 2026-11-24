@@ -98,21 +98,12 @@ const VIEW_TITLES: Record<AdminView, string> = {
 };
 
 /**
- * Teachers may only manage their own courses and live classes. Staff/user
- * management, bundles, and contact messages stay with administrators, and
- * creating teachers is reserved for the super admin.
+ * Single-admin app: admins have full admin panel access. Teachers get teaching
+ * views only.
  */
 function allowedViewsFor(role: string): Set<AdminView> {
-  if (role === "super_admin") return new Set(NAV_ITEMS.map((n) => n.id));
-  if (role === "admin")
-    return new Set<AdminView>([
-      "dashboard",
-      "courses",
-      "bundles",
-      "students",
-      "live",
-      "messages",
-    ]);
+  if (role === "admin" || role === "super_admin")
+    return new Set(NAV_ITEMS.map((n) => n.id));
   return new Set<AdminView>(["dashboard", "courses", "live"]);
 }
 

@@ -62,8 +62,15 @@ export async function POST(req: Request) {
       return jsonError("Enter a valid username, email or Somali phone number", 400);
     }
 
+    const normalizedIdentifier =
+      kind === "email"
+        ? rawIdentifier.toLowerCase()
+        : kind === "username"
+          ? normalizeUsername(rawIdentifier.replace(/^@/, ""))
+          : rawIdentifier;
+
     const attemptLimit = rateLimit(
-      `login:${ip}:${rawIdentifier.toLowerCase()}`,
+      `login:${ip}:${normalizedIdentifier.toLowerCase()}`,
       8,
       15 * 60 * 1000
     );
@@ -97,7 +104,7 @@ export async function POST(req: Request) {
       });
     } else {
       user = await db.user.findUnique({
-        where: { username: normalizeUsername(rawIdentifier) },
+        where: { username: normalizedIdentifier },
       });
     }
 
