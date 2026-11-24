@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Award, ExternalLink, Loader2, LogIn } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export function CertificateView() {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -46,7 +48,7 @@ export function CertificateView() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <LogIn className="mx-auto mb-3 h-8 w-8 text-indigo-500" />
-        <h1 className="text-xl font-bold">Log in to view certificates</h1>
+        <h1 className="text-xl font-bold">{t("certificate.loginToView")}</h1>
         <Button className="mt-4" onClick={() => openAuthModal("login")}>
           Log in
         </Button>
@@ -58,13 +60,13 @@ export function CertificateView() {
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => router.push("/dashboard")}>
-          ← Dashboard
+          {t("certificate.dashboard")}
         </Button>
         <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-          <Award className="h-7 w-7 text-amber-500" /> My Certificates
+          <Award className="h-7 w-7 text-amber-500" /> {t("certificate.myCertificates")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Professional certificates issued after completing lessons, tests and homework.
+          {t("certificate.desc")}
         </p>
       </div>
 
@@ -77,9 +79,9 @@ export function CertificateView() {
       ) : certificates.length === 0 ? (
         <Card className="p-12 text-center">
           <Award className="mx-auto mb-3 h-10 w-10 text-amber-400" />
-          <h2 className="font-bold">No certificates yet</h2>
+          <h2 className="font-bold">{t("certificate.noCertificates")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Complete all course requirements to earn a verifiable certificate.
+            {t("certificate.noCertificatesDesc")}
           </p>
           <Button className="mt-4" onClick={() => router.push("/courses")}>
             Continue learning
@@ -92,11 +94,11 @@ export function CertificateView() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">
-                    Certificate
+                    {t("certificate.certificateLabel")}
                   </p>
                   <p className="mt-1 font-bold">{cert.serial}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Issued{" "}
+                    {t("certificate.issued")}{" "}
                     {new Date(cert.issuedAt).toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
@@ -112,7 +114,7 @@ export function CertificateView() {
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-700 hover:underline"
               >
-                View / verify <ExternalLink className="h-3.5 w-3.5" />
+                {t("certificate.viewVerify")} <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </Card>
           ))}

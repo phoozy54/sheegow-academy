@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { levelBadgeClass } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 const LEVELS = [
   "Beginner",
@@ -62,6 +63,7 @@ const LEVELS = [
 ] as const;
 
 export function ProfileView() {
+  const t = useT();
   const { user, authLoading, openAuthModal, setUser } = useStore();
   const [savingAccount, setSavingAccount] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
@@ -101,7 +103,7 @@ export function ProfileView() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm">Loading your profile...</p>
+          <p className="text-sm">{t("profile.loading")}</p>
         </div>
       </div>
     );
@@ -114,9 +116,9 @@ export function ProfileView() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
             <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">Please log in</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("profile.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Log in to manage your profile settings.
+            {t("profile.loginToManage")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
@@ -204,10 +206,10 @@ export function ProfileView() {
       {/* ─── Header ─────────────────────────────────────────── */}
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          Profile Settings
+          {t("profile.title")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage your account, password, and notification preferences.
+          {t("profile.desc")}
         </p>
       </div>
 
@@ -224,7 +226,7 @@ export function ProfileView() {
               </Avatar>
               <button
                 onClick={handlePhotoUpload}
-                aria-label="Change photo"
+                aria-label={t("profile.changePhoto")}
                 className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-indigo-600 text-white shadow-md transition-transform hover:scale-110 hover:bg-indigo-700"
               >
                 <Camera className="h-4 w-4" />
@@ -263,15 +265,15 @@ export function ProfileView() {
             <dl className="w-full space-y-2 text-left text-sm">
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-2 text-muted-foreground">
-                  <User className="h-4 w-4" /> Username
+                  <User className="h-4 w-4" /> {t("profile.username")}
                 </dt>
                 <dd className="max-w-[140px] truncate font-medium">
-                  {user.username || "Not set"}
+                  {user.username || t("profile.notSet")}
                 </dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="h-4 w-4" /> Email
+                  <Mail className="h-4 w-4" /> {t("profile.email")}
                 </dt>
                 <dd className="max-w-[140px] truncate font-medium">
                   {user.email}
@@ -279,10 +281,10 @@ export function ProfileView() {
               </div>
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-2 text-muted-foreground">
-                  <Phone className="h-4 w-4" /> Phone
+                  <Phone className="h-4 w-4" /> {t("profile.phone")}
                 </dt>
                 <dd className="font-medium">
-                  {user.phone || "Not set"}
+                  {user.phone || t("profile.notSet")}
                 </dd>
               </div>
             </dl>
@@ -298,25 +300,25 @@ export function ProfileView() {
                   value="account"
                   className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
                 >
-                  Account
+                  {t("profile.account")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="password"
                   className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
                 >
-                  Password
+                  {t("profile.password")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="notifications"
                   className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
                 >
-                  Notifications
+                  {t("profile.notifications")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="danger"
                   className="data-[state=active]:bg-red-50 data-[state=active]:text-red-700"
                 >
-                  Danger Zone
+                  {t("profile.dangerZone")}
                 </TabsTrigger>
               </TabsList>
             </CardHeader>
@@ -324,14 +326,14 @@ export function ProfileView() {
             {/* Account */}
             <TabsContent value="account" className="m-0 flex-1 p-6">
               <div className="mb-5">
-                <h3 className="text-base font-bold">Account information</h3>
+                <h3 className="text-base font-bold">{t("profile.accountInfo")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Update your personal details and learning level.
+                  {t("profile.accountInfoDesc")}
                 </p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="fullName">Full Name</Label>
+                  <Label htmlFor="fullName">{t("profile.fullName")}</Label>
                   <Input
                     id="fullName"
                     value={fullName}
@@ -341,7 +343,7 @@ export function ProfileView() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="username">Login Username</Label>
+                  <Label htmlFor="username">{t("profile.loginUsername")}</Label>
                   <Input
                     id="username"
                     value={username}
@@ -351,13 +353,12 @@ export function ProfileView() {
                     maxLength={30}
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    3–30 small letters, numbers, dots or underscores. You can
-                    log in with this, your email or your phone number.
+                    {t("profile.usernameHint")}
                   </p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t("profile.email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -366,17 +367,17 @@ export function ProfileView() {
                     className="bg-muted/40 text-muted-foreground"
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    Email cannot be changed. Contact support if needed.
+                    {t("profile.emailCannotChange")}
                   </p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t("profile.phone")}</Label>
                   <PhoneInput id="phone" value={phone} onChange={setPhone} />
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="level">Learning Level</Label>
+                  <Label htmlFor="level">{t("profile.learningLevel")}</Label>
                   <Select value={level} onValueChange={setLevel}>
                     <SelectTrigger id="level" className="w-full">
                       <SelectValue placeholder="Select level" />
@@ -411,14 +412,14 @@ export function ProfileView() {
             {/* Password */}
             <TabsContent value="password" className="m-0 flex-1 p-6">
               <div className="mb-5">
-                <h3 className="text-base font-bold">Change password</h3>
+                <h3 className="text-base font-bold">{t("profile.changePassword")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Keep your account secure with a strong password.
+                  {t("profile.passwordDesc")}
                 </p>
               </div>
               <div className="max-w-md space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="currentPw">Current Password</Label>
+                  <Label htmlFor="currentPw">{t("profile.currentPassword")}</Label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -432,7 +433,7 @@ export function ProfileView() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="newPw">New Password</Label>
+                  <Label htmlFor="newPw">{t("profile.newPassword")}</Label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -446,7 +447,7 @@ export function ProfileView() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="confirmPw">Confirm New Password</Label>
+                  <Label htmlFor="confirmPw">{t("profile.confirmNewPassword")}</Label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -460,7 +461,7 @@ export function ProfileView() {
                   </div>
                   {confirmPw.length > 0 && newPw !== confirmPw && (
                     <p className="text-[11px] text-red-600">
-                      Passwords do not match
+                      {t("profile.passwordsNoMatch")}
                     </p>
                   )}
                 </div>
@@ -487,14 +488,14 @@ export function ProfileView() {
               <div className="mb-5">
                 <h3 className="text-base font-bold">Notifications</h3>
                 <p className="text-sm text-muted-foreground">
-                  Choose what updates you want to receive.
+                  {t("profile.notificationsDesc")}
                 </p>
               </div>
               <div className="space-y-1">
                 <NotifRow
                   icon={Bell}
-                  title="Live class reminders"
-                  desc="Get notified 15 minutes before your scheduled classes."
+                  title={t("profile.liveReminders")}
+                  desc={t("profile.liveRemindersDesc")}
                   checked={liveReminders}
                   onCheckedChange={(v) => {
                     setLiveReminders(v);
@@ -506,8 +507,8 @@ export function ProfileView() {
                 <Separator />
                 <NotifRow
                   icon={Check}
-                  title="New course announcements"
-                  desc="Hear about new courses that match your level."
+                  title={t("profile.courseAnnouncements")}
+                  desc={t("profile.courseAnnouncementsDesc")}
                   checked={courseAnnouncements}
                   onCheckedChange={(v) => {
                     setCourseAnnouncements(v);
@@ -519,8 +520,8 @@ export function ProfileView() {
                 <Separator />
                 <NotifRow
                   icon={Mail}
-                  title="Weekly progress reports"
-                  desc="A weekly summary of your learning progress by email."
+                  title={t("profile.weeklyReports")}
+                  desc={t("profile.weeklyReportsDesc")}
                   checked={weeklyReports}
                   onCheckedChange={(v) => {
                     setWeeklyReports(v);
@@ -536,21 +537,20 @@ export function ProfileView() {
             <TabsContent value="danger" className="m-0 flex-1 p-6">
               <div className="mb-5">
                 <h3 className="flex items-center gap-2 text-base font-bold text-red-700">
-                  <AlertTriangle className="h-4 w-4" /> Danger Zone
+                  <AlertTriangle className="h-4 w-4" /> {t("profile.dangerZone")}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Irreversible actions for your account.
+                  {t("profile.dangerZoneDesc")}
                 </p>
               </div>
 
               <div className="flex flex-col gap-4 rounded-lg border border-red-200 bg-red-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold text-foreground">
-                    Delete account
+                    {t("profile.deleteAccount")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Permanently remove your account and all associated data.
-                    This cannot be undone.
+                    {t("profile.deleteAccountDesc")}
                   </p>
                 </div>
                 <Button
@@ -568,11 +568,10 @@ export function ProfileView() {
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-red-700">
                       <AlertTriangle className="h-5 w-5" />
-                      Delete account?
+                      {t("profile.deleteAccountTitle")}
                     </DialogTitle>
                     <DialogDescription>
-                      This will permanently delete your account, enrollments,
-                      and progress. This action cannot be undone.
+                      {t("profile.deleteAccountConfirm")}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -623,6 +622,7 @@ function NotifRow({
   checked: boolean;
   onCheckedChange: (v: boolean) => void;
 }) {
+  const t = useT();
   return (
     <div className="flex items-center justify-between gap-4 py-4">
       <div className="flex items-start gap-3">

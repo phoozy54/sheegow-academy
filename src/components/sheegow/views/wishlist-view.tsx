@@ -16,8 +16,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CourseCard } from "../course-card";
+import { useT } from "@/lib/i18n";
 
 export function WishlistView() {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const [items, setItems] = useState<WishlistItem[]>([]);
@@ -48,7 +50,7 @@ export function WishlistView() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm">Loading your wishlist...</p>
+          <p className="text-sm">{t("wishlist.loading")}</p>
         </div>
       </div>
     );
@@ -61,9 +63,9 @@ export function WishlistView() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
             <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">Please log in</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("wishlist.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Log in to see the courses you&apos;ve saved for later.
+            {t("wishlist.loginToSee")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
@@ -83,17 +85,16 @@ export function WishlistView() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             <Heart className="h-7 w-7 fill-rose-500 text-rose-500" />
-            My Wishlist
+            {t("wishlist.title")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Courses you&apos;ve saved to enroll in later. Your wishlist syncs
-            across every device you log in from.
+            {t("wishlist.headerDesc")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 font-semibold text-rose-700">
             <Heart className="h-3.5 w-3.5 fill-rose-500 text-rose-500" />
-            {items.length} saved
+            {items.length} {t("wishlist.saved")}
           </span>
         </div>
       </div>
@@ -152,22 +153,22 @@ export function WishlistView() {
 }
 
 function EmptyWishlist({ onBrowse }: { onBrowse: () => void }) {
+  const t = useT();
   return (
     <Card className="p-12 text-center">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-50">
         <Heart className="h-8 w-8 text-rose-400" />
       </div>
-      <h3 className="mb-1 text-lg font-bold">Your wishlist is empty</h3>
+      <h3 className="mb-1 text-lg font-bold">{t("wishlist.emptyTitle")}</h3>
       <p className="mb-5 mx-auto max-w-sm text-sm text-muted-foreground">
-        Tap the heart icon on any course to save it for later. Saved courses
-        appear here and stay synced across your devices.
+        {t("wishlist.emptyDesc")}
       </p>
       <Button
         onClick={onBrowse}
         className="gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
       >
         <Sparkles className="h-4 w-4" />
-        Browse Courses
+        {t("cta.browseCourses")}
         <ArrowRight className="h-4 w-4" />
       </Button>
     </Card>

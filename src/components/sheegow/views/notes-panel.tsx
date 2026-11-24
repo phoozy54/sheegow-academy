@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 interface NotesPanelProps {
   lessonId: string;
@@ -38,6 +39,7 @@ export function NotesPanel({
   lessonId,
   variant = "card",
 }: NotesPanelProps) {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const [note, setNote] = useState<LessonNote | null>(null);
   const [draft, setDraft] = useState("");
@@ -178,10 +180,10 @@ export function NotesPanel({
       >
         <LockKeyhole className="h-6 w-6 text-muted-foreground" />
         <p className="text-sm font-medium text-foreground">
-          Sign in to take notes
+          {t("notes.signInToTake")}
         </p>
         <p className="text-xs text-muted-foreground">
-          Your personal notes are saved automatically as you type.
+          {t("notes.notesAutoSaved")}
         </p>
         <Button
           size="sm"
@@ -189,7 +191,7 @@ export function NotesPanel({
           className="mt-2 gap-1.5"
           onClick={() => openAuthModal("login")}
         >
-          <LogIn className="h-3.5 w-3.5" /> Log in
+          <LogIn className="h-3.5 w-3.5" /> {t("auth.logIn")}
         </Button>
       </div>
     );
@@ -208,9 +210,9 @@ export function NotesPanel({
             <StickyNote className="h-4 w-4" />
           </span>
           <div>
-            <h3 className="text-sm font-bold text-foreground">My notes</h3>
+            <h3 className="text-sm font-bold text-foreground">{t("notes.myNotes")}</h3>
             <p className="text-[11px] text-muted-foreground">
-              Auto-saved as you type
+              {t("notes.autoSaved")}
             </p>
           </div>
         </div>
@@ -240,7 +242,7 @@ export function NotesPanel({
             className="h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-red-600"
             onClick={() => void handleDelete()}
           >
-            <Trash2 className="h-3.5 w-3.5" /> Delete note
+            <Trash2 className="h-3.5 w-3.5" /> {t("notes.deleteNote")}
           </Button>
         )}
       </div>
@@ -249,17 +251,18 @@ export function NotesPanel({
 }
 
 function SaveIndicator({ state }: { state: SaveState }) {
+  const t = useT();
   if (state === "saving") {
     return (
       <span className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-medium text-indigo-600">
-        <Loader2 className="h-3 w-3 animate-spin" /> Saving…
+        <Loader2 className="h-3 w-3 animate-spin" /> {t("notes.saving")}
       </span>
     );
   }
   if (state === "saved") {
     return (
       <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-600">
-        <CheckCircle2 className="h-3 w-3" /> Saved
+        <CheckCircle2 className="h-3 w-3" /> {t("notes.saved")}
       </span>
     );
   }

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, formatDateTime, timeAgo } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 interface AnnouncementsPanelProps {
   courseId: string;
@@ -51,6 +52,7 @@ export function AnnouncementsPanel({
   compact = false,
   defaultOpen = true,
 }: AnnouncementsPanelProps) {
+  const t = useT();
   const [open, setOpen] = useState(defaultOpen);
   const [items, setItems] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,9 +133,9 @@ export function AnnouncementsPanel({
           <Megaphone className="h-4 w-4" />
         </span>
         <div>
-          <h3 className="text-base font-bold text-foreground">Announcements</h3>
+          <h3 className="text-base font-bold text-foreground">{t("announcements.title")}</h3>
           <p className="text-xs text-muted-foreground">
-            Updates from your teacher for this course
+            {t("announcements.desc")}
           </p>
         </div>
       </div>
@@ -147,11 +149,11 @@ export function AnnouncementsPanel({
           >
             {showForm ? (
               <>
-                <span className="hidden sm:inline">Cancel</span>
+                <span className="hidden sm:inline">{t("announcements.cancel")}</span>
               </>
             ) : (
               <>
-                <Plus className="h-3.5 w-3.5" /> Post
+                <Plus className="h-3.5 w-3.5" /> {t("announcements.post")}
               </>
             )}
           </Button>
@@ -161,7 +163,7 @@ export function AnnouncementsPanel({
             size="sm"
             variant="ghost"
             className="gap-1 text-muted-foreground hover:text-foreground"
-            aria-label={open ? "Collapse announcements" : "Expand announcements"}
+            aria-label={open ? t("announcements.collapseAnn") : t("announcements.expandAnn")}
           >
             <ChevronDown
               className={cn(
@@ -215,7 +217,7 @@ export function AnnouncementsPanel({
                 ) : (
                   <Send className="h-4 w-4" />
                 )}
-                Publish announcement
+                {t("announcements.publish")}
               </Button>
             </div>
           </div>
@@ -234,7 +236,7 @@ export function AnnouncementsPanel({
                 <div>
                   <p className="font-semibold">{error}</p>
                   <p className="mt-1 text-xs text-amber-700">
-                    Enroll in this course to see announcements from your teacher.
+                    {t("announcements.enrollToSee")}
                   </p>
                 </div>
               </div>
@@ -242,12 +244,10 @@ export function AnnouncementsPanel({
               <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-8 text-center">
                 <MessageCircle className="h-7 w-7 text-muted-foreground" />
                 <p className="text-sm font-medium text-foreground">
-                  No announcements yet
+                  {t("announcements.empty")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {canManage
-                    ? "Post your first announcement to keep students informed."
-                    : "Your teacher has not posted any announcements yet."}
+                  {canManage ? t("announcements.emptyTeacher") : t("announcements.emptyStudent")}
                 </p>
               </div>
             ) : (
@@ -276,6 +276,7 @@ function AnnouncementCard({
   canDelete: boolean;
   onDelete: () => void;
 }) {
+  const t = useT();
   const author = announcement.author;
   return (
     <Card className="overflow-hidden border-l-4 border-l-indigo-300 p-0">
@@ -295,7 +296,7 @@ function AnnouncementCard({
               size="icon"
               className="h-8 w-8 shrink-0 text-muted-foreground hover:text-red-600"
               onClick={onDelete}
-              aria-label="Delete announcement"
+              aria-label={t("common.delete")}
             >
               <Trash2 className="h-4 w-4" />
             </Button>

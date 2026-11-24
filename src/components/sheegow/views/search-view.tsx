@@ -33,6 +33,7 @@ import {
   X,
 } from "lucide-react";
 import { cn, formatDateTime, levelBadgeClass } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
@@ -79,6 +80,7 @@ function roleBadgeClass(role: string): string {
 /* ------------------------------------------------------------------ */
 
 function CourseResultCard({ course }: { course: SearchCourseResult }) {
+  const t = useT();
   return (
     <Link
       href={course.href}
@@ -117,7 +119,7 @@ function CourseResultCard({ course }: { course: SearchCourseResult }) {
           {course.description}
         </p>
         <span className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-medium text-indigo-600">
-          View course
+          {t("search.viewCourse")}
         </span>
       </div>
     </Link>
@@ -125,6 +127,7 @@ function CourseResultCard({ course }: { course: SearchCourseResult }) {
 }
 
 function LiveClassResultCard({ liveClass }: { liveClass: SearchLiveClassResult }) {
+  const t = useT();
   const status = liveStatusBadge(liveClass.status);
   return (
     <Link
@@ -150,6 +153,7 @@ function LiveClassResultCard({ liveClass }: { liveClass: SearchLiveClassResult }
 }
 
 function UserResultCard({ user }: { user: SearchUserResult }) {
+  const t = useT();
   return (
     <Link
       href="/dashboard"
@@ -221,6 +225,7 @@ function ResultSection({
 /* ------------------------------------------------------------------ */
 
 export function SearchView() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
@@ -299,14 +304,14 @@ export function SearchView() {
         href="/"
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to home
+        <ArrowLeft className="h-4 w-4" /> {t("search.backToHome")}
       </Link>
 
       <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-        Search SHEEGOW ACADEMY
+        {t("search.title")}
       </h1>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        Find live courses, classes and — for staff — students and teachers.
+        {t("search.desc")}
       </p>
 
       <form onSubmit={submit} className="mt-5">
@@ -317,7 +322,7 @@ export function SearchView() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search courses, classes, people…"
-            aria-label="Search query"
+            aria-label={t("search.searchQuery")}
             className="h-12 rounded-full border-muted bg-muted/40 pl-11 pr-24 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:bg-background sm:text-base"
           />
           <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
@@ -325,7 +330,7 @@ export function SearchView() {
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                aria-label="Clear search"
+                aria-label={t("search.clearSearch")}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <X className="h-4 w-4" />
@@ -356,17 +361,17 @@ export function SearchView() {
         ) : (
           <div>
             <p className="mb-5 text-sm text-muted-foreground">
-              Showing{" "}
+              {t("search.showing")}{" "}
               <span className="font-semibold text-foreground">
                 {totalResults}
               </span>{" "}
-              result{totalResults === 1 ? "" : "s"} for{" "}
+              {totalResults === 1 ? t("search.resultSingular") : t("search.resultPlural")} {t("search.for")}{" "}
               <span className="font-medium text-foreground">
                 &ldquo;{trimmed}&rdquo;
               </span>
               {totalResults >= FULL_LIMIT && (
                 <span className="ml-1 text-xs">
-                  (showing the top {FULL_LIMIT} per category)
+                  {t("search.showingTop")} {FULL_LIMIT} {t("search.perCategory")}
                 </span>
               )}
             </p>
@@ -374,7 +379,7 @@ export function SearchView() {
             {results!.courses.length > 0 && (
               <ResultSection
                 icon={BookOpen}
-                title="Courses"
+                title={t("search.courses")}
                 count={results!.courses.length}
               >
                 {results!.courses.map((c) => (
@@ -386,7 +391,7 @@ export function SearchView() {
             {results!.liveClasses.length > 0 && (
               <ResultSection
                 icon={Video}
-                title="Live Classes"
+                title={t("search.liveClasses")}
                 count={results!.liveClasses.length}
               >
                 {results!.liveClasses.map((lc) => (
@@ -398,7 +403,7 @@ export function SearchView() {
             {(results!.users?.length ?? 0) > 0 && (
               <ResultSection
                 icon={UsersIcon}
-                title="Users"
+                title={t("search.users")}
                 count={results!.users!.length}
               >
                 {results!.users!.map((u) => (
@@ -414,16 +419,16 @@ export function SearchView() {
 }
 
 function EmptyHint() {
+  const t = useT();
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed bg-muted/30 p-10 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-indigo-500 shadow-sm">
         <SearchIcon className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-sm font-semibold">Search across the academy</p>
+        <p className="text-sm font-semibold">{t("search.searchAcrossAcademy")}</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Type a course name, a live class, or — for staff — a student or
-          teacher. Press Enter to run the search.
+          {t("search.searchAcrossDesc")}
         </p>
       </div>
     </div>
@@ -431,11 +436,12 @@ function EmptyHint() {
 }
 
 function LoadingState() {
+  const t = useT();
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
-        Searching…
+        {t("search.searching")}
       </div>
       {[0, 1, 2].map((section) => (
         <div key={section}>
@@ -462,19 +468,20 @@ function LoadingState() {
 }
 
 function NoResults({ query }: { query: string }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border bg-muted/30 p-10 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm">
         <SearchIcon className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-sm font-semibold">No results found</p>
+        <p className="text-sm font-semibold">{t("search.noResults")}</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          We could not find anything matching{" "}
+          {t("search.noResultsDesc")}{" "}
           <span className="font-medium text-foreground">
             &ldquo;{query}&rdquo;
           </span>
-          . Try a different spelling or a broader term.
+          {t("search.tryDifferent")}
         </p>
       </div>
       <div className="mt-2 flex flex-wrap items-center justify-center gap-2">

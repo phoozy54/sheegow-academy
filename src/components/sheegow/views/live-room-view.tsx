@@ -48,6 +48,7 @@ import {
 import { cn, formatDateTime } from "@/lib/ui";
 import { toast } from "sonner";
 import { Whiteboard } from "@/components/sheegow/whiteboard";
+import { useT } from "@/lib/i18n";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -81,6 +82,7 @@ function isSystem(m: AnyMsg): m is SystemMsg {
 /* ─── Main view ──────────────────────────────────────────── */
 
 export function LiveRoomView({ classId }: { classId: string }) {
+  const t = useT();
   const user = useStore((s) => s.user);
   const openAuthModal = useStore((s) => s.openAuthModal);
   const router = useRouter();
@@ -689,15 +691,15 @@ export function LiveRoomView({ classId }: { classId: string }) {
   /* ─── Error / access denied ─────────────────────────── */
   if (error || !liveClass || accessBlocked) {
     const message = accessBlocked
-      ? "You need access to join this class. Enroll with a completed payment, or ask an admin for a free trial."
-      : error || "This live class could not be loaded.";
+      ? t("liveRoom.accessMsg")
+      : error || t("liveRoom.classUnavailable");
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <Radio className="h-8 w-8 text-red-500" />
         </div>
         <h2 className="text-2xl font-bold text-foreground">
-          {accessBlocked ? "Access required" : "Class unavailable"}
+          {accessBlocked ? t("liveRoom.accessRequired") : t("liveRoom.classUnavailable")}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">{message}</p>
 
@@ -705,7 +707,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
           <div className="mx-auto mt-6 max-w-sm rounded-xl border bg-card p-4 shadow-sm">
             {trialRequested ? (
               <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700">
-                <CheckCircle2 className="h-4 w-4" /> Trial request sent — awaiting admin approval
+                <CheckCircle2 className="h-4 w-4" /> {t("liveRoom.trialSent")}
               </div>
             ) : (
               <Button
@@ -718,11 +720,11 @@ export function LiveRoomView({ classId }: { classId: string }) {
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                Request a free trial
+                {t("liveRoom.requestFreeTrial")}
               </Button>
             )}
             <p className="mt-2 text-xs text-muted-foreground">
-              An admin or super admin reviews every request. No payment needed.
+              {t("liveRoom.adminReviews")}
             </p>
           </div>
         )}
@@ -732,7 +734,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
           variant="outline"
           className="mt-6 gap-1.5"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to Live Classes
+          <ArrowLeft className="h-4 w-4" /> {t("liveRoom.backToLive")}
         </Button>
       </div>
     );
@@ -748,11 +750,10 @@ export function LiveRoomView({ classId }: { classId: string }) {
           <Video className="h-8 w-8 text-indigo-600" />
         </div>
         <h2 className="text-2xl font-bold text-foreground">
-          How do you want to join?
+          {t("live.howJoin")}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          You&apos;re joining <span className="font-semibold text-foreground">{liveClass.title}</span>.
-          Choose your role for this session.
+          {t("liveRoom.youAreJoining")} <span className="font-semibold text-foreground">{liveClass.title}</span>. {t("liveRoom.chooseRole")}
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -791,7 +792,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
           variant="ghost"
           className="mt-4 gap-1.5 text-sm"
         >
-          <ArrowLeft className="h-4 w-4" /> Cancel
+          <ArrowLeft className="h-4 w-4" /> {t("liveRoom.cancel")}
         </Button>
       </div>
     );
@@ -810,7 +811,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
             onClick={() => router.push("/live-classes")}
             className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Leave</span>
+            <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">{t("liveRoom.leave")}</span>
           </button>
           <div className="flex min-w-0 items-center gap-2">
             <span className="relative flex h-2 w-2 shrink-0">
@@ -830,7 +831,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
             )}
             title="Live video & chat signaling connection"
           >
-            {socketConnected ? "Connected" : "Connecting…"}
+            {socketConnected ? t("liveRoom.connected") : t("liveRoom.connecting")}
           </span>
           <Badge variant="outline" className="hidden shrink-0 border-red-200 bg-red-50 text-red-700 sm:inline-flex">
             <Radio className="mr-1 h-3 w-3" /> LIVE
@@ -858,7 +859,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
                   : "text-muted-foreground"
               )}
             >
-              <Video className="h-4 w-4" /> Video
+              <Video className="h-4 w-4" /> {t("liveRoom.video")}
             </button>
             <button
               onClick={() => setMobileTab("chat")}
@@ -869,7 +870,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
                   : "text-muted-foreground"
               )}
             >
-              <MessageSquare className="h-4 w-4" /> Chat
+              <MessageSquare className="h-4 w-4" /> {t("liveRoom.chat")}
               {messages.length > 0 && mobileTab !== "chat" && (
                 <span className="ml-0.5 rounded-full bg-indigo-100 px-1.5 text-[10px] font-bold text-indigo-700">
                   {messages.length}
@@ -1029,6 +1030,7 @@ function VideoArea({
   isLoggedIn: boolean;
   onLoginPrompt: () => void;
 }) {
+  const t = useT();
   const teacherName = liveClass.teacher?.fullName || "Teacher";
   const teacherAvatar = liveClass.teacher?.profilePicture || null;
 
@@ -1056,7 +1058,7 @@ function VideoArea({
           </span>
           <div className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-xs font-medium text-white backdrop-blur sm:gap-2 sm:px-3">
             <Users className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Students online:</span>
+            <span className="hidden sm:inline">{t("liveRoom.studentsOnline")}</span>
             <span className="font-semibold">{onlineCount}</span>
           </div>
         </div>
@@ -1073,7 +1075,7 @@ function VideoArea({
             {needsPlay && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/70 p-4 text-center">
                 <Volume2 className="h-8 w-8 text-white" />
-                <p className="text-sm font-semibold text-white">Tap to enable sound</p>
+                <p className="text-sm font-semibold text-white">{t("liveRoom.tapEnableSound")}</p>
                 <Button size="sm" onClick={onEnablePlay}>
                   Enable audio
                 </Button>
@@ -1097,11 +1099,11 @@ function VideoArea({
             />
             {!camOn && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 text-sm font-medium text-white">
-                Camera is off
+                {t("liveRoom.cameraOff")}
               </div>
             )}
             <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-              <Radio className="h-3 w-3 text-red-400" /> You are live
+              <Radio className="h-3 w-3 text-red-400" /> {t("liveRoom.youAreLive")}
               {screenSharing ? " · screen" : ""} · {onlineCount} watching
             </div>
           </>
@@ -1121,17 +1123,13 @@ function VideoArea({
             </div>
             <h3 className="mt-4 line-clamp-2 text-base font-bold text-white sm:text-lg lg:text-xl">{liveClass.title}</h3>
             <p className="mt-1 text-xs text-indigo-200 sm:text-sm">
-              with <span className="font-semibold">{teacherName}</span>
+              {t("liveRoom.with")} <span className="font-semibold">{teacherName}</span>
             </p>
             <p className="mt-3 line-clamp-3 max-w-md text-xs text-slate-300">
-              {liveClass.description || "Live interactive English class in session."}
+              {liveClass.description || t("liveRoom.liveInteractive")}
             </p>
             <p className="mt-4 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-indigo-100 backdrop-blur">
-              {isHost
-                ? 'Press "Start Camera & Mic" to begin teaching'
-                : hostPresent
-                  ? "Connecting to the teacher's video…"
-                  : "Waiting for the teacher to start the camera…"}
+              {isHost ? t("live.pressStart") : hostPresent ? t("live.connecting") : t("live.waiting")}
             </p>
           </div>
         )}
@@ -1168,16 +1166,16 @@ function VideoArea({
               onClick={onToggleMic}
               activeIcon={Mic}
               inactiveIcon={MicOff}
-              activeLabel="Mute microphone"
-              inactiveLabel="Unmute microphone"
+              activeLabel={t("live.mute")}
+              inactiveLabel={t("live.unmute")}
             />
             <ControlButton
               active={camOn}
               onClick={onToggleCam}
               activeIcon={Video}
               inactiveIcon={VideoOff}
-              activeLabel="Turn off camera"
-              inactiveLabel="Turn on camera"
+              activeLabel={t("live.cameraOffBtn")}
+              inactiveLabel={t("live.cameraOnBtn")}
             />
             <Button
               size="sm"
@@ -1191,9 +1189,9 @@ function VideoArea({
             >
               <RadioTower className="h-4 w-4" />
               <span className="hidden sm:inline">
-                {isBroadcasting ? "Stop Camera" : "Start Camera & Mic"}
+                {isBroadcasting ? t("live.stopCamera") : t("live.startCamera")}
               </span>
-              <span className="sm:hidden">{isBroadcasting ? "Stop" : "Go Live"}</span>
+              <span className="sm:hidden">{isBroadcasting ? t("live.stop") : t("live.goLive")}</span>
             </Button>
           </>
         )}
@@ -1201,7 +1199,7 @@ function VideoArea({
         {!isHost && (
           <div className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-emerald-100 px-3 text-xs font-semibold text-emerald-700">
             <Volume2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Listening</span>
+            <span className="hidden sm:inline">{t("liveRoom.listening")}</span>
           </div>
         )}
         {/* Screen sharing — real getDisplayMedia capture for hosts */}
@@ -1218,7 +1216,7 @@ function VideoArea({
                       ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
                       : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                   )}
-                  aria-label={screenSharing ? "Stop sharing screen" : "Share screen"}
+                  aria-label={screenSharing ? t("live.stopShare") : t("live.shareScreen")}
                 >
                   <ScreenShare className="h-5 w-5" />
                 </button>
@@ -1226,10 +1224,10 @@ function VideoArea({
             </TooltipTrigger>
             <TooltipContent>
               {screenSharing
-                ? "Stop sharing screen"
+                ? t("live.stopShare")
                 : isBroadcasting
-                  ? "Share your screen"
-                  : "Start camera first, then share"}
+                  ? t("live.shareScreen")
+                  : t("live.startCameraFirst")}
             </TooltipContent>
           </Tooltip>
         )}
@@ -1240,7 +1238,7 @@ function VideoArea({
               <button
                 onClick={onToggleWhiteboard}
                 aria-pressed={whiteboardOpen}
-                aria-label={whiteboardOpen ? "Hide whiteboard" : "Open whiteboard"}
+                aria-label={whiteboardOpen ? t("live.hideWhiteboard") : t("live.openWhiteboard")}
                 className={cn(
                   "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
                   whiteboardOpen
@@ -1254,10 +1252,10 @@ function VideoArea({
           </TooltipTrigger>
           <TooltipContent>
             {whiteboardOpen
-              ? "Hide whiteboard"
+              ? t("live.hideWhiteboard")
               : isHost
-                ? "Open whiteboard — draw with the class"
-                : "Open whiteboard — view the teacher's drawing"}
+                ? t("live.drawClass")
+                : t("live.viewDrawing")}
           </TooltipContent>
         </Tooltip>
         {/* Raise hand */}
@@ -1275,7 +1273,7 @@ function VideoArea({
               ? "bg-amber-500 text-white shadow-lg shadow-amber-500/40"
               : "bg-amber-100 text-amber-700 hover:bg-amber-200"
           )}
-          aria-label="Raise hand"
+          aria-label={t("live.raiseHand")}
         >
           <Hand className="h-5 w-5" />
         </button>
@@ -1284,10 +1282,10 @@ function VideoArea({
         <button
           onClick={onLeave}
           className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-red-500 px-4 text-sm font-semibold text-white shadow-lg shadow-red-500/30 transition-colors hover:bg-red-600"
-          aria-label="Leave class"
+          aria-label={t("live.leaveClass")}
         >
           <PhoneOff className="h-4 w-4" />
-          <span className="hidden sm:inline">Leave</span>
+          <span className="hidden sm:inline">{t("liveRoom.leave")}</span>
         </button>
       </div>
     </Card>
@@ -1319,6 +1317,7 @@ function PollPanel({
   onVote: (pollId: string, optionIndex: number) => void;
   onEnd: (pollId: string) => void;
 }) {
+  const t = useT();
   const active = polls.filter((p) => !p.endedAt);
 
   return (
@@ -1326,14 +1325,14 @@ function PollPanel({
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <ClipboardList className="h-4 w-4 text-indigo-600" />
-          <h3 className="text-sm font-bold">Live Polls</h3>
+          <h3 className="text-sm font-bold">{t("liveRoom.livePolls")}</h3>
         </div>
-        <Badge variant="outline">{active.length} open</Badge>
+        <Badge variant="outline">{active.length} {t("liveRoom.open")}</Badge>
       </div>
 
       {isHost && (
         <div className="mb-4 space-y-2 rounded-lg border border-dashed p-3">
-          <p className="text-xs font-semibold text-muted-foreground">Ask the class a question</p>
+          <p className="text-xs font-semibold text-muted-foreground">{t("liveRoom.askClass")}</p>
           <Input
             value={pollQuestion}
             onChange={(e) => setPollQuestion(e.target.value)}
@@ -1393,7 +1392,7 @@ function PollPanel({
 
       {polls.length === 0 ? (
         <p className="py-3 text-center text-xs text-muted-foreground">
-          {isHost ? "No polls yet. Ask your first question above." : "No polls right now."}
+          {isHost ? t("liveRoom.noPollsHost") : t("liveRoom.noPollsStudent")}
         </p>
       ) : (
         <div className="space-y-3">
@@ -1405,7 +1404,7 @@ function PollPanel({
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <p className="text-sm font-semibold">{poll.question}</p>
                   {poll.endedAt ? (
-                    <Badge variant="secondary" className="shrink-0 text-[10px]">Ended</Badge>
+                    <Badge variant="secondary" className="shrink-0 text-[10px]">{t("liveRoom.ended")}</Badge>
                   ) : (
                     <Badge className="shrink-0 bg-emerald-600 text-[10px] text-white">Live</Badge>
                   )}
@@ -1482,6 +1481,7 @@ function ControlButton({
   activeLabel: string;
   inactiveLabel: string;
 }) {
+  const t = useT();
   const Icon = active ? ActiveIcon : InactiveIcon;
   return (
     <Tooltip>
@@ -1530,6 +1530,7 @@ function ChatSidebar({
   onLoginPrompt: () => void;
 }) {
   // Auto-scroll to the latest message whenever messages change
+  const t = useT();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1541,11 +1542,11 @@ function ChatSidebar({
       <div className="flex items-center justify-between gap-2 border-b bg-gradient-to-r from-indigo-50 to-background px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <MessageSquare className="h-4 w-4 shrink-0 text-indigo-600" />
-          <span className="truncate text-sm font-bold text-foreground">Live Chat</span>
+          <span className="truncate text-sm font-bold text-foreground">{t("live.chatTitle")}</span>
         </div>
         <Badge variant="outline" className="shrink-0 border-indigo-200 bg-indigo-50 text-indigo-700">
           <Users className="mr-1 h-3 w-3" />
-          {onlineCount} online
+          {onlineCount} {t("live.online")}
         </Badge>
       </div>
 
@@ -1555,9 +1556,9 @@ function ChatSidebar({
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center py-12 text-center">
               <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground/40" />
-              <p className="text-sm font-medium text-foreground">No messages yet</p>
+              <p className="text-sm font-medium text-foreground">{t("live.noMessages")}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Be the first to say hello.
+                {t("live.firstHello")}
               </p>
             </div>
           ) : (
@@ -1614,7 +1615,7 @@ function ChatSidebar({
           <div className="rounded-lg border border-dashed bg-muted/40 p-4 text-center">
             <Lock className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">
-              Log in to join the chat
+              {t("live.loginChat")}
             </p>
             <Button
               size="sm"
@@ -1622,7 +1623,7 @@ function ChatSidebar({
               onClick={onLoginPrompt}
               className="mt-2 gap-1.5"
             >
-              <Lock className="h-3.5 w-3.5" /> Log in to chat
+              <Lock className="h-3.5 w-3.5" /> {t("live.loginChat")}
             </Button>
           </div>
         )}
@@ -1634,6 +1635,7 @@ function ChatSidebar({
 /* ─── Message rows ──────────────────────────────────────── */
 
 function ChatMessageRow({ msg, isMe }: { msg: ChatMsg; isMe: boolean }) {
+  const t = useT();
   return (
     <div className={cn("flex gap-2", isMe && "flex-row-reverse")}>
       <Avatar className="h-7 w-7 shrink-0">

@@ -20,11 +20,13 @@ import {
 } from "lucide-react";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
 import { trackConversion } from "@/lib/analytics";
+import { useT } from "@/lib/i18n";
 
 /** Bundles section for the /courses page. Shown below the individual courses
  *  grid. Renders one card per active bundle with the original total price
  *  vs. the bundle price, the savings, and a "Get Bundle" button. */
 export function BundlesSection() {
+  const t = useT();
   const router = useRouter();
   const { user, openAuthModal } = useStore();
   const [bundles, setBundles] = useState<BundleWithCourses[]>([]);
@@ -128,7 +130,7 @@ export function BundlesSection() {
                 {hasDiscount && (
                   <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg">
                     <Tag className="h-3 w-3" />
-                    Save {savingsPercent}%
+                    {t("bundles.save")} {savingsPercent}%
                   </span>
                 )}
                 <Badge
@@ -136,7 +138,7 @@ export function BundlesSection() {
                   className="absolute bottom-3 left-3 border bg-white/90 text-foreground"
                 >
                   <Boxes className="mr-1 h-3 w-3" />
-                  {courseCount} {courseCount === 1 ? "course" : "courses"}
+                  {courseCount} {courseCount === 1 ? t("bundleCheckout.courseSingular") : t("bundleCheckout.coursePlural")}
                 </Badge>
               </div>
 
@@ -164,7 +166,7 @@ export function BundlesSection() {
                   ))}
                   {courseCount > 4 && (
                     <li className="pl-6 text-xs font-medium text-indigo-600">
-                      +{courseCount - 4} more
+                      +{courseCount - 4} {t("bundles.more")}
                     </li>
                   )}
                 </ul>
@@ -184,7 +186,7 @@ export function BundlesSection() {
                     </div>
                     {hasDiscount && (
                       <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                        Save {formatPrice(bundle.savings)}
+                        {t("bundles.save")} {formatPrice(bundle.savings)}
                       </span>
                     )}
                   </div>
@@ -207,6 +209,7 @@ export function BundlesSection() {
 }
 
 function BundlesHeader() {
+  const t = useT();
   return (
     <div className="mb-6">
       <Badge
@@ -214,15 +217,13 @@ function BundlesHeader() {
         className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
       >
         <Package className="h-3 w-3" />
-        Course Bundles
+        {t("bundles.eyebrow")}
       </Badge>
       <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-        Save more with <span className="gradient-text">bundles</span>
+        {t("bundles.title1")} <span className="gradient-text">{t("bundles.titleHighlight")}</span>
       </h2>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
-        Buy a curated set of courses together and get a discount versus buying
-        them individually. One payment, instant access to every course in the
-        bundle.
+        {t("bundles.desc")}
       </p>
     </div>
   );

@@ -30,6 +30,7 @@ import {
   levelBadgeClass,
   cn,
 } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 type TrialStatus = "pending" | "approved" | "rejected";
 
@@ -54,6 +55,7 @@ function requestStatus(request?: TrialRequest): TrialStatus | undefined {
 }
 
 export function LiveClassesView() {
+  const t = useT();
   const user = useStore((s) => s.user);
   const openAuthModal = useStore((s) => s.openAuthModal);
   const router = useRouter();
@@ -194,7 +196,7 @@ export function LiveClassesView() {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <Radio className="h-8 w-8 text-red-500" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Couldn&apos;t load live classes</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("live.couldNotLoad")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">{error}</p>
         <Button onClick={load} variant="outline" className="mt-6 gap-1.5">
           <Loader2 className="h-4 w-4" /> Try again
@@ -211,19 +213,17 @@ export function LiveClassesView() {
           <Video className="h-8 w-8 text-indigo-500" />
         </div>
         <h2 className="text-2xl font-bold text-foreground">
-          {isManager ? "No live classes yet" : "No live classes scheduled"}
+          {isManager ? t("live.noClassesYet") : t("live.noClasses")}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          {isManager
-            ? "Create a class from the live class manager — it will appear here for you and students."
-            : "Check back soon — new LIVE English classes are added every week."}
+          {isManager ? t("live.createFromClassManager") : t("live.checkBackSoon")}
         </p>
         <Button
           onClick={() => (isManager ? router.push("/dashboard?section=live") : router.push("/courses"))}
           variant="outline"
           className="mt-6 gap-1.5"
         >
-          {isManager ? "Open class manager" : "Browse Courses"}
+          {isManager ? t("live.openClassManager") : t("courses.allCourses")}
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
@@ -240,14 +240,13 @@ export function LiveClassesView() {
             variant="outline"
             className="mb-4 inline-flex items-center gap-1.5 border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700"
           >
-            <Radio className="h-3 w-3" /> Live Classes
+            <Radio className="h-3 w-3" /> {t("live.badge")}
           </Badge>
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            Join a <span className="gradient-text">LIVE English class</span> right now
+            {t("live.joinLiveNow")} <span className="gradient-text">{t("live.englishClass")}</span> {t("live.rightNow")}
           </h1>
           <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-            All our classes are real-time video sessions. Speak with the teacher,
-            ask questions in chat, and practice with classmates — no recordings.
+            {t("live.liveHeaderDesc")}
           </p>
 
           {/* Students online strip */}
@@ -260,7 +259,7 @@ export function LiveClassesView() {
                 <p className="text-lg font-extrabold leading-none text-foreground">
                   {totalOnline}
                 </p>
-                <p className="text-xs text-muted-foreground">students online now</p>
+                <p className="text-xs text-muted-foreground">{t("live.studentsOnline")}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-xl border bg-card px-4 py-2.5 shadow-sm">
@@ -272,7 +271,7 @@ export function LiveClassesView() {
                   {classes.length}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {isManager ? "classes total" : "upcoming classes"}
+                  {isManager ? t("live.classesTotal") : t("live.upcoming")}
                 </p>
               </div>
             </div>
@@ -290,10 +289,10 @@ export function LiveClassesView() {
               </span>
               <div>
                 <p className="text-sm font-bold text-foreground">
-                  See all classes on the monthly calendar
+                  {t("live.seeMonthlyCalendar")}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Browse upcoming sessions by day and never miss a class.
+                  {t("live.browseByDay")}
                 </p>
               </div>
             </div>
@@ -303,7 +302,7 @@ export function LiveClassesView() {
               size="sm"
               className="self-start gap-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 sm:self-auto"
             >
-              <Calendar className="h-3.5 w-3.5" /> View Calendar
+              <Calendar className="h-3.5 w-3.5" /> {t("live.viewCalendar")}
             </Button>
           </div>
         )}
@@ -313,11 +312,10 @@ export function LiveClassesView() {
           <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-bold text-foreground">
-                Admin view — all {classes.length} classes are visible
+                {t("live.adminViewAll")} {classes.length} {t("live.classesVisible")}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Live, scheduled and ended sessions. Use the manager to create,
-                edit, start or end classes.
+                {t("live.adminLiveScheduled")}
               </p>
             </div>
             <Button
@@ -325,7 +323,7 @@ export function LiveClassesView() {
               className="self-start gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:self-auto"
               size="sm"
             >
-              <Pencil className="h-3.5 w-3.5" /> Manage all classes
+              <Pencil className="h-3.5 w-3.5" /> {t("live.manageAllClasses")}
             </Button>
           </div>
         )}
@@ -338,9 +336,9 @@ export function LiveClassesView() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
               </span>
-              <h2 className="text-xl font-bold text-foreground">Live now</h2>
+              <h2 className="text-xl font-bold text-foreground">{t("live.liveNow")}</h2>
               <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
-                {liveNow.length} happening
+                {liveNow.length} {t("live.happening")}
               </Badge>
             </div>
 
@@ -366,11 +364,11 @@ export function LiveClassesView() {
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-indigo-600" />
                 <h2 className="text-xl font-bold text-foreground">
-                  {isManager ? "All classes" : "Upcoming classes"}
+                  {isManager ? t("live.allClasses") : t("live.upcoming")}
                 </h2>
               </div>
               <span className="text-sm text-muted-foreground">
-                {upcoming.length} {isManager ? "listed" : "scheduled"}
+                {upcoming.length} {isManager ? t("live.listed") : t("live.scheduled")}
               </span>
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -407,6 +405,7 @@ function LiveNowCard({
   isManager: boolean;
   trial: TrialActionProps;
 }) {
+  const t = useT();
   const course = liveClass.course;
   return (
     <Card className="card-lift relative overflow-hidden border-red-200 p-0 shadow-lg shadow-red-500/10">
@@ -427,7 +426,7 @@ function LiveNowCard({
           )}
           <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg">
             <span className="h-1.5 w-1.5 animate-live-pulse rounded-full bg-white" />
-            LIVE
+            {t("courseDetail.live")}
           </span>
         </div>
 
@@ -460,7 +459,7 @@ function LiveNowCard({
               <Clock className="h-3 w-3" /> {liveClass.duration} min
             </span>
             <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" /> {liveClass.attendeeCount} joined
+              <Users className="h-3 w-3" /> {liveClass.attendeeCount} {t("live.joined")}
             </span>
           </div>
 
@@ -468,12 +467,12 @@ function LiveNowCard({
             onClick={onJoin}
             className="mt-4 gap-2 bg-gradient-to-r from-red-500 to-red-600 shadow-lg shadow-red-500/30 hover:from-red-600 hover:to-red-700"
           >
-            <Video className="h-4 w-4" /> {isManager ? "Teach Live Class" : "Join Live Class"}
+            <Video className="h-4 w-4" /> {isManager ? t("live.teachLiveClass") : t("live.joinLiveClass")}
             <ArrowRight className="h-4 w-4" />
           </Button>
           {isManager && (
             <Button onClick={onManage} variant="outline" size="sm" className="mt-2 w-full gap-2">
-              <Pencil className="h-4 w-4" /> Manage class
+              <Pencil className="h-4 w-4" /> {t("live.manageClass")}
             </Button>
           )}
           <TrialAction trial={trial} />
@@ -498,6 +497,7 @@ function LiveClassCard({
   isManager: boolean;
   trial: TrialActionProps;
 }) {
+  const t = useT();
   const course = liveClass.course;
   const ended = liveClass.status === "ended";
 
@@ -575,15 +575,13 @@ function LiveClassCard({
             !ended && "bg-indigo-600 hover:bg-indigo-700"
           )}
         >
-          {ended ? (
-            "Class ended"
-          ) : isManager ? (
+          {ended ? t("live.classEnded") : isManager ? (
             <>
-              Teach Class <ChevronRight className="h-4 w-4" />
+              {t("live.teachClass")} <ChevronRight className="h-4 w-4" />
             </>
           ) : (
             <>
-              Join Class <ChevronRight className="h-4 w-4" />
+              {t("live.joinClass")} <ChevronRight className="h-4 w-4" />
             </>
           )}
         </Button>
@@ -601,20 +599,21 @@ function LiveClassCard({
 /* ─── Trial request action (students only) ─────────────── */
 
 function TrialAction({ trial }: { trial: TrialActionProps }) {
+  const t = useT();
   const { classId, status, isStudent, requesting, onRequest } = trial;
   if (!isStudent) return null;
 
   if (status === "approved") {
     return (
       <div className="mt-2 flex items-center justify-center gap-1.5 rounded-md bg-green-50 px-3 py-2 text-xs font-semibold text-green-700">
-        <CheckCircle2 className="h-3.5 w-3.5" /> Trial approved — you can join
+        <CheckCircle2 className="h-3.5 w-3.5" /> {t("live.trialApproved")}
       </div>
     );
   }
   if (status === "pending") {
     return (
       <div className="mt-2 flex items-center justify-center gap-1.5 rounded-md bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
-        <Clock className="h-3.5 w-3.5" /> Trial request pending approval
+        <Clock className="h-3.5 w-3.5" /> {t("live.trialPending")}
       </div>
     );
   }
@@ -631,7 +630,7 @@ function TrialAction({ trial }: { trial: TrialActionProps }) {
       ) : (
         <Sparkles className="h-3.5 w-3.5" />
       )}
-      {status === "rejected" ? "Request trial again" : "Request free trial"}
+      {status === "rejected" ? t("live.requestTrialAgain") : t("live.requestFreeTrial")}
     </Button>
   );
 }
@@ -639,11 +638,12 @@ function TrialAction({ trial }: { trial: TrialActionProps }) {
 /* ─── Status badge ──────────────────────────────────────── */
 
 function StatusBadge({ liveClass }: { liveClass: LiveClass }) {
+  const t = useT();
   if (liveClass.status === "live") {
     return (
       <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-red-500/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg backdrop-blur">
         <span className="h-1.5 w-1.5 animate-live-pulse rounded-full bg-white" />
-        LIVE
+        {t("courseDetail.live")}
       </span>
     );
   }

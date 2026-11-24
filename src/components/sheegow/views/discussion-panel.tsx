@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, formatDateTime, timeAgo } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 interface DiscussionPanelProps {
   courseId: string;
@@ -71,6 +72,7 @@ export function DiscussionPanel({
   filterLessonId,
   defaultOpen = true,
 }: DiscussionPanelProps) {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const [open, setOpen] = useState(defaultOpen);
   const [filter, setFilter] = useState<FilterTab>("all");
@@ -266,9 +268,9 @@ export function DiscussionPanel({
           <MessageSquare className="h-4 w-4" />
         </span>
         <div>
-          <h3 className="text-base font-bold text-foreground">Discussion &amp; Q&amp;A</h3>
+          <h3 className="text-base font-bold text-foreground">{t("discussion.title")}</h3>
           <p className="text-xs text-muted-foreground">
-            Ask questions about this course and get answers from your teacher
+            {t("discussion.desc")}
           </p>
         </div>
       </div>
@@ -281,10 +283,10 @@ export function DiscussionPanel({
             onClick={() => setShowForm((v) => !v)}
           >
             {showForm ? (
-              <span className="hidden sm:inline">Cancel</span>
+              <span className="hidden sm:inline">{t("discussion.cancel")}</span>
             ) : (
               <>
-                <Plus className="h-3.5 w-3.5" /> Ask
+                <Plus className="h-3.5 w-3.5" /> {t("discussion.ask")}
               </>
             )}
           </Button>
@@ -293,7 +295,7 @@ export function DiscussionPanel({
           size="sm"
           variant="ghost"
           className="gap-1 text-muted-foreground hover:text-foreground"
-          aria-label={open ? "Collapse discussion" : "Expand discussion"}
+          aria-label={open ? t("discussion.collapseDisc") : t("discussion.expandDisc")}
           onClick={() => setOpen((v) => !v)}
         >
           <ChevronDown
@@ -333,14 +335,14 @@ export function DiscussionPanel({
           {lessons.length > 0 && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">
-                Related lesson (optional)
+                {t("discussion.relatedLesson")}
               </label>
               <Select value={selectedLessonId} onValueChange={setSelectedLessonId}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="No specific lesson" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No specific lesson</SelectItem>
+                  <SelectItem value="none">{t("discussion.noSpecificLesson")}</SelectItem>
                   {lessons.map((l) => (
                     <SelectItem key={l.id} value={l.id}>
                       {l.title}
@@ -361,7 +363,7 @@ export function DiscussionPanel({
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              Post question
+              {t("discussion.postQuestion")}
             </Button>
           </div>
         </div>
@@ -371,9 +373,9 @@ export function DiscussionPanel({
         <div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
           <div className="min-w-0 flex-1">
-            <p className="font-semibold">Sign in to join the discussion.</p>
+            <p className="font-semibold">{t("discussion.signInToJoin")}</p>
             <p className="mt-1 text-xs text-amber-700">
-              Enrolled students can ask questions and reply to threads.
+              {t("discussion.enrollToDiscuss")}
             </p>
           </div>
           <Button
@@ -382,7 +384,7 @@ export function DiscussionPanel({
             className="gap-1.5"
             onClick={() => openAuthModal("login")}
           >
-            <LogIn className="h-3.5 w-3.5" /> Log in
+            <LogIn className="h-3.5 w-3.5" /> {t("auth.logIn")}
           </Button>
         </div>
       )}
@@ -391,9 +393,9 @@ export function DiscussionPanel({
         <div className="mt-4 space-y-3">
           <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterTab)}>
             <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-3">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="unresolved">Open</TabsTrigger>
-              <TabsTrigger value="resolved">Resolved</TabsTrigger>
+              <TabsTrigger value="all">{t("discussion.all")}</TabsTrigger>
+              <TabsTrigger value="unresolved">{t("discussion.open")}</TabsTrigger>
+              <TabsTrigger value="resolved">{t("discussion.resolved")}</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -408,7 +410,7 @@ export function DiscussionPanel({
               <div>
                 <p className="font-semibold">{error}</p>
                 <p className="mt-1 text-xs text-amber-700">
-                  Enroll in this course to see and join the discussion.
+                  {t("discussion.enrollToSee")}
                 </p>
               </div>
             </div>
@@ -416,16 +418,10 @@ export function DiscussionPanel({
             <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-8 text-center">
               <HelpCircle className="h-7 w-7 text-muted-foreground" />
               <p className="text-sm font-medium text-foreground">
-                {filter === "resolved"
-                  ? "No resolved questions yet"
-                  : filter === "unresolved"
-                  ? "No open questions — everything has been answered."
-                  : "No questions yet"}
+                {filter === "resolved" ? t("discussion.noResolved") : filter === "unresolved" ? t("discussion.noOpen") : t("discussion.noQuestions")}
               </p>
               <p className="text-xs text-muted-foreground">
-                {user
-                  ? "Be the first to ask a question about this course."
-                  : "Sign in to ask the first question."}
+                {user ? t("discussion.beFirst") : t("discussion.signInToAsk")}
               </p>
             </div>
           ) : (
@@ -490,6 +486,7 @@ function ThreadCard({
   currentUserId,
   canManage,
 }: ThreadCardProps) {
+  const t = useT();
   const isAuthor = currentUserId === thread.studentId;
   const canModify = isAuthor || canManage;
 
@@ -578,14 +575,14 @@ function ThreadCard({
                 onClick={() => onToggleResolved(!thread.isResolved)}
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                {thread.isResolved ? "Reopen" : "Resolve"}
+                {thread.isResolved ? t("discussion.reopen") : t("discussion.resolve")}
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
                 className="h-7 w-7 p-0 text-muted-foreground hover:text-red-600"
                 onClick={onDelete}
-                aria-label="Delete thread"
+                aria-label={t("common.delete")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -601,7 +598,7 @@ function ThreadCard({
               detail.replies.map((r) => <ReplyRow key={r.id} reply={r} />)
             ) : (
               <div className="rounded-lg border border-dashed bg-muted/30 p-4 text-center text-xs text-muted-foreground">
-                No replies yet. Be the first to answer.
+                {t("discussion.noReplies")}
               </div>
             )}
 
@@ -643,6 +640,7 @@ function ThreadCard({
 /* ─── Reply row ─────────────────────────────────────────── */
 
 function ReplyRow({ reply }: { reply: DiscussionReply }) {
+  const t = useT();
   const role = reply.author?.role;
   const isStaff = role === "teacher" || role === "admin" || role === "super_admin";
   return (

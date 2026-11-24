@@ -17,25 +17,26 @@ import {
   DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
-function statusBadge(status: string) {
+function statusBadge(status: string, t: (key: string) => string) {
   if (status === "approved") {
     return (
       <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
-        <CheckCircle2 className="mr-1 h-3 w-3" /> Approved
+        <CheckCircle2 className="mr-1 h-3 w-3" /> {t("refunds.approvedBadge")}
       </Badge>
     );
   }
   if (status === "rejected") {
     return (
       <Badge className="border-rose-200 bg-rose-50 text-rose-700">
-        <XCircle className="mr-1 h-3 w-3" /> Rejected
+        <XCircle className="mr-1 h-3 w-3" /> {t("refunds.rejectedBadge")}
       </Badge>
     );
   }
   return (
     <Badge className="border-amber-200 bg-amber-50 text-amber-700">
-      <Clock className="mr-1 h-3 w-3" /> Pending
+      <Clock className="mr-1 h-3 w-3" /> {t("refunds.pendingBadge")}
     </Badge>
   );
 }
@@ -49,6 +50,7 @@ function statusBadge(status: string) {
  * Mobile and tablet get card layout; desktop gets a table.
  */
 export function StudentRefunds() {
+  const t = useT();
   const [requests, setRequests] = useState<RefundRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -84,14 +86,13 @@ export function StudentRefunds() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground">My Refund Requests</h2>
+          <h2 className="text-xl font-bold text-foreground">{t("refunds.title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Track refund requests you have submitted. You&apos;ll be notified
-            when an admin reviews them.
+            {t("refunds.desc")}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
-          <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          <RefreshCw className="h-3.5 w-3.5" /> {t("refunds.refresh")}
         </Button>
       </div>
 
@@ -102,28 +103,28 @@ export function StudentRefunds() {
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary.total}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Total requests</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("refunds.totalRequests")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <Clock className="mb-2 h-5 w-5 text-amber-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary.pending}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Pending</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("refunds.pending")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <CheckCircle2 className="mb-2 h-5 w-5 text-emerald-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary.approved}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Approved</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("refunds.approved")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <DollarSign className="mb-2 h-5 w-5 text-fuchsia-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {formatPrice(summary.refundedTotal)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Refunded</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("refunds.refunded")}</p>
         </Card>
       </div>
 
@@ -136,10 +137,9 @@ export function StudentRefunds() {
       ) : requests.length === 0 ? (
         <Card className="p-10 text-center">
           <RotateCcw className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-          <p className="font-semibold">No refund requests yet</p>
+          <p className="font-semibold">{t("refunds.noRequests")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            When you request a refund from the &quot;My Payments&quot; section,
-            you&apos;ll see its status here.
+            {t("refunds.noRequestsDesc")}
           </p>
         </Card>
       ) : (
@@ -159,14 +159,14 @@ export function StudentRefunds() {
                         {payment?.course?.title ?? "Payment"}
                       </p>
                     </div>
-                    {statusBadge(r.status)}
+                    {statusBadge(r.status, t)}
                   </div>
                   <div className="mt-2 text-xs text-muted-foreground">
-                    Requested {formatDate(r.createdAt)}
+                    {t("refunds.requested")} {formatDate(r.createdAt)}
                   </div>
                   <div className="mt-2">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Your reason
+                      {t("refunds.yourReason")}
                     </p>
                     <p className="mt-0.5 line-clamp-3 text-sm text-foreground">
                       {r.reason}
@@ -175,7 +175,7 @@ export function StudentRefunds() {
                   {r.adminNote && (
                     <div className="mt-2 rounded-lg border bg-muted/30 p-2">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Admin note
+                        {t("refunds.adminNote")}
                       </p>
                       <p className="mt-0.5 text-xs text-foreground">
                         {r.adminNote}
@@ -192,12 +192,12 @@ export function StudentRefunds() {
             <table className="w-full text-left text-sm">
               <thead className="border-b bg-muted/40 text-xs uppercase text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">Course</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Reason</th>
-                  <th className="px-4 py-3">Requested</th>
-                  <th className="px-4 py-3">Reviewed</th>
-                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">{t("refunds.course")}</th>
+                  <th className="px-4 py-3">{t("refunds.amount")}</th>
+                  <th className="px-4 py-3">{t("refunds.reason")}</th>
+                  <th className="px-4 py-3">{t("refunds.requestedLabel")}</th>
+                  <th className="px-4 py-3">{t("refunds.reviewed")}</th>
+                  <th className="px-4 py-3">{t("refunds.status")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -234,7 +234,7 @@ export function StudentRefunds() {
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {r.reviewedAt ? formatDateTime(r.reviewedAt) : "—"}
                       </td>
-                      <td className="px-4 py-3">{statusBadge(r.status)}</td>
+                      <td className="px-4 py-3">{statusBadge(r.status, t)}</td>
                     </tr>
                   );
                 })}

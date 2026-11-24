@@ -39,6 +39,7 @@ import {
   levelBadgeClass,
   timeAgo,
 } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 const RECENT_ACTIVITY = [
   {
@@ -68,6 +69,7 @@ const RECENT_ACTIVITY = [
 ];
 
 export function DashboardView() {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
 
@@ -136,7 +138,7 @@ export function DashboardView() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm">Loading your dashboard...</p>
+          <p className="text-sm">{t("dashboardView.loading")}</p>
         </div>
       </div>
     );
@@ -149,9 +151,9 @@ export function DashboardView() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
             <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">Please log in</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("dashboardView.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            You need to be logged in to view your dashboard.
+            {t("dashboardView.needLogin")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
@@ -173,11 +175,10 @@ export function DashboardView() {
       <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            Welcome back, {firstName}!
+            {t("dashboardView.welcomeBack")} {firstName}!
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Today is {today}. Keep up the momentum — every lesson brings you
-            closer to fluency.
+            {t("dashboardView.todayIs")} {today}. {t("dashboardView.momentumMsg")}
           </p>
         </div>
         <Button
@@ -186,7 +187,7 @@ export function DashboardView() {
           className="gap-2"
         >
           <Sparkles className="h-4 w-4 text-indigo-600" />
-          Explore courses
+          {t("dashboardView.exploreCourses")}
         </Button>
       </div>
 
@@ -194,25 +195,25 @@ export function DashboardView() {
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           icon={BookOpen}
-          label="Active Courses"
+          label={t("dashboardView.activeCourses")}
           value={stats.active}
           color="bg-indigo-100 text-indigo-600"
         />
         <StatCard
           icon={CheckCircle2}
-          label="Completed Lessons"
+          label={t("dashboardView.completedLessons")}
           value={stats.completedLessons}
           color="bg-emerald-100 text-emerald-600"
         />
         <StatCard
           icon={Clock}
-          label="Learning Hours"
+          label={t("dashboardView.learningHours")}
           value={`${stats.learningHours}h`}
           color="bg-amber-100 text-amber-600"
         />
         <StatCard
           icon={Award}
-          label="Certificates"
+          label={t("dashboardView.certificates")}
           value={stats.certificates}
           color="bg-violet-100 text-violet-600"
         />
@@ -227,7 +228,7 @@ export function DashboardView() {
               <div>
                 <CardTitle className="text-lg">My Courses</CardTitle>
                 <CardDescription className="mt-1 text-xs">
-                  Pick up where you left off
+                  {t("dashboardView.pickUpLeft")}
                 </CardDescription>
               </div>
               {enrollments.length > 0 && (
@@ -314,7 +315,7 @@ export function DashboardView() {
                           </button>
                           {teacher && (
                             <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                              with {teacher.fullName}
+                              {t("dashboardView.with")} {teacher.fullName}
                             </p>
                           )}
                           <div className="mt-2 flex items-center gap-2">
@@ -354,7 +355,7 @@ export function DashboardView() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
                   <Video className="h-4 w-4" />
                 </span>
-                Upcoming Live Classes
+                {t("dashboardView.upcomingLiveClasses")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -370,9 +371,9 @@ export function DashboardView() {
               ) : upcoming.length === 0 ? (
                 <div className="px-4 py-8 text-center">
                   <Calendar className="mx-auto mb-2 h-8 w-8 text-muted-foreground/60" />
-                  <p className="text-sm font-medium">No upcoming classes</p>
+                  <p className="text-sm font-medium">{t("dashboardView.noUpcoming")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Check back soon for new sessions.
+                    {t("dashboardView.checkBackSoon")}
                   </p>
                 </div>
               ) : (
@@ -441,7 +442,7 @@ export function DashboardView() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
                   <TrendingUp className="h-4 w-4" />
                 </span>
-                Recent Activity
+                {t("dashboardView.recentActivity")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
@@ -481,6 +482,7 @@ function StatCard({
   value: number | string;
   color: string;
 }) {
+  const t = useT();
   return (
     <Card className="card-lift p-4">
       <div className="flex items-start justify-between">
@@ -503,22 +505,23 @@ function StatCard({
 }
 
 function EmptyCourses({ onBrowse }: { onBrowse: () => void }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
         <BookOpen className="h-7 w-7 text-indigo-600" />
       </div>
       <p className="mb-1 text-sm font-semibold text-foreground">
-        You haven&apos;t enrolled in any courses yet
+        {t("dashboardView.emptyTitle")}
       </p>
       <p className="mb-5 max-w-xs text-xs text-muted-foreground">
-        Browse our catalog and join your first live English class today.
+        {t("dashboardView.emptyDesc")}
       </p>
       <Button
         onClick={onBrowse}
         className="gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
       >
-        Browse Courses
+        {t("dashboardView.browseCourses")}
         <ArrowRight className="h-4 w-4" />
       </Button>
     </div>

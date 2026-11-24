@@ -23,6 +23,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 // Levels offered by the platform — used to drive the filter pills
 const LEVELS = ["All", "Beginner", "Intermediate", "Advanced", "IELTS", "Kids"] as const;
@@ -33,6 +34,7 @@ const PAGE_SIZE = 9;
 export function CoursesView() {
   const user = useStore((s) => s.user);
   const router = useRouter();
+  const t = useT();
   const { byCourse } = useMyEnrollments();
   const { isMobile, isTablet } = useDevice();
 
@@ -117,23 +119,23 @@ export function CoursesView() {
             ) : (
               <BookOpen className="h-3 w-3" />
             )}
-            {mode === "overview" ? "Admin Overview" : "All Courses"}
+            {mode === "overview" ? t("courses.adminOverview") : t("courses.allCourses")}
           </Badge>
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
             {mode === "overview" ? (
               <>
-                Courses <span className="gradient-text">Control Center</span>
+                {t("courses.controlCenter")} <span className="gradient-text">{t("courses.controlCenterHighlight")}</span>
               </>
             ) : (
               <>
-                Explore Live English <span className="gradient-text">Courses</span>
+                {t("courses.exploreLive")} <span className="gradient-text">{t("courses.exploreHighlight")}</span>
               </>
             )}
           </h1>
           <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
             {mode === "overview"
-              ? "All courses, the work inside each one, every enrolled student and all live classes — the full admin view."
-              : "Browse our full catalog of LIVE English courses — every class is taught in real-time by an expert teacher. Choose your level and start speaking today."}
+              ? t("courses.adminSubtitle")
+              : t("courses.catalogSubtitle")}
           </p>
         </div>
       </section>
@@ -152,7 +154,7 @@ export function CoursesView() {
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
-              <LayoutDashboard className="h-4 w-4" /> Admin overview
+              <LayoutDashboard className="h-4 w-4" /> {t("courses.adminOverviewBtn")}
             </button>
             <button
               onClick={() => setMode("catalog")}
@@ -164,7 +166,7 @@ export function CoursesView() {
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
-              <BookOpen className="h-4 w-4" /> Student catalog
+              <BookOpen className="h-4 w-4" /> {t("courses.studentCatalogBtn")}
             </button>
           </div>
         </section>
@@ -187,17 +189,17 @@ export function CoursesView() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search courses by title..."
+              placeholder={t("courses.searchByTitle")}
               className="pl-9"
-              aria-label="Search courses"
+              aria-label={t("common.search")}
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-                aria-label="Clear search"
+                aria-label={t("courses.clear")}
               >
-                Clear
+                {t("courses.clear")}
               </button>
             )}
           </div>
@@ -206,6 +208,14 @@ export function CoursesView() {
           <div className="flex flex-wrap items-center gap-2">
             {LEVELS.map((lvl) => {
               const active = level === lvl;
+              const levelKey = lvl.toLowerCase();
+              const label =
+                levelKey === "all" ? t("courses.all") :
+                levelKey === "beginner" ? t("courses.beginner") :
+                levelKey === "intermediate" ? t("courses.intermediate") :
+                levelKey === "advanced" ? t("courses.advanced") :
+                levelKey === "ielts" ? t("courses.ielts") :
+                levelKey === "kids" ? t("courses.kids") : lvl;
               return (
                 <button
                   key={lvl}
@@ -218,7 +228,7 @@ export function CoursesView() {
                       : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
                   )}
                 >
-                  {lvl}
+                  {label}
                 </button>
               );
             })}
@@ -230,22 +240,22 @@ export function CoursesView() {
           <span className="min-w-0">
             {loading ? (
               <span className="inline-flex items-center gap-1.5">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading...
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("courses.loading")}
               </span>
             ) : error ? (
               <span className="text-red-600">{error}</span>
             ) : (
               <span className="block truncate">
                 <span className="font-semibold text-foreground">{total}</span>{" "}
-                {total === 1 ? "course" : "courses"} found
+                {total === 1 ? t("courses.courseSingular") : t("courses.coursePlural")} {t("courses.found")}
                 {level !== "All" && (
                   <>
-                    {" "}in <span className="font-semibold text-indigo-600">{level}</span>
+                    {" "}{t("courses.inLabel")} <span className="font-semibold text-indigo-600">{level}</span>
                   </>
                 )}
                 {debouncedSearch && (
                   <>
-                    {" "}matching &ldquo;<span className="font-semibold text-indigo-600">{debouncedSearch}</span>&rdquo;
+                    {" "}{t("courses.matching")} &ldquo;<span className="font-semibold text-indigo-600">{debouncedSearch}</span>&rdquo;
                   </>
                 )}
               </span>
@@ -270,7 +280,7 @@ export function CoursesView() {
               onClick={fetchCourses}
               className="mt-4 gap-1.5"
             >
-              Try again
+              {t("courses.tryAgain")}
             </Button>
           </div>
         ) : courses.length === 0 ? (
@@ -293,7 +303,7 @@ export function CoursesView() {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               className="gap-1.5"
             >
-              <ChevronLeft className="h-4 w-4" /> Prev
+              <ChevronLeft className="h-4 w-4" /> {t("courses.prev")}
             </Button>
             <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }).slice(0, 7).map((_, i) => {
@@ -326,7 +336,7 @@ export function CoursesView() {
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               className="gap-1.5"
             >
-              Next <ChevronRight className="h-4 w-4" />
+              {t("courses.next")} <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         )}
@@ -336,17 +346,16 @@ export function CoursesView() {
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl rounded-3xl border bg-gradient-to-br from-indigo-50 to-amber-50/50 p-6 text-center sm:p-10">
           <h3 className="text-xl font-bold text-foreground sm:text-2xl">
-            Can&apos;t find the right course?
+            {t("courses.cantFindTitle")}
           </h3>
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-            Reach out to our team — we&apos;ll help you pick the perfect LIVE English
-            course for your goals and level.
+            {t("courses.cantFindDesc")}
           </p>
           <Button
             onClick={() => router.push("/contact")}
             className="mt-5 gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
           >
-            Talk to an Advisor
+            {t("courses.talkToAdvisor")}
           </Button>
         </div>
       </section>
@@ -378,21 +387,22 @@ function CourseCardSkeleton() {
 
 /* ─── Empty state ───────────────────────────────────────── */
 function EmptyState({ onReset }: { onReset: () => void }) {
+  const t = useT();
   return (
     <div className="rounded-2xl border border-dashed bg-muted/30 p-12 text-center">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
         <Search className="h-8 w-8 text-indigo-400" />
       </div>
-      <h3 className="text-lg font-bold text-foreground">No courses found</h3>
+      <h3 className="text-lg font-bold text-foreground">{t("courses.noCoursesTitle")}</h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        Try changing your search keywords or selecting a different level filter.
+        {t("courses.noCoursesDesc")}
       </p>
       <Button
         onClick={onReset}
         variant="outline"
         className="mt-5 gap-1.5"
       >
-        Reset filters
+        {t("courses.resetFilters")}
       </Button>
     </div>
   );

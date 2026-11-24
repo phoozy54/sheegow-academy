@@ -48,6 +48,7 @@ import { toast } from "sonner";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 import { PhoneInput } from "../phone-input";
+import { useT } from "@/lib/i18n";
 
 type PaymentMethod = "card" | "zaad" | "edahab";
 
@@ -94,6 +95,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
     authLoading,
     openAuthModal,
   } = useStore();
+  const t = useT();
   const router = useRouter();
   const { isMobile, isTablet } = useDevice();
 
@@ -120,7 +122,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
 
   const [submitting, setSubmitting] = useState(false);
   // Payment id captured after a successful checkout — drives the success
-  // card with the "Download Invoice" CTA.
+  // card with the "{t("checkout.downloadInvoice")}" CTA.
   const [paidPaymentId, setPaidPaymentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -161,7 +163,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm">Loading checkout...</p>
+          <p className="text-sm">{t("checkout.loadingCheckout")}</p>
         </div>
       </div>
     );
@@ -174,9 +176,9 @@ export function CheckoutView({ courseId }: { courseId: string }) {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
             <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">Please log in</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("checkout.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Log in to your account to complete payment and enroll.
+            {t("checkout.loginToPay")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
@@ -196,16 +198,16 @@ export function CheckoutView({ courseId }: { courseId: string }) {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
             <Tag className="h-7 w-7 text-indigo-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">No course selected</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("checkout.noCourseSelected")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Choose a course to start the checkout process.
+            {t("checkout.chooseCourse")}
           </p>
           <Button
             onClick={() => router.push("/courses")}
             className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Courses
+            {t("checkout.backToCourses")}
           </Button>
         </Card>
       </div>
@@ -301,10 +303,10 @@ export function CheckoutView({ courseId }: { courseId: string }) {
           className="gap-1.5 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t("checkout.back")}
         </Button>
         <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-          Checkout
+          {t("checkout.title")}
         </h1>
         <div className="w-16" />
       </div>
@@ -316,10 +318,10 @@ export function CheckoutView({ courseId }: { courseId: string }) {
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
           <h2 className="mb-2 text-2xl font-extrabold text-foreground">
-            Payment successful
+            {t("checkout.paymentSuccess")}
           </h2>
           <p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground">
-            You&apos;re now enrolled in {course?.title}. Download your invoice
+            {t("checkout.enrolledIn")} {course?.title}. Download your invoice
             for your records, or jump straight into the course.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -337,7 +339,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
               className="gap-2"
               onClick={() => router.push("/my-courses")}
             >
-              Go to My Courses
+              {t("checkout.goToMyCourses")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -353,13 +355,13 @@ export function CheckoutView({ courseId }: { courseId: string }) {
       ) : !course ? (
         <Card className="p-8 text-center">
           <p className="text-sm text-muted-foreground">
-            This course could not be loaded.
+            {t("checkout.couldNotLoad")}
           </p>
           <Button
             onClick={() => router.push("/courses")}
             className="mt-4 bg-indigo-600 hover:bg-indigo-700"
           >
-            Browse courses
+            {t("checkout.browseCourses")}
           </Button>
         </Card>
       ) : (
@@ -369,9 +371,9 @@ export function CheckoutView({ courseId }: { courseId: string }) {
             {/* Payment methods */}
             <Card className="p-0">
               <CardHeader className="border-b">
-                <CardTitle className="text-base">Payment Method</CardTitle>
+                <CardTitle className="text-base">{t("checkout.paymentMethod")}</CardTitle>
                 <CardDescription>
-                  Choose how you want to pay for this course.
+                  {t("checkout.chooseHow")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4">
@@ -435,16 +437,15 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                 <CardHeader className="border-b">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Lock className="h-4 w-4 text-indigo-600" />
-                    Card Details
+                    {t("checkout.cardDetails")}
                   </CardTitle>
                   <CardDescription>
-                    Your payment is encrypted and secure (demo — do not enter
-                    real card data).
+                    {t("checkout.cardSecure")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="cardNumber">Card Number</Label>
+                    <Label htmlFor="cardNumber">{t("checkout.cardNumber")}</Label>
                     <div className="relative">
                       <CreditCard className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
@@ -468,7 +469,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="cardExpiry">Expiry (MM/YY)</Label>
+                      <Label htmlFor="cardExpiry">{t("checkout.expiry")}</Label>
                       <Input
                         id="cardExpiry"
                         inputMode="numeric"
@@ -483,7 +484,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="cardCvc">CVC</Label>
+                      <Label htmlFor="cardCvc">{t("checkout.cvc")}</Label>
                       <Input
                         id="cardCvc"
                         inputMode="numeric"
@@ -515,15 +516,14 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                 </CardHeader>
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="walletPhone">Phone Number</Label>
+                    <Label htmlFor="walletPhone">{t("checkout.phoneNumber")}</Label>
                     <PhoneInput
                       id="walletPhone"
                       value={phone}
                       onChange={setPhone}
                     />
                     <p className="text-[11px] text-muted-foreground">
-                      You will receive a payment prompt on this number (demo —
-                      no real charge).
+                      {t("checkout.walletPhoneDesc")}
                     </p>
                   </div>
                 </CardContent>
@@ -538,7 +538,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                   Coupon Code
                 </CardTitle>
                 <CardDescription>
-                  Have a discount code? Apply it here.
+                  {t("checkout.haveDiscount")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4">
@@ -548,10 +548,10 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                       <div>
                         <p className="text-sm font-bold text-emerald-800">
-                          {coupon.code} applied
+                          {coupon.code} {t("checkout.applied")}
                         </p>
                         <p className="text-xs text-emerald-700">
-                          {coupon.discount}% discount
+                          {coupon.discount}% {t("checkout.discount")}
                         </p>
                       </div>
                     </div>
@@ -589,7 +589,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                       ) : (
                         <Tag className="h-4 w-4" />
                       )}
-                      Apply
+                      {t("checkout.apply")}
                     </Button>
                   </div>
                 )}
@@ -606,11 +606,11 @@ export function CheckoutView({ courseId }: { courseId: string }) {
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                Secure checkout
+                {t("checkout.secureCheckout")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                Instant enrollment
+                {t("checkout.instantEnrollment")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-emerald-500" />
@@ -623,7 +623,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
           <div className="lg:col-span-1">
             <Card className="sticky top-20 p-0">
               <CardHeader className="border-b">
-                <CardTitle className="text-base">Order Summary</CardTitle>
+                <CardTitle className="text-base">{t("checkout.orderSummary")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 p-4">
                 <div className="flex gap-3">
@@ -656,9 +656,9 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    {course.duration} weeks
+                    {course.duration} {t("courseDetail.weeks")}
                   </span>
-                  <span>Live classes included</span>
+                  <span>{t("checkout.liveClassesIncluded")}</span>
                 </div>
 
                 <Separator />
@@ -674,7 +674,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                     <div className="flex justify-between text-emerald-700">
                       <span className="inline-flex items-center gap-1">
                         <Tag className="h-3.5 w-3.5" />
-                        Discount ({coupon?.discount}%)
+                        {t("checkout.discount")} ({coupon?.discount}%)
                       </span>
                       <span className="font-semibold">
                         -{formatPrice(pricing.discount)}
@@ -683,7 +683,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                   )}
                   <Separator />
                   <div className="flex items-baseline justify-between pt-1">
-                    <span className="font-bold text-foreground">Total</span>
+                    <span className="font-bold text-foreground">{t("checkout.total")}</span>
                     <span className="text-xl font-extrabold text-indigo-700">
                       {formatPrice(pricing.total)}
                     </span>
@@ -701,7 +701,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                   ) : (
                     <Lock className="h-4 w-4" />
                   )}
-                  Complete Payment
+                  {t("checkout.completePayment")}
                 </Button>
 
                 <Separator />

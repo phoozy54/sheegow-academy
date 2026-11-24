@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge as UiBadge } from "@/components/ui/badge";
 import { Trophy, Flame, Star, Crown, Medal, Award } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 /**
  * LeaderboardView — top 10 students by points + the viewer's own rank.
@@ -24,6 +25,7 @@ import { Trophy, Flame, Star, Crown, Medal, Award } from "lucide-react";
  * contrasting background so they can find themselves at a glance.
  */
 export function LeaderboardView() {
+  const t = useT();
   const [data, setData] = useState<LeaderboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,12 +53,10 @@ export function LeaderboardView() {
           <Trophy className="h-7 w-7" />
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          Student Leaderboard
+          {t("leaderboard.studentLeaderboard")}
         </h1>
         <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-          The top 10 students at SHEEGOW ACADEMY, ranked by total points.
-          Earn points by completing lessons, passing quizzes and attending live
-          classes.
+          {t("leaderboard.desc")}
         </p>
       </div>
 
@@ -70,28 +70,26 @@ export function LeaderboardView() {
               </span>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
-                  Your rank
+                  {t("leaderboard.yourRank")}
                 </p>
                 <p className="text-lg font-extrabold text-foreground">
                   #{currentUserRank}
                   <span className="ml-2 text-sm font-medium text-muted-foreground">
-                    {currentUser.points.toLocaleString()} points
+                    {currentUser.points.toLocaleString()} {t("leaderboard.points")}
                   </span>
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Flame className="h-4 w-4 text-orange-500" />
-              {currentUser.currentStreak}-day streak
+              {currentUser.currentStreak}{t("leaderboard.dayStreak")}
             </div>
           </div>
         </Card>
       ) : (
         <Card className="mb-6 border-dashed bg-muted/30 p-4 text-center sm:p-5">
           <p className="text-sm text-muted-foreground">
-            {currentUserRank === null
-              ? "Log in and complete a lesson to appear on the leaderboard."
-              : "Keep learning to earn your first points and join the leaderboard."}
+            {currentUserRank === null ? t("leaderboard.loginToRank") : t("leaderboard.keepLearning")}
           </p>
         </Card>
       )}
@@ -103,10 +101,10 @@ export function LeaderboardView() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
               <Medal className="h-4 w-4" />
             </span>
-            Top 10 Students
+            {t("leaderboard.top10")}
           </CardTitle>
           <CardDescription className="text-xs">
-            Ranked by total points · updates live
+            {t("leaderboard.rankedByPoints")}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -122,11 +120,10 @@ export function LeaderboardView() {
                 <Trophy className="h-6 w-6 text-muted-foreground" />
               </div>
               <p className="text-sm font-semibold text-foreground">
-                No ranked students yet
+                {t("leaderboard.noRankedStudents")}
               </p>
               <p className="max-w-xs text-xs text-muted-foreground">
-                Be the first — complete a lesson, pass a quiz or join a live
-                class to earn your first points.
+                {t("leaderboard.beFirst")}
               </p>
             </div>
           ) : (
@@ -148,10 +145,10 @@ export function LeaderboardView() {
                 <table className="w-full text-left text-sm">
                   <thead className="border-b bg-muted/40 text-xs uppercase text-muted-foreground">
                     <tr>
-                      <th className="w-16 px-4 py-3 text-center">Rank</th>
-                      <th className="px-4 py-3">Student</th>
-                      <th className="px-4 py-3 text-right">Points</th>
-                      <th className="px-4 py-3 text-right">Streak</th>
+                      <th className="w-16 px-4 py-3 text-center">{t("leaderboard.rank")}</th>
+                      <th className="px-4 py-3">{t("leaderboard.student")}</th>
+                      <th className="px-4 py-3 text-right">{t("leaderboard.points")}</th>
+                      <th className="px-4 py-3 text-right">{t("leaderboard.streak")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -187,7 +184,7 @@ export function LeaderboardView() {
                                       variant="outline"
                                       className="ml-2 border-indigo-200 bg-indigo-50 text-[10px] text-indigo-700"
                                     >
-                                      You
+                                      {t("leaderboard.you")}
                                     </UiBadge>
                                   )}
                                 </p>
@@ -229,18 +226,18 @@ export function LeaderboardView() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
               <Award className="h-4 w-4" />
             </span>
-            How to earn points
+            {t("leaderboard.howToEarn")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0 pt-4">
           <ul className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { label: "Complete a lesson", points: 10 },
-              { label: "Pass a quiz", points: 20 },
-              { label: "Attend a live class", points: 15 },
-              { label: "Submit an assignment", points: 15 },
-              { label: "Post a discussion thread", points: 5 },
-              { label: "Daily streak bonus", points: null },
+              { label: t("leaderboard.completeLesson"), points: 10 },
+              { label: t("leaderboard.passQuiz"), points: 20 },
+              { label: t("leaderboard.attendLive"), points: 15 },
+              { label: t("leaderboard.submitAssignment"), points: 15 },
+              { label: t("leaderboard.postThread"), points: 5 },
+              { label: t("leaderboard.dailyStreak"), points: null },
             ].map((row) => (
               <li
                 key={row.label}
@@ -263,7 +260,7 @@ export function LeaderboardView() {
             ))}
           </ul>
           <p className="mt-4 text-xs text-muted-foreground">
-            Visit your dashboard to see your badges and keep your streak alive.
+            {t("leaderboard.visitDashboard")}
           </p>
           <Button
             asChild
@@ -271,7 +268,7 @@ export function LeaderboardView() {
             variant="outline"
             className="mt-3 gap-1.5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
           >
-            <a href="/dashboard">Go to dashboard</a>
+            <a href="/dashboard">{t("leaderboard.goToDashboard")}</a>
           </Button>
         </CardContent>
       </Card>
@@ -288,6 +285,7 @@ function LeaderboardRow({
   isCurrentUser: boolean;
   compact?: boolean;
 }) {
+  const t = useT();
   void compact;
   return (
     <li
@@ -310,7 +308,7 @@ function LeaderboardRow({
               variant="outline"
               className="ml-2 border-indigo-200 bg-indigo-50 text-[10px] text-indigo-700"
             >
-              You
+              {t("leaderboard.you")}
             </UiBadge>
           )}
         </p>
@@ -335,6 +333,7 @@ function LeaderboardRow({
 }
 
 function RankPill({ rank }: { rank: number }) {
+  const t = useT();
   let icon: React.ReactNode = null;
   let className = "bg-muted text-muted-foreground";
   if (rank === 1) {

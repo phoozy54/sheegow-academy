@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { AnnouncementsPanel } from "./announcements-panel";
 import { DiscussionPanel } from "./discussion-panel";
 import { NotesPanel } from "./notes-panel";
+import { useT } from "@/lib/i18n";
 
 type CurriculumData = Awaited<ReturnType<typeof api.curriculum>>;
 type RoadmapLesson = Lesson;
@@ -51,6 +52,7 @@ const TYPE_ICONS: Record<string, typeof BookOpen> = {
 };
 
 export function CoursePlayerView({ courseId }: { courseId: string }) {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const [data, setData] = useState<CurriculumData | null>(null);
@@ -104,8 +106,8 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <LogIn className="mx-auto mb-3 h-8 w-8 text-indigo-500" />
-        <h1 className="text-xl font-bold">Log in to continue learning</h1>
-        <Button className="mt-4" onClick={() => openAuthModal("login")}>Log in</Button>
+        <h1 className="text-xl font-bold">{t("myCourses.loginToSee")}</h1>
+        <Button className="mt-4" onClick={() => openAuthModal("login")}>{t("auth.logIn")}</Button>
       </div>
     );
   }
@@ -117,7 +119,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <Button variant="ghost" size="sm" className="mb-2 gap-1.5 -ml-2" onClick={() => router.push("/dashboard")}>
-            <ArrowLeft className="h-4 w-4" /> Dashboard
+            <ArrowLeft className="h-4 w-4" /> {t("coursePlayer.dashboard")}
           </Button>
           <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
             {data?.course.title || "Course"}
@@ -127,9 +129,9 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              {roadmap.completedLessons}/{roadmap.totalLessons} lessons
+              {roadmap.completedLessons}/{roadmap.totalLessons} {t("coursePlayer.lessons")}
             </Badge>
-            <Badge variant="outline">{roadmap.remainingLessons} left</Badge>
+            <Badge variant="outline">{roadmap.remainingLessons} {t("coursePlayer.left")}</Badge>
           </div>
         )}
       </div>
@@ -137,14 +139,14 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
       {data?.canManage && courseId && (
         <Card className="mb-5 flex flex-wrap items-center justify-between gap-3 border-fuchsia-200 bg-fuchsia-50/60 p-4 dark:bg-fuchsia-950/20">
           <div className="flex items-center gap-2 text-sm font-semibold text-fuchsia-800 dark:text-fuchsia-200">
-            <Hammer className="h-4 w-4" /> Teacher mode — you can edit and deliver this course
+            <Hammer className="h-4 w-4" /> {t("coursePlayer.teacherMode")}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" className="gap-1.5" onClick={() => router.push("/dashboard?section=courses")}>
-              <Pencil className="h-3.5 w-3.5" /> Edit course
+              <Pencil className="h-3.5 w-3.5" /> {t("coursePlayer.editCourse")}
             </Button>
             <Button size="sm" className="gap-1.5" onClick={() => router.push("/dashboard?section=content-builder")}>
-              <Hammer className="h-3.5 w-3.5" /> Manage lessons
+              <Hammer className="h-3.5 w-3.5" /> {t("coursePlayer.manageLessons")}
             </Button>
           </div>
         </Card>
@@ -154,7 +156,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
         <div className="mb-5">
           <div className="mb-1.5 flex justify-between text-xs">
             <span className="font-medium text-muted-foreground">Your roadmap</span>
-            <span className="font-bold text-foreground">{roadmap.percent}% complete</span>
+            <span className="font-bold text-foreground">{roadmap.percent}% {t("coursePlayer.complete")}</span>
           </div>
           <Progress value={roadmap.percent} className="h-2" />
         </div>
@@ -191,7 +193,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
             <Card className="p-4">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-                  Course roadmap
+                  {t("coursePlayer.courseRoadmap")}
                 </h2>
                 <span className="text-xs font-semibold text-indigo-600">
                   {roadmap.percent}%
@@ -202,7 +204,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                   <div key={module.id}>
                     <div className="mb-2 flex items-baseline gap-2">
                       <span className="text-[11px] font-bold uppercase text-indigo-500">
-                        Module {mi + 1}
+                        {t("coursePlayer.module")} {mi + 1}
                       </span>
                       <span className="text-sm font-semibold text-foreground">{module.title}</span>
                     </div>
@@ -232,7 +234,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                             )}
                             <span className="line-clamp-2 flex-1">{lesson.title}</span>
                             {lesson.type === "quiz" && (
-                              <span className="text-[10px] font-bold uppercase text-amber-600">test</span>
+                              <span className="text-[10px] font-bold uppercase text-amber-600">{t("coursePlayer.test")}</span>
                             )}
                           </button>
                         );
@@ -267,9 +269,9 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
             ) : (
               <Card className="p-10 text-center">
                 <BookOpen className="mx-auto mb-3 h-10 w-10 text-indigo-400" />
-                <h2 className="font-bold">No lessons yet</h2>
+                <h2 className="font-bold">{t("coursePlayer.noLessons")}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Your teacher is preparing the course content.
+                  {t("coursePlayer.teacherPreparing")}
                 </p>
                 <Button className="mt-4" variant="outline" onClick={() => router.push(`/learn/${courseId}`)}>
                   Refresh
@@ -300,6 +302,7 @@ function LessonPanel({
   onEnroll: () => void;
   onNext: () => boolean;
 }) {
+  const t = useT();
   const [saving, setSaving] = useState(false);
   const lastSave = useRef(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -353,13 +356,13 @@ function LessonPanel({
             <Badge variant="outline" className="capitalize">{lesson.type}</Badge>
             {done && (
               <Badge className="gap-1 bg-emerald-600">
-                <CheckCircle2 className="h-3 w-3" /> Completed
+                <CheckCircle2 className="h-3 w-3" /> {t("coursePlayer.completed")}
               </Badge>
             )}
             {lesson.durationSec ? (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3.5 w-3.5" />
-                {Math.round(lesson.durationSec / 60)} min
+                {Math.round(lesson.durationSec / 60)} {t("coursePlayer.min")}
               </span>
             ) : null}
           </div>
@@ -370,15 +373,15 @@ function LessonPanel({
           {!hasAccess ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
               <LockKeyhole className="mx-auto mb-2 h-7 w-7 text-amber-600" />
-              <p className="font-semibold text-amber-900">This lesson is for enrolled students.</p>
+              <p className="font-semibold text-amber-900">{t("coursePlayer.thisLessonEnrolled")}</p>
               <p className="mt-1 text-sm text-amber-800">
-                Enroll and complete payment to unlock the full course.
+                {t("coursePlayer.enrollToUnlock")}
               </p>
               <Button
                 className="mt-4 gap-2 bg-indigo-600 hover:bg-indigo-700"
                 onClick={onEnroll}
               >
-                <Sparkles className="h-4 w-4" /> Enroll to unlock
+                <Sparkles className="h-4 w-4" /> {t("coursePlayer.enrollToUnlockBtn")}
               </Button>
             </div>
           ) : (
@@ -398,7 +401,7 @@ function LessonPanel({
               )}
               {lesson.type === "video" && !lesson.videoUrl && (
                 <div className="mb-5 flex aspect-video items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
-                  No video uploaded for this lesson yet.
+                  {t("coursePlayer.noVideoUploaded")}
                 </div>
               )}
 
@@ -411,7 +414,7 @@ function LessonPanel({
               {lesson.materials && lesson.materials.length > 0 && (
                 <div className="mb-5">
                   <h3 className="mb-2 flex items-center gap-2 text-sm font-bold">
-                    <FileText className="h-4 w-4 text-indigo-500" /> Course materials
+                    <FileText className="h-4 w-4 text-indigo-500" /> {t("coursePlayer.courseMaterials")}
                   </h3>
                   <div className="space-y-2">
                     {lesson.materials.map((m) => (
@@ -457,11 +460,11 @@ function LessonPanel({
                     className="gap-2 bg-indigo-600 hover:bg-indigo-700"
                   >
                     <CheckCircle2 className="h-4 w-4" />
-                    {done ? "Completed" : "Mark complete"}
+                    {done ? t("coursePlayer.completed") : t("coursePlayer.markComplete")}
                   </Button>
                 )}
                 <Button variant="outline" onClick={goNext} className="gap-2">
-                  Next lesson <ArrowLeft className="h-4 w-4 rotate-180" />
+                  {t("coursePlayer.nextLesson")} <ArrowLeft className="h-4 w-4 rotate-180" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -474,7 +477,7 @@ function LessonPanel({
                     }
                   }}
                 >
-                  <Award className="h-4 w-4" /> Certificate
+                  <Award className="h-4 w-4" /> {t("coursePlayer.certificate")}
                 </Button>
               </div>
             </>
@@ -485,15 +488,15 @@ function LessonPanel({
       {finished && (
         <Card className="border-emerald-200 bg-emerald-50 p-6 text-center">
           <Award className="mx-auto mb-2 h-8 w-8 text-emerald-600" />
-          <h3 className="text-lg font-bold text-emerald-900">You reached the end of this course</h3>
+          <h3 className="text-lg font-bold text-emerald-900">{t("coursePlayer.reachedEnd")}</h3>
           <p className="mt-1 text-sm text-emerald-800">
-            Check your certificate eligibility, or review any lesson from the roadmap.
+            {t("coursePlayer.checkCertificate")}
           </p>
           <Button
             className="mt-4 gap-2 bg-emerald-600 hover:bg-emerald-700"
             onClick={() => setShowCertificate(true)}
           >
-            <Award className="h-4 w-4" /> View certificate options
+            <Award className="h-4 w-4" /> {t("coursePlayer.viewCertificateOptions")}
           </Button>
         </Card>
       )}
@@ -509,13 +512,13 @@ function LessonPanel({
               value="notes"
               className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
             >
-              <StickyNote className="h-4 w-4" /> My notes
+              <StickyNote className="h-4 w-4" /> {t("coursePlayer.myNotes")}
             </TabsTrigger>
             <TabsTrigger
               value="qa"
               className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
             >
-              <MessageSquare className="h-4 w-4" /> Q&amp;A for this lesson
+              <MessageSquare className="h-4 w-4" /> {t("coursePlayer.qaLesson")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="notes" className="mt-4">
@@ -546,6 +549,7 @@ function QuizPanel({
   onPassed: () => void;
   onNext: () => void;
 }) {
+  const t = useT();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
@@ -598,7 +602,7 @@ function QuizPanel({
       <div className={`rounded-lg border p-5 text-center ${result.passed ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
         <p className="text-3xl font-extrabold">{result.score}%</p>
         <p className="mt-1 font-semibold">
-          {result.passed ? "You passed the test!" : "Try again — you can retake it."}
+          {result.passed ? t("coursePlayer.youPassed") : t("coursePlayer.tryAgain")}
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <Button
@@ -607,7 +611,7 @@ function QuizPanel({
             onClick={() => void start()}
             disabled={busy}
           >
-            <ClipboardList className="h-4 w-4" /> {result.passed ? "Retake test" : "Try again"}
+            <ClipboardList className="h-4 w-4" /> {result.passed ? t("coursePlayer.retakeTest") : t("coursePlayer.tryAgainBtn")}
           </Button>
           {result.passed && (
             <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={onNext}>
@@ -625,7 +629,7 @@ function QuizPanel({
         <ClipboardList className="mx-auto mb-2 h-7 w-7 text-indigo-600" />
         <p className="font-semibold">{quiz.title}</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          {quiz.questions?.length || 0} questions · pass mark {quiz.passScore}% · {quiz.maxAttempts} attempts
+          {quiz.questions?.length || 0} {t("coursePlayer.questions")} · {t("coursePlayer.passMark")} {quiz.passScore}% · {quiz.maxAttempts} {t("coursePlayer.attempts")}
         </p>
         <Button className="mt-3 gap-2 bg-indigo-600" onClick={() => void start()} disabled={busy}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
@@ -691,6 +695,7 @@ function AssignmentPanel({
   courseId: string;
   onSubmitted: () => void;
 }) {
+  const t = useT();
   const [data, setData] = useState<Awaited<ReturnType<typeof api.assignment>> | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -713,7 +718,7 @@ function AssignmentPanel({
       {submission && (
         <div className="mt-3 rounded-md border bg-white p-3 text-sm">
           <p className="font-semibold">
-            {submission.status === "graded" ? `Grade: ${submission.grade}/${data.assignment.maxPoints}` : "Submitted — awaiting grading"}
+            {submission.status === "graded" ? `${t("coursePlayer.grade")}: ${submission.grade}/${data.assignment.maxPoints}` : t("coursePlayer.submittedAwaiting")}
           </p>
           {submission.feedback && <p className="mt-1 text-muted-foreground">{submission.feedback}</p>}
         </div>
@@ -744,7 +749,7 @@ function AssignmentPanel({
         }}
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-        {submission ? "Resubmit homework" : "Submit homework"}
+        {submission ? t("coursePlayer.resubmit") : t("coursePlayer.submitHomework")}
       </Button>
       <p className="mt-2 text-[11px] text-muted-foreground">Course: {courseId}</p>
     </div>
@@ -754,6 +759,7 @@ function AssignmentPanel({
 /* ─── Certificate quick panel ────────────────────────────────────── */
 
 function CertificateQuickPanel({ courseId, onClose }: { courseId: string; onClose: () => void }) {
+  const t = useT();
   const [eligibility, setEligibility] = useState<Awaited<ReturnType<typeof api.certificateEligibility>> | null>(null);
   const [certificate, setCertificate] = useState<Awaited<ReturnType<typeof api.issueCertificate>> | null>(null);
   const [busy, setBusy] = useState(false);
@@ -767,13 +773,13 @@ function CertificateQuickPanel({ courseId, onClose }: { courseId: string; onClos
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="flex items-center gap-2 font-bold">
-            <Award className="h-5 w-5 text-emerald-600" /> Professional certificate
+            <Award className="h-5 w-5 text-emerald-600" /> {t("coursePlayer.professionalCertificate")}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Issued only after every lesson, test and homework requirement is met.
+            {t("coursePlayer.issuedAfter")}
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+        <Button variant="ghost" size="sm" onClick={onClose}>{t("myCourses.close")}</Button>
       </div>
       {eligibility && !certificate && (
         <div className="mt-4 space-y-2 text-sm">
@@ -810,7 +816,7 @@ function CertificateQuickPanel({ courseId, onClose }: { courseId: string; onClos
             target="_blank"
             rel="noopener noreferrer"
           >
-            Open public verification page
+            {t("coursePlayer.openVerification")}
           </a>
         </div>
       )}

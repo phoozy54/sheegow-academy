@@ -40,10 +40,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import { formatDate, levelBadgeClass } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 type TabValue = "all" | "in-progress" | "completed";
 
 export function MyCoursesView() {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -92,7 +94,7 @@ export function MyCoursesView() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm">Loading your courses...</p>
+          <p className="text-sm">{t("myCourses.loading")}</p>
         </div>
       </div>
     );
@@ -105,9 +107,9 @@ export function MyCoursesView() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
             <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">Please log in</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("myCourses.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Log in to see the courses you&apos;re enrolled in.
+            {t("myCourses.loginToSee")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
@@ -126,21 +128,20 @@ export function MyCoursesView() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            My Courses
+            {t("myCourses.title")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Continue learning and track your progress across all enrolled
-            courses.
+            {t("myCourses.desc")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 font-semibold text-indigo-700">
             <BookOpen className="h-3.5 w-3.5" />
-            {counts.enrolled} enrolled
+            {counts.enrolled} {t("myCourses.enrolled")}
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            {counts.completed} completed
+            {counts.completed} {t("myCourses.completed")}
           </span>
         </div>
       </div>
@@ -152,9 +153,9 @@ export function MyCoursesView() {
         className="mb-6"
       >
         <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="all">{t("myCourses.all")}</TabsTrigger>
+          <TabsTrigger value="in-progress">{t("myCourses.inProgress")}</TabsTrigger>
+          <TabsTrigger value="completed">{t("myCourses.completedTab")}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -212,6 +213,7 @@ function EnrollmentCard({
   onContinue: () => void;
   onViewCertificate: () => void;
 }) {
+  const t = useT();
   const course = enrollment.course;
   if (!course) return null;
   const teacher = course.teacher;
@@ -248,14 +250,14 @@ function EnrollmentCard({
               : "bg-indigo-500/90 text-white"
           }`}
         >
-          {completed ? "Completed" : "Active"}
+          {completed ? t("myCourses.completedTab") : t("myCourses.active")}
         </span>
       </button>
 
       <div className="flex flex-1 flex-col p-4">
         <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
           <Clock className="h-3.5 w-3.5" />
-          <span>{course.duration} weeks</span>
+          <span>{course.duration} {t("courseDetail.weeks")}</span>
         </div>
 
         <button
@@ -301,7 +303,7 @@ function EnrollmentCard({
             size="sm"
           >
             <PlayCircle className="h-4 w-4" />
-            Continue Learning
+            {t("myCourses.continueLearning")}
           </Button>
           {completed && (
             <Button
@@ -311,7 +313,7 @@ function EnrollmentCard({
               className="gap-1.5 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
             >
               <Award className="h-4 w-4" />
-              View Certificate
+              {t("myCourses.viewCertificate")}
             </Button>
           )}
         </div>
@@ -329,6 +331,7 @@ function CertificateDialog({
   userName: string;
   onClose: () => void;
 }) {
+  const t = useT();
   const course = enrollment?.course;
   return (
     <Dialog open={enrollment !== null} onOpenChange={(o) => !o && onClose()}>
@@ -350,16 +353,15 @@ function CertificateDialog({
               SHEEGOW ACADEMY
             </p>
             <p className="mt-2 text-xl font-extrabold tracking-tight text-foreground">
-              Professional Certificates
+              {t("myCertificatesTitle")}
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
-              {userName}, your verifiable certificate for{" "}
+              {userName},{t("myCourses.certDialogDesc")}{" "}
               <span className="font-semibold text-foreground">{course?.title}</span>{" "}
-              is issued automatically only after you finish all lessons, pass all
-              tests and complete all homework grading.
+              {t("myCourses.certDialogDesc2")}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
-              Enrolled {formatDate(enrollment?.enrolledAt || new Date().toISOString())}
+              {t("myCourses.enrolledOn")} {formatDate(enrollment?.enrolledAt || new Date().toISOString())}
             </p>
           </div>
         </div>
@@ -376,7 +378,7 @@ function CertificateDialog({
             className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 sm:flex-1"
           >
             <Award className="h-4 w-4" />
-            View Certificates
+            {t("myCourses.viewCertificates")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -391,6 +393,7 @@ function EmptyState({
   tab: TabValue;
   onBrowse: () => void;
 }) {
+  const t = useT();
   const isFiltered = tab !== "all";
   return (
     <Card className="p-12 text-center">
@@ -402,20 +405,16 @@ function EmptyState({
         )}
       </div>
       <h3 className="mb-1 text-lg font-bold">
-        {isFiltered
-          ? "Nothing here yet"
-          : "You haven't enrolled in any courses"}
+        {isFiltered ? t("myCourses.emptyFiltered") : t("myCourses.emptyAll")}
       </h3>
       <p className="mb-5 max-w-sm text-sm text-muted-foreground">
-        {isFiltered
-          ? "Try switching tabs to see your other courses, or browse new ones."
-          : "Explore our live English courses and start learning today."}
+        {isFiltered ? t("myCourses.emptyFilteredDesc") : t("myCourses.emptyAllDesc")}
       </p>
       <Button
         onClick={onBrowse}
         className="gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
       >
-        Browse Courses
+        {t("cta.browseCourses")}
         <ArrowRight className="h-4 w-4" />
       </Button>
     </Card>

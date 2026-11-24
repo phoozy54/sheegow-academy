@@ -26,10 +26,12 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 type Curriculum = Awaited<ReturnType<typeof api.curriculum>>;
 
 export function ContentBuilderView() {
+  const t = useT();
   const { user } = useStore();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
@@ -93,10 +95,9 @@ export function ContentBuilderView() {
     return (
       <Card className="p-10 text-center">
         <Hammer className="mx-auto mb-3 h-10 w-10 text-indigo-400" />
-        <h2 className="text-lg font-bold">No courses to build yet</h2>
+        <h2 className="text-lg font-bold">{t("contentBuilder.noCourses")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Create or get assigned to a course first, then build its modules, lessons,
-          quizzes and homework here.
+          {t("contentBuilder.noCoursesDesc")}
         </p>
       </Card>
     );
@@ -107,17 +108,17 @@ export function ContentBuilderView() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Content Builder
+            {t("contentBuilder.title")}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Build a real roadmap: modules, lessons, videos, PDFs, quizzes and homework.
+            {t("contentBuilder.desc")}
           </p>
         </div>
         <div className="w-full sm:w-80">
-          <Label className="mb-1 block text-xs">Course</Label>
+          <Label className="mb-1 block text-xs">{t("contentBuilder.course")}</Label>
           <Select value={courseId} onValueChange={setCourseId}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a course" />
+              <SelectValue placeholder={t("contentBuilder.selectCourse")} />
             </SelectTrigger>
             <SelectContent>
               {courses.map((c) => (
@@ -142,7 +143,7 @@ export function ContentBuilderView() {
         <div className="space-y-4">
           {curriculum.roadmap.modules.length === 0 ? (
             <Card className="p-8 text-center text-sm text-muted-foreground">
-              No modules yet. Create the first module above to start building the roadmap.
+              {t("contentBuilder.noModules")}
             </Card>
           ) : (
             curriculum.roadmap.modules.map((module, idx) => (
@@ -162,13 +163,14 @@ export function ContentBuilderView() {
 }
 
 function CreateModuleCard({ courseId, onCreated }: { courseId: string; onCreated: () => void }) {
+  const t = useT();
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
 
   return (
     <Card className="p-4 sm:p-5">
       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-        <Plus className="h-4 w-4 text-indigo-600" /> Add module (unit)
+        <Plus className="h-4 w-4 text-indigo-600" /> {t("contentBuilder.addModule")}
       </h3>
       <div className="flex flex-col gap-3 sm:flex-row">
         <Input
@@ -213,6 +215,7 @@ function ModuleEditor({
   courseId: string;
   onRefresh: () => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(true);
 
   return (
@@ -223,12 +226,12 @@ function ModuleEditor({
       >
         <div className="flex items-center gap-2">
           {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          <span className="text-xs font-bold uppercase text-indigo-500">Module {index + 1}</span>
+          <span className="text-xs font-bold uppercase text-indigo-500">{t("contentBuilder.module")} {index + 1}</span>
           <span className="font-semibold">{module.title}</span>
           <Badge variant={module.isPublished ? "secondary" : "outline"}>
-            {module.isPublished ? "Published" : "Draft"}
+            {module.isPublished ? t("contentBuilder.published") : t("contentBuilder.draft")}
           </Badge>
-          <Badge variant="outline">{module.lessons.length} lessons</Badge>
+          <Badge variant="outline">{module.lessons.length} {t("contentBuilder.lessons")}</Badge>
         </div>
       </button>
 
@@ -267,7 +270,7 @@ function ModuleEditor({
                         }
                       }}
                     >
-                      {lesson.isPublished ? "Unpublish" : "Publish"}
+                      {lesson.isPublished ? t("contentBuilder.unpublish") : t("contentBuilder.publish")}
                     </Button>
                   </div>
                 </div>
@@ -285,6 +288,7 @@ function ModuleEditor({
 }
 
 function CreateLessonForm({ moduleId, onCreated }: { moduleId: string; onCreated: () => void }) {
+  const t = useT();
   const [title, setTitle] = useState("");
   const [type, setType] = useState("video");
   const [videoUrl, setVideoUrl] = useState("");
@@ -296,29 +300,29 @@ function CreateLessonForm({ moduleId, onCreated }: { moduleId: string; onCreated
       <p className="mb-3 text-sm font-semibold">Add lesson</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <Label className="text-xs">Title</Label>
+          <Label className="text-xs">{t("contentBuilder.lessonTitle")}</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Lesson title" />
         </div>
         <div>
-          <Label className="text-xs">Type</Label>
+          <Label className="text-xs">{t("contentBuilder.type")}</Label>
           <Select value={type} onValueChange={setType}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="video">Video</SelectItem>
-              <SelectItem value="pdf">PDF / Reading</SelectItem>
-              <SelectItem value="text">Text / Notes</SelectItem>
-              <SelectItem value="quiz">Quiz</SelectItem>
-              <SelectItem value="assignment">Assignment</SelectItem>
-              <SelectItem value="live">Live session</SelectItem>
+              <SelectItem value="video">{t("contentBuilder.video")}</SelectItem>
+              <SelectItem value="pdf">{t("contentBuilder.pdfReading")}</SelectItem>
+              <SelectItem value="text">{t("contentBuilder.textNotes")}</SelectItem>
+              <SelectItem value="quiz">{t("contentBuilder.quiz")}</SelectItem>
+              <SelectItem value="assignment">{t("contentBuilder.assignment")}</SelectItem>
+              <SelectItem value="live">{t("contentBuilder.liveSession")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label className="text-xs">Video URL (if video)</Label>
+          <Label className="text-xs">{t("contentBuilder.videoUrl")}</Label>
           <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." />
         </div>
         <div className="sm:col-span-2">
-          <Label className="text-xs">Notes / content (markdown)</Label>
+          <Label className="text-xs">{t("contentBuilder.notesContent")}</Label>
           <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} placeholder="Lesson notes, summary, or reading text" />
         </div>
       </div>
@@ -364,6 +368,7 @@ function MaterialUploader({
   courseId: string;
   onDone: () => void;
 }) {
+  const t = useT();
   const [busy, setBusy] = useState(false);
 
   return (
@@ -422,6 +427,7 @@ function CreateQuizForm({
   lessons: Module["lessons"];
   onCreated: () => void;
 }) {
+  const t = useT();
   const [title, setTitle] = useState("");
   const [lessonId, setLessonId] = useState("");
   const [question, setQuestion] = useState("");
@@ -431,13 +437,13 @@ function CreateQuizForm({
 
   return (
     <details className="rounded-lg border p-4">
-      <summary className="cursor-pointer text-sm font-semibold">Create quick quiz/test</summary>
+      <summary className="cursor-pointer text-sm font-semibold">{t("contentBuilder.createQuiz")}</summary>
       <div className="mt-3 grid gap-3">
         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Quiz title" />
         <Select value={lessonId || "none"} onValueChange={(v) => setLessonId(v === "none" ? "" : v)}>
-          <SelectTrigger><SelectValue placeholder="Attach to lesson (optional)" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={t("contentBuilder.attachToLesson")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">No lesson</SelectItem>
+            <SelectItem value="none">{t("contentBuilder.noLesson")}</SelectItem>
             {lessons.map((l) => (
               <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>
             ))}
@@ -503,6 +509,7 @@ function CreateAssignmentForm({
   lessons: Module["lessons"];
   onCreated: () => void;
 }) {
+  const t = useT();
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
   const [lessonId, setLessonId] = useState("");
@@ -510,7 +517,7 @@ function CreateAssignmentForm({
 
   return (
     <details className="rounded-lg border p-4">
-      <summary className="cursor-pointer text-sm font-semibold">Create homework / assignment</summary>
+      <summary className="cursor-pointer text-sm font-semibold">{t("contentBuilder.createHomework")}</summary>
       <div className="mt-3 grid gap-3">
         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Homework title" />
         <Select value={lessonId || "none"} onValueChange={(v) => setLessonId(v === "none" ? "" : v)}>

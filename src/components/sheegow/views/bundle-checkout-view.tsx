@@ -47,6 +47,7 @@ import { toast } from "sonner";
 import { formatPrice, levelBadgeClass } from "@/lib/ui";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 import { PhoneInput } from "../phone-input";
+import { useT } from "@/lib/i18n";
 
 type PaymentMethod = "card" | "zaad" | "edahab";
 
@@ -91,6 +92,7 @@ const INCLUDED = [
  *  summary lists every included course, shows the original total vs the
  *  bundle price, and the payment enrolls the student in all of them. */
 export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const { isMobile, isTablet } = useDevice();
@@ -176,7 +178,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-          <p className="text-sm">Loading bundle checkout...</p>
+          <p className="text-sm">{t("bundleCheckout.loading")}</p>
         </div>
       </div>
     );
@@ -189,9 +191,9 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
             <LogIn className="h-7 w-7 text-amber-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">Please log in</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("bundleCheckout.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Log in to your account to purchase this bundle.
+            {t("bundleCheckout.loginToPurchase")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
@@ -211,16 +213,16 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
             <Package className="h-7 w-7 text-amber-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">No bundle selected</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("bundleCheckout.noBundle")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Browse our bundles to start the checkout process.
+            {t("bundleCheckout.browseBundles")}
           </p>
           <Button
             onClick={() => router.push("/courses")}
             className="gap-1.5 bg-amber-600 hover:bg-amber-700"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Courses
+            {t("bundleCheckout.backToCourses")}
           </Button>
         </Card>
       </div>
@@ -318,11 +320,11 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
           className="gap-1.5 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t("checkout.back")}
         </Button>
         <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
           <Package className="h-5 w-5 text-amber-500" />
-          Bundle Checkout
+          {t("bundleCheckout.title")}
         </h1>
         <div className="w-16" />
       </div>
@@ -334,10 +336,10 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
           <h2 className="mb-2 text-2xl font-extrabold text-foreground">
-            Payment successful
+            {t("bundleCheckout.paymentSuccess")}
           </h2>
           <p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground">
-            You&apos;re now enrolled in every course in {bundle?.title}.
+            {t('bundleCheckout.enrolledInEvery')} {bundle?.title}.
             {alreadyEnrolledIds.length > 0 && (
               <>
                 {" "}
@@ -358,7 +360,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
               rel="noopener noreferrer"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-amber-600 px-5 text-sm font-semibold text-white shadow-md shadow-amber-500/30 transition-colors hover:bg-amber-700"
             >
-              <Download className="h-4 w-4" /> Download Invoice
+              <Download className="h-4 w-4" /> {t("bundleCheckout.downloadInvoice")}
             </a>
             <Button
               size="lg"
@@ -366,7 +368,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
               className="gap-2"
               onClick={() => router.push("/my-courses")}
             >
-              Go to My Courses
+              {t("bundleCheckout.goToMyCourses")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -382,7 +384,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
       ) : !bundle ? (
         <Card className="p-8 text-center">
           <p className="text-sm text-muted-foreground">
-            This bundle could not be loaded.
+            {t("bundleCheckout.couldNotLoad")}
           </p>
           <Button
             onClick={() => router.push("/courses")}
@@ -400,12 +402,12 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
               <CardHeader className="border-b">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Package className="h-4 w-4 text-amber-600" />
-                  What&apos;s included
+                  {t("bundleCheckout.whatsIncluded")}
                 </CardTitle>
                 <CardDescription>
                   {bundle.courses.length}{" "}
-                  {bundle.courses.length === 1 ? "course" : "courses"} —
-                  instant access to all of them.
+                  {bundle.courses.length === 1 ? t("bundleCheckout.courseSingular") : t("bundleCheckout.coursePlural")} —
+                  {t("bundleCheckout.instantAccessAll")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -442,7 +444,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                             {c.level}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {c.duration} weeks
+                            {c.duration} {t("courseDetail.weeks")}
                           </span>
                         </div>
                       </div>
@@ -458,9 +460,9 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
             {/* Payment methods */}
             <Card className="p-0">
               <CardHeader className="border-b">
-                <CardTitle className="text-base">Payment Method</CardTitle>
+                <CardTitle className="text-base">{t("checkout.paymentMethod")}</CardTitle>
                 <CardDescription>
-                  Choose how you want to pay for this bundle.
+                  {t("bundleCheckout.chooseHow")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4">
@@ -524,16 +526,15 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                 <CardHeader className="border-b">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Lock className="h-4 w-4 text-amber-600" />
-                    Card Details
+                    {t("checkout.cardDetails")}
                   </CardTitle>
                   <CardDescription>
-                    Your payment is encrypted and secure (demo — do not enter
-                    real card data).
+                    {t("checkout.cardSecure")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="cardNumber">Card Number</Label>
+                    <Label htmlFor="cardNumber">{t("checkout.cardNumber")}</Label>
                     <div className="relative">
                       <CreditCard className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
@@ -556,7 +557,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="cardExpiry">Expiry (MM/YY)</Label>
+                      <Label htmlFor="cardExpiry">{t("checkout.expiry")}</Label>
                       <Input
                         id="cardExpiry"
                         inputMode="numeric"
@@ -571,7 +572,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="cardCvc">CVC</Label>
+                      <Label htmlFor="cardCvc">{t("checkout.cvc")}</Label>
                       <Input
                         id="cardCvc"
                         inputMode="numeric"
@@ -604,15 +605,14 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                 </CardHeader>
                 <CardContent className="space-y-4 p-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="walletPhone">Phone Number</Label>
+                    <Label htmlFor="walletPhone">{t("checkout.phoneNumber")}</Label>
                     <PhoneInput
                       id="walletPhone"
                       value={phone}
                       onChange={setPhone}
                     />
                     <p className="text-[11px] text-muted-foreground">
-                      You will receive a payment prompt on this number (demo —
-                      no real charge).
+                      {t("checkout.walletPhoneDesc")}
                     </p>
                   </div>
                 </CardContent>
@@ -624,10 +624,10 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
               <CardHeader className="border-b">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Tag className="h-4 w-4 text-amber-600" />
-                  Coupon Code
+                  {t("checkout.couponCode")}
                 </CardTitle>
                 <CardDescription>
-                  Have a discount code? Apply it here.
+                  {t("checkout.haveDiscount")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4">
@@ -637,10 +637,10 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                       <div>
                         <p className="text-sm font-bold text-emerald-800">
-                          {coupon.code} applied
+                          {coupon.code} {t("checkout.applied")}
                         </p>
                         <p className="text-xs text-emerald-700">
-                          {coupon.discount}% discount
+                          {coupon.discount}% {t("checkout.discount")}
                         </p>
                       </div>
                     </div>
@@ -678,7 +678,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                       ) : (
                         <Tag className="h-4 w-4" />
                       )}
-                      Apply
+                      {t("checkout.apply")}
                     </Button>
                   </div>
                 )}
@@ -695,11 +695,11 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                Secure checkout
+                {t("checkout.secureCheckout")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                Instant enrollment
+                {t("checkout.instantEnrollment")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-emerald-500" />
@@ -714,7 +714,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
               <CardHeader className="border-b">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Sparkles className="h-4 w-4 text-amber-500" />
-                  Bundle Summary
+                  {t("bundleCheckout.bundleSummary")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 p-4">
@@ -738,9 +738,9 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                   <span className="inline-flex items-center gap-1">
                     <Package className="h-3.5 w-3.5" />
                     {bundle.courses.length}{" "}
-                    {bundle.courses.length === 1 ? "course" : "courses"}
+                    {bundle.courses.length === 1 ? t("bundleCheckout.courseSingular") : t("bundleCheckout.coursePlural")}
                   </span>
-                  <span>One payment, all access</span>
+                  <span>{t("bundleCheckout.onePaymentAllAccess")}</span>
                 </div>
 
                 <Separator />
@@ -748,7 +748,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      Original total
+                      {t("bundleCheckout.originalTotal")}
                     </span>
                     <span className="font-medium">
                       {formatPrice(pricing.originalTotal)}
@@ -758,7 +758,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                     <div className="flex justify-between text-emerald-700">
                       <span className="inline-flex items-center gap-1">
                         <Tag className="h-3.5 w-3.5" />
-                        Bundle discount
+                        {t("bundleCheckout.bundleDiscount")}
                       </span>
                       <span className="font-semibold">
                         -{formatPrice(pricing.savings)}
@@ -775,7 +775,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                     <div className="flex justify-between text-emerald-700">
                       <span className="inline-flex items-center gap-1">
                         <Tag className="h-3.5 w-3.5" />
-                        Coupon ({coupon?.discount}%)
+                        {t("bundleCheckout.coupon")} ({coupon?.discount}%)
                       </span>
                       <span className="font-semibold">
                         -{formatPrice(pricing.couponDiscount)}
@@ -784,7 +784,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                   )}
                   <Separator />
                   <div className="flex items-baseline justify-between pt-1">
-                    <span className="font-bold text-foreground">Total</span>
+                    <span className="font-bold text-foreground">{t("checkout.total")}</span>
                     <span className="text-xl font-extrabold text-amber-700">
                       {formatPrice(pricing.total)}
                     </span>
@@ -802,7 +802,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                   ) : (
                     <Lock className="h-4 w-4" />
                   )}
-                  Complete Payment
+                  {t("checkout.completePayment")}
                 </Button>
 
                 <Separator />

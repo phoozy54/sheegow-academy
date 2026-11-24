@@ -88,6 +88,7 @@ import { StudentRefunds } from "./student-refunds";
 import { LibraryView } from "./library-view";
 import { ContentBuilderView } from "./content-builder-view";
 import { GamificationWidget } from "@/components/sheegow/gamification-widget";
+import { useT } from "@/lib/i18n";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -122,48 +123,48 @@ const ADMIN_ROLES: Role[] = ["admin", "super_admin"];
    Teachers also see their own students. Admins and super admins see the full
    management suite, with Payments available to both (edits are super-admin only). */
 const NAV_ITEMS: NavItem[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard, roles: ALL_ROLES },
-  { id: "courses", label: "My Courses", icon: BookOpen, roles: ["student"] },
-  { id: "library", label: "My Library", icon: Library, roles: ["student"] },
-  { id: "my-payments", label: "My Payments", icon: DollarSign, roles: ["student"] },
-  { id: "my-refunds", label: "Refund Requests", icon: RotateCcw, roles: ["student"] },
-  { id: "courses", label: "Manage Courses", icon: BookOpen, roles: ["teacher", ...ADMIN_ROLES] },
-  { id: "content-builder", label: "Content Builder", icon: Hammer, roles: ["teacher", ...ADMIN_ROLES] },
-  { id: "live", label: "Live Classes", icon: Video, roles: ALL_ROLES },
-  { id: "students", label: "My Students", icon: Users, roles: ["teacher"] },
-  { id: "students", label: "Manage Students", icon: Users, roles: ADMIN_ROLES },
-  { id: "teachers", label: "Teachers", icon: GraduationCap, roles: ADMIN_ROLES },
-  { id: "payments", label: "Payments", icon: DollarSign, roles: ADMIN_ROLES },
-  { id: "refunds", label: "Refund Requests", icon: RotateCcw, roles: ADMIN_ROLES },
-  { id: "trial-requests", label: "Trial Requests", icon: ClipboardCheck, roles: ADMIN_ROLES },
-  { id: "gradebook", label: "Gradebook", icon: GraduationCap, roles: ["teacher", ...ADMIN_ROLES] },
-  { id: "messages", label: "Messages", icon: MessageSquare, roles: ADMIN_ROLES },
-  { id: "profile", label: "Profile", icon: UserIcon, roles: ALL_ROLES },
+  { id: "overview", label: "dashboard.overview", icon: LayoutDashboard, roles: ALL_ROLES },
+  { id: "courses", label: "dashboard.myCourses", icon: BookOpen, roles: ["student"] },
+  { id: "library", label: "dashboard.myLibrary", icon: Library, roles: ["student"] },
+  { id: "my-payments", label: "dashboard.myPayments", icon: DollarSign, roles: ["student"] },
+  { id: "my-refunds", label: "dashboard.refundRequests", icon: RotateCcw, roles: ["student"] },
+  { id: "courses", label: "dashboard.manageCourses", icon: BookOpen, roles: ["teacher", ...ADMIN_ROLES] },
+  { id: "content-builder", label: "dashboard.contentBuilder", icon: Hammer, roles: ["teacher", ...ADMIN_ROLES] },
+  { id: "live", label: "dashboard.liveClasses", icon: Video, roles: ALL_ROLES },
+  { id: "students", label: "dashboard.myStudents", icon: Users, roles: ["teacher"] },
+  { id: "students", label: "dashboard.manageStudents", icon: Users, roles: ADMIN_ROLES },
+  { id: "teachers", label: "dashboard.teachers", icon: GraduationCap, roles: ADMIN_ROLES },
+  { id: "payments", label: "dashboard.payments", icon: DollarSign, roles: ADMIN_ROLES },
+  { id: "refunds", label: "dashboard.refunds", icon: RotateCcw, roles: ADMIN_ROLES },
+  { id: "trial-requests", label: "dashboard.trialRequests", icon: ClipboardCheck, roles: ADMIN_ROLES },
+  { id: "gradebook", label: "dashboard.gradebook", icon: GraduationCap, roles: ["teacher", ...ADMIN_ROLES] },
+  { id: "messages", label: "dashboard.messages", icon: MessageSquare, roles: ADMIN_ROLES },
+  { id: "profile", label: "dashboard.profile", icon: UserIcon, roles: ALL_ROLES },
 ];
 
 const SECTION_TITLES: Record<SectionId, string> = {
-  overview: "Dashboard Overview",
-  courses: "Courses",
-  library: "My Library",
-  "content-builder": "Content Builder",
-  students: "Students",
-  live: "Live Classes",
-  teachers: "Teachers",
-  payments: "Payments & Revenue",
-  "my-payments": "My Payments",
-  "my-refunds": "My Refund Requests",
-  refunds: "Refund Requests",
-  "trial-requests": "Trial Requests",
-  gradebook: "Gradebook",
-  messages: "Contact Messages",
-  profile: "Profile Settings",
+  overview: "dashboard.sectionOverview",
+  courses: "dashboard.sectionCourses",
+  library: "dashboard.sectionLibrary",
+  "content-builder": "dashboard.sectionContentBuilder",
+  students: "dashboard.sectionStudents",
+  live: "dashboard.sectionLive",
+  teachers: "dashboard.sectionTeachers",
+  payments: "dashboard.sectionPayments",
+  "my-payments": "dashboard.sectionMyPayments",
+  "my-refunds": "dashboard.sectionMyRefunds",
+  refunds: "dashboard.sectionRefunds",
+  "trial-requests": "dashboard.sectionTrialRequests",
+  gradebook: "dashboard.sectionGradebook",
+  messages: "dashboard.sectionMessages",
+  profile: "dashboard.sectionProfile",
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  student: "Student Portal",
-  teacher: "Teacher Console",
-  admin: "Admin Console",
-  super_admin: "Super Admin Console",
+  student: "dashboard.roleStudent",
+  teacher: "dashboard.roleTeacher",
+  admin: "dashboard.roleAdmin",
+  super_admin: "dashboard.roleSuperAdmin",
 };
 
 const ROLE_BADGE_STYLES: Record<string, string> = {
@@ -176,6 +177,7 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
 /* ─── Main Unified Dashboard ─────────────────────────────── */
 
 export function UnifiedDashboard() {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -202,7 +204,7 @@ export function UnifiedDashboard() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm">Loading your dashboard...</p>
+          <p className="text-sm">{t("dashboard.loadingDashboard")}</p>
         </div>
       </div>
     );
@@ -215,10 +217,9 @@ export function UnifiedDashboard() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
             <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
-          <h2 className="mb-2 text-xl font-bold">Please log in</h2>
+          <h2 className="mb-2 text-xl font-bold">{t("dashboard.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Log in to access your dashboard — students, teachers, and admins
-            all start here.
+            {t("dashboard.loginForAccess")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
@@ -267,8 +268,8 @@ export function UnifiedDashboard() {
               return (
                 <button
                   key={`rail-${item.id}-${idx}`}
-                  title={item.label}
-                  aria-label={item.label}
+                  title={t(item.label)}
+                  aria-label={t(item.label)}
                   onClick={() => setSection(item.id)}
                   className={cn(
                     "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
@@ -283,8 +284,8 @@ export function UnifiedDashboard() {
             })}
           </nav>
           <button
-            title="Back to site"
-            aria-label="Back to site"
+            title={t("dashboard.backToSite")}
+            aria-label={t("dashboard.backToSite")}
             onClick={() => router.push("/")}
             className="flex h-12 w-12 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
@@ -296,7 +297,7 @@ export function UnifiedDashboard() {
       {/* Mobile sidebar — wider drawer with larger touch targets */}
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
         <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
-          <SheetTitle className="sr-only">Dashboard navigation</SheetTitle>
+          <SheetTitle className="sr-only">{t("dashboard.menu")}</SheetTitle>
           {sidebar}
         </SheetContent>
       </Sheet>
@@ -317,10 +318,10 @@ export function UnifiedDashboard() {
             </Button>
             <div className="min-w-0">
               <h1 className="truncate text-base font-bold text-foreground sm:text-lg">
-                {activeTitle}
+                {t(activeTitle)}
               </h1>
               <p className="hidden text-xs text-muted-foreground sm:block">
-                {ROLE_LABELS[role]}
+                {t(ROLE_LABELS[role])}
               </p>
             </div>
           </div>
@@ -332,8 +333,8 @@ export function UnifiedDashboard() {
               className="gap-1.5"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to site</span>
-              <span className="sm:hidden">Exit</span>
+              <span className="hidden sm:inline">{t("dashboard.backToSite")}</span>
+              <span className="sm:hidden">{t("dashboard.exit")}</span>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -360,16 +361,16 @@ export function UnifiedDashboard() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setSection("profile")}>
                   <UserIcon className="h-4 w-4" />
-                  Profile Settings
+                  {t("dashboard.profileSettings")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSection("overview")}>
                   <LayoutDashboard className="h-4 w-4" />
-                  Dashboard Overview
+                  {t("dashboard.dashboardOverview")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push("/")}>
                   <ArrowLeft className="h-4 w-4" />
-                  Back to site
+                  {t("dashboard.backToSite")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -451,6 +452,7 @@ function SidebarContent({
   onSelect: (v: SectionId) => void;
   onBackToSite: () => void;
 }) {
+  const t = useT();
   return (
     <div className="flex h-full flex-col">
       {/* Logo / brand */}
@@ -463,7 +465,7 @@ function SidebarContent({
             SHEEGOW
           </p>
           <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-            {ROLE_LABELS[user.role] || "Portal"}
+            {t(ROLE_LABELS[user.role] || "dashboard.menu")}
           </p>
         </div>
       </div>
@@ -471,7 +473,7 @@ function SidebarContent({
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Menu
+          {t("dashboard.menu")}
         </p>
         {navItems.map((item, idx) => {
           const active = activeView === item.id;
@@ -492,7 +494,7 @@ function SidebarContent({
                   active ? "text-white" : "text-muted-foreground"
                 )}
               />
-              <span className="flex-1 text-left">{item.label}</span>
+              <span className="flex-1 text-left">{t(item.label)}</span>
               {active && (
                 <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
               )}
@@ -533,7 +535,7 @@ function SidebarContent({
           onClick={onBackToSite}
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to site
+          {t("dashboard.backToSite")}
         </Button>
       </div>
     </div>
@@ -543,6 +545,7 @@ function SidebarContent({
 /* ─── Admin Courses: overview + management ─────────────── */
 
 function AdminCoursesSection() {
+  const t = useT();
   const [tab, setTab] = useState<"overview" | "manage">("overview");
   return (
     <div className="space-y-5">
@@ -557,7 +560,7 @@ function AdminCoursesSection() {
             tab === "overview" && "bg-indigo-600 hover:bg-indigo-700"
           )}
         >
-          <LayoutDashboard className="h-4 w-4" /> Overview
+          <LayoutDashboard className="h-4 w-4" /> {t("dashboard.overviewTab")}
         </Button>
         <Button
           size="sm"
@@ -569,7 +572,7 @@ function AdminCoursesSection() {
             tab === "manage" && "bg-indigo-600 hover:bg-indigo-700"
           )}
         >
-          <BookOpen className="h-4 w-4" /> Manage courses
+          <BookOpen className="h-4 w-4" /> {t("dashboard.manageCoursesTab")}
         </Button>
       </div>
       {tab === "overview" ? <AdminCourseOverview /> : <AdminCourses />}
@@ -588,6 +591,7 @@ function RoleOverview({ role }: { role: Role }) {
 /* ─── Student Overview ─────────────────────────────────── */
 
 function StudentOverview() {
+  const t = useT();
   const { user } = useStore();
   const router = useRouter();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -655,32 +659,31 @@ function StudentOverview() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-            Welcome back, {firstName}!
+            {t("dashboard.welcomeBack")} {firstName}!
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Today is {today}. Keep up the momentum — every lesson brings you
-            closer to fluency.
+            {t("dashboard.todayIs")} {today}. {t("dashboard.momentumMsg")}
           </p>
         </div>
         <Button onClick={() => router.push("/courses")} variant="outline" className="w-full gap-2 sm:w-auto">
           <Sparkles className="h-4 w-4 text-indigo-600" />
-          Explore courses
+          {t("dashboard.exploreCourses")}
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-5">
-        <StatCard icon={BookOpen} label="Active Courses" value={stats.activeCourses} color="bg-indigo-100 text-indigo-600" />
-        <StatCard icon={CheckCircle2} label="Completed Lessons" value={stats.completedLessons} color="bg-emerald-100 text-emerald-600" />
-        <StatCard icon={Clock} label="Learning Hours" value={`${stats.learningHours}h`} color="bg-amber-100 text-amber-600" />
-        <StatCard icon={Award} label="Certificates" value={stats.certificates} color="bg-violet-100 text-violet-600" />
+        <StatCard icon={BookOpen} label={t("dashboard.activeCourses")} value={stats.activeCourses} color="bg-indigo-100 text-indigo-600" />
+        <StatCard icon={CheckCircle2} label={t("dashboard.completedLessons")} value={stats.completedLessons} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={Clock} label={t("dashboard.learningHours")} value={`${stats.learningHours}h`} color="bg-amber-100 text-amber-600" />
+        <StatCard icon={Award} label={t("dashboard.certificates")} value={stats.certificates} color="bg-violet-100 text-violet-600" />
         <button
           type="button"
           onClick={() => router.push("/wishlist")}
           className="text-left transition-transform hover:scale-[1.02] focus:outline-none"
           aria-label="Open your wishlist"
         >
-          <StatCard icon={Heart} label="Wishlist" value={stats.wishlist} color="bg-rose-100 text-rose-600" />
+          <StatCard icon={Heart} label={t("dashboard.wishlist")} value={stats.wishlist} color="bg-rose-100 text-rose-600" />
         </button>
       </div>
 
@@ -695,7 +698,7 @@ function StudentOverview() {
               <div>
                 <CardTitle className="text-lg">My Courses</CardTitle>
                 <CardDescription className="mt-1 text-xs">
-                  Pick up where you left off
+                  {t("dashboard.pickUpLeft")}
                 </CardDescription>
               </div>
             </CardHeader>
@@ -721,7 +724,7 @@ function StudentOverview() {
                   <div>
                     <p className="text-sm font-semibold">No courses yet</p>
                     <p className="text-xs text-muted-foreground">
-                      Browse our catalog to start learning.
+                      {t("dashboard.browseCatalog")}
                     </p>
                   </div>
                   <Button size="sm" onClick={() => router.push("/courses")} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
@@ -797,7 +800,7 @@ function StudentOverview() {
             <CardHeader className="border-b">
               <CardTitle className="text-base">Upcoming Live Classes</CardTitle>
               <CardDescription className="text-xs">
-                Join the next session
+                {t("dashboard.joinNextSession")}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -810,7 +813,7 @@ function StudentOverview() {
                     No upcoming classes
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Check back soon for new sessions.
+                    {t("dashboard.checkBackSoon")}
                   </p>
                 </div>
               ) : (
@@ -860,7 +863,7 @@ function StudentOverview() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
                   <Heart className="h-4 w-4" />
                 </span>
-                Wishlist
+                {t("dashboard.wishlist")}
               </CardTitle>
               <Badge variant="secondary" className="font-semibold">
                 {wishlist.length}
@@ -876,7 +879,7 @@ function StudentOverview() {
                     No saved courses yet
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Tap the heart on any course to save it for later.
+                    {t("dashboard.tapHeart")}
                   </p>
                 </div>
               ) : (
@@ -931,6 +934,7 @@ function StudentOverview() {
 /* ─── Teacher Overview ──────────────────────────────────── */
 
 function TeacherOverview() {
+  const t = useT();
   const { user } = useStore();
   const router = useRouter();
   const [myCourses, setMyCourses] = useState<Course[]>([]);
@@ -977,19 +981,19 @@ function TeacherOverview() {
       {/* Welcome */}
       <div>
         <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-          Welcome, {firstName}!
+          {t("dashboard.welcomeTeacher")} {firstName}!
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Here&apos;s an overview of your teaching activity at SHEEGOW ACADEMY.
+          {t("dashboard.teacherOverview")}
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-        <StatCard icon={BookOpen} label="My Courses" value={stats?.courses ?? myCourses.length} color="bg-indigo-100 text-indigo-600" />
-        <StatCard icon={Video} label="Upcoming Classes" value={stats?.upcoming ?? upcoming.length} color="bg-rose-100 text-rose-600" />
-        <StatCard icon={Users} label="Total Enrollments" value={stats?.enrollments ?? 0} color="bg-emerald-100 text-emerald-600" />
-        <StatCard icon={Award} label="Avg Rating" value={stats?.averageRating != null ? stats.averageRating.toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
+        <StatCard icon={BookOpen} label={t("dashboard.myCourses")} value={stats?.courses ?? myCourses.length} color="bg-indigo-100 text-indigo-600" />
+        <StatCard icon={Video} label={t("dashboard.upcomingClasses")} value={stats?.upcoming ?? upcoming.length} color="bg-rose-100 text-rose-600" />
+        <StatCard icon={Users} label={t("dashboard.totalEnrollments")} value={stats?.enrollments ?? 0} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={Award} label={t("dashboard.avgRating")} value={stats?.averageRating != null ? stats.averageRating.toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
@@ -999,7 +1003,7 @@ function TeacherOverview() {
             <CardHeader className="border-b">
               <CardTitle className="text-lg">My Courses</CardTitle>
               <CardDescription className="text-xs">
-                Courses you teach
+                {t("dashboard.coursesYouTeach")}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -1013,7 +1017,7 @@ function TeacherOverview() {
                 <div className="py-12 text-center">
                   <BookOpen className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    No courses assigned to you yet.
+                    {t("dashboard.noCoursesAssigned")}
                   </p>
                 </div>
               ) : (
@@ -1059,7 +1063,7 @@ function TeacherOverview() {
             <CardHeader className="border-b">
               <CardTitle className="text-base">My Live Classes</CardTitle>
               <CardDescription className="text-xs">
-                Sessions you&apos;ll teach
+                {t("dashboard.sessionsYoullTeach")}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -1072,7 +1076,7 @@ function TeacherOverview() {
                     No upcoming classes
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Your scheduled sessions will appear here.
+                    {t("dashboard.yourScheduled")}
                   </p>
                 </div>
               ) : (
@@ -1112,6 +1116,7 @@ function TeacherOverview() {
 /* ─── Student: My Courses (full list within portal) ─────── */
 
 function StudentMyCourses() {
+  const t = useT();
   const router = useRouter();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1144,13 +1149,13 @@ function StudentMyCourses() {
         <BookOpen className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
         <p className="font-semibold">No courses yet</p>
         <p className="text-sm text-muted-foreground">
-          Browse the catalog to enroll in your first course.
+          {t("dashboard.browseCatalog")}
         </p>
         <Button
           onClick={() => router.push("/courses")}
           className="mt-4 gap-1.5 bg-indigo-600 hover:bg-indigo-700"
         >
-          <BookOpen className="h-4 w-4" /> Browse Courses
+          <BookOpen className="h-4 w-4" /> {t("dashboard.browseCourses")}
         </Button>
       </Card>
     );
@@ -1178,7 +1183,7 @@ function StudentMyCourses() {
                   {c.level}
                 </Badge>
                 {enr.status === "completed" && (
-                  <Badge className="bg-emerald-100 text-emerald-700">Completed</Badge>
+                  <Badge className="bg-emerald-100 text-emerald-700">{t("dashboard.completedBadge")}</Badge>
                 )}
               </div>
               <button
@@ -1198,7 +1203,7 @@ function StudentMyCourses() {
                 className="mt-3 w-full gap-1 bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => router.push(`/learn/${c.id}`)}
               >
-                Continue Learning <ArrowRight className="h-3.5 w-3.5" />
+                {t("dashboard.continueLearning")} <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
           </Card>
@@ -1211,6 +1216,7 @@ function StudentMyCourses() {
 /* ─── Teacher: My Students ──────────────────────────────── */
 
 function TeacherStudents() {
+  const t = useT();
   const { user } = useStore();
   const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1246,7 +1252,7 @@ function TeacherStudents() {
         <Users className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
         <p className="font-semibold">No students yet</p>
         <p className="text-sm text-muted-foreground">
-          Students enrolled in your courses will appear here.
+          {t("dashboard.studentsEnrolled")}
         </p>
       </Card>
     );
@@ -1264,7 +1270,7 @@ function TeacherStudents() {
               </p>
             </div>
             <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
-              {c.reviewCount} students
+              {c.reviewCount} {t("dashboard.students")}
             </Badge>
           </div>
         </Card>
@@ -1277,6 +1283,7 @@ function TeacherStudents() {
 
 function ProfileInline() {
   const router = useRouter();
+  const t = useT();
   // Delegate to the dedicated profile view
   useEffect(() => {
     router.push("/profile");
@@ -1284,7 +1291,7 @@ function ProfileInline() {
   return (
     <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      Opening profile settings...
+      {t("dashboard.openingProfile")}
     </div>
   );
 }
@@ -1292,6 +1299,7 @@ function ProfileInline() {
 /* ─── Student Payments — payment history + invoice download ── */
 
 function StudentPayments() {
+  const t = useT();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [refundByPaymentId, setRefundByPaymentId] = useState<
     Record<string, RefundRequest>
@@ -1356,20 +1364,20 @@ function StudentPayments() {
     if (r.status === "approved") {
       return (
         <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
-          Refund approved
+          {t("dashboard.refundApproved")}
         </Badge>
       );
     }
     if (r.status === "rejected") {
       return (
         <Badge className="border-rose-200 bg-rose-50 text-rose-700">
-          Refund rejected
+          {t("dashboard.refundRejected")}
         </Badge>
       );
     }
     return (
       <Badge className="border-amber-200 bg-amber-50 text-amber-700">
-        Refund pending
+        {t("dashboard.refundPending")}
       </Badge>
     );
   }
@@ -1403,7 +1411,7 @@ function StudentPayments() {
         className="gap-1.5 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
       >
         <RotateCcw className="h-3.5 w-3.5" />
-        Request Refund
+        {t("dashboard.requestRefund")}
       </Button>
     );
   }
@@ -1417,29 +1425,26 @@ function StudentPayments() {
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {formatPrice(totalPaid)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Total paid</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("dashboard.totalPaid")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <CheckCircle2 className="mb-2 h-5 w-5 text-indigo-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {payments.filter((p) => p.status === "completed").length}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Completed</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("dashboard.completed")}</p>
         </Card>
         <Card className="col-span-2 p-3 sm:p-4 md:col-span-1">
           <Clock className="mb-2 h-5 w-5 text-amber-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {payments.filter((p) => p.status === "pending").length}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Pending</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("dashboard.pending")}</p>
         </Card>
       </div>
 
       <p className="text-sm text-muted-foreground">
-        Download a printable invoice (PDF) for any completed payment. Click
-        the download link to open the receipt page, then use your browser&apos;s
-        print dialog to save it. If a payment didn&apos;t go as expected, you can
-        request a refund and our team will review it.
+        {t("dashboard.paymentsDesc")}
       </p>
 
       {loading ? (
@@ -1453,7 +1458,7 @@ function StudentPayments() {
           <DollarSign className="mx-auto mb-3 h-9 w-9 text-muted-foreground" />
           <p className="font-semibold">No payments yet</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your completed enrollments and invoices will appear here.
+            {t("dashboard.paymentsAppearHere")}
           </p>
         </Card>
       ) : (
@@ -1466,7 +1471,7 @@ function StudentPayments() {
                   <div className="min-w-0">
                     <p className="truncate font-bold">{formatPrice(p.amount)}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {p.course?.title ?? "No course"}
+                      {p.course?.title ?? t("dashboard.noCourse")}
                     </p>
                   </div>
                   <Badge
@@ -1485,7 +1490,7 @@ function StudentPayments() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-700"
                     >
-                      <Download className="h-3.5 w-3.5" /> Invoice
+                      <Download className="h-3.5 w-3.5" /> {t("dashboard.invoice")}
                     </a>
                   )}
                 </div>
@@ -1501,13 +1506,13 @@ function StudentPayments() {
             <table className="w-full text-left text-sm">
               <thead className="border-b bg-muted/40 text-xs uppercase text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">Course</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Method</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Invoice</th>
-                  <th className="px-4 py-3">Refund</th>
+                  <th className="px-4 py-3">{t("dashboard.course")}</th>
+                  <th className="px-4 py-3">{t("dashboard.amount")}</th>
+                  <th className="px-4 py-3">{t("dashboard.method")}</th>
+                  <th className="px-4 py-3">{t("dashboard.date")}</th>
+                  <th className="px-4 py-3">{t("dashboard.status")}</th>
+                  <th className="px-4 py-3">{t("dashboard.invoice")}</th>
+                  <th className="px-4 py-3">{t("dashboard.refund")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -1539,7 +1544,7 @@ function StudentPayments() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                         >
-                          <Download className="h-3.5 w-3.5" /> Download
+                          <Download className="h-3.5 w-3.5" /> {t("dashboard.download")}
                         </a>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
@@ -1568,9 +1573,7 @@ function StudentPayments() {
           <DialogHeader>
             <DialogTitle>Request a refund</DialogTitle>
             <DialogDescription>
-              Tell us why you are requesting a refund for this payment. Our
-              team will review your request and notify you once it&apos;s
-              processed.
+              {t("dashboard.requestRefundDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
@@ -1578,7 +1581,7 @@ function StudentPayments() {
               htmlFor="refund-reason"
               className="text-xs font-semibold text-muted-foreground"
             >
-              Reason
+              {t("dashboard.reason")}
             </label>
             <Textarea
               id="refund-reason"
@@ -1649,6 +1652,7 @@ function StatCard({
   value: string | number;
   color: string;
 }) {
+  const t = useT();
   return (
     <Card className="card-lift p-3 sm:p-5">
       <div className={`mb-2 inline-flex h-8 w-8 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${color}`}>

@@ -34,6 +34,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 /* ─── Static data ───────────────────────────────────────── */
 
@@ -113,6 +114,7 @@ export function ContactView() {
     subject: "",
     message: "",
   });
+  const t = useT();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -153,15 +155,13 @@ export function ContactView() {
             variant="outline"
             className="mb-4 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
           >
-            <MessageSquare className="h-3 w-3" /> Get in Touch
+            <MessageSquare className="h-3 w-3" /> {t("contact.eyebrow")}
           </Badge>
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            We&apos;d love to <span className="gradient-text">hear from you</span>
+            {t("contact.title1")} <span className="gradient-text">{t("contact.titleHighlight")}</span>
           </h1>
           <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Have a question about a course, a live class schedule, or your
-            enrollment? Send us a message and our team will respond within 24
-            hours.
+            {t("contact.heroDesc")}
           </p>
         </div>
       </section>
@@ -170,9 +170,9 @@ export function ContactView() {
         <div className="grid gap-10 lg:grid-cols-2">
           {/* ─── LEFT: FORM ──────────────────────────────── */}
           <div>
-            <h2 className="mb-2 text-xl font-bold text-foreground">Send a message</h2>
+            <h2 className="mb-2 text-xl font-bold text-foreground">{t("contact.sendTitle")}</h2>
             <p className="mb-6 text-sm text-muted-foreground">
-              Fill in the form below and we&apos;ll reply by email.
+              {t("contact.sendDesc")}
             </p>
 
             {submitted ? (
@@ -180,9 +180,9 @@ export function ContactView() {
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
                   <CheckCircle2 className="h-7 w-7 text-emerald-600" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">Message sent!</h3>
+                <h3 className="text-lg font-bold text-foreground">{t("contact.messageSent")}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Thank you for reaching out. We&apos;ll respond within 24 hours.
+                  {t("contact.replySoon")}
                 </p>
                 <Button
                   variant="outline"
@@ -198,7 +198,7 @@ export function ContactView() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="name">
-                        Full name <span className="text-red-500">*</span>
+                        {t("contact.fullName")} <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="name"
@@ -210,7 +210,7 @@ export function ContactView() {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="email">
-                        Email <span className="text-red-500">*</span>
+                        {t("contact.emailLabel")} <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="email"
@@ -225,7 +225,7 @@ export function ContactView() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="phone">Phone (optional)</Label>
+                      <Label htmlFor="phone">{t("contact.phoneOptional")}</Label>
                       <PhoneInput
                         id="phone"
                         value={form.phone}
@@ -236,7 +236,7 @@ export function ContactView() {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="subject">
-                        Subject <span className="text-red-500">*</span>
+                        {t("contact.subjectLabel")} <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="subject"
@@ -250,7 +250,7 @@ export function ContactView() {
 
                   <div className="space-y-1.5">
                     <Label htmlFor="message">
-                      Message <span className="text-red-500">*</span>
+                      {t("contact.messageLabel")} <span className="text-red-500">*</span>
                     </Label>
                     <Textarea
                       id="message"
@@ -274,11 +274,11 @@ export function ContactView() {
                   >
                     {submitting ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" /> Sending...
+                        <Loader2 className="h-4 w-4 animate-spin" /> {t("contact.sending")}
                       </>
                     ) : (
                       <>
-                        <Send className="h-4 w-4" /> Send Message
+                        <Send className="h-4 w-4" /> {t("contact.sendMsg")}
                       </>
                     )}
                   </Button>
@@ -289,9 +289,9 @@ export function ContactView() {
 
           {/* ─── RIGHT: INFO + MAP ───────────────────────── */}
           <div className="space-y-4">
-            <h2 className="mb-2 text-xl font-bold text-foreground">Contact info</h2>
+            <h2 className="mb-2 text-xl font-bold text-foreground">{t("contact.infoTitle")}</h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              Reach us directly using any of the channels below.
+              {t("contact.infoDesc")}
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -360,13 +360,13 @@ export function ContactView() {
               variant="outline"
               className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
             >
-              <HelpCircle className="h-3 w-3" /> FAQ
+              <HelpCircle className="h-3 w-3" /> {t("contact.faqEyebrow")}
             </Badge>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Frequently asked questions
+              {t("contact.faqTitle")}
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              Quick answers to the questions we hear most from new students.
+              {t("contact.faqDesc")}
             </p>
           </div>
 
@@ -389,10 +389,10 @@ export function ContactView() {
             {/* Quick topic chips */}
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { icon: Video, label: "Live Classes" },
-                { icon: CreditCard, label: "Secure payments" },
-                { icon: CalendarClock, label: "Class Scheduling" },
-                { icon: Award, label: "Certificates" },
+                { icon: Video, label: t("contact.liveClassesChip") },
+                { icon: CreditCard, label: t("contact.securePaymentsChip") },
+                { icon: CalendarClock, label: t("contact.classSchedulingChip") },
+                { icon: Award, label: t("contact.certificatesChip") },
               ].map(({ icon: Icon, label }) => (
                 <div
                   key={label}
@@ -412,11 +412,10 @@ export function ContactView() {
             <div className="mt-8 rounded-2xl border bg-gradient-to-r from-indigo-50 to-amber-50/50 p-6 text-center">
               <Sparkles className="mx-auto mb-2 h-6 w-6 text-amber-500" />
               <p className="text-sm font-semibold text-foreground">
-                Still need help?
+                {t("contact.stillNeedHelp")}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Fill out the form above and we&apos;ll get back to you within 24
-                hours.
+                {t("contact.stillNeedHelpDesc")}
               </p>
             </div>
           </div>

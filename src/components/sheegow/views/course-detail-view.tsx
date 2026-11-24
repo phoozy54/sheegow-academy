@@ -44,6 +44,7 @@ import { levelBadgeClass, formatDate, timeAgo, cn } from "@/lib/ui";
 import { toast } from "sonner";
 import { AnnouncementsPanel } from "./announcements-panel";
 import { DiscussionPanel } from "./discussion-panel";
+import { useT } from "@/lib/i18n";
 
 /* ─── Helpers ───────────────────────────────────────────── */
 
@@ -180,6 +181,7 @@ function Stars({ rating, size = "h-4 w-4" }: { rating: number; size?: string }) 
 /* ─── Main view ─────────────────────────────────────────── */
 
 export function CourseDetailView({ courseId }: { courseId: string }) {
+  const t = useT();
   const openAuthModal = useStore((s) => s.openAuthModal);
   const user = useStore((s) => s.user);
   const router = useRouter();
@@ -247,16 +249,16 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <PlayCircle className="h-8 w-8 text-red-500" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Course not found</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("courseDetail.courseNotFound")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          {error || "The course you're looking for may have been removed."}
+          {error || t("courseDetail.notFoundDesc")}
         </p>
         <Button
           onClick={() => router.push("/courses")}
           variant="outline"
           className="mt-6 gap-1.5"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to Courses
+          <ArrowLeft className="h-4 w-4" /> {t("courseDetail.backToCourses")}
         </Button>
       </div>
     );
@@ -290,7 +292,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
             onClick={() => router.push("/courses")}
             className="mb-6 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> All Courses
+            <ArrowLeft className="h-4 w-4" /> {t("courseDetail.allCourses")}
           </button>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -311,7 +313,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                 {/* LIVE + level badges */}
                 <span className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-red-500/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg backdrop-blur">
                   <span className="h-1.5 w-1.5 animate-live-pulse rounded-full bg-white" />
-                  LIVE
+                  {t("courseDetail.live")}
                 </span>
                 <Badge
                   variant="outline"
@@ -337,16 +339,16 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                       {course.rating.toFixed(1)}
                     </span>
                     <span className="text-muted-foreground">
-                      ({course.reviewCount} reviews)
+                      ({course.reviewCount} {t("courseDetail.reviewsCount")})
                     </span>
                   </span>
                   <span className="flex items-center gap-1.5 text-muted-foreground">
                     <Clock className="h-4 w-4 text-indigo-500" />
-                    {course.duration} weeks
+                    {course.duration} {t("courseDetail.weeks")}
                   </span>
                   <span className="flex items-center gap-1.5 text-muted-foreground">
                     <Calendar className="h-4 w-4 text-indigo-500" />
-                    Added {formatDate(course.createdAt)}
+                    {t("courseDetail.added")} {formatDate(course.createdAt)}
                   </span>
                   {/* Share button */}
                   <button
@@ -364,7 +366,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                     className="flex items-center gap-1.5 text-indigo-600 transition-colors hover:text-indigo-700"
                   >
                     <Share2 className="h-4 w-4" />
-                    Share
+                    {t("courseDetail.share")}
                   </button>
                 </div>
 
@@ -381,7 +383,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="text-left">
-                      <p className="text-xs text-muted-foreground">Taught by</p>
+                      <p className="text-xs text-muted-foreground">{t("courseDetail.taughtBy")}</p>
                       <p className="text-sm font-bold text-foreground">
                         {course.teacher.fullName}
                       </p>
@@ -434,21 +436,21 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                   className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
                 >
                   <BookOpen className="h-4 w-4" />
-                  Overview
+                  {t("course.overview")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="outcomes"
                   className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
                 >
                   <ListChecks className="h-4 w-4" />
-                  Outcomes
+                  {t("courseDetail.outcomes")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="certification"
                   className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
                 >
                   <Award className="h-4 w-4" />
-                  Certification
+                  {t("course.certification")}
                 </TabsTrigger>
               </TabsList>
 
@@ -469,7 +471,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                 <Separator />
                 <div>
                   <h2 className="mb-4 text-xl font-bold text-foreground">
-                    Meet your teacher
+                    {t("course.meetTeacher")}
                   </h2>
                   <Card className="card-lift flex flex-col gap-4 p-6 sm:flex-row sm:items-start">
                     <Avatar className="h-16 w-16 shrink-0 border">
@@ -484,7 +486,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                           {course.teacher.fullName}
                         </h3>
                         <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
-                          English Teacher
+                          {t("courseDetail.englishTeacher")}
                         </Badge>
                       </div>
                       {course.teacher.bio && (
@@ -504,7 +506,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                           }
                         }}
                       >
-                        <Mail className="h-3.5 w-3.5" /> Contact teacher
+                        <Mail className="h-3.5 w-3.5" /> {t("courseDetail.contactTeacher")}
                       </Button>
                     </div>
                   </Card>
@@ -549,16 +551,16 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
               <div className="mb-4 flex items-center gap-2">
                 <Award className="h-5 w-5 text-amber-500" />
                 <h3 className="text-base font-bold text-foreground">
-                  Why students love this course
+                  {t("courseDetail.whyStudentsLove")}
                 </h3>
               </div>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 {[
-                  { icon: Video, label: "Live video classes every week" },
-                  { icon: Users, label: "Small group — max 15 students" },
-                  { icon: MessageSquare, label: "Real-time chat with the teacher" },
-                  { icon: Award, label: "Certificate on completion" },
-                  { icon: ShieldCheck, label: "Money-back guarantee in 7 days" },
+                  { icon: Video, label: t("courseDetail.liveVideoEveryWeek") },
+                  { icon: Users, label: t("courseDetail.smallGroupMax") },
+                  { icon: MessageSquare, label: t("courseDetail.realTimeChatTeacher") },
+                  { icon: Award, label: t("courseDetail.certificateOnCompletion") },
+                  { icon: ShieldCheck, label: t("courseDetail.moneyBack7") },
                 ].map(({ icon: Icon, label }, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
@@ -591,32 +593,31 @@ function ManagerCourseCard({
   onContent: () => void;
   onOpen: () => void;
 }) {
+  const t = useT();
   const isAdmin = role === "admin" || role === "super_admin";
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
       <div className="bg-gradient-to-br from-fuchsia-600 to-indigo-800 p-6 text-white">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-100">
-          <LayoutDashboard className="h-4 w-4" /> {isAdmin ? "Admin access" : "Teacher controls"}
+          <LayoutDashboard className="h-4 w-4" /> {isAdmin ? t("courseDetail.managerAccess") : t("courseDetail.teacherControls")}
         </div>
         <p className="mt-2 text-lg font-extrabold leading-tight">
-          {isAdmin ? "Open this course directly" : "You manage this course"}
+          {isAdmin ? t("courseDetail.openDirectly") : t("courseDetail.youManage")}
         </p>
         <p className="mt-1 text-xs text-indigo-100">
-          {isAdmin
-            ? "As admin you can open lessons, edit the course and manage content — no enrollment required."
-            : "Edit details, build lessons and deliver live classes — no enrollment needed."}
+          {isAdmin ? t("courseDetail.adminCanEdit") : t("courseDetail.teacherCanEdit")}
         </p>
       </div>
 
       <div className="space-y-2.5 p-6">
         <Button onClick={onOpen} size="lg" className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700">
-          <BookOpen className="h-4 w-4" /> Open course
+          <BookOpen className="h-4 w-4" /> {t("courseDetail.openCourse")}
         </Button>
         <Button onClick={onContent} size="lg" variant="outline" className="w-full gap-2">
-          <Hammer className="h-4 w-4" /> Manage lessons &amp; quizzes
+          <Hammer className="h-4 w-4" /> {t("courseDetail.manageLessons")}
         </Button>
         <Button onClick={onEdit} size="lg" variant="ghost" className="w-full gap-2">
-          <Pencil className="h-4 w-4" /> Edit course
+          <Pencil className="h-4 w-4" /> {t("courseDetail.editCourse")}
         </Button>
         <p className="pt-1 text-center text-xs text-muted-foreground">
           {course.title}
@@ -637,6 +638,7 @@ function EnrolledCourseCard({
   enrollment: Enrollment;
   onContinue: () => void;
 }) {
+  const t = useT();
   const complete = enrollment.status === "completed" || enrollment.progress >= 100;
 
   return (
@@ -644,19 +646,19 @@ function EnrolledCourseCard({
       <div className="bg-gradient-to-br from-emerald-600 to-indigo-800 p-6 text-white">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-100">
           <CheckCircle2 className="h-4 w-4" />
-          {complete ? "Course complete" : "You're enrolled"}
+          {complete ? t("courseDetail.courseComplete") : t("courseDetail.youreEnrolled")}
         </div>
         <p className="mt-2 text-lg font-extrabold leading-tight">
-          {complete ? "Review your course anytime" : "Pick up where you left off"}
+          {complete ? t("courseDetail.reviewAnytime") : t("courseDetail.pickUpLeft")}
         </p>
         <p className="mt-1 text-xs text-emerald-100">
-          Your lessons, tests and homework are ready.
+          {t("courseDetail.lessonsReady")}
         </p>
       </div>
 
       <div className="p-6">
         <div className="mb-1.5 flex justify-between text-xs">
-          <span className="font-medium text-muted-foreground">Course progress</span>
+          <span className="font-medium text-muted-foreground">{t("courseDetail.courseProgress")}</span>
           <span className="font-bold text-foreground">{enrollment.progress}%</span>
         </div>
         <Progress value={enrollment.progress} className="h-2" />
@@ -666,7 +668,7 @@ function EnrolledCourseCard({
           className="mt-5 w-full gap-2 bg-indigo-600 shadow-lg shadow-indigo-500/30 hover:bg-indigo-700"
         >
           <BookOpen className="h-4 w-4" />
-          {complete ? "Open course" : "Continue learning"}
+          {complete ? t("courseDetail.openCourse") : t("courseDetail.continueLearning")}
         </Button>
         <p className="pt-3 text-center text-xs text-muted-foreground">{course.title}</p>
       </div>
@@ -685,11 +687,12 @@ function EnrollmentCard({
   onEnroll: () => void;
   isLoggedIn: boolean;
 }) {
+  const t = useT();
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
       <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
         <p className="text-sm font-semibold text-indigo-100">
-          {course.duration}-week live course
+          {course.duration}-{t("courseDetail.weekLiveCourse")}
         </p>
         <p className="mt-1 text-xs text-indigo-200">
           Full price and payment options are shown at checkout.
@@ -703,7 +706,7 @@ function EnrollmentCard({
           className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
         >
           <Sparkles className="h-4 w-4" />
-          {course.price === 0 ? "Start Now" : "Enroll Now"}
+          {course.price === 0 ? t("course.startNow") : t("course.enrollNow")}
         </Button>
 
         {!isLoggedIn && (
@@ -717,7 +720,7 @@ function EnrollmentCard({
         {/* What's included */}
         <div className="space-y-2.5">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            This course includes
+            {t("course.includes")}
           </p>
           {[
             { icon: Video, label: `${course.duration * 4}+ live class hours` },
@@ -753,6 +756,7 @@ function ReviewsSection({
   isLoggedIn: boolean;
   onReviewAdded: () => void;
 }) {
+  const t = useT();
   const [showForm, setShowForm] = useState(false);
   const [formRating, setFormRating] = useState(5);
   const [formComment, setFormComment] = useState("");
@@ -787,7 +791,7 @@ function ReviewsSection({
     <div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground">Student reviews</h2>
+          <h2 className="text-xl font-bold text-foreground">{t("course.reviews")}</h2>
           <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <Stars rating={rating} />
             <span className="font-semibold text-foreground">
@@ -806,7 +810,7 @@ function ReviewsSection({
             className="gap-1.5"
           >
             <MessageSquare className="h-4 w-4" />
-            {showForm ? "Cancel" : "Write a review"}
+            {showForm ? t("common.cancel") : t("courseDetail.writeReview")}
           </Button>
         )}
       </div>
@@ -817,7 +821,7 @@ function ReviewsSection({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">
-                Your rating
+                {t("courseDetail.yourRating")}
               </label>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => {
@@ -849,7 +853,7 @@ function ReviewsSection({
 
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">
-                Your review
+                {t("courseDetail.yourReview")}
               </label>
               <Textarea
                 value={formComment}
@@ -873,7 +877,7 @@ function ReviewsSection({
               ) : (
                 <CheckCircle2 className="h-4 w-4" />
               )}
-              Submit review
+              {t("courseDetail.submitReview")}
             </Button>
           </form>
         </Card>
@@ -883,9 +887,9 @@ function ReviewsSection({
       {reviews.length === 0 ? (
         <div className="rounded-xl border border-dashed bg-muted/30 p-10 text-center">
           <MessageSquare className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
-          <p className="text-sm font-semibold text-foreground">No reviews yet</p>
+          <p className="text-sm font-semibold text-foreground">{t("courseDetail.noReviews")}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Be the first to share your experience with this course.
+            {t("courseDetail.beFirstReview")}
           </p>
         </div>
       ) : (
@@ -902,6 +906,7 @@ function ReviewsSection({
 }
 
 function ReviewItem({ review }: { review: Review }) {
+  const t = useT();
   const name = review.student?.fullName || "Anonymous student";
   const avatar = review.student?.profilePicture || null;
   return (
@@ -941,26 +946,27 @@ function CourseOverviewTab({
   course: Course;
   bullets: string[];
 }) {
+  const t = useT();
   const highlights = [
     {
       icon: Video,
-      title: "Live interactive sessions",
-      desc: "Real-time classes with your teacher",
+      title: t("courseDetail.liveInteractiveSessions"),
+      desc: t("courseDetail.realTimeClasses"),
     },
     {
       icon: Users,
-      title: "Expert teacher feedback",
-      desc: "Personalised corrections and guidance",
+      title: t("courseDetail.expertTeacherFeedback"),
+      desc: t("courseDetail.personalisedCorrections"),
     },
     {
       icon: MessageSquare,
-      title: "Real conversation practice",
-      desc: "Speak with confidence every class",
+      title: t("courseDetail.realConversationPractice"),
+      desc: t("courseDetail.speakConfidence"),
     },
     {
       icon: Award,
-      title: "Certificate on completion",
-      desc: "Verifiable proof of your progress",
+      title: t("courseDetail.certificateOnCompletion"),
+      desc: t("courseDetail.verifiableProof"),
     },
   ];
 
@@ -971,7 +977,7 @@ function CourseOverviewTab({
       {/* Intro paragraph */}
       <div>
         <h2 className="mb-3 text-xl font-bold text-foreground sm:text-2xl">
-          About this course
+          {t("course.aboutCourse")}
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           {course.description}
@@ -981,7 +987,7 @@ function CourseOverviewTab({
       {/* Key highlights */}
       <div>
         <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
-          <Sparkles className="h-5 w-5 text-amber-500" /> Key highlights
+          <Sparkles className="h-5 w-5 text-amber-500" /> {t("courseDetail.keyHighlights")}
         </h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {highlights.map(({ icon: Icon, title, desc }, i) => (
@@ -1000,7 +1006,7 @@ function CourseOverviewTab({
       {bullets.length > 0 && (
         <div>
           <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
-            <BookOpen className="h-5 w-5 text-indigo-500" /> What&apos;s covered
+            <BookOpen className="h-5 w-5 text-indigo-500" /> {t('courseDetail.whatsCovered')}
           </h3>
           <div className="grid gap-2 sm:grid-cols-2">
             {bullets.map((b, i) => (
@@ -1021,7 +1027,7 @@ function CourseOverviewTab({
       {/* Who this course is for */}
       <div>
         <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
-          <Target className="h-5 w-5 text-amber-500" /> Who this course is for
+          <Target className="h-5 w-5 text-amber-500" /> {t("courseDetail.whoFor")}
         </h3>
         <div className="grid gap-2.5 sm:grid-cols-2">
           {audience.map((a, i) => (
@@ -1045,16 +1051,17 @@ function LearningOutcomesTab({
   course: Course;
   bullets: string[];
 }) {
+  const t = useT();
   const skills = deriveSkills(course);
 
   return (
     <div className="space-y-8 rounded-xl border bg-card p-4 sm:p-6">
       <div>
         <h2 className="mb-3 text-xl font-bold text-foreground sm:text-2xl">
-          Learning outcomes
+          {t("courseDetail.learningOutcomesTitle")}
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-          By the end of this course, you will be able to:
+          {t("courseDetail.byEndOfCourse")}
         </p>
       </div>
 
@@ -1073,14 +1080,14 @@ function LearningOutcomesTab({
         </div>
       ) : (
         <p className="rounded-lg border border-dashed bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-          Outcomes will be announced soon.
+          {t("courseDetail.outcomesSoon")}
         </p>
       )}
 
       {/* Skills you'll develop */}
       <div>
         <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
-          <Sparkles className="h-5 w-5 text-amber-500" /> Skills you&apos;ll develop
+          <Sparkles className="h-5 w-5 text-amber-500" /> {t('courseDetail.skillsDevelop')}
         </h3>
         <div className="flex flex-wrap gap-2">
           {skills.map((s, i) => (
@@ -1101,26 +1108,27 @@ function LearningOutcomesTab({
 /* ─── Tab content: Certification ───────────────────────────── */
 
 function CertificationTab({ course }: { course: Course }) {
+  const t = useT();
   const includes = [
-    "Your full name",
-    "Course title",
-    "Completion date",
-    "Unique verification ID",
-    "SHEEGOW ACADEMY seal",
+    t("courseDetail.yourFullName"),
+    t("courseDetail.courseTitle"),
+    t("courseDetail.completionDate"),
+    t("courseDetail.uniqueId"),
+    t("courseDetail.sheegowSeal"),
   ];
 
   const steps = [
     {
-      title: "Enroll in the course",
-      desc: "Reserve your seat in the next live cohort.",
+      title: t("courseDetail.stepEnroll"),
+      desc: t("courseDetail.stepEnrollDesc"),
     },
     {
-      title: "Attend all live classes",
-      desc: "Join every session and practise with the group.",
+      title: t("courseDetail.stepAttend"),
+      desc: t("courseDetail.stepAttendDesc"),
     },
     {
-      title: "Complete the assignments",
-      desc: "Finish your homework and pass the quizzes.",
+      title: t("courseDetail.stepComplete"),
+      desc: t("courseDetail.stepCompleteDesc"),
     },
   ];
 
@@ -1129,7 +1137,7 @@ function CertificationTab({ course }: { course: Course }) {
       <div>
         <h2 className="mb-3 flex items-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
           <GraduationCap className="h-6 w-6 text-indigo-600" />
-          Earn your SHEEGOW ACADEMY Certificate
+          {t("courseDetail.earnCertificate")}
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           Upon completing this course (attending live classes + finishing
@@ -1146,7 +1154,7 @@ function CertificationTab({ course }: { course: Course }) {
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
           <h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
-            <Award className="h-5 w-5 text-amber-500" /> What&apos;s included
+            <Award className="h-5 w-5 text-amber-500" /> {t('courseDetail.whatsIncluded')}
           </h3>
           <ul className="space-y-2">
             {includes.map((item, i) => (
@@ -1160,7 +1168,7 @@ function CertificationTab({ course }: { course: Course }) {
 
         <div>
           <h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
-            <ListChecks className="h-5 w-5 text-indigo-500" /> How to earn it
+            <ListChecks className="h-5 w-5 text-indigo-500" /> {t("courseDetail.howToEarn")}
           </h3>
           <ol className="space-y-3">
             {steps.map((s, i) => (

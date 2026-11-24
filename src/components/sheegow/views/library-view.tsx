@@ -17,10 +17,12 @@ import {
   Loader2,
   LogIn,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 type LibraryData = Awaited<ReturnType<typeof api.library>>;
 
 export function LibraryView() {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const [data, setData] = useState<LibraryData | null>(null);
@@ -43,8 +45,8 @@ export function LibraryView() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <LogIn className="mx-auto mb-3 h-8 w-8 text-indigo-500" />
-        <h1 className="text-xl font-bold">Log in to open your library</h1>
-        <Button className="mt-4" onClick={() => openAuthModal("login")}>Log in</Button>
+        <h1 className="text-xl font-bold">{t("library.loginToOpen")}</h1>
+        <Button className="mt-4" onClick={() => openAuthModal("login")}>{t("auth.logIn")}</Button>
       </div>
     );
   }
@@ -53,13 +55,13 @@ export function LibraryView() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => router.push("/dashboard")}>
-          ← Dashboard
+          {t("library.dashboard")}
         </Button>
         <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-          <Library className="h-7 w-7 text-indigo-500" /> My Library
+          <Library className="h-7 w-7 text-indigo-500" /> {t("library.myLibrary")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Every lesson, book and PDF you are entitled to — revisit any time while your access is active.
+          {t("library.desc")}
         </p>
       </div>
 
@@ -70,9 +72,9 @@ export function LibraryView() {
       ) : !data?.courses.length ? (
         <Card className="p-12 text-center">
           <BookOpen className="mx-auto mb-3 h-10 w-10 text-indigo-400" />
-          <h2 className="font-bold">Your library is empty</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Enroll in a course to start collecting materials.</p>
-          <Button className="mt-4" onClick={() => router.push("/courses")}>Browse courses</Button>
+          <h2 className="font-bold">{t("library.empty")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("library.emptyDesc")}</p>
+          <Button className="mt-4" onClick={() => router.push("/courses")}>{t("library.browseCourses")}</Button>
         </Card>
       ) : (
         <div className="space-y-5">
@@ -94,7 +96,7 @@ export function LibraryView() {
                       <div className="min-w-0">
                         <p className="truncate font-bold">{course.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {lessons.length} lessons · {materials.length} files · {course.percent}% complete
+                          {lessons.length} {t("library.lessons")} · {materials.length} {t("library.files")} · {course.percent}% {t("library.complete")}
                         </p>
                       </div>
                     </div>
@@ -105,7 +107,7 @@ export function LibraryView() {
                   </summary>
                   <div className="border-t p-5">
                     <Button size="sm" className="mb-4 gap-2 bg-indigo-600" onClick={() => router.push(`/learn/${course.courseId}`)}>
-                      <BookOpen className="h-4 w-4" /> Continue course
+                      <BookOpen className="h-4 w-4" /> {t("library.continueCourse")}
                     </Button>
                     <div className="space-y-5">
                       {course.modules.map((module) => (
@@ -120,7 +122,7 @@ export function LibraryView() {
                                 >
                                   <span>{lesson.title}</span>
                                   <span className="shrink-0 text-xs text-muted-foreground">
-                                    {lesson.progress?.[0]?.status === "completed" ? "✓ done" : lesson.type}
+                                    {lesson.progress?.[0]?.status === "completed" ? t("library.done") : lesson.type}
                                   </span>
                                 </button>
                                 {lesson.materials && lesson.materials.length > 0 && (

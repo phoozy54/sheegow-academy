@@ -20,6 +20,7 @@ import { PathwayCard } from "../design/pathway-card";
 import { CtaPanel } from "../design/cta-panel";
 import { useMyEnrollments } from "@/lib/use-my-enrollments";
 import { trackConversion, type ConversionEvent } from "@/lib/analytics";
+import { useT } from "@/lib/i18n";
 import {
   Video,
   Users,
@@ -84,6 +85,7 @@ const FEATURES: Array<{
 export function HomeView() {
   const { openAuthModal, user } = useStore();
   const router = useRouter();
+  const t = useT();
   const { enrollments, byCourse, loading: loadingEnrollments } = useMyEnrollments();
   const { isMobile, isTablet } = useDevice();
   const padClass = isMobile
@@ -115,18 +117,16 @@ export function HomeView() {
                 className="mb-5 inline-flex items-center gap-1.5 rounded-full border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
               >
                 <Video className="h-3 w-3" />
-                Live English classes with expert teachers
+                {t("home.heroBadge")}
               </Badge>
 
               <h1 className="mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Speak English with confidence in{" "}
-                <span className="gradient-text">live classes</span>
+                {t("home.heroTitle1")}{" "}
+                <span className="gradient-text">{t("home.heroTitleHighlight")}</span>
               </h1>
 
               <p className="mx-auto mb-7 max-w-xl text-base text-muted-foreground sm:text-lg lg:mx-0">
-                Talk to a real teacher from your first lesson. Small,
-                conversation-first classes help you speak clearly at work, in
-                exams and in everyday life — with feedback you can act on.
+                {t("home.heroDesc")}
               </p>
 
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
@@ -139,7 +139,7 @@ export function HomeView() {
                     href="/courses"
                     onClick={() => trackConversion("hero_explore_courses")}
                   >
-                    Explore live courses
+                    {t("home.exploreLiveCourses")}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -148,7 +148,7 @@ export function HomeView() {
                     href="#how-it-works"
                     onClick={() => trackConversion("hero_how_it_works")}
                   >
-                    See how it works
+                    {t("home.seeHowItWorks")}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -177,15 +177,15 @@ export function HomeView() {
                     </span>
                     <div>
                       <p className="text-sm font-bold text-foreground">
-                        English Conversation
+                        {t("home.englishConversation")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Live with SHEEGOW
+                        {t("home.liveWithSheegow")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-sm font-semibold text-indigo-600">
-                    <Users className="h-4 w-4" /> Small group
+                    <Users className="h-4 w-4" /> {t("home.smallGroup")}
                   </div>
                 </div>
               </div>
@@ -202,20 +202,20 @@ export function HomeView() {
           items={[
             {
               icon: AudioLines,
-              label: "Speaking every lesson",
-              detail: "Practice out loud, not just watch",
+              label: t("home.proofSpeaking"),
+              detail: t("home.proofSpeakingDetail"),
               tone: "rose",
             },
             {
               icon: UserRoundCheck,
-              label: "Real teacher feedback",
-              detail: "Corrections you can act on",
+              label: t("home.proofFeedback"),
+              detail: t("home.proofFeedbackDetail"),
               tone: "emerald",
             },
             {
               icon: Award,
-              label: "Certificate on completion",
-              detail: "Progress you can show",
+              label: t("home.proofCertificate"),
+              detail: t("home.proofCertificateDetail"),
               tone: "amber",
             },
           ]}
@@ -231,10 +231,10 @@ export function HomeView() {
                 variant="outline"
                 className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
               >
-                <BookOpen className="h-3 w-3" /> Continue learning
+                <BookOpen className="h-3 w-3" /> {t("home.continueLearning")}
               </Badge>
               <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-                Pick up where you left off
+                {t("home.pickUpWhereLeft")}
               </h2>
             </div>
             <Button
@@ -242,20 +242,20 @@ export function HomeView() {
               onClick={() => router.push("/dashboard")}
               className="gap-1.5"
             >
-              My dashboard <ArrowRight className="h-4 w-4" />
+              {t("home.myDashboard")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {enrollments.slice(0, 3).map((enrollment) => (
               <Card key={enrollment.id} className="card-lift flex flex-col p-5">
                 <p className="text-[11px] font-bold uppercase tracking-wide text-indigo-500">
-                  {enrollment.course?.level || "Your course"}
+                  {enrollment.course?.level || t("dashboard.sectionCourses")}
                 </p>
                 <h3 className="mt-1 line-clamp-2 text-base font-bold text-foreground">
                   {enrollment.course?.title || "Course"}
                 </h3>
                 <div className="mb-1.5 mt-4 flex justify-between text-xs text-muted-foreground">
-                  <span>Progress</span>
+                  <span>{t("home.progress")}</span>
                   <span className="font-bold text-foreground">{enrollment.progress}%</span>
                 </div>
                 <Progress value={enrollment.progress} className="h-1.5" />
@@ -263,7 +263,7 @@ export function HomeView() {
                   className="mt-4 w-full gap-1.5 bg-indigo-600 hover:bg-indigo-700"
                   onClick={() => router.push(`/learn/${enrollment.courseId}`)}
                 >
-                  Continue lesson <ArrowRight className="h-4 w-4" />
+                  {t("home.continueLesson")} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Card>
             ))}
@@ -274,11 +274,11 @@ export function HomeView() {
       {/* ─── FEATURES ──────────────────────────────── */}
       <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <SectionHeading
-          eyebrow="Why SHEEGOW"
+          eyebrow={t("home.featuresEyebrow")}
           icon={Sparkles}
           tone="indigo"
-          title="Built for speaking, not just watching"
-          description="One proven format: a real teacher, a small group and a reason to speak in every lesson."
+          title={t("home.featuresTitle")}
+          description={t("home.featuresDesc")}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
@@ -298,16 +298,16 @@ export function HomeView() {
         <div className={`mx-auto max-w-7xl ${padClass}`}>
           <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
             <SectionHeading
-              eyebrow="Popular Courses"
+              eyebrow={t("home.popularCoursesEyebrow")}
               icon={GraduationCap}
               tone="amber"
               align="left"
               className="mb-0"
-              title="Live courses students love"
+              title={t("home.popularCoursesTitle")}
             />
             <Button asChild variant="outline" className="gap-1.5">
               <Link href="/courses">
-                View all courses
+                {t("home.viewAllCourses")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -337,29 +337,29 @@ export function HomeView() {
       <section id="how-it-works" className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <SectionHeading
           id="how-it-works"
-          eyebrow="How it works"
+          eyebrow={t("home.howItWorksEyebrow")}
           icon={CheckCircle2}
           tone="emerald"
-          title="Three steps to confident English"
-          description="Every class is live with your teacher — no recorded videos."
+          title={t("home.howItWorksTitle")}
+          description={t("home.howItWorksDesc")}
         />
 
         <div className="grid gap-5 sm:grid-cols-3">
           {[
             {
               n: "1",
-              title: "Choose your course",
-              desc: "Pick the level that fits you — beginner, intermediate, IELTS, business or kids.",
+              title: t("home.step1Title"),
+              desc: t("home.step1Desc"),
             },
             {
               n: "2",
-              title: "Join the live class",
-              desc: "See your teacher, speak, use chat and raise your hand — all in real time.",
+              title: t("home.step2Title"),
+              desc: t("home.step2Desc"),
             },
             {
               n: "3",
-              title: "Earn your certificate",
-              desc: "Complete the lessons and quizzes to receive a verification certificate.",
+              title: t("home.step3Title"),
+              desc: t("home.step3Desc"),
             },
           ].map((step) => (
             <Card key={step.n} className="card-lift flex flex-col p-6">
@@ -379,30 +379,30 @@ export function HomeView() {
       <section className="bg-muted/30 py-16 lg:py-24">
         <div className={`mx-auto max-w-7xl ${padClass}`}>
           <SectionHeading
-            eyebrow="The difference is real"
+            eyebrow={t("home.liveVsRecordedEyebrow")}
             icon={Video}
             tone="amber"
-            title="Live classes vs. recorded drills"
-            description="Apps can build habits. Speaking with a teacher builds confidence."
+            title={t("home.liveVsRecordedTitle")}
+            description={t("home.liveVsRecordedDesc")}
           />
           <div className="grid gap-5 md:grid-cols-2">
             <ComparisonPanel
               highlighted
-              title="Live with SHEEGOW"
+              title={t("home.liveWithSheegow")}
               items={[
-                "A teacher hears you and corrects you in the moment",
-                "You speak in every lesson, not after finishing a module",
-                "Questions get answers during the class",
-                "Progress is marked by real lessons and a certificate",
+                t("home.liveItem1"),
+                t("home.liveItem2"),
+                t("home.liveItem3"),
+                t("home.liveItem4"),
               ]}
             />
             <ComparisonPanel
-              title="Self-paced apps and recordings"
+              title={t("home.selfPacedTitle")}
               items={[
-                "Practice is mostly reading, tapping or repeating alone",
-                "No one listens to your pronunciation in real time",
-                "Mistakes can stay uncorrected for weeks",
-                "Finishing videos is not the same as speaking well",
+                t("home.recordedItem1"),
+                t("home.recordedItem2"),
+                t("home.recordedItem3"),
+                t("home.recordedItem4"),
               ]}
             />
           </div>
@@ -412,38 +412,38 @@ export function HomeView() {
       {/* ─── PATHWAYS ─────────────────────────────── */}
       <section className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <SectionHeading
-          eyebrow="Choose your path"
+          eyebrow={t("home.pathwaysEyebrow")}
           icon={Sparkles}
           tone="sky"
-          title="There is a live class for your goal"
-          description="Start with a course, ask about a trial, or explore how we work with you."
+          title={t("home.pathwaysTitle")}
+          description={t("home.pathwaysDesc")}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {([
             {
               icon: GraduationCap,
               tone: "indigo",
-              title: "Learners",
-              desc: "Beginner to advanced live English courses.",
-              cta: "Explore live courses",
+              title: t("home.pathwayLearners"),
+              desc: t("home.pathwayLearnersDesc"),
+              cta: t("home.pathwayLearnersCta"),
               href: "/courses",
               event: "pathway_courses",
             },
             {
               icon: Baby,
               tone: "rose",
-              title: "Parents",
-              desc: "Playful live classes for children aged 7–12.",
-              cta: "See English for kids",
+              title: t("home.pathwayParents"),
+              desc: t("home.pathwayParentsDesc"),
+              cta: t("home.pathwayParentsCta"),
               href: "/courses/english-for-kids-ages-7-12",
               event: "pathway_kids",
             },
             {
               icon: BriefcaseBusiness,
               tone: "amber",
-              title: "Professionals",
-              desc: "Meetings, email, interviews and presentations at work.",
-              cta: "See business English",
+              title: t("home.pathwayProfessionals"),
+              desc: t("home.pathwayProfessionalsDesc"),
+              cta: t("home.pathwayProfessionalsCta"),
               href: "/courses/business-english-professional",
               event: "pathway_business",
             },
@@ -469,14 +469,13 @@ export function HomeView() {
           ))}
         </div>
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          Want to try a class first? A free trial is available with administrator
-          approval.{" "}
+          {t("home.trialText")}{" "}
           <Link
             href="/contact"
             onClick={() => trackConversion("trial_enquiry")}
             className="font-semibold text-indigo-600 underline"
           >
-            Ask us about a free trial
+            {t("home.askFreeTrial")}
           </Link>
           .
         </p>
@@ -485,8 +484,8 @@ export function HomeView() {
       {/* ─── CTA ─────────────────────────────────── */}
       <CtaPanel
         className={padClass}
-        title="Ready to start speaking English with confidence?"
-        description="Join SHEEGOW ACADEMY today and start speaking English with expert teachers in live, interactive classes."
+        title={t("cta.ready")}
+        description={t("cta.join")}
       >
         {user ? (
           <Button
@@ -495,7 +494,7 @@ export function HomeView() {
             className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
           >
             <Link href="/courses">
-              Browse Courses
+              {t("cta.browseCourses")}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
@@ -505,7 +504,7 @@ export function HomeView() {
             onClick={() => openAuthModal("register")}
             className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
           >
-            Create Account
+            {t("cta.createAccount")}
             <ArrowRight className="h-4 w-4" />
           </Button>
         )}
@@ -516,7 +515,7 @@ export function HomeView() {
           className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
         >
           <Link href="/about">
-            About SHEEGOW ACADEMY
+            {t("home.aboutSheegow")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>

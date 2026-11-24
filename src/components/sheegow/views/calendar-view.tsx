@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, isLiveNow, levelBadgeClass } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -114,6 +115,7 @@ function formatHourMinute(date: Date) {
 }
 
 export function CalendarView() {
+  const t = useT();
   const router = useRouter();
   const today = useMemo(() => new Date(), []);
   const [cursor, setCursor] = useState({
@@ -218,14 +220,13 @@ export function CalendarView() {
             variant="outline"
             className="mb-4 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
           >
-            <CalendarDays className="h-3 w-3" /> Class Calendar
+            <CalendarDays className="h-3 w-3" /> {t("calendar.eyebrow")}
           </Badge>
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            All your <span className="gradient-text">live classes</span>, in one calendar
+            {t("calendar.title1")} <span className="gradient-text">{t("calendar.titleHighlight")}</span>{t("calendar.title2")}
           </h1>
           <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-            See every upcoming live English class in a monthly view. Click a
-            class to join the room when it starts — never miss a session.
+            {t("calendar.desc")}
           </p>
         </div>
       </section>
@@ -238,7 +239,7 @@ export function CalendarView() {
               variant="outline"
               size="icon"
               onClick={goToPrevMonth}
-              aria-label="Previous month"
+              aria-label={t("calendar.previousMonth")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -249,7 +250,7 @@ export function CalendarView() {
               variant="outline"
               size="icon"
               onClick={goToNextMonth}
-              aria-label="Next month"
+              aria-label={t("calendar.nextMonth")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -262,7 +263,7 @@ export function CalendarView() {
                 className="gap-1.5"
                 onClick={goToToday}
               >
-                <CalendarIcon className="h-3.5 w-3.5" /> Today
+                <CalendarIcon className="h-3.5 w-3.5" /> {t("calendar.today")}
               </Button>
             )}
             <Button
@@ -271,7 +272,7 @@ export function CalendarView() {
               className="gap-1.5"
               onClick={() => router.push("/live-classes")}
             >
-              <Video className="h-3.5 w-3.5" /> All classes
+              <Video className="h-3.5 w-3.5" /> {t("calendar.allClasses")}
             </Button>
           </div>
         </div>
@@ -280,15 +281,15 @@ export function CalendarView() {
         <div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-            Live now
+            {t("calendar.liveNow")}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
-            Scheduled
+            {t("calendar.scheduled")}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-            Ended
+            {t("calendar.ended")}
           </span>
         </div>
 
@@ -308,9 +309,9 @@ export function CalendarView() {
         ) : classes.length === 0 ? (
           <Card className="p-10 text-center">
             <CalendarDays className="mx-auto mb-3 h-9 w-9 text-muted-foreground" />
-            <p className="font-semibold">No live classes scheduled</p>
+            <p className="font-semibold">{t("calendar.noClassesScheduled")}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Check back soon — new LIVE English classes are added every week.
+              {t("calendar.noClassesDesc")}
             </p>
             <Button
               onClick={() => router.push("/courses")}
@@ -402,7 +403,7 @@ export function CalendarView() {
                         })}
                         {dayClasses.length > 3 && (
                           <p className="px-1 text-[10px] text-muted-foreground">
-                            +{dayClasses.length - 3} more
+                            +{dayClasses.length - 3} {t("calendar.more")}
                           </p>
                         )}
                       </div>
@@ -417,9 +418,9 @@ export function CalendarView() {
               {monthClasses.length === 0 ? (
                 <Card className="p-8 text-center">
                   <CalendarIcon className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-medium">No classes this month</p>
+                  <p className="text-sm font-medium">{t("calendar.noClassesThisMonth")}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Try another month using the arrows above.
+                    {t("calendar.tryAnotherMonth")}
                   </p>
                 </Card>
               ) : (

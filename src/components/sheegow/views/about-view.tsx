@@ -23,6 +23,7 @@ import {
   HandHeart,
   Sun,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 /* ─── Static data ───────────────────────────────────────── */
 
@@ -74,6 +75,7 @@ const TEACHER = {
 /* ─── Main view ──────────────────────────────────────────── */
 
 export function AboutView() {
+  const t = useT();
   const { openAuthModal, user } = useStore();
   const router = useRouter();
 
@@ -88,15 +90,13 @@ export function AboutView() {
               variant="outline"
               className="mb-5 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
             >
-              <Sparkles className="h-3 w-3" /> Our Story
+              <Sparkles className="h-3 w-3" /> {t("about.eyebrow")}
             </Badge>
             <h1 className="mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              About <span className="gradient-text">SHEEGOW ACADEMY</span>
+              {t("about.title")} <span className="gradient-text">SHEEGOW ACADEMY</span>
             </h1>
             <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-              We exist to bring quality, live English education to students
-              everywhere. No recorded videos. No lonely self-study. Just real
-              teachers, real conversations, real progress.
+              {t("about.heroDesc")}
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -105,7 +105,7 @@ export function AboutView() {
                 onClick={() => router.push("/courses")}
                 className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
               >
-                Explore Courses
+                {t("about.exploreCourses")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <Button
@@ -128,13 +128,9 @@ export function AboutView() {
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30">
               <Target className="h-6 w-6" />
             </div>
-            <h2 className="mb-3 text-xl font-bold text-foreground">Our Mission</h2>
+            <h2 className="mb-3 text-xl font-bold text-foreground">{t("about.mission")}</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              To make high-quality, interactive English education accessible to
-              every learner — through live classes taught by caring expert
-              teachers. We exist to break the barrier of recorded, passive
-              learning and replace it with conversation, practice, and
-              confidence.
+              {t("about.missionDesc")}
             </p>
           </Card>
 
@@ -142,12 +138,9 @@ export function AboutView() {
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30">
               <Eye className="h-6 w-6" />
             </div>
-            <h2 className="mb-3 text-xl font-bold text-foreground">Our Vision</h2>
+            <h2 className="mb-3 text-xl font-bold text-foreground">{t("about.vision")}</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              A world where every student — from primary school to working
-              professional — can speak English confidently. Where live classes
-              replace lonely videos, where teachers know their students by name,
-              and where a better future is just a live class away.
+              {t("about.visionDesc")}
             </p>
           </Card>
         </div>
@@ -160,10 +153,10 @@ export function AboutView() {
             variant="outline"
             className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
           >
-            <BookOpen className="h-3 w-3" /> The Story
+            <BookOpen className="h-3 w-3" /> {t("about.storyEyebrow")}
           </Badge>
           <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Built for learners, by learners
+            {t("about.storyTitle")}
           </h2>
 
           <div className="space-y-5 text-base leading-relaxed text-muted-foreground">
@@ -206,14 +199,13 @@ export function AboutView() {
             variant="outline"
             className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
           >
-            <Heart className="h-3 w-3" /> Our Values
+            <Heart className="h-3 w-3" /> {t("about.valuesEyebrow")}
           </Badge>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            What we believe in
+            {t("about.valuesTitle")}
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Six principles that shape every class, every course, every decision
-            we make.
+            {t("about.valuesDesc")}
           </p>
         </div>
 
@@ -242,13 +234,13 @@ export function AboutView() {
               variant="outline"
               className="mb-3 inline-flex items-center gap-1.5 border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
             >
-              <Award className="h-3 w-3" /> Leadership
+              <Award className="h-3 w-3" /> {t("about.leadershipEyebrow")}
             </Badge>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Meet the founder &amp; general manager
+              {t("about.leadershipTitle")}
             </h2>
             <p className="mt-3 text-muted-foreground">
-              The English language expert behind SHEEGOW ACADEMY.
+              {t("about.leadershipDesc")}
             </p>
           </div>
 
@@ -261,13 +253,13 @@ export function AboutView() {
               </div>
               <div className="p-6 sm:p-10">
                 <Badge className="mb-3 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
-                  Founder &amp; General Manager
+                  {t("about.founderBadge")}
                 </Badge>
                 <h3 className="text-2xl font-extrabold tracking-tight text-foreground">
                   Ciise Mohamed Sheeq (SHEEGOW)
                 </h3>
                 <p className="mt-1 text-sm font-semibold text-indigo-600">
-                  English Language Expert · 15+ Years of Experience
+                  {t("about.founderSpecialty")}
                 </p>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                   Ciise holds a university degree in English and multiple
@@ -314,15 +306,13 @@ export function AboutView() {
               variant="outline"
               className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
             >
-              <GraduationCap className="h-3 w-3" /> Meet Your Teacher
+              <GraduationCap className="h-3 w-3" /> {t("about.teacherEyebrow")}
             </Badge>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              One expert. Every class live.
+              {t("about.teacherTitle")}
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              All courses are taught by founder Ciise Mohamed Sheeq (SHEEGOW),
-              an English language expert with 15 years of experience — live and
-              interactive, never recorded.
+              {t("about.teacherDesc")}
             </p>
           </div>
 
@@ -338,7 +328,7 @@ export function AboutView() {
                   variant="outline"
                   className="mb-3 w-fit border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700"
                 >
-                  Founder &amp; Teacher
+                  {t("about.founderTeacherBadge")}
                 </Badge>
                 <h3 className="text-lg font-bold text-foreground">{TEACHER.name}</h3>
                 <p className="mt-1 text-xs font-semibold text-indigo-600">
@@ -353,7 +343,7 @@ export function AboutView() {
                   onClick={() => router.push("/courses")}
                   className="mt-4 gap-1.5 self-start"
                 >
-                  <BookOpen className="h-3.5 w-3.5" /> View Courses
+                  <BookOpen className="h-3.5 w-3.5" /> {t("about.viewCourses")}
                 </Button>
               </div>
             </Card>
@@ -370,14 +360,13 @@ export function AboutView() {
               variant="outline"
               className="mb-4 inline-flex items-center gap-1.5 border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
             >
-              <Sun className="h-3 w-3" /> Start today
+              <Sun className="h-3 w-3" /> {t("about.ctaEyebrow")}
             </Badge>
             <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Ready to start your English journey?
+              {t("about.ctaTitle")}
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-indigo-100">
-              Join SHEEGOW ACADEMY today and start speaking English with
-              expert teachers in live, interactive classes.
+              {t("about.ctaDesc")}
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button
@@ -387,7 +376,7 @@ export function AboutView() {
                 }
                 className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
               >
-                {user ? "Browse Courses" : "Create Account"}
+                {user ? t("cta.browseCourses") : t("cta.createAccount")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <Button
@@ -396,7 +385,7 @@ export function AboutView() {
                 onClick={() => router.push("/contact")}
                 className="w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
               >
-                <MessageSquare className="h-4 w-4" /> Ask a Question
+                <MessageSquare className="h-4 w-4" /> {t("about.askQuestion")}
               </Button>
             </div>
           </div>
@@ -410,13 +399,13 @@ export function AboutView() {
             variant="outline"
             className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
           >
-            <ShieldCheck className="h-3 w-3" /> Your Privacy
+            <ShieldCheck className="h-3 w-3" /> {t("about.privacyEyebrow")}
           </Badge>
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Privacy Policy
+            {t("about.privacyTitle")}
           </h2>
           <p className="text-muted-foreground">
-            How we handle your data at SHEEGOW ACADEMY.
+            {t("about.privacyDesc")}
           </p>
         </div>
         <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
