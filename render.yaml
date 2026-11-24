@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sheegow-chat
+    name: sheegow-chat-v2
     runtime: node
     plan: free
     region: oregon
