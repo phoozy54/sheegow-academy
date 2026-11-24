@@ -25,6 +25,7 @@ import {
   Download,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 type AdminPayment = Payment & {
   student?: { id: string; fullName: string; email: string } | null;
@@ -44,15 +45,14 @@ const STATUSES = ["pending", "completed", "failed", "refunded"];
 const METHODS = ["card", "zaad", "edahab"];
 
 const METHOD_LABELS: Record<string, string> = {
-  card: "Card",
-  zaad: "Zaad Service",
-  edahab: "Edahab (E-Dahab)",
+  card: "admin.payments.methodCard",
+  zaad: "admin.payments.methodZaad",
+  edahab: "admin.payments.methodEdahab",
 };
 
 function methodLabel(method: string) {
-  return (
-    METHOD_LABELS[method] || method.charAt(0).toUpperCase() + method.slice(1)
-  );
+  const key = METHOD_LABELS[method];
+  return key || method.charAt(0).toUpperCase() + method.slice(1);
 }
 
 function statusClass(status: string) {
@@ -69,6 +69,7 @@ function statusClass(status: string) {
 }
 
 export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
+  const t = useT();
   const [payments, setPayments] = useState<AdminPayment[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -87,12 +88,12 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
       setSummary(res.summary);
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Failed to load payments"
+        err instanceof ApiError ? err.message : t("admin.payments.loadFailed")
       );
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, methodFilter]);
+  }, [statusFilter, methodFilter, t]);
 
   useEffect(() => {
     load();
@@ -102,11 +103,11 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
     setUpdatingId(id);
     try {
       await api.updatePaymentStatus(id, status);
-      toast.success("Payment status updated");
+      toast.success(t("admin.payments.statusUpdatedToast"));
       await load();
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Failed to update payment"
+        err instanceof ApiError ? err.message : t("admin.payments.updateFailed")
       );
     } finally {
       setUpdatingId(null);
@@ -122,35 +123,35 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {formatPrice(summary?.revenue ?? 0)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Completed revenue</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.payments.completedRevenue")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <CheckCircle2 className="mb-2 h-5 w-5 text-emerald-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary?.completed ?? 0}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Completed</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.payments.completed")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <Clock className="mb-2 h-5 w-5 text-amber-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary?.pending ?? 0}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Pending</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.payments.pending")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <RotateCcw className="mb-2 h-5 w-5 text-fuchsia-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary?.refunded ?? 0}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Refunded</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.payments.refunded")}</p>
         </Card>
       </div>
 
       {!canManage && (
         <div className="flex items-start gap-2 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-800">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>You can view payments. Admin access is required to change payment status.</span>
+          <span>{t("admin.payments.viewOnly")}</span>
         </div>
       )}
 
@@ -158,10 +159,10 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
       <div className="flex flex-col gap-3 sm:flex-row">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder={t("admin.payments.allStatuses")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="all">{t("admin.payments.allStatuses")}</SelectItem>
             {STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
                 {s[0].toUpperCase() + s.slice(1)}
@@ -171,13 +172,13 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
         </Select>
         <Select value={methodFilter} onValueChange={setMethodFilter}>
           <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="All methods" />
+            <SelectValue placeholder={t("admin.payments.allMethods")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All methods</SelectItem>
+            <SelectItem value="all">{t("admin.payments.allMethods")}</SelectItem>
             {METHODS.map((m) => (
               <SelectItem key={m} value={m}>
-                {methodLabel(m)}
+                {t(methodLabel(m))}
               </SelectItem>
             ))}
           </SelectContent>
@@ -193,9 +194,9 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
       ) : payments.length === 0 ? (
         <Card className="p-10 text-center">
           <CreditCard className="mx-auto mb-3 h-9 w-9 text-muted-foreground" />
-          <p className="font-semibold">No payments found</p>
+          <p className="font-semibold">{t("admin.payments.noPayments")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Payments will appear here once students check out.
+            {t("admin.payments.noPaymentsDesc")}
           </p>
         </Card>
       ) : (
@@ -210,8 +211,8 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                       {formatPrice(p.amount)}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {p.student?.fullName ?? "Unknown student"} ·{" "}
-                      {methodLabel(p.method)}
+                      {p.student?.fullName ?? t("admin.payments.unknownStudent")} ·{" "}
+                      {t(methodLabel(p.method))}
                     </p>
                   </div>
                   <Badge variant="outline" className={statusClass(p.status)}>
@@ -219,7 +220,7 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                   </Badge>
                 </div>
                 <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {p.course?.title ?? "No course"}
+                  {p.course?.title ?? t("admin.payments.noCourse")}
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   {formatDate(p.createdAt)}
@@ -231,7 +232,7 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                     rel="noopener noreferrer"
                     className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                   >
-                    <Download className="h-3.5 w-3.5" /> Invoice
+                    <Download className="h-3.5 w-3.5" /> {t("admin.payments.invoice")}
                   </a>
                 )}
                 {canManage && (
@@ -259,14 +260,14 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
             <table className="w-full text-left text-sm">
               <thead className="border-b bg-muted/40 text-xs uppercase text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">Student</th>
-                  <th className="px-4 py-3">Course</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Method</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Invoice</th>
-                  {canManage && <th className="px-4 py-3">Change</th>}
+                  <th className="px-4 py-3">{t("admin.payments.colStudent")}</th>
+                  <th className="px-4 py-3">{t("admin.payments.colCourse")}</th>
+                  <th className="px-4 py-3">{t("admin.payments.colAmount")}</th>
+                  <th className="px-4 py-3">{t("admin.payments.colMethod")}</th>
+                  <th className="px-4 py-3">{t("admin.payments.colDate")}</th>
+                  <th className="px-4 py-3">{t("admin.payments.colStatus")}</th>
+                  <th className="px-4 py-3">{t("admin.payments.colInvoice")}</th>
+                  {canManage && <th className="px-4 py-3">{t("admin.payments.colChange")}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -284,7 +285,7 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                     <td className="px-4 py-3 font-semibold">
                       {formatPrice(p.amount)}
                     </td>
-                    <td className="px-4 py-3">{methodLabel(p.method)}</td>
+                    <td className="px-4 py-3">{t(methodLabel(p.method))}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {formatDate(p.createdAt)}
                     </td>
@@ -301,7 +302,7 @@ export function AdminPayments({ canManage = false }: { canManage?: boolean }) {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                         >
-                          <Download className="h-3.5 w-3.5" /> Download
+                          <Download className="h-3.5 w-3.5" /> {t("admin.payments.download")}
                         </a>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>

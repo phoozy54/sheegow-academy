@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, timeAgo } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 /** Polling interval — 30 seconds while the popover is CLOSED. */
 const POLL_INTERVAL_MS = 30_000;
@@ -77,6 +78,7 @@ function metaFor(type: string) {
 export function NotificationBell() {
   const { user, authLoading } = useStore();
   const router = useRouter();
+  const t = useT();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -96,7 +98,7 @@ export function NotificationBell() {
       // Silent failures keep the bell from spamming toasts on flaky networks.
       if (!opts?.silent) {
         toast.error(
-          e instanceof ApiError ? e.message : "Could not load notifications"
+          e instanceof ApiError ? e.message : t("notifications.loadFailed")
         );
       }
     } finally {
@@ -136,7 +138,7 @@ export function NotificationBell() {
       setUnreadCount(0);
     } catch (e) {
       toast.error(
-        e instanceof ApiError ? e.message : "Could not mark notifications"
+        e instanceof ApiError ? e.message : t("notifications.markFailed")
       );
     } finally {
       setMarkingAll(false);
@@ -158,7 +160,7 @@ export function NotificationBell() {
         return true;
       } catch (e) {
         toast.error(
-          e instanceof ApiError ? e.message : "Could not mark notification"
+          e instanceof ApiError ? e.message : t("notifications.markFailed")
         );
         return false;
       }
@@ -184,9 +186,11 @@ export function NotificationBell() {
         <Button
           variant="ghost"
           size="icon"
-          aria-label={`Notifications${
-            unreadCount > 0 ? ` (${unreadCount} unread)` : ""
-          }`}
+          aria-label={
+            unreadCount > 0
+              ? t("notifications.ariaLabelUnread", { count: unreadCount })
+              : t("notifications.ariaLabel")
+          }
           className="relative h-9 w-9 text-muted-foreground hover:text-foreground"
         >
           <Bell className="h-[18px] w-[18px]" />
@@ -209,10 +213,10 @@ export function NotificationBell() {
       >
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-foreground">Notifications</h2>
+            <h2 className="text-sm font-bold text-foreground">{t("notifications.title")}</h2>
             {unreadCount > 0 && (
               <Badge className="bg-red-500 text-[10px] hover:bg-red-500">
-                {unreadCount} new
+                {t("notifications.newBadge", { count: unreadCount })}
               </Badge>
             )}
           </div>
@@ -228,14 +232,14 @@ export function NotificationBell() {
             ) : (
               <CheckCheck className="h-3.5 w-3.5" />
             )}
-            Mark all read
+            {t("notifications.markAllReadBtn")}
           </Button>
         </div>
 
         <div className="max-h-[22rem] overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+              <Loader2 className="h-4 w-4 animate-spin" /> {t("notifications.loading")}
             </div>
           ) : notifications.length === 0 ? (
             <EmptyState />
@@ -262,7 +266,7 @@ export function NotificationBell() {
               router.push("/notifications");
             }}
           >
-            View all notifications
+            {t("notifications.viewAllNotifications")}
           </Button>
         </div>
       </PopoverContent>
@@ -271,14 +275,15 @@ export function NotificationBell() {
 }
 
 function EmptyState() {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
         <Inbox className="h-6 w-6 text-muted-foreground" />
       </div>
-      <p className="text-sm font-semibold text-foreground">You&apos;re all caught up</p>
+      <p className="text-sm font-semibold text-foreground">{t("notifications.emptyTitle")}</p>
       <p className="max-w-[16rem] text-xs text-muted-foreground">
-        New announcements, replies and messages will show up here.
+        {t("notifications.emptyDesc")}
       </p>
     </div>
   );

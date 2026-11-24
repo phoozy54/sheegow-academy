@@ -53,6 +53,7 @@ import {
   CornerDownLeft,
 } from "lucide-react";
 import { cn, formatDateTime, levelBadgeClass } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
@@ -68,6 +69,7 @@ interface UseSearchState {
 }
 
 export function useSearchQuery(query: string, enabled = true) {
+  const t = useT();
   const [state, setState] = useState<UseSearchState>({
     loading: false,
     results: null,
@@ -97,7 +99,7 @@ export function useSearchQuery(query: string, enabled = true) {
       } catch (e) {
         if (id !== requestId.current) return;
         const msg =
-          e instanceof ApiError ? e.message : "Search failed. Try again.";
+          e instanceof ApiError ? e.message : t("search.searchFailed");
         setState({ loading: false, results: null, error: msg });
       }
     }, DEBOUNCE_MS);
@@ -112,22 +114,22 @@ export function useSearchQuery(query: string, enabled = true) {
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-function liveStatusBadge(status: string): { label: string; className: string } {
+function liveStatusBadge(status: string): { labelKey: string; className: string } {
   switch (status) {
     case "live":
       return {
-        label: "Live now",
+        labelKey: "search.liveNow",
         className:
           "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/30",
       };
     case "ended":
       return {
-        label: "Ended",
+        labelKey: "search.ended",
         className: "bg-muted text-muted-foreground border-border",
       };
     default:
       return {
-        label: "Scheduled",
+        labelKey: "search.scheduled",
         className:
           "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30",
       };
@@ -198,6 +200,7 @@ function CourseRow({ course }: { course: SearchCourseResult }) {
 }
 
 function LiveClassRow({ liveClass }: { liveClass: SearchLiveClassResult }) {
+  const t = useT();
   const status = liveStatusBadge(liveClass.status);
   return (
     <Link
@@ -214,7 +217,7 @@ function LiveClassRow({ liveClass }: { liveClass: SearchLiveClassResult }) {
         </p>
       </div>
       <Badge variant="outline" className={cn("shrink-0 border", status.className)}>
-        {status.label}
+        {t(status.labelKey)}
       </Badge>
     </Link>
   );
@@ -269,6 +272,7 @@ function ResultsList({
   query,
   onPick,
 }: ResultsListProps) {
+  const t = useT();
   if (loading) {
     return (
       <div className="space-y-1 p-2">
@@ -294,7 +298,7 @@ function ResultsList({
     // Nothing searched yet (query shorter than the minimum length).
     return (
       <div className="p-6 text-center text-sm text-muted-foreground">
-        Type at least {MIN_QUERY_LENGTH} characters to search
+        {t("search.typeMinimum", { count: MIN_QUERY_LENGTH })}
       </div>
     );
   }
@@ -310,20 +314,20 @@ function ResultsList({
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
           <Search className="h-4 w-4 text-muted-foreground" />
         </div>
-        <p className="text-sm font-medium">No results found</p>
+        <p className="text-sm font-medium">{t("search.noResults")}</p>
         <p className="text-xs text-muted-foreground">
-          We could not find courses, classes or users matching{" "}
+          {t("search.noResultsDescInline")}{" "}
           <span className="font-medium text-foreground">
             &ldquo;{query}&rdquo;
           </span>
-          .
+          {t("search.tryDifferentInline")}
         </p>
         <Link
           href={`/search?q=${encodeURIComponent(query)}`}
           onClick={onPick}
           className="mt-1 text-xs font-semibold text-indigo-600 hover:underline"
         >
-          View full search page →
+          {t("search.viewFullSearch")}
         </Link>
       </div>
     );
@@ -335,7 +339,7 @@ function ResultsList({
         <section className="mb-1">
           <header className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             <BookOpen className="h-3 w-3" />
-            Courses
+            {t("search.courses")}
           </header>
           {results.courses.map((c) => (
             <div key={c.id} onClick={onPick}>
@@ -349,7 +353,7 @@ function ResultsList({
         <section className="mb-1">
           <header className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             <Video className="h-3 w-3" />
-            Live Classes
+            {t("search.liveClasses")}
           </header>
           {results.liveClasses.map((lc) => (
             <div key={lc.id} onClick={onPick}>
@@ -363,7 +367,7 @@ function ResultsList({
         <section>
           <header className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             <UsersIcon className="h-3 w-3" />
-            Users
+            {t("search.users")}
           </header>
           {results.users!.map((u) => (
             <div key={u.id} onClick={onPick}>
@@ -379,9 +383,9 @@ function ResultsList({
           onClick={onPick}
           className="flex items-center justify-between text-xs font-medium text-indigo-600 hover:underline"
         >
-          <span>See all results</span>
+          <span>{t("search.seeAllResults")}</span>
           <span className="inline-flex items-center gap-1">
-            <CornerDownLeft className="h-3 w-3" /> Enter
+            <CornerDownLeft className="h-3 w-3" /> {t("search.enter")}
           </span>
         </Link>
       </div>
@@ -395,6 +399,7 @@ function ResultsList({
 
 export function SearchBar({ className }: { className?: string }) {
   const router = useRouter();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -460,8 +465,8 @@ export function SearchBar({ className }: { className?: string }) {
                 if (query.trim().length >= MIN_QUERY_LENGTH) setOpen(true);
               }}
               onKeyDown={onKeyDown}
-              placeholder="Search courses, classes…"
-              aria-label="Search"
+              placeholder={t("search.placeholder")}
+              aria-label={t("search.searchAriaLabel")}
               className="h-9 w-full rounded-full border-muted bg-muted/40 pl-9 pr-8 text-sm placeholder:text-muted-foreground focus-visible:bg-background"
             />
             {loading && (
@@ -474,7 +479,7 @@ export function SearchBar({ className }: { className?: string }) {
                   setQuery("");
                   inputRef.current?.focus();
                 }}
-                aria-label="Clear search"
+                aria-label={t("search.clearSearchAria")}
                 className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -508,6 +513,7 @@ export function SearchBar({ className }: { className?: string }) {
 
 export function MobileSearchButton({ className }: { className?: string }) {
   const router = useRouter();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -550,13 +556,13 @@ export function MobileSearchButton({ className }: { className?: string }) {
           variant="ghost"
           size="icon"
           className={cn("h-10 w-10 lg:hidden", className)}
-          aria-label="Search"
+          aria-label={t("search.searchAriaLabel")}
         >
           <Search className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent side="top" className="w-full p-0 sm:max-w-md">
-        <SheetTitle className="sr-only">Search SHEEGOW ACADEMY</SheetTitle>
+        <SheetTitle className="sr-only">{t("search.searchSheetTitle")}</SheetTitle>
         <div className="flex flex-col gap-3 p-4">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -566,8 +572,8 @@ export function MobileSearchButton({ className }: { className?: string }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder="Search courses, classes…"
-              aria-label="Search"
+              placeholder={t("search.placeholder")}
+              aria-label={t("search.searchAriaLabel")}
               className="h-11 rounded-full border-muted bg-muted/40 pl-10 pr-9 text-sm placeholder:text-muted-foreground focus-visible:bg-background"
             />
             {loading && (
@@ -580,7 +586,7 @@ export function MobileSearchButton({ className }: { className?: string }) {
                   setQuery("");
                   inputRef.current?.focus();
                 }}
-                aria-label="Clear search"
+                aria-label={t("search.clearSearchAria")}
                 className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <X className="h-4 w-4" />

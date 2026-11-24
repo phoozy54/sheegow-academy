@@ -39,6 +39,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "IELTS", "Kids"];
 
@@ -63,6 +64,7 @@ const EMPTY_FORM: TeacherForm = {
 };
 
 export function AdminTeachers() {
+  const t = useT();
   const [teachers, setTeachers] = useState<User[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,7 @@ export function AdminTeachers() {
       setCourses(courseRes.items);
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to load teachers";
+        err instanceof ApiError ? err.message : t("admin.teachers.loadFailed");
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -137,7 +139,7 @@ export function AdminTeachers() {
     e.preventDefault();
     if (!editing) return;
     if (!form.fullName.trim() || !form.email.trim()) {
-      toast.error("Name and email are required");
+      toast.error(t("admin.teachers.nameEmailRequired"));
       return;
     }
     setSaving(true);
@@ -150,12 +152,12 @@ export function AdminTeachers() {
         bio: form.bio.trim() || null,
         level: form.level,
       });
-      toast.success("Teacher updated");
+      toast.success(t("admin.teachers.teacherUpdatedToast"));
       setEditOpen(false);
       await fetchAll();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to update teacher";
+        err instanceof ApiError ? err.message : t("admin.teachers.updateFailed");
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -170,11 +172,11 @@ export function AdminTeachers() {
   async function handleAddSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!addForm.fullName.trim() || !addForm.email.trim()) {
-      toast.error("Name and email are required");
+      toast.error(t("admin.teachers.nameEmailRequired"));
       return;
     }
     if (addForm.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("admin.teachers.passwordMin"));
       return;
     }
     setAdding(true);
@@ -189,12 +191,12 @@ export function AdminTeachers() {
         level: addForm.level,
         bio: addForm.bio.trim() || undefined,
       });
-      toast.success("Teacher account created");
+      toast.success(t("admin.teachers.teacherCreatedToast"));
       setAddOpen(false);
       await fetchAll();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to create teacher";
+        err instanceof ApiError ? err.message : t("admin.teachers.createFailed");
       toast.error(msg);
     } finally {
       setAdding(false);
@@ -206,14 +208,14 @@ export function AdminTeachers() {
       {/* Toolbar */}
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Manage teaching staff and assigned courses.
+          {t("admin.teachers.intro")}
         </p>
         <Button
           onClick={openAdd}
           className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
-          Add Teacher
+          {t("admin.teachers.addTeacher")}
         </Button>
       </div>
 
@@ -230,69 +232,69 @@ export function AdminTeachers() {
             <GraduationCap className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium text-foreground">
-            No teachers yet
+            {t("admin.teachers.noTeachers")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Click &quot;Add Teacher&quot; to invite your first instructor.
+            {t("admin.teachers.noTeachersDesc")}
           </p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {teachers.map((t) => {
-            const courseCount = courseCountByTeacher[t.id] ?? 0;
+          {teachers.map((teacher) => {
+            const courseCount = courseCountByTeacher[teacher.id] ?? 0;
             return (
-              <Card key={t.id} className="card-lift flex flex-col p-5">
+              <Card key={teacher.id} className="card-lift flex flex-col p-5">
                 <div className="mb-3 flex items-start gap-3">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={t.profilePicture || undefined} />
+                    <AvatarImage src={teacher.profilePicture || undefined} />
                     <AvatarFallback className="bg-indigo-100 text-sm font-bold text-indigo-700">
-                      {t.fullName.slice(0, 2).toUpperCase()}
+                      {teacher.fullName.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate font-bold text-foreground">
-                      {t.fullName}
+                      {teacher.fullName}
                     </h3>
                     <Badge
                       variant="outline"
-                      className={cn("border", levelBadgeClass(t.level))}
+                      className={cn("border", levelBadgeClass(teacher.level))}
                     >
-                      {t.level}
+                      {teacher.level}
                     </Badge>
                   </div>
                   <Badge
                     variant="outline"
                     className={
-                      t.isActive
+                      teacher.isActive
                         ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                         : "border-muted bg-muted text-muted-foreground"
                     }
                   >
-                    {t.isActive ? "Active" : "Inactive"}
+                    {teacher.isActive ? t("admin.teachers.active") : t("admin.teachers.inactive")}
                   </Badge>
                 </div>
 
                 <div className="mb-3 space-y-1.5 text-xs">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-3.5 w-3.5" />
-                    <span className="truncate">{t.email}</span>
+                    <span className="truncate">{teacher.email}</span>
                   </div>
-                  {t.username && (
+                  {teacher.username && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <UserCircle className="h-3.5 w-3.5" />
-                      <span className="truncate">@{t.username}</span>
+                      <span className="truncate">@{teacher.username}</span>
                     </div>
                   )}
-                  {t.phone && (
+                  {teacher.phone && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Phone className="h-3.5 w-3.5" />
-                      <span>{t.phone}</span>
+                      <span>{teacher.phone}</span>
                     </div>
                   )}
                 </div>
 
                 <p className="mb-4 line-clamp-3 flex-1 text-xs leading-relaxed text-muted-foreground">
-                  {t.bio || "No bio provided."}
+                  {teacher.bio || t("admin.teachers.noBio")}
                 </p>
 
                 <div className="mb-4 flex items-center justify-between border-t pt-3">
@@ -305,16 +307,16 @@ export function AdminTeachers() {
                         {courseCount}
                       </p>
                       <p className="text-[10px] text-muted-foreground">
-                        {courseCount === 1 ? "course" : "courses"}
+                        {courseCount === 1 ? t("admin.teachers.courseSingular") : t("admin.teachers.coursePlural")}
                       </p>
                     </div>
                   </div>
                   <button
-                    onClick={() => setViewing(t)}
+                    onClick={() => setViewing(teacher)}
                     className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline"
                   >
                     <UserCircle className="h-3.5 w-3.5" />
-                    View Profile
+                    {t("admin.teachers.viewProfile")}
                   </button>
                 </div>
 
@@ -322,10 +324,10 @@ export function AdminTeachers() {
                   variant="outline"
                   size="sm"
                   className="w-full gap-1.5"
-                  onClick={() => openEdit(t)}
+                  onClick={() => openEdit(teacher)}
                 >
                   <Pencil className="h-3.5 w-3.5" />
-                  Edit Teacher
+                  {t("admin.teachers.editTeacher")}
                 </Button>
               </Card>
             );
@@ -342,14 +344,14 @@ export function AdminTeachers() {
       >
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Teacher</DialogTitle>
+            <DialogTitle>{t("admin.teachers.editTitle")}</DialogTitle>
             <DialogDescription>
-              Update profile details for {editing?.fullName}.
+              {t("admin.teachers.editDesc", { name: editing?.fullName ?? "" })}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">{t("admin.teachers.fullName")}</Label>
               <Input
                 id="fullName"
                 value={form.fullName}
@@ -360,7 +362,7 @@ export function AdminTeachers() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="username">Login Username</Label>
+              <Label htmlFor="username">{t("admin.teachers.loginUsername")}</Label>
               <Input
                 id="username"
                 value={form.username}
@@ -372,11 +374,11 @@ export function AdminTeachers() {
                 maxLength={30}
               />
               <p className="text-[11px] text-muted-foreground">
-                Used to log in alongside email and phone.
+                {t("admin.teachers.usernameHint")}
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t("admin.teachers.emailAddress")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -389,7 +391,7 @@ export function AdminTeachers() {
             </div>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t("admin.teachers.phone")}</Label>
                 <PhoneInput
                   id="phone"
                   value={form.phone}
@@ -399,13 +401,13 @@ export function AdminTeachers() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="level">Level</Label>
+                <Label htmlFor="level">{t("admin.teachers.level")}</Label>
                 <Select
                   value={form.level}
                   onValueChange={(v) => setForm((f) => ({ ...f, level: v }))}
                 >
                   <SelectTrigger id="level" className="w-full">
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue placeholder={t("admin.teachers.selectLevel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {LEVELS.map((l) => (
@@ -418,14 +420,14 @@ export function AdminTeachers() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="bio">Bio</Label>
+              <Label htmlFor="bio">{t("admin.teachers.bio")}</Label>
               <Textarea
                 id="bio"
                 value={form.bio}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, bio: e.target.value }))
                 }
-                placeholder="Short biography describing expertise and teaching style."
+                placeholder={t("admin.teachers.bioPlaceholder")}
                 rows={4}
               />
             </div>
@@ -436,14 +438,14 @@ export function AdminTeachers() {
                 onClick={() => setEditOpen(false)}
                 disabled={saving}
               >
-                Cancel
+                {t("admin.teachers.cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={saving}
                 className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? t("admin.teachers.saving") : t("admin.teachers.saveChanges")}
               </Button>
             </DialogFooter>
           </form>
@@ -459,17 +461,17 @@ export function AdminTeachers() {
       >
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New Teacher</DialogTitle>
+            <DialogTitle>{t("admin.teachers.addTitle")}</DialogTitle>
             <DialogDescription>
-              Invite a new instructor to the platform.
+              {t("admin.teachers.addDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
-            The teacher can log in with the username, email or phone number set here.
+            {t("admin.teachers.addInfoNote")}
           </div>
           <form onSubmit={handleAddSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="add-fullName">Full Name</Label>
+              <Label htmlFor="add-fullName">{t("admin.teachers.addFullName")}</Label>
               <Input
                 id="add-fullName"
                 value={addForm.fullName}
@@ -480,7 +482,7 @@ export function AdminTeachers() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="add-username">Login Username (optional)</Label>
+              <Label htmlFor="add-username">{t("admin.teachers.addUsername")}</Label>
               <Input
                 id="add-username"
                 value={addForm.username}
@@ -492,11 +494,11 @@ export function AdminTeachers() {
                 maxLength={30}
               />
               <p className="text-[11px] text-muted-foreground">
-                Leave blank to generate one from the name.
+                {t("admin.teachers.addUsernameHint")}
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="add-email">Email Address</Label>
+              <Label htmlFor="add-email">{t("admin.teachers.addEmail")}</Label>
               <Input
                 id="add-email"
                 type="email"
@@ -508,7 +510,7 @@ export function AdminTeachers() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="add-password">Initial Password</Label>
+              <Label htmlFor="add-password">{t("admin.teachers.addPassword")}</Label>
               <Input
                 id="add-password"
                 type="password"
@@ -517,14 +519,14 @@ export function AdminTeachers() {
                 onChange={(e) =>
                   setAddForm((f) => ({ ...f, password: e.target.value }))
                 }
-                placeholder="At least 6 characters"
+                placeholder={t("admin.teachers.passwordPlaceholder")}
                 minLength={6}
                 required
               />
             </div>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="add-phone">Phone</Label>
+                <Label htmlFor="add-phone">{t("admin.teachers.addPhone")}</Label>
                 <PhoneInput
                   id="add-phone"
                   value={addForm.phone}
@@ -534,13 +536,13 @@ export function AdminTeachers() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="add-level">Level</Label>
+                <Label htmlFor="add-level">{t("admin.teachers.addLevel")}</Label>
                 <Select
                   value={addForm.level}
                   onValueChange={(v) => setAddForm((f) => ({ ...f, level: v }))}
                 >
                   <SelectTrigger id="add-level" className="w-full">
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue placeholder={t("admin.teachers.selectLevel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {LEVELS.map((l) => (
@@ -553,14 +555,14 @@ export function AdminTeachers() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="add-bio">Bio</Label>
+              <Label htmlFor="add-bio">{t("admin.teachers.addBio")}</Label>
               <Textarea
                 id="add-bio"
                 value={addForm.bio}
                 onChange={(e) =>
                   setAddForm((f) => ({ ...f, bio: e.target.value }))
                 }
-                placeholder="Short biography..."
+                placeholder={t("admin.teachers.addBioPlaceholder")}
                 rows={3}
               />
             </div>
@@ -571,14 +573,14 @@ export function AdminTeachers() {
                 onClick={() => setAddOpen(false)}
                 disabled={adding}
               >
-                Cancel
+                {t("admin.teachers.cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={adding}
                 className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
               >
-                {adding ? "Creating..." : "Create Teacher"}
+                {adding ? t("admin.teachers.creating") : t("admin.teachers.createTeacher")}
               </Button>
             </DialogFooter>
           </form>
@@ -594,7 +596,7 @@ export function AdminTeachers() {
       >
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Teacher Profile</DialogTitle>
+            <DialogTitle>{t("admin.teachers.profileTitle")}</DialogTitle>
           </DialogHeader>
           {viewing && (
             <div className="space-y-4">
@@ -637,16 +639,16 @@ export function AdminTeachers() {
                 <div className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-muted-foreground" />
                   <span>
-                    {courseCountByTeacher[viewing.id] ?? 0} assigned course(s)
+                    {t("admin.teachers.assignedCourses", { count: courseCountByTeacher[viewing.id] ?? 0 })}
                   </span>
                 </div>
               </div>
               <div>
                 <p className="mb-1 text-xs font-semibold text-muted-foreground">
-                  Bio
+                  {t("admin.teachers.bioLabel")}
                 </p>
                 <p className="text-sm leading-relaxed text-foreground">
-                  {viewing.bio || "No bio provided."}
+                  {viewing.bio || t("admin.teachers.noBio")}
                 </p>
               </div>
             </div>
@@ -657,7 +659,7 @@ export function AdminTeachers() {
               onClick={() => setViewing(null)}
               className="w-full"
             >
-              Close
+              {t("admin.teachers.close")}
             </Button>
           </DialogFooter>
         </DialogContent>

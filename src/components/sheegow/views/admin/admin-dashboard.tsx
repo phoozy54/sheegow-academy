@@ -45,6 +45,7 @@ import {
   Legend,
 } from "recharts";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 const PIE_COLORS = [
   "#6366f1",
@@ -60,39 +61,40 @@ const STAT_CARDS: {
     Stats,
     "totalStudents" | "totalCourses" | "totalRevenue" | "liveClassesCount"
   >;
-  label: string;
+  labelKey: string;
   icon: typeof Users;
   gradient: string;
   isCurrency?: boolean;
 }[] = [
   {
     key: "totalStudents",
-    label: "Total Students",
+    labelKey: "admin.dashboard.totalStudents",
     icon: Users,
     gradient: "from-indigo-500 to-indigo-600",
   },
   {
     key: "totalCourses",
-    label: "Total Courses",
+    labelKey: "admin.dashboard.totalCourses",
     icon: BookOpen,
     gradient: "from-amber-500 to-orange-600",
   },
   {
     key: "totalRevenue",
-    label: "Total Revenue",
+    labelKey: "admin.dashboard.totalRevenue",
     icon: DollarSign,
     gradient: "from-emerald-500 to-teal-600",
     isCurrency: true,
   },
   {
     key: "liveClassesCount",
-    label: "Live Classes",
+    labelKey: "admin.dashboard.liveClasses",
     icon: Video,
     gradient: "from-violet-500 to-purple-600",
   },
 ];
 
 export function AdminDashboard() {
+  const t = useT();
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
@@ -110,7 +112,7 @@ export function AdminDashboard() {
       })
       .catch((err) => {
         const msg =
-          err instanceof ApiError ? err.message : "Failed to load dashboard";
+          err instanceof ApiError ? err.message : t("admin.dashboard.loadFailed");
         toast.error(msg);
       })
       .finally(() => {
@@ -150,7 +152,7 @@ export function AdminDashboard() {
     return (
       <Card className="p-10 text-center">
         <p className="text-sm text-muted-foreground">
-          Could not load dashboard data. Please try again later.
+          {t("admin.dashboard.couldNotLoad")}
         </p>
       </Card>
     );
@@ -196,7 +198,7 @@ export function AdminDashboard() {
                   {display}
                 </p>
                 <p className="text-xs font-medium text-muted-foreground">
-                  {s.label}
+                  {t(s.labelKey)}
                 </p>
               </div>
             </Card>
@@ -211,10 +213,10 @@ export function AdminDashboard() {
           <div className="mb-4 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <h3 className="text-sm font-semibold text-foreground sm:text-base">
-                Revenue (last 6 months)
+                {t("admin.dashboard.revenueTitle")}
               </h3>
               <p className="text-xs text-muted-foreground">
-                Monthly completed payment totals
+                {t("admin.dashboard.revenueSubtitle")}
               </p>
             </div>
             <Badge
@@ -227,7 +229,7 @@ export function AdminDashboard() {
           </div>
           <div className="w-full">
             {revenueData.length === 0 ? (
-              <EmptyChart label="No revenue data yet" />
+              <EmptyChart label={t("admin.dashboard.noRevenueData")} />
             ) : (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart
@@ -261,7 +263,7 @@ export function AdminDashboard() {
                   />
                   <Tooltip
                     cursor={{ fill: "rgba(99,102,241,0.08)" }}
-                    formatter={(value: number) => [formatPrice(value), "Revenue"]}
+                    formatter={(value: number) => [formatPrice(value), t("admin.dashboard.revenueLabel")]}
                     contentStyle={{
                       borderRadius: 8,
                       border: "1px solid rgba(0,0,0,0.08)",
@@ -284,15 +286,15 @@ export function AdminDashboard() {
         <Card className="p-4 sm:p-6">
           <div className="mb-4">
             <h3 className="text-sm font-semibold text-foreground sm:text-base">
-              Enrollments by Level
+              {t("admin.dashboard.enrollmentsByLevelTitle")}
             </h3>
             <p className="text-xs text-muted-foreground">
-              Distribution across course levels
+              {t("admin.dashboard.enrollmentsByLevelSubtitle")}
             </p>
           </div>
           <div className="w-full min-w-0">
             {levelData.length === 0 ? (
-              <EmptyChart label="No enrollments yet" />
+              <EmptyChart label={t("admin.dashboard.noEnrollmentsData")} />
             ) : (
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -336,10 +338,10 @@ export function AdminDashboard() {
         <div className="mb-4 flex items-center justify-between gap-2">
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-foreground sm:text-base">
-              Recent Enrollments
+              {t("admin.dashboard.recentEnrollmentsTitle")}
             </h3>
             <p className="text-xs text-muted-foreground">
-              Latest students who joined a course
+              {t("admin.dashboard.recentEnrollmentsSubtitle")}
             </p>
           </div>
           <Badge
@@ -347,16 +349,16 @@ export function AdminDashboard() {
             className="shrink-0 border-amber-200 bg-amber-50 text-amber-700"
           >
             <GraduationCap className="h-3 w-3" />
-            {stats.totalEnrollments.toLocaleString()} total
+            {stats.totalEnrollments.toLocaleString()} {t("admin.dashboard.total")}
           </Badge>
         </div>
         <div className="-mx-3 overflow-x-auto sm:mx-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[160px]">Student</TableHead>
-                <TableHead className="min-w-[200px]">Course</TableHead>
-                <TableHead className="text-right">When</TableHead>
+                <TableHead className="min-w-[160px]">{t("admin.dashboard.colStudent")}</TableHead>
+                <TableHead className="min-w-[200px]">{t("admin.dashboard.colCourse")}</TableHead>
+                <TableHead className="text-right">{t("admin.dashboard.colWhen")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -366,7 +368,7 @@ export function AdminDashboard() {
                   colSpan={3}
                   className="py-10 text-center text-sm text-muted-foreground"
                 >
-                  No enrollments yet.
+                  {t("admin.dashboard.noEnrollments")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -401,10 +403,10 @@ export function AdminDashboard() {
         <div className="mb-4 flex items-center justify-between gap-2">
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-foreground sm:text-base">
-              Live Classes
+              {t("admin.dashboard.liveClassesTitle")}
             </h3>
             <p className="text-xs text-muted-foreground">
-              Scheduled, live and ended sessions
+              {t("admin.dashboard.liveClassesSubtitle")}
             </p>
           </div>
           <Button
@@ -413,12 +415,12 @@ export function AdminDashboard() {
             onClick={() => router.push("/dashboard?section=live")}
             className="shrink-0 gap-1.5"
           >
-            <Video className="h-3.5 w-3.5" /> Manage
+            <Video className="h-3.5 w-3.5" /> {t("admin.dashboard.manage")}
           </Button>
         </div>
         {liveClasses.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            No classes scheduled yet.
+            {t("admin.dashboard.noClassesScheduled")}
           </p>
         ) : (
           <div className="space-y-2">
@@ -432,7 +434,7 @@ export function AdminDashboard() {
                     {lc.title}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {lc.course?.title ?? "No course"} · {formatDateTime(lc.scheduledAt)} · {lc.duration}m
+                    {lc.course?.title ?? t("admin.dashboard.noCourse")} · {formatDateTime(lc.scheduledAt)} · {lc.duration}{t("admin.dashboard.m")}
                   </p>
                 </div>
                 <Badge

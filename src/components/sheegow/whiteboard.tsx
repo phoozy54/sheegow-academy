@@ -23,6 +23,7 @@ import {
 import { Pencil, Eraser, Trash2, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -49,13 +50,14 @@ interface WhiteboardProps {
 /* ─── Constants ─────────────────────────────────────────── */
 
 // Six preset colors tuned for legibility on a white canvas.
-const PRESET_COLORS: { name: string; value: string }[] = [
-  { name: "Black", value: "#1f2937" },
-  { name: "Red", value: "#ef4444" },
-  { name: "Blue", value: "#2563eb" },
-  { name: "Green", value: "#16a34a" },
-  { name: "Amber", value: "#f59e0b" },
-  { name: "Indigo", value: "#6366f1" },
+// `nameKey` is the i18n key used to resolve the localized color name.
+const PRESET_COLORS: { nameKey: string; value: string }[] = [
+  { nameKey: "whiteboard.colorBlack", value: "#1f2937" },
+  { nameKey: "whiteboard.colorRed", value: "#ef4444" },
+  { nameKey: "whiteboard.colorBlue", value: "#2563eb" },
+  { nameKey: "whiteboard.colorGreen", value: "#16a34a" },
+  { nameKey: "whiteboard.colorAmber", value: "#f59e0b" },
+  { nameKey: "whiteboard.colorIndigo", value: "#6366f1" },
 ];
 
 const CANVAS_BG = "#ffffff";
@@ -71,6 +73,7 @@ export function Whiteboard({
   userId,
   socketConnected,
 }: WhiteboardProps) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -342,7 +345,7 @@ export function Whiteboard({
       socket.emit("whiteboard-clear", { classId, userId });
     }
     setShowClearConfirm(false);
-    toast.success("Whiteboard cleared");
+    toast.success(t("whiteboard.clearedToast"));
   };
 
   const handleEraseToggle = () => {
@@ -355,17 +358,18 @@ export function Whiteboard({
       {canDraw && (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card p-2 shadow-sm">
           {/* Color palette */}
-          <div className="flex items-center gap-1" role="radiogroup" aria-label="Brush color">
+          <div className="flex items-center gap-1" role="radiogroup" aria-label={t("whiteboard.brushColorAria")}>
             {PRESET_COLORS.map((c) => {
               const selected = !eraser && color === c.value;
+              const colorName = t(c.nameKey);
               return (
                 <button
                   key={c.value}
                   type="button"
                   role="radio"
                   aria-checked={selected}
-                  aria-label={c.name}
-                  title={c.name}
+                  aria-label={colorName}
+                  title={colorName}
                   onClick={() => {
                     setColor(c.value);
                     setEraser(false);
@@ -394,7 +398,7 @@ export function Whiteboard({
               step={1}
               onValueChange={(v) => setBrushSize(v[0] ?? brushSize)}
               className="w-24"
-              aria-label="Brush size"
+              aria-label={t("whiteboard.brushSizeAria")}
             />
             <span className="w-6 text-center text-xs font-medium tabular-nums text-muted-foreground">
               {brushSize}
@@ -420,13 +424,13 @@ export function Whiteboard({
                 >
                   <Eraser className="h-4 w-4" />
                   <span className="hidden sm:inline">
-                    {eraser ? "Erasing" : "Eraser"}
+                    {eraser ? t("whiteboard.erasing") : t("whiteboard.eraser")}
                   </span>
                 </Button>
               </span>
             </TooltipTrigger>
             <TooltipContent>
-              {eraser ? "Eraser is on — click to switch back to drawing" : "Turn on the eraser"}
+              {eraser ? t("whiteboard.eraserTooltipOn") : t("whiteboard.eraserTooltipOff")}
             </TooltipContent>
           </Tooltip>
 
@@ -441,25 +445,24 @@ export function Whiteboard({
                   className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                   <Trash2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Clear</span>
+                  <span className="hidden sm:inline">{t("whiteboard.clear")}</span>
                 </Button>
               </span>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Clear the whiteboard?</AlertDialogTitle>
+                <AlertDialogTitle>{t("whiteboard.clearTitle")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This erases everything on the whiteboard for everyone in the
-                  class. This action cannot be undone.
+                  {t("whiteboard.clearDesc")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t("whiteboard.clearCancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleClear}
                   className="bg-red-600 text-white hover:bg-red-700"
                 >
-                  Clear
+                  {t("whiteboard.clearConfirm")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -467,7 +470,7 @@ export function Whiteboard({
 
           <div className="ml-auto flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
             <Pencil className="h-3.5 w-3.5 text-indigo-600" aria-hidden />
-            <span className="hidden sm:inline">You&apos;re drawing live</span>
+            <span className="hidden sm:inline">{t("whiteboard.drawingLive")}</span>
           </div>
         </div>
       )}
@@ -491,22 +494,22 @@ export function Whiteboard({
           )}
           aria-label={
             canDraw
-              ? "Collaborative whiteboard — draw to share with the class"
-              : "Teacher's whiteboard"
+              ? t("whiteboard.canvasDrawAria")
+              : t("whiteboard.canvasViewAria")
           }
         />
 
         {!canDraw && (
           <div className="pointer-events-none absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur">
             <Pencil className="h-3 w-3" aria-hidden />
-            Viewing the teacher&apos;s whiteboard
+            {t("whiteboard.viewingTeacher")}
           </div>
         )}
 
         {/* Watermark indicator for hosts */}
         {canDraw && (
           <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-indigo-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700 backdrop-blur">
-            Host whiteboard
+            {t("whiteboard.hostBadge")}
           </div>
         )}
       </div>

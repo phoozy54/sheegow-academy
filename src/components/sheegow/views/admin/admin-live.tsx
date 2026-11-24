@@ -41,6 +41,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 interface LiveFormValues {
   title: string;
@@ -74,6 +75,7 @@ function toLocalInput(iso: string): string {
 }
 
 export function AdminLive() {
+  const t = useT();
   const router = useRouter();
 
   const [classes, setClasses] = useState<LiveClass[]>([]);
@@ -105,7 +107,7 @@ export function AdminLive() {
       );
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to load live classes";
+        err instanceof ApiError ? err.message : t("admin.live.loadFailed");
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -154,11 +156,11 @@ export function AdminLive() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim()) {
-      toast.error("Class title is required");
+      toast.error(t("admin.live.titleRequired"));
       return;
     }
     if (!form.scheduledAt) {
-      toast.error("Scheduled date and time are required");
+      toast.error(t("admin.live.dateRequired"));
       return;
     }
     setSaving(true);
@@ -177,14 +179,14 @@ export function AdminLive() {
         : await api.createLiveClass(body);
       toast.success(
         editingId
-          ? `Live class "${liveClass.title}" updated`
-          : `Live class "${liveClass.title}" scheduled`
+          ? t("admin.live.updatedToast", { title: liveClass.title })
+          : t("admin.live.scheduledToast", { title: liveClass.title })
       );
       setFormOpen(false);
       await fetchAll();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to schedule class";
+        err instanceof ApiError ? err.message : t("admin.live.scheduleFailed");
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -195,11 +197,11 @@ export function AdminLive() {
     setActioningId(id);
     try {
       await api.startLiveClass(id);
-      toast.success("Live class started");
+      toast.success(t("admin.live.startedToast"));
       await fetchAll();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to start class";
+        err instanceof ApiError ? err.message : t("admin.live.startFailed");
       toast.error(msg);
     } finally {
       setActioningId(null);
@@ -210,11 +212,11 @@ export function AdminLive() {
     setActioningId(id);
     try {
       await api.endLiveClass(id);
-      toast.success("Live class ended");
+      toast.success(t("admin.live.endedToast"));
       await fetchAll();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to end class";
+        err instanceof ApiError ? err.message : t("admin.live.endFailed");
       toast.error(msg);
     } finally {
       setActioningId(null);
@@ -226,14 +228,14 @@ export function AdminLive() {
       {/* Toolbar */}
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Manage upcoming, live, and past classes.
+          {t("admin.live.intro")}
         </p>
         <Button
           onClick={openCreate}
           className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
-          Schedule Live Class
+          {t("admin.live.scheduleLiveClass")}
         </Button>
       </div>
 
@@ -250,10 +252,10 @@ export function AdminLive() {
             <Video className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium text-foreground">
-            No live classes yet
+            {t("admin.live.noClasses")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Click &quot;Schedule Live Class&quot; to create your first session.
+            {t("admin.live.noClassesDesc")}
           </p>
         </Card>
       ) : (
@@ -282,17 +284,17 @@ export function AdminLive() {
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingId ? "Edit Live Class" : "Schedule Live Class"}
+              {editingId ? t("admin.live.editTitle") : t("admin.live.createTitle")}
             </DialogTitle>
             <DialogDescription>
               {editingId
-                ? "Change the class details or its date and time."
-                : "Set up a new live class. Students will see it on the live page."}
+                ? t("admin.live.editDesc")
+                : t("admin.live.createDesc")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="title">Class Title</Label>
+              <Label htmlFor="title">{t("admin.live.labelTitle")}</Label>
               <Input
                 id="title"
                 value={form.title}
@@ -304,7 +306,7 @@ export function AdminLive() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="description">Description (optional)</Label>
+              <Label htmlFor="description">{t("admin.live.labelDesc")}</Label>
               <Textarea
                 id="description"
                 value={form.description}
@@ -317,7 +319,7 @@ export function AdminLive() {
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="course">Linked Course</Label>
+                <Label htmlFor="course">{t("admin.live.labelCourse")}</Label>
                 <Select
                   value={form.courseId}
                   onValueChange={(v) =>
@@ -325,12 +327,12 @@ export function AdminLive() {
                   }
                 >
                   <SelectTrigger id="course" className="w-full">
-                    <SelectValue placeholder="None" />
+                    <SelectValue placeholder={t("admin.live.noneOption")} />
                   </SelectTrigger>
                   <SelectContent>
                     {courses.length === 0 ? (
                       <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                        No courses available
+                        {t("admin.live.noCoursesAvailable")}
                       </div>
                     ) : (
                       courses.map((c) => (
@@ -343,7 +345,7 @@ export function AdminLive() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="teacher">Teacher</Label>
+                <Label htmlFor="teacher">{t("admin.live.labelTeacher")}</Label>
                 <Select
                   value={form.teacherId}
                   onValueChange={(v) =>
@@ -351,17 +353,17 @@ export function AdminLive() {
                   }
                 >
                   <SelectTrigger id="teacher" className="w-full">
-                    <SelectValue placeholder="Unassigned" />
+                    <SelectValue placeholder={t("admin.live.unassignedOption")} />
                   </SelectTrigger>
                   <SelectContent>
                     {teachers.length === 0 ? (
                       <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                        No teachers available
+                        {t("admin.live.noTeachersAvailable")}
                       </div>
                     ) : (
-                      teachers.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.fullName}
+                      teachers.map((teacher) => (
+                        <SelectItem key={teacher.id} value={teacher.id}>
+                          {teacher.fullName}
                         </SelectItem>
                       ))
                     )}
@@ -371,7 +373,7 @@ export function AdminLive() {
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="scheduledAt">Scheduled At</Label>
+                <Label htmlFor="scheduledAt">{t("admin.live.labelScheduledAt")}</Label>
                 <Input
                   id="scheduledAt"
                   type="datetime-local"
@@ -383,7 +385,7 @@ export function AdminLive() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Label htmlFor="duration">{t("admin.live.labelDuration")}</Label>
                 <Input
                   id="duration"
                   type="number"
@@ -407,7 +409,7 @@ export function AdminLive() {
                 onClick={() => setFormOpen(false)}
                 disabled={saving}
               >
-                Cancel
+                {t("admin.live.cancel")}
               </Button>
               <Button
                 type="submit"
@@ -416,11 +418,11 @@ export function AdminLive() {
               >
                 {saving
                   ? editingId
-                    ? "Saving..."
-                    : "Scheduling..."
+                    ? t("admin.live.saving")
+                    : t("admin.live.scheduling")
                   : editingId
-                    ? "Save Changes"
-                    : "Schedule Class"}
+                    ? t("admin.live.saveChanges")
+                    : t("admin.live.scheduleClass")}
               </Button>
             </DialogFooter>
           </form>
@@ -445,6 +447,7 @@ function LiveClassCard({
   onEdit: () => void;
   onViewRoom: () => void;
 }) {
+  const t = useT();
   const c = liveClass;
   const isLive = c.status === "live";
   const isEnded = c.status === "ended";
@@ -486,14 +489,14 @@ function LiveClassCard({
             <p className="font-medium text-foreground">
               {formatDateTime(c.scheduledAt)}
             </p>
-            <p className="text-muted-foreground">Scheduled</p>
+            <p className="text-muted-foreground">{t("admin.live.scheduled")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Clock className="h-3.5 w-3.5 text-amber-500" />
           <div>
             <p className="font-medium text-foreground">{c.duration} min</p>
-            <p className="text-muted-foreground">Duration</p>
+            <p className="text-muted-foreground">{t("admin.live.duration")}</p>
           </div>
         </div>
       </div>
@@ -514,12 +517,12 @@ function LiveClassCard({
         ) : (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <UserCircle className="h-4 w-4" />
-            Unassigned
+            {t("admin.live.unassigned")}
           </div>
         )}
         <Badge variant="outline" className="border-muted bg-muted/50">
           <UserCircle className="h-3 w-3" />
-          {c.attendeeCount} attending
+          {t("admin.live.attending", { count: c.attendeeCount })}
         </Badge>
       </div>
 
@@ -532,7 +535,7 @@ function LiveClassCard({
             className="gap-1.5 bg-red-600 hover:bg-red-700"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-            View Room
+            {t("admin.live.viewRoom")}
           </Button>
         )}
         {!isEnded && !isLive && (
@@ -543,7 +546,7 @@ function LiveClassCard({
             className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
           >
             <Play className="h-3.5 w-3.5" />
-            {actioning ? "Starting..." : "Start Now"}
+            {actioning ? t("admin.live.starting") : t("admin.live.startNow")}
           </Button>
         )}
         <Button
@@ -553,7 +556,7 @@ function LiveClassCard({
           className="gap-1.5"
         >
           <Pencil className="h-3.5 w-3.5" />
-          Edit
+          {t("admin.live.edit")}
         </Button>
         {isLive && (
           <Button
@@ -564,7 +567,7 @@ function LiveClassCard({
             className="gap-1.5 border-red-200 text-red-700 hover:bg-red-50"
           >
             <Square className="h-3.5 w-3.5" />
-            {actioning ? "Ending..." : "End Class"}
+            {actioning ? t("admin.live.ending") : t("admin.live.endClass")}
           </Button>
         )}
         {isEnded && (
@@ -575,7 +578,7 @@ function LiveClassCard({
             className="gap-1.5"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-            View Recording
+            {t("admin.live.viewRecording")}
           </Button>
         )}
       </div>
@@ -584,6 +587,7 @@ function LiveClassCard({
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useT();
   if (status === "live") {
     return (
       <Badge
@@ -594,14 +598,14 @@ function StatusBadge({ status }: { status: string }) {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
         </span>
-        LIVE
+        {t("admin.live.liveBadge")}
       </Badge>
     );
   }
   if (status === "ended") {
     return (
       <Badge variant="outline" className="border-muted bg-muted text-muted-foreground">
-        Ended
+        {t("admin.live.endedBadge")}
       </Badge>
     );
   }
@@ -611,7 +615,7 @@ function StatusBadge({ status }: { status: string }) {
       className="border-indigo-200 bg-indigo-50 text-indigo-700"
     >
       <Radio className="h-3 w-3" />
-      Scheduled
+      {t("admin.live.scheduledBadge")}
     </Badge>
   );
 }

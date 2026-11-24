@@ -67,6 +67,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "IELTS", "Kids"];
 
@@ -81,6 +82,7 @@ interface EditForm {
 }
 
 export function AdminStudents() {
+  const t = useT();
   const user = useStore((s) => s.user);
 
   const [users, setUsers] = useState<User[]>([]);
@@ -113,7 +115,7 @@ export function AdminStudents() {
       setUsers(r.users);
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to load users";
+        err instanceof ApiError ? err.message : t("admin.students.loadFailed");
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -152,7 +154,7 @@ export function AdminStudents() {
     e.preventDefault();
     if (!editing) return;
     if (!editForm.fullName.trim() || !editForm.email.trim()) {
-      toast.error("Name and email are required");
+      toast.error(t("admin.students.nameEmailRequired"));
       return;
     }
     setSaving(true);
@@ -165,12 +167,12 @@ export function AdminStudents() {
         level: editForm.level,
       };
       await api.updateUser(editing.id, body);
-      toast.success("User updated");
+      toast.success(t("admin.students.userUpdatedToast"));
       setEditOpen(false);
       await fetchUsers();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to update user";
+        err instanceof ApiError ? err.message : t("admin.students.updateFailed");
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -180,11 +182,11 @@ export function AdminStudents() {
   async function toggleActive(u: User) {
     try {
       await api.updateUser(u.id, { isActive: !u.isActive });
-      toast.success(`${u.fullName} ${u.isActive ? "deactivated" : "activated"}`);
+      toast.success(t(u.isActive ? "admin.students.deactivatedToast" : "admin.students.activatedToast", { name: u.fullName }));
       await fetchUsers();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to update status";
+        err instanceof ApiError ? err.message : t("admin.students.statusUpdateFailed");
       toast.error(msg);
     }
   }
@@ -194,12 +196,12 @@ export function AdminStudents() {
     setDeleting(true);
     try {
       await api.deleteUser(deleteId);
-      toast.success("User deleted");
+      toast.success(t("admin.students.userDeletedToast"));
       setDeleteId(null);
       await fetchUsers();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to delete user";
+        err instanceof ApiError ? err.message : t("admin.students.deleteFailed");
       toast.error(msg);
     } finally {
       setDeleting(false);
@@ -231,21 +233,21 @@ export function AdminStudents() {
           <TabsList className="w-full justify-start overflow-x-auto whitespace-nowrap sm:w-auto">
             <TabsTrigger value="all" className="gap-1.5">
               <Users className="h-3.5 w-3.5" />
-              All
+              {t("admin.students.all")}
               <span className="ml-1 rounded bg-muted-foreground/10 px-1.5 text-[10px] font-bold">
                 {counts.all}
               </span>
             </TabsTrigger>
             <TabsTrigger value="student" className="gap-1.5">
               <GraduationCap className="h-3.5 w-3.5" />
-              Students
+              {t("admin.students.students")}
             </TabsTrigger>
             <TabsTrigger value="teacher" className="gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Teachers
+              {t("admin.students.teachers")}
             </TabsTrigger>
-            <TabsTrigger value="admin">Admins</TabsTrigger>
-            <TabsTrigger value="super_admin">Super Admins</TabsTrigger>
+            <TabsTrigger value="admin">{t("admin.students.admins")}</TabsTrigger>
+            <TabsTrigger value="super_admin">{t("admin.students.superAdmins")}</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -254,7 +256,7 @@ export function AdminStudents() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or phone..."
+            placeholder={t("admin.students.searchPlaceholder")}
             className="pl-9"
           />
         </div>
@@ -274,12 +276,12 @@ export function AdminStudents() {
               <Users className="h-6 w-6 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">
-              {search ? "No users match your search" : "No users found"}
+              {search ? t("admin.students.noUsersMatch") : t("admin.students.noUsersFound")}
             </p>
             <p className="text-xs text-muted-foreground">
               {search
-                ? "Try a different search term."
-                : "Users will appear here once they register."}
+                ? t("admin.students.tryDifferent")
+                : t("admin.students.usersWillAppear")}
             </p>
           </div>
         ) : (
@@ -287,13 +289,13 @@ export function AdminStudents() {
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[200px] pl-4">User</TableHead>
-                  <TableHead className="hidden min-w-[120px] md:table-cell">Contact</TableHead>
-                  <TableHead className="min-w-[90px]">Role</TableHead>
-                  <TableHead className="hidden min-w-[110px] lg:table-cell">Level</TableHead>
-                  <TableHead className="hidden min-w-[110px] md:table-cell">Joined</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
-                  <TableHead className="pr-4 text-right">Actions</TableHead>
+                  <TableHead className="min-w-[200px] pl-4">{t("admin.students.colUser")}</TableHead>
+                  <TableHead className="hidden min-w-[120px] md:table-cell">{t("admin.students.colContact")}</TableHead>
+                  <TableHead className="min-w-[90px]">{t("admin.students.colRole")}</TableHead>
+                  <TableHead className="hidden min-w-[110px] lg:table-cell">{t("admin.students.colLevel")}</TableHead>
+                  <TableHead className="hidden min-w-[110px] md:table-cell">{t("admin.students.colJoined")}</TableHead>
+                  <TableHead className="min-w-[100px]">{t("admin.students.colStatus")}</TableHead>
+                  <TableHead className="pr-4 text-right">{t("admin.students.colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -325,7 +327,7 @@ export function AdminStudents() {
                             {u.fullName}
                             {isSelf && (
                               <span className="ml-2 text-xs font-medium text-indigo-600">
-                                (You)
+                                {t("admin.students.you")}
                               </span>
                             )}
                           </p>
@@ -386,7 +388,7 @@ export function AdminStudents() {
                             u.isActive ? "bg-emerald-500" : "bg-red-500"
                           )}
                         />
-                        {u.isActive ? "Active" : "Inactive"}
+                        {u.isActive ? t("admin.students.active") : t("admin.students.inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell className="pr-4 text-right">
@@ -398,13 +400,13 @@ export function AdminStudents() {
                             className="h-8 w-8"
                           >
                             <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Open user actions</span>
+                            <span className="sr-only">{t("admin.students.openActions")}</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(u)}>
                             <Pencil className="h-4 w-4" />
-                            Edit
+                            {t("admin.students.edit")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => toggleActive(u)}
@@ -413,12 +415,12 @@ export function AdminStudents() {
                             {u.isActive ? (
                               <>
                                 <UserX className="h-4 w-4" />
-                                Deactivate
+                                {t("admin.students.deactivate")}
                               </>
                             ) : (
                               <>
                                 <UserCheck className="h-4 w-4" />
-                                Activate
+                                {t("admin.students.activate")}
                               </>
                             )}
                           </DropdownMenuItem>
@@ -429,7 +431,7 @@ export function AdminStudents() {
                             disabled={isSelf}
                           >
                             <Trash2 className="h-4 w-4" />
-                            Delete
+                            {t("admin.students.delete")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -452,14 +454,14 @@ export function AdminStudents() {
       >
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>{t("admin.students.editTitle")}</DialogTitle>
             <DialogDescription>
-              Update profile details for {editing?.fullName}.
+              {t("admin.students.editDesc", { name: editing?.fullName ?? "" })}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">{t("admin.students.fullName")}</Label>
               <Input
                 id="fullName"
                 value={editForm.fullName}
@@ -470,7 +472,7 @@ export function AdminStudents() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="username">Login Username</Label>
+              <Label htmlFor="username">{t("admin.students.loginUsername")}</Label>
               <Input
                 id="username"
                 value={editForm.username}
@@ -482,11 +484,11 @@ export function AdminStudents() {
                 maxLength={30}
               />
               <p className="text-[11px] text-muted-foreground">
-                The user can log in with this, their email or their phone.
+                {t("admin.students.usernameHint")}
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t("admin.students.emailAddress")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -499,7 +501,7 @@ export function AdminStudents() {
             </div>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t("admin.students.phone")}</Label>
                 <PhoneInput
                   id="phone"
                   value={editForm.phone}
@@ -509,7 +511,7 @@ export function AdminStudents() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="level">Level</Label>
+                <Label htmlFor="level">{t("admin.students.level")}</Label>
                 <Select
                   value={editForm.level}
                   onValueChange={(v) =>
@@ -517,7 +519,7 @@ export function AdminStudents() {
                   }
                 >
                   <SelectTrigger id="level" className="w-full">
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue placeholder={t("admin.students.selectLevel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {LEVELS.map((l) => (
@@ -536,14 +538,14 @@ export function AdminStudents() {
                 onClick={() => setEditOpen(false)}
                 disabled={saving}
               >
-                Cancel
+                {t("admin.students.cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={saving}
                 className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? t("admin.students.saving") : t("admin.students.saveChanges")}
               </Button>
             </DialogFooter>
           </form>
@@ -559,20 +561,19 @@ export function AdminStudents() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this user?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.students.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The user account and all related
-              data will be permanently removed.
+              {t("admin.students.deleteDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.students.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
-              {deleting ? "Deleting..." : "Delete"}
+              {deleting ? t("admin.students.deleting") : t("admin.students.deleteBtn")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

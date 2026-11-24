@@ -18,6 +18,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 type Filter = "pending" | "all";
 
@@ -25,29 +26,30 @@ function isPending(r: TrialRequest) {
   return r.status === "pending";
 }
 
-function statusBadge(status: string) {
+function statusBadge(status: string, t: (key: string) => string) {
   if (status === "completed") {
     return (
       <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
-        Approved
+        {t("admin.trial.approved")}
       </Badge>
     );
   }
   if (status === "failed") {
     return (
       <Badge className="border-rose-200 bg-rose-50 text-rose-700">
-        Rejected
+        {t("admin.trial.rejected")}
       </Badge>
     );
   }
   return (
     <Badge className="border-amber-200 bg-amber-50 text-amber-700">
-      Pending
+      {t("admin.trial.pendingBadge")}
     </Badge>
   );
 }
 
 export function AdminTrialRequests() {
+  const t = useT();
   const [requests, setRequests] = useState<TrialRequest[]>([]);
   const [filter, setFilter] = useState<Filter>("pending");
   const [loading, setLoading] = useState(true);
@@ -60,12 +62,12 @@ export function AdminTrialRequests() {
       setRequests(res.requests);
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Failed to load trial requests"
+        err instanceof ApiError ? err.message : t("admin.trial.loadFailed")
       );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -83,13 +85,13 @@ export function AdminTrialRequests() {
       await api.decideTrialRequest(id, action);
       toast.success(
         action === "approve"
-          ? "Trial approved — the student can now join for 7 days"
-          : "Trial request rejected"
+          ? t("admin.trial.approvedToast")
+          : t("admin.trial.rejectedToast")
       );
       await load();
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Failed to update the request"
+        err instanceof ApiError ? err.message : t("admin.trial.updateFailed")
       );
     } finally {
       setActingId(null);
@@ -101,15 +103,15 @@ export function AdminTrialRequests() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground">Trial Requests</h2>
+          <h2 className="text-xl font-bold text-foreground">{t("admin.trial.title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Students ask to test a paid live class. Approve to grant 7-day access.
+            {t("admin.trial.intro")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {pendingCount > 0 && (
             <Badge className="gap-1 border-amber-200 bg-amber-50 text-amber-700">
-              <Clock className="h-3 w-3" /> {pendingCount} awaiting review
+              <Clock className="h-3 w-3" /> {t("admin.trial.awaitingReview", { count: pendingCount })}
             </Badge>
           )}
           <Button
@@ -118,7 +120,7 @@ export function AdminTrialRequests() {
             onClick={load}
             className="gap-1.5"
           >
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+            <RefreshCw className="h-3.5 w-3.5" /> {t("admin.trial.refresh")}
           </Button>
         </div>
       </div>
@@ -133,7 +135,7 @@ export function AdminTrialRequests() {
             onClick={() => setFilter(f)}
             className={cn(filter === f && "bg-indigo-600 hover:bg-indigo-700")}
           >
-            {f === "pending" ? `Pending (${pendingCount})` : "All requests"}
+            {f === "pending" ? t("admin.trial.filterPending", { count: pendingCount }) : t("admin.trial.filterAll")}
           </Button>
         ))}
       </div>
@@ -153,11 +155,11 @@ export function AdminTrialRequests() {
           <ClipboardCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
           <p className="font-medium text-foreground">
             {filter === "pending"
-              ? "No pending trial requests"
-              : "No trial requests yet"}
+              ? t("admin.trial.noPending")
+              : t("admin.trial.noRequests")}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            New requests from students will appear here for your approval.
+            {t("admin.trial.noRequestsDesc")}
           </p>
         </Card>
       ) : (
@@ -180,9 +182,9 @@ export function AdminTrialRequests() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold text-foreground">
-                          {student?.fullName || "Student"}
+                          {student?.fullName || t("admin.trial.student")}
                         </span>
-                        {statusBadge(r.status)}
+                        {statusBadge(r.status, t)}
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
                         {student?.email}
@@ -200,12 +202,12 @@ export function AdminTrialRequests() {
                   <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
                   <div>
                     <p className="text-sm font-medium text-foreground">
-                      {r.liveClass?.title || "Live class"}
+                      {r.liveClass?.title || t("admin.trial.liveClass")}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {r.liveClass?.scheduledAt
                         ? formatDateTime(r.liveClass.scheduledAt)
-                        : "Scheduled time not available"}
+                        : t("admin.trial.scheduledNA")}
                       {r.liveClass?.status
                         ? ` · ${r.liveClass.status}`
                         : ""}
@@ -222,7 +224,7 @@ export function AdminTrialRequests() {
                       onClick={() => decide(r.id, "approve")}
                       className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
                     >
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                      <CheckCircle2 className="h-3.5 w-3.5" /> {t("admin.trial.approve")}
                     </Button>
                     <Button
                       size="sm"
@@ -231,7 +233,7 @@ export function AdminTrialRequests() {
                       onClick={() => decide(r.id, "reject")}
                       className="gap-1.5"
                     >
-                      <XCircle className="h-3.5 w-3.5" /> Reject
+                      <XCircle className="h-3.5 w-3.5" /> {t("admin.trial.reject")}
                     </Button>
                   </div>
                 )}

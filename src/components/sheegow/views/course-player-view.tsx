@@ -86,7 +86,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
         return firstAvailable?.id ?? res.roadmap.modules[0]?.lessons[0]?.id ?? null;
       });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Could not load this course.");
+      setError(e instanceof ApiError ? e.message : t("coursePlayer.couldNotLoad"));
     } finally {
       setLoading(false);
     }
@@ -134,7 +134,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
             <ArrowLeft className="h-4 w-4" /> {t("coursePlayer.dashboard")}
           </Button>
           <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-            {data?.course.title || "Course"}
+            {data?.course.title || t("coursePlayer.courseFallback")}
           </h1>
         </div>
         {roadmap && (
@@ -167,7 +167,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
       {roadmap && (
         <div className="mb-5">
           <div className="mb-1.5 flex justify-between text-xs">
-            <span className="font-medium text-muted-foreground">Your roadmap</span>
+            <span className="font-medium text-muted-foreground">{t("coursePlayer.yourRoadmap")}</span>
             <span className="font-bold text-foreground">{roadmap.percent}% {t("coursePlayer.complete")}</span>
           </div>
           <Progress value={roadmap.percent} className="h-2" />
@@ -178,7 +178,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
         <Card className="mb-5 border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           {error}{" "}
           <button className="font-semibold underline" onClick={() => router.push("/courses")}>
-            Browse courses
+            {t("coursePlayer.browseCourses")}
           </button>
         </Card>
       )}
@@ -316,7 +316,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                   {t("coursePlayer.teacherPreparing")}
                 </p>
                 <Button className="mt-4" variant="outline" onClick={() => router.push(`/learn/${courseId}`)}>
-                  Refresh
+                  {t("coursePlayer.refresh")}
                 </Button>
               </Card>
             )}
@@ -365,11 +365,11 @@ function LessonPanel({
       });
       await onRefresh();
       if (status === "completed") {
-        toast.success("Lesson completed!");
+        toast.success(t("coursePlayer.lessonCompletedToast"));
         if (advance && !onNext()) setFinished(true);
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not save progress");
+      toast.error(e instanceof Error ? e.message : t("coursePlayer.couldNotSaveProgress"));
     } finally {
       setSaving(false);
     }
@@ -535,7 +535,7 @@ function LessonPanel({
                     const res = await api.certificateEligibility(courseId);
                     setShowCertificate(true);
                     if (!res.eligibility.eligible) {
-                      toast.info(res.eligibility.reasons[0] || "Keep going!");
+                      toast.info(res.eligibility.reasons[0] || t("coursePlayer.keepGoing"));
                     }
                   }}
                 >
@@ -633,7 +633,7 @@ function QuizPanel({
       setAnswers({});
       setResult(null);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start the test");
+      toast.error(e instanceof Error ? e.message : t("coursePlayer.couldNotStartTest"));
     } finally {
       setBusy(false);
     }
@@ -649,9 +649,9 @@ function QuizPanel({
       });
       setResult({ score: r.result.score, passed: r.result.passed });
       if (r.result.passed) onPassed();
-      toast.success(`Score: ${r.result.score}% — ${r.result.passed ? "Passed" : "Not passed"}`);
+      toast.success(t("coursePlayer.scoreToast", { score: r.result.score, status: r.result.passed ? t("coursePlayer.scorePassed") : t("coursePlayer.scoreNotPassed") }));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not submit the test");
+      toast.error(e instanceof Error ? e.message : t("coursePlayer.couldNotSubmitTest"));
     } finally {
       setBusy(false);
     }
@@ -677,7 +677,7 @@ function QuizPanel({
           </Button>
           {result.passed && (
             <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={onNext}>
-              Next lesson <ArrowLeft className="h-4 w-4 rotate-180" />
+              {t("coursePlayer.nextLesson")} <ArrowLeft className="h-4 w-4 rotate-180" />
             </Button>
           )}
         </div>
@@ -695,7 +695,7 @@ function QuizPanel({
         </p>
         <Button className="mt-3 gap-2 bg-indigo-600" onClick={() => void start()} disabled={busy}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
-          Start test
+          {t("coursePlayer.startTest")}
         </Button>
       </div>
     );
@@ -740,7 +740,7 @@ function QuizPanel({
       ))}
       <Button onClick={() => void submit()} disabled={busy} className="gap-2 bg-emerald-600">
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-        Submit test
+        {t("coursePlayer.submitTest")}
       </Button>
     </div>
   );
@@ -788,7 +788,7 @@ function AssignmentPanel({
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="Write your answer here…"
+        placeholder={t("coursePlayer.writeAnswerHere")}
         rows={4}
         className="mt-3 w-full rounded-md border bg-white p-3 text-sm"
       />
@@ -802,9 +802,9 @@ function AssignmentPanel({
             const r = await api.assignment(assignmentId);
             setData(r);
             onSubmitted();
-            toast.success("Homework submitted — lesson marked complete. Your certificate still awaits teacher grading.");
+            toast.success(t("coursePlayer.homeworkSubmittedToast"));
           } catch (e) {
-            toast.error(e instanceof Error ? e.message : "Could not submit homework");
+            toast.error(e instanceof Error ? e.message : t("coursePlayer.couldNotSubmitHomework"));
           } finally {
             setBusy(false);
           }
@@ -813,7 +813,7 @@ function AssignmentPanel({
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
         {submission ? t("coursePlayer.resubmit") : t("coursePlayer.submitHomework")}
       </Button>
-      <p className="mt-2 text-[11px] text-muted-foreground">Course: {courseId}</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">{t("coursePlayer.courseLabel", { courseId })}</p>
     </div>
   );
 }
@@ -856,22 +856,22 @@ function CertificateQuickPanel({ courseId, onClose }: { courseId: string; onClos
               try {
                 const r = await api.issueCertificate(courseId);
                 setCertificate(r);
-                toast.success("Certificate issued!");
+                toast.success(t("coursePlayer.certificateIssuedToast"));
               } catch {
-                toast.error("Could not issue certificate");
+                toast.error(t("coursePlayer.couldNotIssueCertificate"));
               } finally {
                 setBusy(false);
               }
             }}
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
-            Issue certificate
+            {t("coursePlayer.issueCertificate")}
           </Button>
         </div>
       )}
       {certificate && (
         <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm">
-          <p className="font-semibold text-emerald-800">Serial: {certificate.certificate.serial}</p>
+          <p className="font-semibold text-emerald-800">{t("coursePlayer.serial", { serial: certificate.certificate.serial })}</p>
           <a
             className="mt-2 inline-block font-semibold text-indigo-700 underline"
             href={`/verify/${certificate.certificate.verificationCode}`}

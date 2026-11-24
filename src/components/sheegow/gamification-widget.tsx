@@ -31,6 +31,7 @@ import {
   ArrowRight,
   Award,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 /**
  * GamificationWidget — shown on the student dashboard overview.
@@ -45,6 +46,7 @@ import {
  * full ranking view.
  */
 export function GamificationWidget() {
+  const t = useT();
   const [data, setData] = useState<GamificationData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -90,10 +92,10 @@ export function GamificationWidget() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
               <Trophy className="h-4 w-4" />
             </span>
-            Your Progress
+            {t("gamification.yourProgress")}
           </CardTitle>
           <CardDescription className="mt-1 text-xs">
-            Earn points, keep your streak, and unlock badges.
+            {t("gamification.widgetDesc")}
           </CardDescription>
         </div>
         <Button
@@ -103,7 +105,7 @@ export function GamificationWidget() {
           className="gap-1 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
         >
           <Link href="/leaderboard">
-            Leaderboard
+            {t("gamification.leaderboard")}
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </Button>
@@ -119,7 +121,7 @@ export function GamificationWidget() {
               <p className="text-2xl font-extrabold leading-none text-foreground">
                 {points.toLocaleString()}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">Points earned</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("gamification.pointsEarned")}</p>
             </div>
           </div>
 
@@ -133,11 +135,11 @@ export function GamificationWidget() {
               <p className="text-2xl font-extrabold leading-none text-foreground">
                 {currentStreak}
                 <span className="ml-1 text-sm font-semibold text-muted-foreground">
-                  day{currentStreak === 1 ? "" : "s"}
+                  {currentStreak === 1 ? t("gamification.daySingular") : t("gamification.dayPlural")}
                 </span>
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Current streak · best {longestStreak}
+                {t("gamification.currentStreak", { count: longestStreak })}
               </p>
             </div>
           </div>
@@ -146,9 +148,9 @@ export function GamificationWidget() {
         {/* Badge grid */}
         <div className="mt-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-foreground">Badges</h3>
+            <h3 className="text-sm font-bold text-foreground">{t("gamification.badges")}</h3>
             <UiBadge variant="secondary" className="text-xs font-semibold">
-              {earnedTypes.size}/{BADGE_METADATA.length} earned
+              {t("gamification.earnedCount", { earned: earnedTypes.size, total: BADGE_METADATA.length })}
             </UiBadge>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -173,6 +175,7 @@ function BadgeTile({
   meta: BadgeMetadata;
   earned: boolean;
 }) {
+  const t = useT();
   const Icon = meta.icon;
   return (
     <Tooltip>
@@ -184,7 +187,7 @@ function BadgeTile({
               ? meta.color
               : "border-border bg-muted/40 text-muted-foreground"
           }`}
-          aria-label={`${meta.title}${earned ? " — earned" : " — locked"}`}
+          aria-label={`${meta.title}${earned ? ` — ${t("gamification.earnedSuffix")}` : ` — ${t("gamification.lockedSuffix")}`}`}
         >
           <span
             className={`flex h-9 w-9 items-center justify-center rounded-full ${

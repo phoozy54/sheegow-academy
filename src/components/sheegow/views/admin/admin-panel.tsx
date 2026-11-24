@@ -55,6 +55,7 @@ import {
   Package,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 import { AdminDashboard } from "./admin-dashboard";
 import { AdminCourses } from "./admin-courses";
 import { AdminStudents } from "./admin-students";
@@ -73,28 +74,28 @@ type AdminView =
 
 interface NavItem {
   id: AdminView;
-  label: string;
+  labelKey: string;
   icon: typeof LayoutDashboard;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "courses", label: "Courses", icon: BookOpen },
-  { id: "bundles", label: "Bundles", icon: Package },
-  { id: "students", label: "Students", icon: Users },
-  { id: "live", label: "Live Classes", icon: Video },
-  { id: "teachers", label: "Teachers", icon: GraduationCap },
-  { id: "messages", label: "Contact Messages", icon: MessageSquare },
+  { id: "dashboard", labelKey: "admin.nav.dashboard", icon: LayoutDashboard },
+  { id: "courses", labelKey: "admin.nav.courses", icon: BookOpen },
+  { id: "bundles", labelKey: "admin.nav.bundles", icon: Package },
+  { id: "students", labelKey: "admin.nav.students", icon: Users },
+  { id: "live", labelKey: "admin.nav.live", icon: Video },
+  { id: "teachers", labelKey: "admin.nav.teachers", icon: GraduationCap },
+  { id: "messages", labelKey: "admin.nav.messages", icon: MessageSquare },
 ];
 
 const VIEW_TITLES: Record<AdminView, string> = {
-  dashboard: "Dashboard",
-  courses: "Courses",
-  bundles: "Course Bundles",
-  students: "Students & Users",
-  live: "Live Classes",
-  teachers: "Teachers",
-  messages: "Contact Messages",
+  dashboard: "admin.viewTitles.dashboard",
+  courses: "admin.viewTitles.courses",
+  bundles: "admin.viewTitles.bundles",
+  students: "admin.viewTitles.students",
+  live: "admin.viewTitles.live",
+  teachers: "admin.viewTitles.teachers",
+  messages: "admin.viewTitles.messages",
 };
 
 /**
@@ -108,6 +109,7 @@ function allowedViewsFor(role: string): Set<AdminView> {
 }
 
 export function AdminPanel() {
+  const t = useT();
   const { user, authLoading, openAuthModal } = useStore();
   const router = useRouter();
   const [adminView, setAdminView] = useState<AdminView>("dashboard");
@@ -119,7 +121,7 @@ export function AdminPanel() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
-          <p className="text-sm">Loading admin panel...</p>
+          <p className="text-sm">{t("admin.panel.loading")}</p>
         </div>
       </div>
     );
@@ -133,17 +135,17 @@ export function AdminPanel() {
             <LogIn className="h-6 w-6 text-indigo-600" />
           </div>
           <h2 className="mb-2 text-lg font-bold text-foreground">
-            Please log in
+            {t("admin.panel.pleaseLogin")}
           </h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            You need to be logged in as an admin or teacher to access this area.
+            {t("admin.panel.loginDesc")}
           </p>
           <Button
             onClick={() => openAuthModal("login")}
             className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
           >
             <LogIn className="h-4 w-4" />
-            Log in
+            {t("admin.panel.login")}
           </Button>
         </Card>
       </div>
@@ -162,15 +164,14 @@ export function AdminPanel() {
             <ShieldAlert className="h-6 w-6 text-red-600" />
           </div>
           <h2 className="mb-2 text-lg font-bold text-foreground">
-            Access denied
+            {t("admin.panel.accessDenied")}
           </h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Your account does not have permission to view the admin panel.
-            Only administrators and teachers can access this area.
+            {t("admin.panel.accessDeniedDesc")}
           </p>
           <Button variant="outline" onClick={() => router.push("/")} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to site
+            {t("admin.panel.backToSite")}
           </Button>
         </Card>
       </div>
@@ -182,7 +183,7 @@ export function AdminPanel() {
   // see, even if state was manipulated some other way.
   const safeView: AdminView = allowedViews.has(adminView) ? adminView : "dashboard";
   const navItems = NAV_ITEMS.filter((item) => allowedViews.has(item.id));
-  const activeTitle = VIEW_TITLES[safeView];
+  const activeTitle = t(VIEW_TITLES[safeView]);
 
   const sidebar = (
     <SidebarContent
@@ -206,7 +207,7 @@ export function AdminPanel() {
       {/* Mobile sidebar */}
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
         <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
-          <SheetTitle className="sr-only">Admin navigation</SheetTitle>
+          <SheetTitle className="sr-only">{t("admin.panel.adminNav")}</SheetTitle>
           {sidebar}
         </SheetContent>
       </Sheet>
@@ -223,14 +224,14 @@ export function AdminPanel() {
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
-              <span className="sr-only">Open admin navigation</span>
+              <span className="sr-only">{t("admin.panel.openNav")}</span>
             </Button>
             <div className="min-w-0">
               <h1 className="truncate text-base font-bold text-foreground sm:text-lg">
                 {activeTitle}
               </h1>
               <p className="hidden text-xs text-muted-foreground sm:block">
-                SHEEGOW ACADEMY admin panel
+                {t("admin.panel.adminSubtitle")}
               </p>
             </div>
           </div>
@@ -242,14 +243,14 @@ export function AdminPanel() {
               className="gap-1.5"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to site</span>
-              <span className="sm:hidden">Exit</span>
+              <span className="hidden sm:inline">{t("admin.panel.backToSite")}</span>
+              <span className="sm:hidden">{t("admin.panel.exit")}</span>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   className="flex items-center gap-2 rounded-full border p-1 pr-2 transition-colors hover:bg-accent"
-                  aria-label="Open admin profile menu"
+                  aria-label={t("admin.panel.openProfileMenu")}
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.profilePicture || undefined} />
@@ -270,16 +271,16 @@ export function AdminPanel() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => router.push("/profile")}>
                   <Users className="h-4 w-4" />
-                  My Profile
+                  {t("admin.panel.myProfile")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/dashboard")}>
                   <LayoutDashboard className="h-4 w-4" />
-                  Student Dashboard
+                  {t("admin.panel.studentDashboard")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push("/")}>
                   <ArrowLeft className="h-4 w-4" />
-                  Back to site
+                  {t("admin.panel.backToSite")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -310,6 +311,7 @@ function SidebarContent({
   activeView: AdminView;
   onSelect: (v: AdminView) => void;
 }) {
+  const t = useT();
   const { user } = useStore();
   const router = useRouter();
 
@@ -325,7 +327,7 @@ function SidebarContent({
             SHEEGOW
           </p>
           <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-            Admin Console
+            {t("admin.panel.adminConsole")}
           </p>
         </div>
       </div>
@@ -333,7 +335,7 @@ function SidebarContent({
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Management
+          {t("admin.panel.management")}
         </p>
         {items.map((item) => {
           const active = activeView === item.id;
@@ -354,7 +356,7 @@ function SidebarContent({
                   active ? "text-white" : "text-muted-foreground"
                 )}
               />
-              <span className="flex-1 text-left">{item.label}</span>
+              <span className="flex-1 text-left">{t(item.labelKey)}</span>
               {active && (
                 <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
               )}
@@ -397,7 +399,7 @@ function SidebarContent({
               onClick={() => router.push("/")}
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              Back to site
+              {t("admin.panel.backToSite")}
             </Button>
           </div>
         </>
@@ -420,6 +422,7 @@ interface ContactMessage {
 }
 
 export function AdminMessages() {
+  const t = useT();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -431,7 +434,7 @@ export function AdminMessages() {
       setMessages(r.messages as ContactMessage[]);
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to load messages";
+        err instanceof ApiError ? err.message : t("admin.messages.loadFailed");
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -460,7 +463,7 @@ export function AdminMessages() {
               <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {messages.length}
               </p>
-              <p className="text-xs text-muted-foreground">Total messages</p>
+              <p className="text-xs text-muted-foreground">{t("admin.messages.totalMessages")}</p>
             </div>
           </div>
         </Card>
@@ -473,7 +476,7 @@ export function AdminMessages() {
               <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {unreadCount}
               </p>
-              <p className="text-xs text-muted-foreground">Awaiting reply</p>
+              <p className="text-xs text-muted-foreground">{t("admin.messages.awaitingReply")}</p>
             </div>
           </div>
         </Card>
@@ -486,7 +489,7 @@ export function AdminMessages() {
               <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {messages.length - unreadCount}
               </p>
-              <p className="text-xs text-muted-foreground">Resolved</p>
+              <p className="text-xs text-muted-foreground">{t("admin.messages.resolved")}</p>
             </div>
           </div>
         </Card>
@@ -506,10 +509,10 @@ export function AdminMessages() {
               <MessageSquare className="h-6 w-6 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">
-              No messages yet
+              {t("admin.messages.noMessages")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Contact form submissions will appear here.
+              {t("admin.messages.noMessagesDesc")}
             </p>
           </div>
         ) : (
@@ -517,11 +520,11 @@ export function AdminMessages() {
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[180px] pl-4">From</TableHead>
-                  <TableHead className="min-w-[220px]">Subject</TableHead>
-                  <TableHead className="hidden min-w-[140px] md:table-cell">Received</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
-                  <TableHead className="pr-4 text-right">Actions</TableHead>
+                  <TableHead className="min-w-[180px] pl-4">{t("admin.messages.colFrom")}</TableHead>
+                  <TableHead className="min-w-[220px]">{t("admin.messages.colSubject")}</TableHead>
+                  <TableHead className="hidden min-w-[140px] md:table-cell">{t("admin.messages.colReceived")}</TableHead>
+                  <TableHead className="min-w-[100px]">{t("admin.messages.colStatus")}</TableHead>
+                  <TableHead className="pr-4 text-right">{t("admin.messages.colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -567,7 +570,7 @@ export function AdminMessages() {
                           : "border-amber-200 bg-amber-50 text-amber-700"
                       }
                     >
-                      {m.resolved ? "Resolved" : "Open"}
+                      {m.resolved ? t("admin.messages.resolvedBadge") : t("admin.messages.openBadge")}
                     </Badge>
                   </TableCell>
                   <TableCell className="pr-4 text-right">
@@ -580,14 +583,14 @@ export function AdminMessages() {
                         >
                           <MoreVertical className="h-4 w-4" />
                           <span className="sr-only">
-                            Open message actions
+                            {t("admin.messages.openActions")}
                           </span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setOpenId(m.id)}>
                           <MailOpen className="h-4 w-4" />
-                          Read message
+                          {t("admin.messages.readMessage")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
@@ -595,20 +598,20 @@ export function AdminMessages() {
                               `RE: ${m.subject}`
                             );
                             const body = encodeURIComponent(
-                              `Hi ${m.name},\n\nThank you for contacting SHEEGOW ACADEMY.\n\n`
+                              `${t("admin.messages.replyGreeting", { name: m.name })}\n\n${t("admin.messages.replyBody")}\n\n`
                             );
                             window.location.href = `mailto:${m.email}?subject=${subject}&body=${body}`;
                           }}
                         >
                           <Mail className="h-4 w-4" />
-                          Reply by email
+                          {t("admin.messages.replyByEmail")}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={async () => {
                             try {
                               await api.updateUser(m.id, {});
-                              toast.success("Already up to date");
+                              toast.success(t("admin.messages.alreadyUpToDateToast"));
                             } catch {
                               // no dedicated endpoint — just toggle locally
                               setMessages((prev) =>
@@ -620,14 +623,14 @@ export function AdminMessages() {
                               );
                               toast.success(
                                 m.resolved
-                                  ? "Marked as open"
-                                  : "Marked as resolved"
+                                  ? t("admin.messages.markedOpenToast")
+                                  : t("admin.messages.markedResolvedToast")
                               );
                             }
                           }}
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          {m.resolved ? "Mark as open" : "Mark resolved"}
+                          {m.resolved ? t("admin.messages.markAsOpen") : t("admin.messages.markResolved")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -648,7 +651,7 @@ export function AdminMessages() {
           onReply={(email, subject, name) => {
             const subj = encodeURIComponent(`RE: ${subject}`);
             const body = encodeURIComponent(
-              `Hi ${name},\n\nThank you for contacting SHEEGOW ACADEMY.\n\n`
+              `${t("admin.messages.replyGreeting", { name })}\n\n${t("admin.messages.replyBody")}\n\n`
             );
             window.location.href = `mailto:${email}?subject=${subj}&body=${body}`;
           }}
@@ -667,6 +670,7 @@ function ReadMessageDialog({
   onClose: () => void;
   onReply: (email: string, subject: string, name: string) => void;
 }) {
+  const t = useT();
   if (!message) return null;
   return (
     <div
@@ -694,29 +698,29 @@ function ReadMessageDialog({
                 : "border-amber-200 bg-amber-50 text-amber-700"
             }
           >
-            {message.resolved ? "Resolved" : "Open"}
+            {message.resolved ? t("admin.messages.resolvedBadge") : t("admin.messages.openBadge")}
           </Badge>
         </div>
         <Separator className="mb-4" />
         <div className="mb-4 space-y-1.5 text-sm">
           <p>
-            <span className="font-semibold text-foreground">From:</span>{" "}
+            <span className="font-semibold text-foreground">{t("admin.messages.fromLabel")}</span>{" "}
             <span className="text-foreground">{message.name}</span>
           </p>
           <p>
-            <span className="font-semibold text-foreground">Email:</span>{" "}
+            <span className="font-semibold text-foreground">{t("admin.messages.emailLabel")}</span>{" "}
             <span className="text-muted-foreground">{message.email}</span>
           </p>
           {message.phone && (
             <p>
-              <span className="font-semibold text-foreground">Phone:</span>{" "}
+              <span className="font-semibold text-foreground">{t("admin.messages.phoneLabel")}</span>{" "}
               <span className="text-muted-foreground">{message.phone}</span>
             </p>
           )}
         </div>
         <div className="mb-4">
           <p className="mb-1 text-xs font-semibold text-muted-foreground">
-            Message
+            {t("admin.messages.messageLabel")}
           </p>
           <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
             {message.message}
@@ -724,7 +728,7 @@ function ReadMessageDialog({
         </div>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
-            Close
+            {t("admin.messages.close")}
           </Button>
           <Button
             onClick={() =>
@@ -733,7 +737,7 @@ function ReadMessageDialog({
             className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
           >
             <Mail className="h-4 w-4" />
-            Reply
+            {t("admin.messages.reply")}
           </Button>
         </div>
       </Card>

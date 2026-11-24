@@ -27,6 +27,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 type Filter = "pending" | "all";
 
@@ -34,23 +35,23 @@ function isPending(r: RefundRequest) {
   return r.status === "pending";
 }
 
-function statusBadge(status: string) {
+function statusBadge(status: string, t: (key: string) => string) {
   if (status === "approved") {
     return (
       <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
-        Approved
+        {t("admin.refunds.approved")}
       </Badge>
     );
   }
   if (status === "rejected") {
     return (
       <Badge className="border-rose-200 bg-rose-50 text-rose-700">
-        Rejected
+        {t("admin.refunds.rejected")}
       </Badge>
     );
   }
   return (
-    <Badge className="border-amber-200 bg-amber-50 text-amber-700">Pending</Badge>
+    <Badge className="border-amber-200 bg-amber-50 text-amber-700">{t("admin.refunds.pendingBadge")}</Badge>
   );
 }
 
@@ -60,6 +61,7 @@ function statusBadge(status: string) {
  * "refunded" + notifies the student) or reject (notifies the student).
  */
 export function AdminRefunds() {
+  const t = useT();
   const [requests, setRequests] = useState<RefundRequest[]>([]);
   const [filter, setFilter] = useState<Filter>("pending");
   const [loading, setLoading] = useState(true);
@@ -75,12 +77,12 @@ export function AdminRefunds() {
       setRequests(res.refunds);
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Failed to load refund requests"
+        err instanceof ApiError ? err.message : t("admin.refunds.loadFailed")
       );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -118,8 +120,8 @@ export function AdminRefunds() {
       });
       toast.success(
         decision === "approved"
-          ? "Refund approved — the payment has been marked as refunded"
-          : "Refund request rejected"
+          ? t("admin.refunds.approvedToast")
+          : t("admin.refunds.rejectedToast")
       );
       setReviewing(null);
       setDecision(null);
@@ -127,7 +129,7 @@ export function AdminRefunds() {
       await load();
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Failed to update the refund request"
+        err instanceof ApiError ? err.message : t("admin.refunds.updateFailed")
       );
     } finally {
       setActingId(null);
@@ -139,16 +141,15 @@ export function AdminRefunds() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground">Refund Requests</h2>
+          <h2 className="text-xl font-bold text-foreground">{t("admin.refunds.title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Students ask for their money back on completed payments. Approving
-            marks the payment as refunded and notifies the student.
+            {t("admin.refunds.intro")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {pendingCount > 0 && (
             <Badge className="gap-1 border-amber-200 bg-amber-50 text-amber-700">
-              <Clock className="h-3 w-3" /> {pendingCount} awaiting review
+              <Clock className="h-3 w-3" /> {t("admin.refunds.awaitingReview", { count: pendingCount })}
             </Badge>
           )}
           <Button
@@ -157,7 +158,7 @@ export function AdminRefunds() {
             onClick={load}
             className="gap-1.5"
           >
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+            <RefreshCw className="h-3.5 w-3.5" /> {t("admin.refunds.refresh")}
           </Button>
         </div>
       </div>
@@ -169,21 +170,21 @@ export function AdminRefunds() {
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {requests.length}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Total requests</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.refunds.totalRequests")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
           <Clock className="mb-2 h-5 w-5 text-amber-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {pendingCount}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Pending review</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.refunds.pendingReview")}</p>
         </Card>
         <Card className="col-span-2 p-3 sm:p-4 md:col-span-1">
           <DollarSign className="mb-2 h-5 w-5 text-emerald-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {formatPrice(totalRefunded)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Total refunded</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("admin.refunds.totalRefunded")}</p>
         </Card>
       </div>
 
@@ -197,7 +198,7 @@ export function AdminRefunds() {
             onClick={() => setFilter(f)}
             className={cn(filter === f && "bg-indigo-600 hover:bg-indigo-700")}
           >
-            {f === "pending" ? `Pending (${pendingCount})` : "All requests"}
+            {f === "pending" ? t("admin.refunds.filterPending", { count: pendingCount }) : t("admin.refunds.filterAll")}
           </Button>
         ))}
       </div>
@@ -217,11 +218,11 @@ export function AdminRefunds() {
           <RotateCcw className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
           <p className="font-medium text-foreground">
             {filter === "pending"
-              ? "No pending refund requests"
-              : "No refund requests yet"}
+              ? t("admin.refunds.noPending")
+              : t("admin.refunds.noRefunds")}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            New refund requests from students will appear here for your review.
+            {t("admin.refunds.noRefundsDesc")}
           </p>
         </Card>
       ) : (
@@ -245,9 +246,9 @@ export function AdminRefunds() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold text-foreground">
-                          {student?.fullName || "Student"}
+                          {student?.fullName || t("admin.refunds.student")}
                         </span>
-                        {statusBadge(r.status)}
+                        {statusBadge(r.status, t)}
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
                         {student?.email}
@@ -265,12 +266,12 @@ export function AdminRefunds() {
                   <DollarSign className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground">
-                      {payment?.course?.title || "Payment"}
+                      {payment?.course?.title || t("admin.refunds.payment")}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {payment ? formatPrice(payment.amount) : "—"} ·{" "}
                       {payment?.method ? payment.method : "—"}
-                      {payment?.status ? ` · payment ${payment.status}` : ""}
+                      {payment?.status ? ` · ${t("admin.refunds.paymentStatusSuffix", { status: payment.status })}` : ""}
                     </p>
                   </div>
                   {payment?.status === "completed" && (
@@ -280,7 +281,7 @@ export function AdminRefunds() {
                       rel="noopener noreferrer"
                       className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                     >
-                      Invoice
+                      {t("admin.refunds.invoice")}
                     </a>
                   )}
                 </div>
@@ -288,7 +289,7 @@ export function AdminRefunds() {
                 {/* Reason */}
                 <div className="mt-3">
                   <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Student&apos;s reason
+                    {t("admin.refunds.studentReason")}
                   </p>
                   <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
                     {r.reason}
@@ -299,14 +300,14 @@ export function AdminRefunds() {
                 {r.status !== "pending" && r.adminNote && (
                   <div className="mt-3 rounded-lg border border-border bg-card p-3">
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Admin note
+                      {t("admin.refunds.adminNote")}
                     </p>
                     <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
                       {r.adminNote}
                     </p>
                     {r.reviewedAt && (
                       <p className="mt-1 text-[11px] text-muted-foreground">
-                        Reviewed {formatDateTime(r.reviewedAt)}
+                        {t("admin.refunds.reviewed", { date: formatDateTime(r.reviewedAt) })}
                       </p>
                     )}
                   </div>
@@ -321,7 +322,7 @@ export function AdminRefunds() {
                       onClick={() => openReview(r, "approved")}
                       className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
                     >
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                      <CheckCircle2 className="h-3.5 w-3.5" /> {t("admin.refunds.approve")}
                     </Button>
                     <Button
                       size="sm"
@@ -330,7 +331,7 @@ export function AdminRefunds() {
                       onClick={() => openReview(r, "rejected")}
                       className="gap-1.5"
                     >
-                      <XCircle className="h-3.5 w-3.5" /> Reject
+                      <XCircle className="h-3.5 w-3.5" /> {t("admin.refunds.reject")}
                     </Button>
                   </div>
                 )}
@@ -354,23 +355,23 @@ export function AdminRefunds() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {decision === "approved" ? "Approve refund" : "Reject refund"}
+              {decision === "approved" ? t("admin.refunds.approveTitle") : t("admin.refunds.rejectTitle")}
             </DialogTitle>
             <DialogDescription>
               {decision === "approved"
-                ? "Approving flips the payment status to \"refunded\" and notifies the student. The student will no longer be charged for this payment."
-                : "Rejecting leaves the payment as \"completed\". The student will be notified that their refund request was rejected."}
+                ? t("admin.refunds.approveDesc")
+                : t("admin.refunds.rejectDesc")}
             </DialogDescription>
           </DialogHeader>
 
           {reviewing && (
             <div className="rounded-lg border bg-muted/30 p-3 text-sm">
               <p className="font-semibold text-foreground">
-                {reviewing.payment?.course?.title || "Payment"}
+                {reviewing.payment?.course?.title || t("admin.refunds.payment")}
               </p>
               <p className="text-xs text-muted-foreground">
                 {reviewing.payment ? formatPrice(reviewing.payment.amount) : "—"} ·{" "}
-                {reviewing.student?.fullName || "Student"}
+                {reviewing.student?.fullName || t("admin.refunds.student")}
               </p>
             </div>
           )}
@@ -380,14 +381,14 @@ export function AdminRefunds() {
               htmlFor="admin-note"
               className="text-xs font-semibold text-muted-foreground"
             >
-              Admin note (optional)
+              {t("admin.refunds.adminNoteLabel")}
             </label>
             <Textarea
               id="admin-note"
               placeholder={
                 decision === "approved"
-                  ? "e.g. Refund processed via Zaad Service, expect 1-2 business days..."
-                  : "e.g. Course already completed — refund not eligible per policy..."
+                  ? t("admin.refunds.approvePlaceholder")
+                  : t("admin.refunds.rejectPlaceholder")
               }
               value={adminNote}
               onChange={(e) => setAdminNote(e.target.value)}
@@ -410,7 +411,7 @@ export function AdminRefunds() {
               }}
               disabled={actingId !== null}
             >
-              Cancel
+              {t("admin.refunds.cancel")}
             </Button>
             <Button
               onClick={submitDecision}
@@ -423,7 +424,7 @@ export function AdminRefunds() {
               )}
             >
               <CheckCircle2 className="h-4 w-4" />
-              Confirm {decision === "approved" ? "approval" : "rejection"}
+              {decision === "approved" ? t("admin.refunds.confirmApproval") : t("admin.refunds.confirmRejection")}
             </Button>
           </DialogFooter>
         </DialogContent>

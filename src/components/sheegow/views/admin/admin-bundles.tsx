@@ -64,6 +64,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 interface BundleFormValues {
   title: string;
@@ -86,6 +87,7 @@ const EMPTY_FORM: BundleFormValues = {
 /** Admin bundles view — list, create, edit, delete course bundles.
  *  Mirrors the layout of AdminCourses (toolbar + table + dialog form). */
 export function AdminBundles() {
+  const t = useT();
   const [bundles, setBundles] = useState<BundleWithCourses[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,7 @@ export function AdminBundles() {
       setBundles(r.bundles ?? []);
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to load bundles";
+        err instanceof ApiError ? err.message : t("admin.bundles.loadFailed");
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -162,19 +164,19 @@ export function AdminBundles() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim()) {
-      toast.error("Bundle title is required");
+      toast.error(t("admin.bundles.titleRequired"));
       return;
     }
     if (!form.description.trim()) {
-      toast.error("Bundle description is required");
+      toast.error(t("admin.bundles.descRequired"));
       return;
     }
     if (!(form.price >= 1)) {
-      toast.error("Price must be at least $1");
+      toast.error(t("admin.bundles.priceMin"));
       return;
     }
     if (form.courseIds.length === 0) {
-      toast.error("Select at least one course for the bundle");
+      toast.error(t("admin.bundles.selectCourse"));
       return;
     }
     setSaving(true);
@@ -189,16 +191,16 @@ export function AdminBundles() {
       };
       if (editing) {
         const { bundle } = await api.updateBundle(editing.id, body);
-        toast.success(`Bundle "${bundle.title}" updated`);
+        toast.success(t("admin.bundles.updatedToast", { title: bundle.title }));
       } else {
         const { bundle } = await api.createBundle(body);
-        toast.success(`Bundle "${bundle.title}" created`);
+        toast.success(t("admin.bundles.createdToast", { title: bundle.title }));
       }
       setFormOpen(false);
       await fetchBundles();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to save bundle";
+        err instanceof ApiError ? err.message : t("admin.bundles.saveFailed");
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -210,12 +212,12 @@ export function AdminBundles() {
     setDeleting(true);
     try {
       await api.deleteBundle(deleteId);
-      toast.success("Bundle deleted");
+      toast.success(t("admin.bundles.deletedToast"));
       setDeleteId(null);
       await fetchBundles();
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : "Failed to delete bundle";
+        err instanceof ApiError ? err.message : t("admin.bundles.deleteFailed");
       toast.error(msg);
     } finally {
       setDeleting(false);
@@ -231,9 +233,9 @@ export function AdminBundles() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search bundles by title..."
+            placeholder={t("admin.bundles.searchPlaceholder")}
             className="pl-9"
-            aria-label="Search bundles"
+            aria-label={t("admin.bundles.searchAria")}
           />
         </div>
         <Button
@@ -241,7 +243,7 @@ export function AdminBundles() {
           className="w-full gap-2 bg-gradient-to-r from-amber-500 to-amber-600 shadow-md shadow-amber-500/30 hover:from-amber-600 hover:to-amber-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
-          Create Bundle
+          {t("admin.bundles.createBundle")}
         </Button>
       </div>
 
@@ -256,7 +258,7 @@ export function AdminBundles() {
               <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {bundles.length}
               </p>
-              <p className="text-xs text-muted-foreground">Total bundles</p>
+              <p className="text-xs text-muted-foreground">{t("admin.bundles.totalBundles")}</p>
             </div>
           </div>
         </Card>
@@ -269,7 +271,7 @@ export function AdminBundles() {
               <p className="text-xl font-extrabold text-foreground sm:text-2xl">
                 {bundles.filter((b) => b.isActive).length}
               </p>
-              <p className="text-xs text-muted-foreground">Active</p>
+              <p className="text-xs text-muted-foreground">{t("admin.bundles.active")}</p>
             </div>
           </div>
         </Card>
@@ -283,7 +285,7 @@ export function AdminBundles() {
                 {bundles.reduce((sum, b) => sum + b.courses.length, 0)}
               </p>
               <p className="text-xs text-muted-foreground">
-                Total bundle enrollments offered
+                {t("admin.bundles.totalEnrollmentsOffered")}
               </p>
             </div>
           </div>
@@ -304,12 +306,12 @@ export function AdminBundles() {
               <Package className="h-6 w-6 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">
-              {search ? "No bundles match your search" : "No bundles yet"}
+              {search ? t("admin.bundles.noBundlesMatch") : t("admin.bundles.noBundlesYet")}
             </p>
             <p className="text-xs text-muted-foreground">
               {search
-                ? "Try a different search term."
-                : 'Click "Create Bundle" to add your first course package.'}
+                ? t("admin.bundles.tryDifferent")
+                : t("admin.bundles.clickCreate")}
             </p>
           </div>
         ) : (
@@ -317,20 +319,20 @@ export function AdminBundles() {
             <Table className="min-w-[760px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[200px] pl-4">Bundle</TableHead>
-                  <TableHead className="min-w-[90px]">Courses</TableHead>
-                  <TableHead className="min-w-[100px]">Price</TableHead>
+                  <TableHead className="min-w-[200px] pl-4">{t("admin.bundles.colBundle")}</TableHead>
+                  <TableHead className="min-w-[90px]">{t("admin.bundles.colCourses")}</TableHead>
+                  <TableHead className="min-w-[100px]">{t("admin.bundles.colPrice")}</TableHead>
                   <TableHead className="hidden min-w-[100px] md:table-cell">
-                    Original total
+                    {t("admin.bundles.colOriginalTotal")}
                   </TableHead>
                   <TableHead className="hidden min-w-[100px] md:table-cell">
-                    Savings
+                    {t("admin.bundles.colSavings")}
                   </TableHead>
                   <TableHead className="hidden min-w-[120px] lg:table-cell">
-                    Created
+                    {t("admin.bundles.colCreated")}
                   </TableHead>
-                  <TableHead className="min-w-[90px]">Status</TableHead>
-                  <TableHead className="pr-4 text-right">Actions</TableHead>
+                  <TableHead className="min-w-[90px]">{t("admin.bundles.colStatus")}</TableHead>
+                  <TableHead className="pr-4 text-right">{t("admin.bundles.colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -400,7 +402,7 @@ export function AdminBundles() {
                               : "border-muted-foreground/30 bg-muted text-muted-foreground"
                           }
                         >
-                          {b.isActive ? "Active" : "Hidden"}
+                          {b.isActive ? t("admin.bundles.active") : t("admin.bundles.hidden")}
                         </Badge>
                       </TableCell>
                       <TableCell className="pr-4 text-right">
@@ -413,14 +415,14 @@ export function AdminBundles() {
                             >
                               <MoreVertical className="h-4 w-4" />
                               <span className="sr-only">
-                                Open bundle actions
+                                {t("admin.bundles.openActions")}
                               </span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEdit(b)}>
                               <Pencil className="h-4 w-4" />
-                              Edit bundle
+                              {t("admin.bundles.editBundle")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
@@ -432,7 +434,7 @@ export function AdminBundles() {
                               }
                             >
                               <Package className="h-4 w-4" />
-                              Preview checkout
+                              {t("admin.bundles.previewCheckout")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -440,7 +442,7 @@ export function AdminBundles() {
                               onClick={() => setDeleteId(b.id)}
                             >
                               <Trash2 className="h-4 w-4" />
-                              Delete
+                              {t("admin.bundles.delete")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -460,18 +462,17 @@ export function AdminBundles() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Package className="h-5 w-5 text-amber-600" />
-              {editing ? "Edit bundle" : "Create new bundle"}
+              {editing ? t("admin.bundles.editTitle") : t("admin.bundles.createTitle")}
             </DialogTitle>
             <DialogDescription>
-              Group multiple courses into a discounted package. Students buy the
-              bundle once and get enrolled in every included course.
+              {t("admin.bundles.formDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Title */}
             <div className="space-y-1.5">
-              <Label htmlFor="bundle-title">Bundle title</Label>
+              <Label htmlFor="bundle-title">{t("admin.bundles.labelTitle")}</Label>
               <Input
                 id="bundle-title"
                 value={form.title}
@@ -485,7 +486,7 @@ export function AdminBundles() {
 
             {/* Description */}
             <div className="space-y-1.5">
-              <Label htmlFor="bundle-desc">Description</Label>
+              <Label htmlFor="bundle-desc">{t("admin.bundles.labelDesc")}</Label>
               <Textarea
                 id="bundle-desc"
                 value={form.description}
@@ -502,10 +503,10 @@ export function AdminBundles() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="bundle-price">
-                  Bundle price (USD)
+                  {t("admin.bundles.labelPrice")}
                   {form.courseIds.length > 0 && (
                     <span className="ml-2 text-xs font-normal text-muted-foreground">
-                      Original total:{" "}
+                      {t("admin.bundles.originalTotalInline")}{" "}
                       <span className="font-semibold">
                         {formatPrice(
                           form.courseIds
@@ -533,7 +534,7 @@ export function AdminBundles() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="bundle-image">Image URL (optional)</Label>
+                <Label htmlFor="bundle-image">{t("admin.bundles.labelImage")}</Label>
                 <Input
                   id="bundle-image"
                   value={form.image}
@@ -549,10 +550,10 @@ export function AdminBundles() {
             <div className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  Active (visible to students)
+                  {t("admin.bundles.activeVisible")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Hidden bundles are invisible on the public courses page.
+                  {t("admin.bundles.hiddenNote")}
                 </p>
               </div>
               <Switch
@@ -560,21 +561,21 @@ export function AdminBundles() {
                 onCheckedChange={(v) =>
                   setForm((f) => ({ ...f, isActive: v }))
                 }
-                aria-label="Toggle bundle visibility"
+                aria-label={t("admin.bundles.toggleAria")}
               />
             </div>
 
             {/* Course selector */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label>Included courses</Label>
+                <Label>{t("admin.bundles.includedCourses")}</Label>
                 <span className="text-xs text-muted-foreground">
-                  {form.courseIds.length} selected
+                  {t("admin.bundles.selectedCount", { count: form.courseIds.length })}
                 </span>
               </div>
               {courses.length === 0 ? (
                 <p className="rounded-lg border border-dashed bg-muted/30 p-4 text-xs text-muted-foreground">
-                  No courses found. Create courses first.
+                  {t("admin.bundles.noCoursesFound")}
                 </p>
               ) : (
                 <ScrollArea className="h-64 rounded-lg border">
@@ -635,7 +636,7 @@ export function AdminBundles() {
                                   {c.level}
                                 </Badge>
                                 <span className="text-xs text-muted-foreground">
-                                  {c.duration} weeks
+                                  {t("admin.bundles.weeks", { count: c.duration })}
                                 </span>
                               </div>
                             </div>
@@ -656,7 +657,7 @@ export function AdminBundles() {
               <div className="rounded-lg border bg-muted/30 p-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">
-                    Original total (sum of course prices)
+                    {t("admin.bundles.originalTotalSum")}
                   </span>
                   <span className="font-medium">
                     {formatPrice(
@@ -668,13 +669,13 @@ export function AdminBundles() {
                   </span>
                 </div>
                 <div className="mt-1 flex justify-between">
-                  <span className="text-muted-foreground">Bundle price</span>
+                  <span className="text-muted-foreground">{t("admin.bundles.bundlePrice")}</span>
                   <span className="font-medium">{formatPrice(form.price)}</span>
                 </div>
                 <div className="mt-1 flex justify-between text-emerald-700">
                   <span className="inline-flex items-center gap-1">
                     <PackageCheck className="h-3.5 w-3.5" />
-                    Student savings
+                    {t("admin.bundles.studentSavings")}
                   </span>
                   <span className="font-semibold">
                     {formatPrice(
@@ -699,7 +700,7 @@ export function AdminBundles() {
                 disabled={saving}
               >
                 <X className="h-4 w-4" />
-                Cancel
+                {t("admin.bundles.cancel")}
               </Button>
               <Button
                 type="submit"
@@ -711,7 +712,7 @@ export function AdminBundles() {
                 ) : (
                   <PackageCheck className="h-4 w-4" />
                 )}
-                {editing ? "Save changes" : "Create bundle"}
+                {editing ? t("admin.bundles.saveChanges") : t("admin.bundles.createBundleBtn")}
               </Button>
             </DialogFooter>
           </form>
@@ -727,15 +728,13 @@ export function AdminBundles() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this bundle?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.bundles.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              The bundle will be permanently removed. Students who already
-              purchased it keep their enrollments — only the bundle listing is
-              deleted. This action cannot be undone.
+              {t("admin.bundles.deleteDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("admin.bundles.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
@@ -746,7 +745,7 @@ export function AdminBundles() {
               ) : (
                 <Trash2 className="h-4 w-4" />
               )}
-              Delete bundle
+              {t("admin.bundles.deleteBundleBtn")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
