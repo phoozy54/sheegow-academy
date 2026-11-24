@@ -345,7 +345,7 @@ export function ContactView() {
                 <span className="font-medium text-foreground">
                   Hargeisa, Somaliland
                 </span>
-                <span className="text-muted-foreground">· Online classes worldwide</span>
+                <span className="text-muted-foreground">· Online classes for learners worldwide</span>
               </div>
             </Card>
           </div>

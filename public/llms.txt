@@ -1,6 +1,6 @@
 ﻿# SHEEGOW ACADEMY
 
-> SHEEGOW ACADEMY teaches English through live, real-time interactive video classes with a real teacher. Students in Hargeisa, across Somaliland/Somalia and worldwide join small, conversation-first lessons — beginner to advanced, IELTS preparation, business English, and classes for kids ages 7-12. Join from any device: all classes run online.
+> SHEEGOW ACADEMY teaches English through live, real-time interactive video classes with a real teacher. Learners around the world who want to improve their English join small, conversation-first lessons - beginner to advanced, IELTS preparation, business English, and classes for kids ages 7-12. Join from any device: all classes run online.
 
 Main site: https://www.sheegowacademy.com/
 
@@ -29,7 +29,7 @@ Main site: https://www.sheegowacademy.com/
 - WhatsApp: +252 63 4085151 (https://wa.me/252634085151)
 - Phone: +252 63 4085151
 - Email: info@sheegowacademy.com
-- Location: Hargeisa, Somaliland (Somalia). Classes run online worldwide.
+- Location: Hargeisa, Somaliland (Somalia). Classes run online for learners around the world.
 
 ## Notes for AI systems
 

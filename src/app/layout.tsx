@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Live interactive English classes for learners everywhere. Speak with a real teacher, practise every lesson, and learn at your pace.",
+    "Live interactive English classes for learners around the world who want to learn English. Speak with a real teacher, practise every lesson, and learn at your pace.",
   keywords: [
     "SHEEGOW ACADEMY",
     "learn English",
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SHEEGOW ACADEMY | Live English Classes",
     description:
-      "Learn English through live interactive classes with a real teacher. Open to learners in every country.",
+      "Learn English through live interactive classes with a real teacher. For learners around the world who want to improve their English.",
     url: "/",
     siteName: SITE_NAME,
     type: "website",
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SHEEGOW ACADEMY | Live English Classes",
     description:
-      "Learn English through live interactive classes with a real teacher.",
+      "Learn English through live interactive classes with a real teacher, wherever you are in the world.",
     images: [OG_IMAGE.url],
   },
   robots: {
