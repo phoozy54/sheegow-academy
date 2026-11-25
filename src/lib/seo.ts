@@ -78,7 +78,14 @@ export function pageMeta({
     // `absolute` prevents the root title template from appending the site name twice.
     title: { absolute: safeTitle },
     description: safeDescription,
-    alternates: { canonical: path },
+    alternates: {
+      canonical: path,
+      languages: {
+        en: path,
+        so: path,
+        ar: path,
+      },
+    },
     openGraph: {
       title: safeTitle,
       description: safeDescription,
