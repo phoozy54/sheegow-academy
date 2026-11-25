@@ -35,7 +35,7 @@ const DUMMY_HASH =
 export async function POST(req: Request) {
   try {
     const ip = clientIp(req);
-    const ipLimit = rateLimit(`login:ip:${ip}`, 50, 15 * 60 * 1000);
+    const ipLimit = rateLimit(`login:ip:${ip}`, 5, 15 * 60 * 1000);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { error: "Too many attempts. Please try again later." },

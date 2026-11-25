@@ -24,6 +24,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: false,
+  // Hide X-Powered-By header — don't expose server technology
+  poweredByHeader: false,
   /**
    * One canonical origin: https://www.sheegowacademy.com
    * Vercel's platform-level HTTP→HTTPS / apex→www redirects run before this

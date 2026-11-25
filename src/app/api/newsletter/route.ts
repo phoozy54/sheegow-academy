@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { handleAuthError, jsonError, safeBody } from "@/lib/api-helpers";
+import { handleAuthError, jsonError, limitRequest, safeBody } from "@/lib/api-helpers";
+import { clientIp } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email";
 
 interface SubscribeBody {
@@ -18,6 +19,9 @@ interface SubscribeBody {
  */
 export async function POST(req: Request) {
   try {
+    const limited = limitRequest(`newsletter:${clientIp(req)}`, 3, 60 * 60_000);
+    if (limited) return limited;
+
     const body = await safeBody<SubscribeBody>(req);
     if (!body || !body.email?.trim()) {
       return jsonError("Email is required", 400);

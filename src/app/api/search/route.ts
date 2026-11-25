@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { getCurrentUser, isTeachingRole } from "@/lib/auth";
-import { jsonError } from "@/lib/api-helpers";
+import { jsonError, limitRequest } from "@/lib/api-helpers";
+import { clientIp } from "@/lib/rate-limit";
 import { coursePath } from "@/lib/slug";
 import type {
   SearchCourseResult,
@@ -37,6 +38,9 @@ function parseLimit(value: string | null): number {
  */
 export async function GET(req: Request) {
   try {
+    const limited = limitRequest(`search:${clientIp(req)}`, 30, 60_000);
+    if (limited) return limited;
+
     const { searchParams } = new URL(req.url);
     const raw = searchParams.get("q") ?? "";
     const q = raw.trim();

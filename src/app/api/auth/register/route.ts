@@ -100,7 +100,7 @@ async function linkReferral(params: {
 export async function POST(req: Request) {
   try {
     const ip = clientIp(req);
-    const limit = rateLimit(`register:${ip}`, 8, 60 * 60 * 1000);
+    const limit = rateLimit(`register:${ip}`, 3, 60 * 60 * 1000);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: "Too many accounts created. Please try again later." },
