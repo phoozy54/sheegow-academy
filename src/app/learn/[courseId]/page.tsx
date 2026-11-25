@@ -1,10 +1,27 @@
 "use client";
 
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { AppShell } from "@/components/sheegow/app-shell";
-import { CoursePlayerView } from "@/components/sheegow/views/course-player-view";
+
+// Lazy-load the heavy CoursePlayerView (35KB) — only loads when user
+// actually starts a lesson.
+const CoursePlayerView = dynamic(
+  () =>
+    import("@/components/sheegow/views/course-player-view").then(
+      (m) => m.CoursePlayerView
+    ),
+  {
+    loading: () => (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <span className="h-7 w-7 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 export default function LearnPage() {
   const params = useParams<{ courseId: string }>();

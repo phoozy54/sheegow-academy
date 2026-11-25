@@ -133,6 +133,19 @@ export async function POST(req: Request) {
     if (!password || password.length < 12)
       return jsonError("Password must be at least 12 characters", 400);
 
+    // Password complexity — require at least 3 of: uppercase, lowercase,
+    // number, special character. This stops trivially weak passwords.
+    let complexity = 0;
+    if (/[A-Z]/.test(password)) complexity++;
+    if (/[a-z]/.test(password)) complexity++;
+    if (/[0-9]/.test(password)) complexity++;
+    if (/[^A-Za-z0-9]/.test(password)) complexity++;
+    if (complexity < 3)
+      return jsonError(
+        "Password must include at least 3 of: uppercase, lowercase, numbers, and special characters",
+        400
+      );
+
     // ── Reject duplicate emails ──
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) return jsonError("Email already registered", 409);
