@@ -88,6 +88,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.mailtoToast": "Your email app will open — send the message to join the list.",
     "footer.emailLabel": "Email address",
     "footer.emailPlaceholder": "Enter your email",
+    "footer.subscribeSuccess": "Waad isku qortay! Eeg email-kaaga si aad u aragto farta soo dhawaynta.",
+    "footer.subscribeError": "Isku qoritaanku waa fashilmay. Fadlan isku day mar kale.",
     "footer.requestSchedule": "Request schedule",
     "footer.allCourses": "All Courses",
     "footer.liveClasses": "Live Classes",

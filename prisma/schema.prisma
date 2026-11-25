@@ -777,3 +777,13 @@ model Referral {
 
   @@index([referrerId, createdAt])
 }
+
+// ─── NEWSLETTER SUBSCRIBER ──────────────────────────────
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  source    String   @default("footer")  // footer, landing, etc.
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

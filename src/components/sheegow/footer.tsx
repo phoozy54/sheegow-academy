@@ -54,18 +54,27 @@ export function Footer() {
             </p>
           </div>
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               const value = new FormData(e.currentTarget).get("email");
               if (typeof value !== "string" || !value.trim()) return;
-              const subject = encodeURIComponent(
-                t("footer.mailtoSubject")
-              );
-              const body = encodeURIComponent(
-                `${t("footer.mailtoBody")}\n\n${t("footer.mailtoAdd")} ${value.trim()} ${t("footer.mailtoList")}\n\n${t("footer.mailtoThanks")}`
-              );
-              window.location.href = `mailto:info@sheegowacademy.com?subject=${subject}&body=${body}`;
-              toast.info(t("footer.mailtoToast"));
+              const email = value.trim();
+              try {
+                const res = await fetch("/api/newsletter", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email, source: "footer" }),
+                });
+                if (res.ok) {
+                  toast.success(t("footer.subscribeSuccess"));
+                  (e.target as HTMLFormElement).reset();
+                } else {
+                  const data = await res.json().catch(() => null);
+                  toast.error(data?.error || t("footer.subscribeError"));
+                }
+              } catch {
+                toast.error(t("footer.subscribeError"));
+              }
             }}
             className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center"
           >
@@ -85,7 +94,7 @@ export function Footer() {
               type="submit"
               className="gap-1.5 bg-indigo-700 text-white hover:bg-indigo-800"
             >
-              <Send className="h-4 w-4" /> {t("footer.requestSchedule")}
+              <Send className="h-4 w-4" /> {t("footer.subscribe")}
             </Button>
           </form>
         </div>
