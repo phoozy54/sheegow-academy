@@ -254,7 +254,7 @@ export function AdminCourses() {
         </div>
         <Button
           onClick={openCreate}
-          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
+          className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Create Course
@@ -347,7 +347,7 @@ export function AdminCourses() {
                             <AvatarImage
                               src={c.teacher.profilePicture || undefined}
                             />
-                            <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                            <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
                               {c.teacher.fullName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -508,9 +508,9 @@ export function AdminCourses() {
             </div>
 
             {/* ─── Pricing section — admin/teacher sets the price ─── */}
-            <div className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-4">
               <div className="mb-3 flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
                   <DollarSign className="h-4 w-4" />
                 </span>
                 <div>
@@ -563,8 +563,8 @@ export function AdminCourses() {
                       }
                       className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors ${
                         form.price === preset.value
-                          ? "border-indigo-500 bg-indigo-600 text-white"
-                          : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:text-indigo-600"
+                          ? "border-emerald-500 bg-emerald-600 text-white"
+                          : "border-border bg-background text-muted-foreground hover:border-emerald-300 hover:text-emerald-600"
                       }`}
                     >
                       {preset.label}
@@ -690,7 +690,7 @@ export function AdminCourses() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
               >
                 {saving
                   ? "Saving..."

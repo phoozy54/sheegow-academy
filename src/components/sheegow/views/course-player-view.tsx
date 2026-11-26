@@ -110,14 +110,14 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
   if (authLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
       </div>
     );
   }
   if (!user) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <LogIn className="mx-auto mb-3 h-8 w-8 text-indigo-500" />
+        <LogIn className="mx-auto mb-3 h-8 w-8 text-emerald-500" />
         <h1 className="text-xl font-bold">{t("myCourses.loginToSee")}</h1>
         <Button className="mt-4" onClick={() => openAuthModal("login")}>{t("auth.logIn")}</Button>
       </div>
@@ -207,7 +207,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                 <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
                   {t("coursePlayer.courseRoadmap")}
                 </h2>
-                <span className="text-xs font-semibold text-indigo-600">
+                <span className="text-xs font-semibold text-emerald-600">
                   {roadmap.percent}%
                 </span>
               </div>
@@ -215,7 +215,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                 {roadmap.modules.map((module, mi) => (
                   <div key={module.id}>
                     <div className="mb-2 flex items-baseline gap-2">
-                      <span className="text-[11px] font-bold uppercase text-indigo-500">
+                      <span className="text-[11px] font-bold uppercase text-emerald-500">
                         {t("coursePlayer.module")} {mi + 1}
                       </span>
                       <span className="text-sm font-semibold text-foreground">{module.title}</span>
@@ -248,7 +248,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                             title={isLocked ? unlockLabel : undefined}
                             className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors ${
                               isActive
-                                ? "bg-indigo-50 font-semibold text-indigo-700"
+                                ? "bg-emerald-50 font-semibold text-emerald-700"
                                 : isLocked
                                   ? "cursor-not-allowed text-muted-foreground/60"
                                   : "text-muted-foreground hover:bg-muted"
@@ -259,7 +259,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
                             ) : done ? (
                               <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                             ) : isActive ? (
-                              <Circle className="h-4 w-4 shrink-0 fill-indigo-500 text-indigo-500" />
+                              <Circle className="h-4 w-4 shrink-0 fill-emerald-500 text-emerald-500" />
                             ) : data.hasAccess || lesson.isPreview ? (
                               <Icon className="h-4 w-4 shrink-0" />
                             ) : (
@@ -310,7 +310,7 @@ export function CoursePlayerView({ courseId }: { courseId: string }) {
               />
             ) : (
               <Card className="p-10 text-center">
-                <BookOpen className="mx-auto mb-3 h-10 w-10 text-indigo-400" />
+                <BookOpen className="mx-auto mb-3 h-10 w-10 text-emerald-400" />
                 <h2 className="font-bold">{t("coursePlayer.noLessons")}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t("coursePlayer.teacherPreparing")}
@@ -440,7 +440,7 @@ function LessonPanel({
                 {t("coursePlayer.enrollToUnlock")}
               </p>
               <Button
-                className="mt-4 gap-2 bg-indigo-600 hover:bg-indigo-700"
+                className="mt-4 gap-2 bg-emerald-600 hover:bg-emerald-700"
                 onClick={onEnroll}
               >
                 <Sparkles className="h-4 w-4" /> {t("coursePlayer.enrollToUnlockBtn")}
@@ -476,7 +476,7 @@ function LessonPanel({
               {lesson.materials && lesson.materials.length > 0 && (
                 <div className="mb-5">
                   <h3 className="mb-2 flex items-center gap-2 text-sm font-bold">
-                    <FileText className="h-4 w-4 text-indigo-500" /> {t("coursePlayer.courseMaterials")}
+                    <FileText className="h-4 w-4 text-emerald-500" /> {t("coursePlayer.courseMaterials")}
                   </h3>
                   <div className="space-y-2">
                     {lesson.materials.map((m) => (
@@ -486,10 +486,10 @@ function LessonPanel({
                         target="_blank"
                         rel="noopener noreferrer"
                         download
-                        className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50"
+                        className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50"
                       >
                         <span className="flex min-w-0 items-center gap-2">
-                          <FileText className="h-4 w-4 shrink-0 text-indigo-500" />
+                          <FileText className="h-4 w-4 shrink-0 text-emerald-500" />
                           <span className="truncate font-medium">{m.name}</span>
                         </span>
                         <Download className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -519,7 +519,7 @@ function LessonPanel({
                   <Button
                     onClick={() => void save("completed", undefined, true)}
                     disabled={saving || done}
-                    className="gap-2 bg-indigo-600 hover:bg-indigo-700"
+                    className="gap-2 bg-emerald-600 hover:bg-emerald-700"
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     {done ? t("coursePlayer.completed") : t("coursePlayer.markComplete")}
@@ -572,13 +572,13 @@ function LessonPanel({
           <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-muted p-1">
             <TabsTrigger
               value="notes"
-              className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
+              className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm"
             >
               <StickyNote className="h-4 w-4" /> {t("coursePlayer.myNotes")}
             </TabsTrigger>
             <TabsTrigger
               value="qa"
-              className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
+              className="flex items-center justify-center gap-2 py-2 text-sm data-[state=active]:bg-background data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm"
             >
               <MessageSquare className="h-4 w-4" /> {t("coursePlayer.qaLesson")}
             </TabsTrigger>
@@ -676,7 +676,7 @@ function QuizPanel({
             <ClipboardList className="h-4 w-4" /> {result.passed ? t("coursePlayer.retakeTest") : t("coursePlayer.tryAgainBtn")}
           </Button>
           {result.passed && (
-            <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={onNext}>
+            <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700" onClick={onNext}>
               {t("coursePlayer.nextLesson")} <ArrowLeft className="h-4 w-4 rotate-180" />
             </Button>
           )}
@@ -687,13 +687,13 @@ function QuizPanel({
 
   if (!attemptId) {
     return (
-      <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-5 text-center">
-        <ClipboardList className="mx-auto mb-2 h-7 w-7 text-indigo-600" />
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-center">
+        <ClipboardList className="mx-auto mb-2 h-7 w-7 text-emerald-600" />
         <p className="font-semibold">{quiz.title}</p>
         <p className="mt-1 text-xs text-muted-foreground">
           {quiz.questions?.length || 0} {t("coursePlayer.questions")} · {t("coursePlayer.passMark")} {quiz.passScore}% · {quiz.maxAttempts} {t("coursePlayer.attempts")}
         </p>
-        <Button className="mt-3 gap-2 bg-indigo-600" onClick={() => void start()} disabled={busy}>
+        <Button className="mt-3 gap-2 bg-emerald-600" onClick={() => void start()} disabled={busy}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
           {t("coursePlayer.startTest")}
         </Button>
@@ -714,7 +714,7 @@ function QuizPanel({
               return (
                 <label
                   key={c.id}
-                  className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${selected ? "border-indigo-400 bg-indigo-50" : ""}`}
+                  className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${selected ? "border-emerald-400 bg-emerald-50" : ""}`}
                 >
                   <input
                     type={q.type === "multiple" ? "checkbox" : "radio"}
@@ -873,7 +873,7 @@ function CertificateQuickPanel({ courseId, onClose }: { courseId: string; onClos
         <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm">
           <p className="font-semibold text-emerald-800">{t("coursePlayer.serial", { serial: certificate.certificate.serial })}</p>
           <a
-            className="mt-2 inline-block font-semibold text-indigo-700 underline"
+            className="mt-2 inline-block font-semibold text-emerald-700 underline"
             href={`/verify/${certificate.certificate.verificationCode}`}
             target="_blank"
             rel="noopener noreferrer"

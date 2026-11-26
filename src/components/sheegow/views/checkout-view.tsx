@@ -64,7 +64,7 @@ const METHODS: {
     name: "Card",
     desc: "Visa, Mastercard, Amex — instant enrollment",
     icon: CreditCard,
-    accent: "bg-indigo-100 text-indigo-600",
+    accent: "bg-emerald-100 text-emerald-600",
   },
   {
     id: "zaad",
@@ -162,7 +162,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
           <p className="text-sm">{t("checkout.loadingCheckout")}</p>
         </div>
       </div>
@@ -173,8 +173,8 @@ export function CheckoutView({ courseId }: { courseId: string }) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-            <LogIn className="h-7 w-7 text-indigo-600" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+            <LogIn className="h-7 w-7 text-emerald-600" />
           </div>
           <h2 className="mb-2 text-xl font-bold">{t("checkout.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
@@ -182,7 +182,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
           </p>
           <Button
             onClick={() => openAuthModal("login")}
-            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
           >
             Log in
           </Button>
@@ -195,8 +195,8 @@ export function CheckoutView({ courseId }: { courseId: string }) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-            <Tag className="h-7 w-7 text-indigo-600" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+            <Tag className="h-7 w-7 text-emerald-600" />
           </div>
           <h2 className="mb-2 text-xl font-bold">{t("checkout.noCourseSelected")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
@@ -204,7 +204,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
           </p>
           <Button
             onClick={() => router.push("/courses")}
-            className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
           >
             <ArrowLeft className="h-4 w-4" />
             {t("checkout.backToCourses")}
@@ -329,7 +329,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
               href={`/invoice/${paidPaymentId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition-colors hover:bg-indigo-700"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition-colors hover:bg-emerald-700"
             >
               <Download className="h-4 w-4" /> Download Invoice
             </a>
@@ -359,7 +359,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
           </p>
           <Button
             onClick={() => router.push("/courses")}
-            className="mt-4 bg-indigo-600 hover:bg-indigo-700"
+            className="mt-4 bg-emerald-600 hover:bg-emerald-700"
           >
             {t("checkout.browseCourses")}
           </Button>
@@ -390,7 +390,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                         htmlFor={`m-${m.id}`}
                         className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition-all ${
                           selected
-                            ? "border-indigo-500 bg-indigo-50/60 shadow-sm"
+                            ? "border-emerald-500 bg-emerald-50/60 shadow-sm"
                             : "border-border hover:border-muted-foreground/40 hover:bg-muted/30"
                         }`}
                       >
@@ -408,7 +408,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                           <p className="flex items-center gap-2 text-sm font-bold text-foreground">
                             {m.name}
                             {selected && (
-                              <Check className="h-4 w-4 text-indigo-600" />
+                              <Check className="h-4 w-4 text-emerald-600" />
                             )}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -418,7 +418,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                         <span
                           className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
                             selected
-                              ? "border-indigo-600 bg-indigo-600 text-white"
+                              ? "border-emerald-600 bg-emerald-600 text-white"
                               : "border-muted-foreground/30"
                           }`}
                         >
@@ -436,7 +436,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
               <Card className="p-0">
                 <CardHeader className="border-b">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Lock className="h-4 w-4 text-indigo-600" />
+                    <Lock className="h-4 w-4 text-emerald-600" />
                     {t("checkout.cardDetails")}
                   </CardTitle>
                   <CardDescription>
@@ -506,7 +506,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
               <Card className="p-0">
                 <CardHeader className="border-b">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Smartphone className="h-4 w-4 text-indigo-600" />
+                    <Smartphone className="h-4 w-4 text-emerald-600" />
                     {method === "zaad" ? "Zaad Service Phone" : "Edahab Phone"}
                   </CardTitle>
                   <CardDescription>
@@ -582,7 +582,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                       onClick={handleApplyCoupon}
                       disabled={couponLoading}
                       variant="outline"
-                      className="shrink-0 gap-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                      className="shrink-0 gap-1.5 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                     >
                       {couponLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -635,8 +635,8 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
-                        <CreditCard className="h-6 w-6 text-indigo-400" />
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
+                        <CreditCard className="h-6 w-6 text-emerald-400" />
                       </div>
                     )}
                   </div>
@@ -684,7 +684,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                   <Separator />
                   <div className="flex items-baseline justify-between pt-1">
                     <span className="font-bold text-foreground">{t("checkout.total")}</span>
-                    <span className="text-xl font-extrabold text-indigo-700">
+                    <span className="text-xl font-extrabold text-emerald-700">
                       {formatPrice(pricing.total)}
                     </span>
                   </div>
@@ -693,7 +693,7 @@ export function CheckoutView({ courseId }: { courseId: string }) {
                 <Button
                   onClick={handleCheckout}
                   disabled={submitting}
-                  className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+                  className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
                   size="lg"
                 >
                   {submitting ? (

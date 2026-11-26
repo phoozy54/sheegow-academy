@@ -172,10 +172,10 @@ export function ReferralWidget() {
 
   return (
     <Card className="overflow-hidden p-0">
-      <CardHeader className="flex-row items-center justify-between border-b bg-gradient-to-r from-indigo-50/60 to-amber-50/40">
+      <CardHeader className="flex-row items-center justify-between border-b bg-gradient-to-r from-emerald-50/60 to-amber-50/40">
         <div>
           <CardTitle className="flex items-center gap-2 text-base">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
               <Gift className="h-4 w-4" />
             </span>
             {t("referral.title")}
@@ -206,7 +206,7 @@ export function ReferralWidget() {
                 void handleGenerate();
               }}
               disabled={generating}
-              className="gap-2 bg-indigo-600 hover:bg-indigo-700"
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700"
             >
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -225,8 +225,8 @@ export function ReferralWidget() {
                   {t("referral.yourCode")}
                 </p>
                 <div className="flex items-stretch gap-2">
-                  <div className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-indigo-300 bg-indigo-50/50 px-3 py-2.5">
-                    <span className="font-mono text-lg font-extrabold tracking-widest text-indigo-700">
+                  <div className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-emerald-300 bg-emerald-50/50 px-3 py-2.5">
+                    <span className="font-mono text-lg font-extrabold tracking-widest text-emerald-700">
                       {stats.code.code}
                     </span>
                   </div>
@@ -270,7 +270,7 @@ export function ReferralWidget() {
               <Button
                 type="button"
                 onClick={handleShare}
-                className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700"
+                className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700"
               >
                 <Share2 className="h-4 w-4" />
                 {t("referral.share")}
@@ -281,7 +281,7 @@ export function ReferralWidget() {
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl border bg-card p-3">
                 <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                  <Users className="h-3.5 w-3.5 text-indigo-500" />
+                  <Users className="h-3.5 w-3.5 text-emerald-500" />
                   {t("referral.friendsReferred")}
                 </div>
                 <p className="text-2xl font-extrabold text-foreground">

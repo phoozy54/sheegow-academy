@@ -57,7 +57,7 @@ const PRESET_COLORS: { nameKey: string; value: string }[] = [
   { nameKey: "whiteboard.colorBlue", value: "#2563eb" },
   { nameKey: "whiteboard.colorGreen", value: "#16a34a" },
   { nameKey: "whiteboard.colorAmber", value: "#f59e0b" },
-  { nameKey: "whiteboard.colorIndigo", value: "#6366f1" },
+  { nameKey: "whiteboard.colorIndigo", value: "#10b981" },
 ];
 
 const CANVAS_BG = "#ffffff";
@@ -469,7 +469,7 @@ export function Whiteboard({
           </AlertDialog>
 
           <div className="ml-auto flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <Pencil className="h-3.5 w-3.5 text-indigo-600" aria-hidden />
+            <Pencil className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
             <span className="hidden sm:inline">{t("whiteboard.drawingLive")}</span>
           </div>
         </div>
@@ -508,7 +508,7 @@ export function Whiteboard({
 
         {/* Watermark indicator for hosts */}
         {canDraw && (
-          <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-indigo-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700 backdrop-blur">
+          <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 backdrop-blur">
             {t("whiteboard.hostBadge")}
           </div>
         )}

@@ -63,7 +63,7 @@ const METHODS: {
     name: "Card",
     desc: "Visa, Mastercard, Amex — instant enrollment",
     icon: CreditCard,
-    accent: "bg-indigo-100 text-indigo-600",
+    accent: "bg-emerald-100 text-emerald-600",
   },
   {
     id: "zaad",
@@ -427,8 +427,8 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
-                            <BookOpen className="h-4 w-4 text-indigo-400" />
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
+                            <BookOpen className="h-4 w-4 text-emerald-400" />
                           </div>
                         )}
                       </div>

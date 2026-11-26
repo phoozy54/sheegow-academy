@@ -97,14 +97,14 @@ function statusColor(status: string, scheduledAt: string, duration: number) {
   if (status === "ended") return "bg-muted text-muted-foreground";
   if (status === "live") return "bg-red-500 text-white hover:bg-red-600";
   if (isLiveNow(scheduledAt, duration, status)) return "bg-red-500 text-white hover:bg-red-600";
-  return "bg-indigo-500 text-white hover:bg-indigo-600";
+  return "bg-emerald-500 text-white hover:bg-emerald-600";
 }
 
 function statusBorder(status: string, scheduledAt: string, duration: number) {
   if (status === "ended") return "border-muted-foreground/30";
   if (status === "live") return "border-red-400";
   if (isLiveNow(scheduledAt, duration, status)) return "border-red-400";
-  return "border-indigo-400";
+  return "border-emerald-400";
 }
 
 function formatHourMinute(date: Date) {
@@ -213,12 +213,12 @@ export function CalendarView() {
   return (
     <div className="bg-background">
       {/* ─── HEADER ───────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/60 to-background">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-emerald-50/60 to-background">
         <div className="hero-mesh absolute inset-0 opacity-70" />
         <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           <Badge
             variant="outline"
-            className="mb-4 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+            className="mb-4 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
           >
             <CalendarDays className="h-3 w-3" /> {t("calendar.eyebrow")}
           </Badge>
@@ -284,7 +284,7 @@ export function CalendarView() {
             {t("calendar.liveNow")}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
             {t("calendar.scheduled")}
           </span>
           <span className="flex items-center gap-1.5">
@@ -349,7 +349,7 @@ export function CalendarView() {
                         "min-h-[110px] border-b border-r p-1.5 align-top lg:min-h-[140px]",
                         i % 7 === 6 && "border-r-0",
                         outside && "bg-muted/30 text-muted-foreground",
-                        isToday && !outside && "bg-indigo-50/60"
+                        isToday && !outside && "bg-emerald-50/60"
                       )}
                     >
                       <div className="mb-1 flex items-center justify-between">
@@ -357,7 +357,7 @@ export function CalendarView() {
                           className={cn(
                             "text-xs font-semibold",
                             isToday
-                              ? "flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white"
+                              ? "flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white"
                               : outside
                                 ? "text-muted-foreground/60"
                                 : "text-foreground"
@@ -388,7 +388,7 @@ export function CalendarView() {
                                   ? "bg-muted/60 text-muted-foreground hover:bg-muted"
                                   : live
                                     ? "bg-red-500/95 text-white hover:bg-red-600"
-                                    : "bg-indigo-500/95 text-white hover:bg-indigo-600"
+                                    : "bg-emerald-500/95 text-white hover:bg-emerald-600"
                               )}
                               title={`${c.title} · ${formatHourMinute(
                                 new Date(c.scheduledAt)
@@ -450,7 +450,7 @@ export function CalendarView() {
                               ? "bg-muted-foreground/40"
                               : live
                                 ? "bg-red-500"
-                                : "bg-indigo-500"
+                                : "bg-emerald-500"
                           )}
                         >
                           <span className="text-[10px] font-semibold uppercase">

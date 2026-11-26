@@ -141,7 +141,7 @@ function roleBadgeClass(role: string): string {
     case "super_admin":
       return "bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-500/20 dark:text-violet-300 dark:border-violet-500/30";
     case "admin":
-      return "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30";
+      return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30";
     case "teacher":
       return "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30";
     default:
@@ -178,7 +178,7 @@ function CourseRow({ course }: { course: SearchCourseResult }) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-500">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-500">
             <BookOpen className="h-4 w-4" />
           </div>
         )}
@@ -232,7 +232,7 @@ function UserRow({ user }: { user: SearchUserResult }) {
     >
       <Avatar className="h-9 w-9 shrink-0">
         <AvatarImage src={user.profilePicture || undefined} />
-        <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+        <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
           {user.fullName.slice(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
@@ -325,7 +325,7 @@ function ResultsList({
         <Link
           href={`/search?q=${encodeURIComponent(query)}`}
           onClick={onPick}
-          className="mt-1 text-xs font-semibold text-indigo-600 hover:underline"
+          className="mt-1 text-xs font-semibold text-emerald-600 hover:underline"
         >
           {t("search.viewFullSearch")}
         </Link>
@@ -381,7 +381,7 @@ function ResultsList({
         <Link
           href={`/search?q=${encodeURIComponent(query)}`}
           onClick={onPick}
-          className="flex items-center justify-between text-xs font-medium text-indigo-600 hover:underline"
+          className="flex items-center justify-between text-xs font-medium text-emerald-600 hover:underline"
         >
           <span>{t("search.seeAllResults")}</span>
           <span className="inline-flex items-center gap-1">

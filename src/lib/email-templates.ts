@@ -3,7 +3,7 @@
  *
  * Each exported function returns `{ html, text }` for a specific email type.
  * The HTML uses a shared `emailShell` wrapper so every email has the same
- * indigo gradient header, white content area, and footer.
+ * emerald gradient header, white content area, and footer.
  *
  * All templates are responsive (work on mobile + desktop) and ship a
  * plain-text fallback alongside the HTML.
@@ -14,8 +14,8 @@
 
 /** Brand colors pulled from the platform design system. */
 const BRAND = {
-  indigo: "#6366f1",
-  indigoDark: "#4f46e5",
+  emerald: "#10b981",
+  emeraldDark: "#059669",
   amber: "#f59e0b",
   textPrimary: "#1f2937",
   textMuted: "#6b7280",
@@ -40,7 +40,7 @@ function escapeHtml(value: string): string {
 
 /**
  * Shared wrapper that gives every email the SHEEGOW ACADEMY look:
- * indigo gradient header bar with logo text, white content card, footer.
+ * emerald gradient header bar with logo text, white content card, footer.
  *
  * `title` is shown in the header under the logo. `content` is the inner
  * HTML of the email body.
@@ -57,7 +57,7 @@ export function emailShell(title: string, content: string): { html: string; text
   <title>${escapeHtml(title)}</title>
   <!--[if mso]>
   <style>
-    .header-bar { background: ${BRAND.indigoDark} !important; }
+    .header-bar { background: ${BRAND.emeraldDark} !important; }
   </style>
   <![endif]-->
 </head>
@@ -68,7 +68,7 @@ export function emailShell(title: string, content: string): { html: string; text
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:${BRAND.white};border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
           <!-- Header -->
           <tr>
-            <td class="header-bar" style="background:linear-gradient(135deg,${BRAND.indigo} 0%,${BRAND.indigoDark} 100%);padding:28px 32px;text-align:left;">
+            <td class="header-bar" style="background:linear-gradient(135deg,${BRAND.emerald} 0%,${BRAND.emeraldDark} 100%);padding:28px 32px;text-align:left;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="font-size:22px;font-weight:800;letter-spacing:-0.02em;color:#ffffff;line-height:1.1;">
@@ -95,14 +95,14 @@ export function emailShell(title: string, content: string): { html: string; text
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${BRAND.border};padding-top:20px;">
                 <tr>
                   <td style="font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
-                    <strong style="color:${BRAND.indigoDark};">SHEEGOW ACADEMY</strong><br />
+                    <strong style="color:${BRAND.emeraldDark};">SHEEGOW ACADEMY</strong><br />
                     English for Somali learners &mdash; live classes, structured courses, and a supportive community.
                     <br /><br />
                     &copy; ${year} SHEEGOW ACADEMY. All rights reserved.
                     <br />
-                    Contact: <a href="mailto:${SUPPORT_EMAIL}" style="color:${BRAND.indigoDark};text-decoration:none;">${SUPPORT_EMAIL}</a>
+                    Contact: <a href="mailto:${SUPPORT_EMAIL}" style="color:${BRAND.emeraldDark};text-decoration:none;">${SUPPORT_EMAIL}</a>
                     &nbsp;|&nbsp;
-                    <a href="${APP_URL}" style="color:${BRAND.indigoDark};text-decoration:none;">Visit website</a>
+                    <a href="${APP_URL}" style="color:${BRAND.emeraldDark};text-decoration:none;">Visit website</a>
                     <br /><br />
                     You receive this email because you have a SHEEGOW ACADEMY account.
                     If this email reached you in error, you can ignore it.
@@ -157,7 +157,7 @@ function ctaButton(label: string, url: string): string {
   return `
   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 8px 0;">
     <tr>
-      <td style="border-radius:10px;background:linear-gradient(135deg,${BRAND.indigo} 0%,${BRAND.indigoDark} 100%);">
+      <td style="border-radius:10px;background:linear-gradient(135deg,${BRAND.emerald} 0%,${BRAND.emeraldDark} 100%);">
         <a href="${escapeHtml(url)}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;">
           ${escapeHtml(label)}
         </a>
@@ -172,7 +172,7 @@ function noteBox(label: string, note: string): string {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;background-color:#f3f4f6;border-left:4px solid ${BRAND.amber};border-radius:6px;">
     <tr>
       <td style="padding:14px 18px;font-size:14px;color:${BRAND.textPrimary};line-height:1.55;">
-        <strong style="color:${BRAND.indigoDark};">${escapeHtml(label)}</strong><br />
+        <strong style="color:${BRAND.emeraldDark};">${escapeHtml(label)}</strong><br />
         ${escapeHtml(note)}
       </td>
     </tr>
@@ -185,7 +185,7 @@ function greeting(name: string): string {
 }
 
 function signOff(): string {
-  return `<p style="margin:24px 0 0 0;">Best regards,<br /><strong style="color:${BRAND.indigoDark};">The SHEEGOW ACADEMY Team</strong></p>`;
+  return `<p style="margin:24px 0 0 0;">Best regards,<br /><strong style="color:${BRAND.emeraldDark};">The SHEEGOW ACADEMY Team</strong></p>`;
 }
 
 /* ─── Template: Welcome ───────────────────────────────── */
@@ -193,7 +193,7 @@ function signOff(): string {
 export function welcomeTemplate(name: string): { html: string; text: string } {
   const content = `
     ${greeting(name)}
-    <p style="margin:0 0 16px 0;">Welcome to <strong style="color:${BRAND.indigoDark};">SHEEGOW ACADEMY</strong>! Your account is ready and you're all set to start learning English with us.</p>
+    <p style="margin:0 0 16px 0;">Welcome to <strong style="color:${BRAND.emeraldDark};">SHEEGOW ACADEMY</strong>! Your account is ready and you're all set to start learning English with us.</p>
     <p style="margin:0 0 16px 0;">Here's what you can do next:</p>
     <ul style="margin:0 0 16px 0;padding-left:22px;line-height:1.7;">
       <li>Browse our English courses and pick one that fits your level.</li>
@@ -216,18 +216,18 @@ export function classReminderTemplate(
 ): { html: string; text: string } {
   const content = `
     ${greeting(name)}
-    <p style="margin:0 0 16px 0;">Your live class <strong style="color:${BRAND.indigoDark};">${escapeHtml(classTitle)}</strong> starts in <strong>15 minutes</strong>.</p>
+    <p style="margin:0 0 16px 0;">Your live class <strong style="color:${BRAND.emeraldDark};">${escapeHtml(classTitle)}</strong> starts in <strong>15 minutes</strong>.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background-color:#f3f4f6;border-radius:8px;">
       <tr>
         <td style="padding:16px 18px;font-size:14px;line-height:1.6;">
-          <strong style="color:${BRAND.indigoDark};">Class:</strong> ${escapeHtml(classTitle)}<br />
-          <strong style="color:${BRAND.indigoDark};">Starts:</strong> ${escapeHtml(time)}
+          <strong style="color:${BRAND.emeraldDark};">Class:</strong> ${escapeHtml(classTitle)}<br />
+          <strong style="color:${BRAND.emeraldDark};">Starts:</strong> ${escapeHtml(time)}
         </td>
       </tr>
     </table>
     <p style="margin:0 0 8px 0;">Click below to join the classroom. Try to arrive a minute early so you can settle in.</p>
     ${ctaButton("Join live class", url)}
-    <p style="margin:8px 0 0 0;font-size:13px;color:${BRAND.textMuted};">If the button doesn't work, paste this link into your browser: <a href="${escapeHtml(url)}" style="color:${BRAND.indigoDark};">${escapeHtml(url)}</a></p>
+    <p style="margin:8px 0 0 0;font-size:13px;color:${BRAND.textMuted};">If the button doesn't work, paste this link into your browser: <a href="${escapeHtml(url)}" style="color:${BRAND.emeraldDark};">${escapeHtml(url)}</a></p>
     ${signOff()}`;
   return emailShell("Your live class starts soon", content);
 }
@@ -257,7 +257,7 @@ export function teacherApplicationTemplate(
     ctaUrl = APP_URL;
   } else {
     heading = "Your application is under review";
-    body = `<p style="margin:0 0 16px 0;">Thanks for applying to teach on SHEEGOW ACADEMY! Your application is now <strong style="color:${BRAND.indigoDark};">under review</strong> by our team.</p>
+    body = `<p style="margin:0 0 16px 0;">Thanks for applying to teach on SHEEGOW ACADEMY! Your application is now <strong style="color:${BRAND.emeraldDark};">under review</strong> by our team.</p>
       <p style="margin:0 0 16px 0;">We'll be in touch as soon as we have a decision. This usually takes a few business days.</p>`;
     ctaLabel = "View application";
     ctaUrl = `${APP_URL}/teach`;
@@ -289,11 +289,11 @@ export function refundTemplate(
 
   if (status === "approved") {
     heading = "Your refund request has been approved";
-    body = `<p style="margin:0 0 16px 0;">Good news &mdash; your refund request for <strong style="color:${BRAND.indigoDark};">${escapeHtml(course)}</strong> has been <strong style="color:#16a34a;">approved</strong>.</p>
+    body = `<p style="margin:0 0 16px 0;">Good news &mdash; your refund request for <strong style="color:${BRAND.emeraldDark};">${escapeHtml(course)}</strong> has been <strong style="color:#16a34a;">approved</strong>.</p>
       <p style="margin:0 0 16px 0;">A refund of <strong>${escapeHtml(amount)}</strong> has been marked as processed. Depending on your payment method, it may take a few business days to appear on your statement.</p>`;
   } else {
     heading = "An update on your refund request";
-    body = `<p style="margin:0 0 16px 0;">We've reviewed your refund request for <strong style="color:${BRAND.indigoDark};">${escapeHtml(course)}</strong> and unfortunately we're unable to approve it at this time.</p>`;
+    body = `<p style="margin:0 0 16px 0;">We've reviewed your refund request for <strong style="color:${BRAND.emeraldDark};">${escapeHtml(course)}</strong> and unfortunately we're unable to approve it at this time.</p>`;
   }
 
   const noteBlock =
@@ -318,11 +318,11 @@ export function announcementTemplate(
 ): { html: string; text: string } {
   const content = `
     ${greeting(name)}
-    <p style="margin:0 0 16px 0;">There's a new announcement in <strong style="color:${BRAND.indigoDark};">${escapeHtml(course)}</strong>:</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background-color:#f3f4f6;border-left:4px solid ${BRAND.indigo};border-radius:6px;">
+    <p style="margin:0 0 16px 0;">There's a new announcement in <strong style="color:${BRAND.emeraldDark};">${escapeHtml(course)}</strong>:</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background-color:#f3f4f6;border-left:4px solid ${BRAND.emerald};border-radius:6px;">
       <tr>
         <td style="padding:16px 18px;">
-          <strong style="display:block;font-size:16px;color:${BRAND.indigoDark};margin-bottom:6px;">${escapeHtml(title)}</strong>
+          <strong style="display:block;font-size:16px;color:${BRAND.emeraldDark};margin-bottom:6px;">${escapeHtml(title)}</strong>
           <div style="font-size:14px;line-height:1.6;color:${BRAND.textPrimary};">${escapeHtml(body)}</div>
         </td>
       </tr>
@@ -342,7 +342,7 @@ export function certificateTemplate(
 ): { html: string; text: string } {
   const content = `
     ${greeting(name)}
-    <p style="margin:0 0 16px 0;">Congratulations! You've successfully completed <strong style="color:${BRAND.indigoDark};">${escapeHtml(course)}</strong> and earned your certificate of completion.</p>
+    <p style="margin:0 0 16px 0;">Congratulations! You've successfully completed <strong style="color:${BRAND.emeraldDark};">${escapeHtml(course)}</strong> and earned your certificate of completion.</p>
     <p style="margin:0 0 16px 0;">This is a big step in your English learning journey &mdash; keep up the great work!</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border-radius:8px;">
       <tr>

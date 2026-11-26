@@ -254,7 +254,7 @@ function SaveIndicator({ state }: { state: SaveState }) {
   const t = useT();
   if (state === "saving") {
     return (
-      <span className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-medium text-indigo-600">
+      <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-600">
         <Loader2 className="h-3 w-3 animate-spin" /> {t("notes.saving")}
       </span>
     );

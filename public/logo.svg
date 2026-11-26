@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
   <defs>
-    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#4f46e5"/>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
     </linearGradient>
   </defs>
-  <!-- Rounded square background with indigo gradient -->
-  <rect x="1" y="1" width="28" height="28" rx="7" fill="url(#indigoGrad)"/>
+  <!-- Rounded square background with emerald gradient -->
+  <rect x="1" y="1" width="28" height="28" rx="7" fill="url(#emeraldGrad)"/>
   <!-- Graduation cap (mortar board) -->
   <g fill="#ffffff">
     <!-- Cap top (diamond shape) -->

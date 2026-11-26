@@ -99,7 +99,7 @@ export function StudentRefunds() {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <Card className="p-3 sm:p-4">
-          <RotateCcw className="mb-2 h-5 w-5 text-indigo-600" />
+          <RotateCcw className="mb-2 h-5 w-5 text-emerald-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary.total}
           </p>

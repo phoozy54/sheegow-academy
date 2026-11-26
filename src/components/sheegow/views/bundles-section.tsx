@@ -118,8 +118,8 @@ export function BundlesSection() {
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-indigo-200">
-                    <Package className="h-10 w-10 text-indigo-400" />
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-emerald-200">
+                    <Package className="h-10 w-10 text-emerald-400" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -165,7 +165,7 @@ export function BundlesSection() {
                     </li>
                   ))}
                   {courseCount > 4 && (
-                    <li className="pl-6 text-xs font-medium text-indigo-600">
+                    <li className="pl-6 text-xs font-medium text-emerald-600">
                       +{courseCount - 4} {t("bundles.more")}
                     </li>
                   )}
@@ -175,7 +175,7 @@ export function BundlesSection() {
                 <div className="mt-auto space-y-3 border-t pt-3">
                   <div className="flex items-baseline justify-between gap-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-extrabold text-indigo-700">
+                      <span className="text-xl font-extrabold text-emerald-700">
                         {formatPrice(bundle.price)}
                       </span>
                       {hasDiscount && (

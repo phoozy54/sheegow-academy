@@ -60,7 +60,7 @@ export function BrandLockup({
           "flex h-10 w-10 items-center justify-center rounded-xl shadow-lg",
           onDark
             ? "bg-white/10 ring-1 ring-white/15 shadow-none"
-            : "bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-indigo-500/30"
+            : "bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-emerald-500/30"
         )}
       >
         <BrandMark
@@ -80,7 +80,7 @@ export function BrandLockup({
         <span
           className={cn(
             "text-[10px] font-semibold tracking-[0.2em]",
-            onDark ? "text-indigo-200" : "text-indigo-700 dark:text-indigo-300"
+            onDark ? "text-emerald-200" : "text-emerald-700 dark:text-emerald-300"
           )}
         >
           ACADEMY

@@ -94,8 +94,8 @@ export function CompareView() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-24">
         <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed bg-card/60 p-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
-            <GitCompare className="h-8 w-8 text-indigo-500" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+            <GitCompare className="h-8 w-8 text-emerald-500" />
           </div>
           <h2 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
             {t("compare.emptyTitle")}
@@ -103,7 +103,7 @@ export function CompareView() {
           <p className="max-w-md text-sm text-muted-foreground">
             {t("compare.emptyDesc")}
           </p>
-          <Button asChild className="mt-2 gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className="mt-2 gap-2 bg-emerald-600 hover:bg-emerald-700">
             <Link href="/courses">
               <BookOpen className="h-4 w-4" />
               {t("compare.browseCourses")}
@@ -172,20 +172,20 @@ export function CompareView() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
-                <BookOpen className="h-8 w-8 text-indigo-400" />
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
+                <BookOpen className="h-8 w-8 text-emerald-400" />
               </div>
             )}
           </div>
           <Link
             href={`/course/${c.id}`}
-            className="block line-clamp-2 text-left text-sm font-bold text-foreground hover:text-indigo-600"
+            className="block line-clamp-2 text-left text-sm font-bold text-foreground hover:text-emerald-600"
           >
             {c.title}
           </Link>
           <Button
             size="sm"
-            className="w-full gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+            className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700"
             onClick={() => handleEnroll(c)}
           >
             {t("compare.enroll")}
@@ -256,7 +256,7 @@ export function CompareView() {
           <div className="flex items-center gap-2">
             <Avatar className="h-7 w-7">
               <AvatarImage src={c.teacher.profilePicture || undefined} />
-              <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+              <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
                 {c.teacher.fullName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -325,7 +325,7 @@ export function CompareView() {
         <div>
           <Badge
             variant="outline"
-            className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+            className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
           >
             <GitCompare className="h-3 w-3" />
             {t("compare.trayCount", { count: columns.length })}
@@ -392,7 +392,7 @@ export function CompareView() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border bg-gradient-to-br from-indigo-50 to-amber-50/50 p-6 text-center sm:flex-row sm:justify-between sm:text-left">
+      <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border bg-gradient-to-br from-emerald-50 to-amber-50/50 p-6 text-center sm:flex-row sm:justify-between sm:text-left">
         <div>
           <p className="text-sm font-bold text-foreground">
             {t("compare.browseCourses")}
@@ -401,7 +401,7 @@ export function CompareView() {
             {t("compare.subtitle")}
           </p>
         </div>
-        <Button asChild className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+        <Button asChild className="gap-2 bg-emerald-600 hover:bg-emerald-700">
           <Link href="/courses">
             <BookOpen className="h-4 w-4" />
             {t("compare.browseCourses")}

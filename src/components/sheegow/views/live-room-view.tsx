@@ -713,7 +713,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
               <Button
                 onClick={handleRequestTrial}
                 disabled={requestingTrial}
-                className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700"
+                className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700"
               >
                 {requestingTrial ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -746,8 +746,8 @@ export function LiveRoomView({ classId }: { classId: string }) {
   if (isEligibleForHost && !joinMode) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center sm:px-6 lg:px-8">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
-          <Video className="h-8 w-8 text-indigo-600" />
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+          <Video className="h-8 w-8 text-emerald-600" />
         </div>
         <h2 className="text-2xl font-bold text-foreground">
           {t("live.howJoin")}
@@ -760,9 +760,9 @@ export function LiveRoomView({ classId }: { classId: string }) {
           {/* Host mode */}
           <button
             onClick={() => setJoinMode("host")}
-            className="group rounded-xl border-2 border-indigo-200 bg-card p-5 text-left transition-all hover:border-indigo-500 hover:shadow-lg"
+            className="group rounded-xl border-2 border-emerald-200 bg-card p-5 text-left transition-all hover:border-emerald-500 hover:shadow-lg"
           >
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white">
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white">
               <Video className="h-5 w-5" />
             </div>
             <p className="font-bold text-foreground">Join as Host</p>
@@ -855,7 +855,7 @@ export function LiveRoomView({ classId }: { classId: string }) {
               className={cn(
                 "flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-colors",
                 mobileTab === "video"
-                  ? "bg-indigo-600 text-white shadow-sm"
+                  ? "bg-emerald-600 text-white shadow-sm"
                   : "text-muted-foreground"
               )}
             >
@@ -866,13 +866,13 @@ export function LiveRoomView({ classId }: { classId: string }) {
               className={cn(
                 "flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-colors",
                 mobileTab === "chat"
-                  ? "bg-indigo-600 text-white shadow-sm"
+                  ? "bg-emerald-600 text-white shadow-sm"
                   : "text-muted-foreground"
               )}
             >
               <MessageSquare className="h-4 w-4" /> {t("liveRoom.chat")}
               {messages.length > 0 && mobileTab !== "chat" && (
-                <span className="ml-0.5 rounded-full bg-indigo-100 px-1.5 text-[10px] font-bold text-indigo-700">
+                <span className="ml-0.5 rounded-full bg-emerald-100 px-1.5 text-[10px] font-bold text-emerald-700">
                   {messages.length}
                 </span>
               )}
@@ -1037,7 +1037,7 @@ function VideoArea({
   return (
     <Card className="overflow-hidden p-0">
       {/* Video surface (mock) */}
-      <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+      <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900">
         {/* Decorative grid */}
         <div
           className="absolute inset-0 opacity-20"
@@ -1113,7 +1113,7 @@ function VideoArea({
               <div className="absolute -inset-3 animate-pulse rounded-full bg-red-500/20 blur-xl" />
               <Avatar className="relative h-20 w-20 border-4 border-white/30 shadow-2xl sm:h-28 sm:w-28 lg:h-32 lg:w-32">
                 <AvatarImage src={teacherAvatar || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-xl font-bold text-white sm:text-2xl">
+                <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-emerald-600 text-xl font-bold text-white sm:text-2xl">
                   {teacherName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -1122,13 +1122,13 @@ function VideoArea({
               </span>
             </div>
             <h3 className="mt-4 line-clamp-2 text-base font-bold text-white sm:text-lg lg:text-xl">{liveClass.title}</h3>
-            <p className="mt-1 text-xs text-indigo-200 sm:text-sm">
+            <p className="mt-1 text-xs text-emerald-200 sm:text-sm">
               {t("liveRoom.with")} <span className="font-semibold">{teacherName}</span>
             </p>
             <p className="mt-3 line-clamp-3 max-w-md text-xs text-slate-300">
               {liveClass.description || t("liveRoom.liveInteractive")}
             </p>
-            <p className="mt-4 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-indigo-100 backdrop-blur">
+            <p className="mt-4 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-emerald-100 backdrop-blur">
               {isHost ? t("live.pressStart") : hostPresent ? t("live.connecting") : t("live.waiting")}
             </p>
           </div>
@@ -1141,7 +1141,7 @@ function VideoArea({
               {participants.slice(0, 5).map((p) => (
                 <Avatar key={p.userId} className="h-10 w-10 ring-2 ring-white/20" title={p.userName}>
                   <AvatarImage src={p.userAvatar || undefined} />
-                  <AvatarFallback className="bg-indigo-600 text-xs font-bold text-white">
+                  <AvatarFallback className="bg-emerald-600 text-xs font-bold text-white">
                     {p.userName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -1184,7 +1184,7 @@ function VideoArea({
                 "h-11 shrink-0 gap-1.5 rounded-full px-3 text-xs font-semibold sm:px-4",
                 isBroadcasting
                   ? "bg-amber-500 text-white hover:bg-amber-600"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
               )}
             >
               <RadioTower className="h-4 w-4" />
@@ -1214,7 +1214,7 @@ function VideoArea({
                     "flex h-11 w-11 items-center justify-center rounded-full transition-colors disabled:opacity-50",
                     screenSharing
                       ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
-                      : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                      : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                   )}
                   aria-label={screenSharing ? t("live.stopShare") : t("live.shareScreen")}
                 >
@@ -1242,8 +1242,8 @@ function VideoArea({
                 className={cn(
                   "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
                   whiteboardOpen
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700"
-                    : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-700"
+                    : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                 )}
               >
                 <Pencil className="h-5 w-5" />
@@ -1324,7 +1324,7 @@ function PollPanel({
     <Card className="p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <ClipboardList className="h-4 w-4 text-indigo-600" />
+          <ClipboardList className="h-4 w-4 text-emerald-600" />
           <h3 className="text-sm font-bold">{t("liveRoom.livePolls")}</h3>
         </div>
         <Badge variant="outline">{active.length} {t("liveRoom.open")}</Badge>
@@ -1375,7 +1375,7 @@ function PollPanel({
             )}
             <Button
               size="sm"
-              className="h-8 gap-1 bg-indigo-600 text-xs hover:bg-indigo-700"
+              className="h-8 gap-1 bg-emerald-600 text-xs hover:bg-emerald-700"
               disabled={busyPoll === "create" || !pollQuestion.trim()}
               onClick={onCreate}
             >
@@ -1416,12 +1416,12 @@ function PollPanel({
                     return showResults ? (
                       <div key={i} className="relative overflow-hidden rounded-md bg-muted/50 px-3 py-2 text-xs">
                         <div
-                          className="absolute inset-y-0 left-0 bg-indigo-100"
+                          className="absolute inset-y-0 left-0 bg-emerald-100"
                           style={{ width: `${percent}%` }}
                         />
                         <div className="relative flex items-center justify-between gap-2">
                           <span className="font-medium">{option}</span>
-                          <span className="shrink-0 font-bold text-indigo-700">{percent}%</span>
+                          <span className="shrink-0 font-bold text-emerald-700">{percent}%</span>
                         </div>
                       </div>
                     ) : (
@@ -1429,9 +1429,9 @@ function PollPanel({
                         key={i}
                         disabled={busyPoll === poll.id}
                         onClick={() => onVote(poll.id, i)}
-                        className="flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-xs font-medium transition-colors hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-60"
+                        className="flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-xs font-medium transition-colors hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-60"
                       >
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[10px] font-bold text-indigo-700">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-700">
                           {String.fromCharCode(65 + i)}
                         </span>
                         {option}
@@ -1492,7 +1492,7 @@ function ControlButton({
             className={cn(
               "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
               active
-                ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                 : "bg-red-500 text-white shadow-lg shadow-red-500/30 hover:bg-red-600"
             )}
             aria-label={active ? activeLabel : inactiveLabel}
@@ -1539,12 +1539,12 @@ function ChatSidebar({
   return (
     <Card className="flex h-[460px] flex-col overflow-hidden p-0 sm:h-[520px] lg:h-[calc(100vh-12rem)] lg:max-h-[800px]">
       {/* Header */}
-      <div className="flex items-center justify-between gap-2 border-b bg-gradient-to-r from-indigo-50 to-background px-4 py-3">
+      <div className="flex items-center justify-between gap-2 border-b bg-gradient-to-r from-emerald-50 to-background px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
-          <MessageSquare className="h-4 w-4 shrink-0 text-indigo-600" />
+          <MessageSquare className="h-4 w-4 shrink-0 text-emerald-600" />
           <span className="truncate text-sm font-bold text-foreground">{t("live.chatTitle")}</span>
         </div>
-        <Badge variant="outline" className="shrink-0 border-indigo-200 bg-indigo-50 text-indigo-700">
+        <Badge variant="outline" className="shrink-0 border-emerald-200 bg-emerald-50 text-emerald-700">
           <Users className="mr-1 h-3 w-3" />
           {onlineCount} {t("live.online")}
         </Badge>
@@ -1601,7 +1601,7 @@ function ChatSidebar({
               type="submit"
               size="icon"
               disabled={sending || !chatInput.trim()}
-              className="h-10 w-10 shrink-0 bg-indigo-600 hover:bg-indigo-700"
+              className="h-10 w-10 shrink-0 bg-emerald-600 hover:bg-emerald-700"
               aria-label="Send message"
             >
               {sending ? (
@@ -1640,13 +1640,13 @@ function ChatMessageRow({ msg, isMe }: { msg: ChatMsg; isMe: boolean }) {
     <div className={cn("flex gap-2", isMe && "flex-row-reverse")}>
       <Avatar className="h-7 w-7 shrink-0">
         <AvatarImage src={msg.userAvatar || undefined} />
-        <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+        <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
           {msg.userName.slice(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div className={cn("max-w-[75%]", isMe && "text-right")}>
         <div className="flex items-baseline gap-1.5">
-          <span className={cn("text-xs font-bold", isMe ? "text-indigo-600" : "text-foreground")}>
+          <span className={cn("text-xs font-bold", isMe ? "text-emerald-600" : "text-foreground")}>
             {isMe ? "You" : msg.userName}
           </span>
           <span className="text-[10px] text-muted-foreground">
@@ -1657,7 +1657,7 @@ function ChatMessageRow({ msg, isMe }: { msg: ChatMsg; isMe: boolean }) {
           className={cn(
             "mt-1 inline-block rounded-2xl px-3 py-2 text-sm",
             isMe
-              ? "rounded-br-sm bg-indigo-600 text-white"
+              ? "rounded-br-sm bg-emerald-600 text-white"
               : "rounded-bl-sm bg-muted text-foreground"
           )}
         >

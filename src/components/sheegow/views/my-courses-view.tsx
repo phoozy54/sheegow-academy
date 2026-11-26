@@ -93,7 +93,7 @@ export function MyCoursesView() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
           <p className="text-sm">{t("myCourses.loading")}</p>
         </div>
       </div>
@@ -104,8 +104,8 @@ export function MyCoursesView() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-            <LogIn className="h-7 w-7 text-indigo-600" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+            <LogIn className="h-7 w-7 text-emerald-600" />
           </div>
           <h2 className="mb-2 text-xl font-bold">{t("myCourses.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
@@ -113,7 +113,7 @@ export function MyCoursesView() {
           </p>
           <Button
             onClick={() => openAuthModal("login")}
-            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
           >
             Log in
           </Button>
@@ -135,7 +135,7 @@ export function MyCoursesView() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 font-semibold text-indigo-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700">
             <BookOpen className="h-3.5 w-3.5" />
             {counts.enrolled} {t("myCourses.enrolled")}
           </span>
@@ -233,8 +233,8 @@ function EnrollmentCard({
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
-            <PlayCircle className="h-10 w-10 text-indigo-400" />
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
+            <PlayCircle className="h-10 w-10 text-emerald-400" />
           </div>
         )}
         <Badge
@@ -247,7 +247,7 @@ function EnrollmentCard({
           className={`absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-lg backdrop-blur ${
             completed
               ? "bg-emerald-500/90 text-white"
-              : "bg-indigo-500/90 text-white"
+              : "bg-emerald-500/90 text-white"
           }`}
         >
           {completed ? t("myCourses.completedTab") : t("myCourses.active")}
@@ -262,7 +262,7 @@ function EnrollmentCard({
 
         <button
           onClick={onContinue}
-          className="mb-2 line-clamp-2 text-left text-base font-bold leading-snug transition-colors hover:text-indigo-600"
+          className="mb-2 line-clamp-2 text-left text-base font-bold leading-snug transition-colors hover:text-emerald-600"
         >
           {course.title}
         </button>
@@ -271,7 +271,7 @@ function EnrollmentCard({
           <div className="mb-3 flex items-center gap-2">
             <Avatar className="h-6 w-6">
               <AvatarImage src={teacher.profilePicture || undefined} />
-              <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+              <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
                 {teacher.fullName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -299,7 +299,7 @@ function EnrollmentCard({
         <div className="flex flex-col gap-2">
           <Button
             onClick={onContinue}
-            className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
             size="sm"
           >
             <PlayCircle className="h-4 w-4" />
@@ -343,13 +343,13 @@ function CertificateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative overflow-hidden rounded-t-lg border-b bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-6 py-8 text-center">
+        <div className="relative overflow-hidden rounded-t-lg border-b bg-gradient-to-br from-emerald-50 via-white to-amber-50 px-6 py-8 text-center">
           <div className="pointer-events-none absolute inset-0 opacity-40 [background:repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(99,102,241,0.05)_10px,rgba(99,102,241,0.05)_11px)]" />
           <div className="relative">
             <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg">
               <GraduationCap className="h-7 w-7" />
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-700">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-700">
               SHEEGOW ACADEMY
             </p>
             <p className="mt-2 text-xl font-extrabold tracking-tight text-foreground">
@@ -397,11 +397,11 @@ function EmptyState({
   const isFiltered = tab !== "all";
   return (
     <Card className="p-12 text-center">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
         {isFiltered ? (
-          <Sparkles className="h-8 w-8 text-indigo-500" />
+          <Sparkles className="h-8 w-8 text-emerald-500" />
         ) : (
-          <BookOpen className="h-8 w-8 text-indigo-500" />
+          <BookOpen className="h-8 w-8 text-emerald-500" />
         )}
       </div>
       <h3 className="mb-1 text-lg font-bold">
@@ -412,7 +412,7 @@ function EmptyState({
       </p>
       <Button
         onClick={onBrowse}
-        className="gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+        className="gap-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
       >
         {t("cta.browseCourses")}
         <ArrowRight className="h-4 w-4" />

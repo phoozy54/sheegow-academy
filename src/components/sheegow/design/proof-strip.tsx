@@ -28,7 +28,7 @@ export function ProofStrip({
             <span
               className={cn(
                 "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md",
-                ICON_TONES[item.tone ?? "indigo"]
+                ICON_TONES[item.tone ?? "emerald"]
               )}
             >
               <Icon className="h-5 w-5" />

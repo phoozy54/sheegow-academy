@@ -70,7 +70,7 @@ function statusBadge(
       );
     case "under_review":
       return (
-        <Badge className="gap-1 border-indigo-200 bg-indigo-50 text-indigo-700">
+        <Badge className="gap-1 border-emerald-200 bg-emerald-50 text-emerald-700">
           <Loader2 className="h-3 w-3" /> {t("teach.statusUnderReview")}
         </Badge>
       );
@@ -245,7 +245,7 @@ export function AdminTeacherApplications() {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <Card className="p-3 sm:p-4">
-          <ClipboardCheck className="mb-2 h-5 w-5 text-indigo-600" />
+          <ClipboardCheck className="mb-2 h-5 w-5 text-emerald-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {applications.length}
           </p>
@@ -282,7 +282,7 @@ export function AdminTeacherApplications() {
             variant={filter === f ? "default" : "outline"}
             size="sm"
             onClick={() => setFilter(f)}
-            className={cn(filter === f && "bg-indigo-600 hover:bg-indigo-700")}
+            className={cn(filter === f && "bg-emerald-600 hover:bg-emerald-700")}
           >
             {f === "pending"
               ? `${t("teach.adminFilterPending")} (${pendingCount})`
@@ -342,7 +342,7 @@ export function AdminTeacherApplications() {
                             <AvatarImage
                               src={a.applicant?.profilePicture || undefined}
                             />
-                            <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
+                            <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
                               {a.fullName.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -422,7 +422,7 @@ export function AdminTeacherApplications() {
                         <AvatarImage
                           src={a.applicant?.profilePicture || undefined}
                         />
-                        <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
+                        <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
                           {a.fullName.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -810,7 +810,7 @@ export function AdminTeacherApplications() {
                   ? "bg-emerald-600 hover:bg-emerald-700"
                   : decision === "rejected"
                   ? "bg-rose-600 hover:bg-rose-700"
-                  : "bg-indigo-600 hover:bg-indigo-700"
+                  : "bg-emerald-600 hover:bg-emerald-700"
               )}
             >
               {actingId ? (
@@ -845,7 +845,7 @@ function DetailSection({
   return (
     <section className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
           <Icon className="h-3.5 w-3.5" />
         </span>
         <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
@@ -888,7 +888,7 @@ function ExternalLinkRow({ label, href }: { label: string; href: string }) {
       className="flex items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 text-sm transition-colors hover:bg-accent"
     >
       <span className="truncate text-foreground">{label}</span>
-      <span className="flex items-center gap-1 text-xs font-semibold text-indigo-600">
+      <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
         <ExternalLink className="h-3.5 w-3.5" />
         Open
       </span>

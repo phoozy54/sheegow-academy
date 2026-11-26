@@ -36,7 +36,7 @@ export default function MessagesPage() {
       <Suspense
         fallback={
           <div className="flex min-h-[60vh] items-center justify-center">
-            <Loader2 className="h-7 w-7 animate-spin text-indigo-500" />
+            <Loader2 className="h-7 w-7 animate-spin text-emerald-500" />
           </div>
         }
       >
@@ -142,19 +142,19 @@ function MessagesInner() {
     <div className="mx-auto max-w-6xl px-3 py-6 sm:px-6 lg:px-8">
       {authLoading ? (
         <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-7 w-7 animate-spin text-indigo-500" />
+          <Loader2 className="h-7 w-7 animate-spin text-emerald-500" />
         </div>
       ) : !user ? (
         <div className="mx-auto max-w-md py-16 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-            <LogIn className="h-7 w-7 text-indigo-600" />
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+            <LogIn className="h-7 w-7 text-emerald-600" />
           </div>
           <h1 className="text-xl font-bold">Log in to read your messages</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Direct messaging works between students, teachers and admins.
           </p>
           <Button
-            className="mt-4 gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600"
+            className="mt-4 gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600"
             onClick={() => openAuthModal("login")}
           >
             <LogIn className="h-4 w-4" /> Log in
@@ -306,7 +306,7 @@ function ConversationListColumn({
                 >
                   <Avatar className="h-7 w-7 shrink-0">
                     <AvatarImage src={u.profilePicture || undefined} />
-                    <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                    <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
                       {u.fullName.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -350,7 +350,7 @@ function ConversationListColumn({
                   className={cn(
                     "flex w-full items-center gap-3 px-3 py-3 text-left transition-colors",
                     activeId === c.id
-                      ? "bg-indigo-50"
+                      ? "bg-emerald-50"
                       : "hover:bg-accent"
                   )}
                 >
@@ -365,14 +365,14 @@ function ConversationListColumn({
                             : c.otherUser.role === "admin" ||
                               c.otherUser.role === "super_admin"
                             ? "bg-fuchsia-100 text-fuchsia-700"
-                            : "bg-indigo-100 text-indigo-700"
+                            : "bg-emerald-100 text-emerald-700"
                         )}
                       >
                         {c.otherUser.fullName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     {c.unreadCount > 0 && (
-                      <span className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">
+                      <span className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold text-white">
                         {c.unreadCount > 9 ? "9+" : c.unreadCount}
                       </span>
                     )}
@@ -409,8 +409,8 @@ function ConversationListColumn({
 function EmptyConversation() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50">
-        <MessageSquare className="h-7 w-7 text-indigo-500" />
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+        <MessageSquare className="h-7 w-7 text-emerald-500" />
       </div>
       <p className="text-sm font-semibold text-foreground">
         Select a conversation
@@ -558,7 +558,7 @@ function ConversationPane({
                 ? "bg-amber-100 text-amber-700"
                 : other.role === "admin" || other.role === "super_admin"
                 ? "bg-fuchsia-100 text-fuchsia-700"
-                : "bg-indigo-100 text-indigo-700"
+                : "bg-emerald-100 text-emerald-700"
             )}
           >
             {other.fullName.slice(0, 2).toUpperCase()}
@@ -614,7 +614,7 @@ function ConversationPane({
                   className={cn(
                     "max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-sm shadow-sm sm:max-w-[70%]",
                     mine
-                      ? "rounded-br-sm bg-indigo-600 text-white"
+                      ? "rounded-br-sm bg-emerald-600 text-white"
                       : "rounded-bl-sm bg-card text-foreground"
                   )}
                 >
@@ -654,7 +654,7 @@ function ConversationPane({
           <Button
             onClick={() => void send()}
             disabled={sending || !draft.trim()}
-            className="h-10 shrink-0 gap-2 bg-indigo-600 hover:bg-indigo-700"
+            className="h-10 shrink-0 gap-2 bg-emerald-600 hover:bg-emerald-700"
             aria-label="Send message"
           >
             {sending ? (

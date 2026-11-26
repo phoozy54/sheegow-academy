@@ -52,8 +52,8 @@ export const BADGE_METADATA: BadgeMetadata[] = [
     description: "You completed your very first lesson at SHEEGOW ACADEMY.",
     howToEarn: "Complete any lesson.",
     icon: BookOpen,
-    color: "border-indigo-200 bg-indigo-50 text-indigo-700",
-    iconBg: "bg-indigo-100 text-indigo-600",
+    color: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconBg: "bg-emerald-100 text-emerald-600",
   },
   {
     type: "first_course",

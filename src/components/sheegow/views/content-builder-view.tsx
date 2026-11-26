@@ -97,7 +97,7 @@ export function ContentBuilderView() {
   if (courses.length === 0) {
     return (
       <Card className="p-10 text-center">
-        <Hammer className="mx-auto mb-3 h-10 w-10 text-indigo-400" />
+        <Hammer className="mx-auto mb-3 h-10 w-10 text-emerald-400" />
         <h2 className="text-lg font-bold">{t("contentBuilder.noCourses")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("contentBuilder.noCoursesDesc")}
@@ -173,7 +173,7 @@ function CreateModuleCard({ courseId, onCreated }: { courseId: string; onCreated
   return (
     <Card className="p-4 sm:p-5">
       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-        <Plus className="h-4 w-4 text-indigo-600" /> {t("contentBuilder.addModule")}
+        <Plus className="h-4 w-4 text-emerald-600" /> {t("contentBuilder.addModule")}
       </h3>
       <div className="flex flex-col gap-3 sm:flex-row">
         <Input
@@ -197,7 +197,7 @@ function CreateModuleCard({ courseId, onCreated }: { courseId: string; onCreated
               setBusy(false);
             }
           }}
-          className="gap-2 bg-indigo-600 hover:bg-indigo-700"
+          className="gap-2 bg-emerald-600 hover:bg-emerald-700"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Create module
@@ -229,7 +229,7 @@ function ModuleEditor({
       >
         <div className="flex items-center gap-2">
           {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          <span className="text-xs font-bold uppercase text-indigo-500">{t("contentBuilder.module")} {index + 1}</span>
+          <span className="text-xs font-bold uppercase text-emerald-500">{t("contentBuilder.module")} {index + 1}</span>
           <span className="font-semibold">{module.title}</span>
           <Badge variant={module.isPublished ? "secondary" : "outline"}>
             {module.isPublished ? t("contentBuilder.published") : t("contentBuilder.draft")}
@@ -315,7 +315,7 @@ function LessonRow({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           {lesson.type === "video" ? (
-            <Video className="h-4 w-4 shrink-0 text-indigo-500" />
+            <Video className="h-4 w-4 shrink-0 text-emerald-500" />
           ) : lesson.type === "pdf" ? (
             <FileText className="h-4 w-4 shrink-0 text-rose-500" />
           ) : lesson.type === "quiz" ? (
@@ -395,7 +395,7 @@ function LessonRow({
             </Button>
             <Button
               size="sm"
-              className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
               onClick={saveUnlock}
               disabled={savingUnlock}
             >

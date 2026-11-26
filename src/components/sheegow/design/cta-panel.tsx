@@ -18,7 +18,7 @@ export function CtaPanel({
 }) {
   return (
     <section className={cn("pb-16 lg:pb-24", className)}>
-      <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 px-6 py-10 text-center shadow-2xl shadow-indigo-500/30 sm:px-12 sm:py-14 lg:px-16 lg:py-16">
+      <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 px-6 py-10 text-center shadow-2xl shadow-emerald-500/30 sm:px-12 sm:py-14 lg:px-16 lg:py-16">
         <div className="hero-mesh absolute inset-0 opacity-40" />
         <div className="relative">
           <Badge
@@ -31,7 +31,7 @@ export function CtaPanel({
             {title}
           </h2>
           {description ? (
-            <p className="mx-auto mt-4 max-w-xl text-indigo-100">
+            <p className="mx-auto mt-4 max-w-xl text-emerald-100">
               {description}
             </p>
           ) : null}

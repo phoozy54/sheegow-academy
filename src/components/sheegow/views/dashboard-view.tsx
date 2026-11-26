@@ -58,7 +58,7 @@ const RECENT_ACTIVITY = [
     icon: BookMarked,
     title: "Enrolled in IELTS Speaking",
     meta: "2d ago",
-    color: "bg-indigo-100 text-indigo-600",
+    color: "bg-emerald-100 text-emerald-600",
   },
   {
     icon: Award,
@@ -137,7 +137,7 @@ export function DashboardView() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
           <p className="text-sm">{t("dashboardView.loading")}</p>
         </div>
       </div>
@@ -148,8 +148,8 @@ export function DashboardView() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-            <LogIn className="h-7 w-7 text-indigo-600" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+            <LogIn className="h-7 w-7 text-emerald-600" />
           </div>
           <h2 className="mb-2 text-xl font-bold">{t("dashboardView.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
@@ -157,7 +157,7 @@ export function DashboardView() {
           </p>
           <Button
             onClick={() => openAuthModal("login")}
-            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
           >
             Log in
           </Button>
@@ -186,7 +186,7 @@ export function DashboardView() {
           variant="outline"
           className="gap-2"
         >
-          <Sparkles className="h-4 w-4 text-indigo-600" />
+          <Sparkles className="h-4 w-4 text-emerald-600" />
           {t("dashboardView.exploreCourses")}
         </Button>
       </div>
@@ -197,7 +197,7 @@ export function DashboardView() {
           icon={BookOpen}
           label={t("dashboardView.activeCourses")}
           value={stats.active}
-          color="bg-indigo-100 text-indigo-600"
+          color="bg-emerald-100 text-emerald-600"
         />
         <StatCard
           icon={CheckCircle2}
@@ -236,7 +236,7 @@ export function DashboardView() {
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push("/my-courses")}
-                  className="gap-1 text-indigo-600 hover:text-indigo-700"
+                  className="gap-1 text-emerald-600 hover:text-emerald-700"
                 >
                   View all
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -287,8 +287,8 @@ export function DashboardView() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
-                              <PlayCircle className="h-6 w-6 text-indigo-500" />
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
+                              <PlayCircle className="h-6 w-6 text-emerald-500" />
                             </div>
                           )}
                         </button>
@@ -309,7 +309,7 @@ export function DashboardView() {
                           </div>
                           <button
                             onClick={() => router.push(`/course/${course.id}`)}
-                            className="block w-full text-left text-sm font-bold leading-snug text-foreground hover:text-indigo-600"
+                            className="block w-full text-left text-sm font-bold leading-snug text-foreground hover:text-emerald-600"
                           >
                             {course.title}
                           </button>
@@ -332,7 +332,7 @@ export function DashboardView() {
                         <Button
                           size="sm"
                           onClick={() => router.push(`/course/${course.id}`)}
-                          className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:shrink-0"
+                          className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 sm:shrink-0"
                         >
                           <PlayCircle className="h-4 w-4" />
                           Continue
@@ -383,7 +383,7 @@ export function DashboardView() {
                       key={cls.id}
                       className="flex items-center gap-3 p-4 transition-colors hover:bg-muted/40"
                     >
-                      <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
+                      <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
                         <span className="text-[10px] font-semibold uppercase leading-none">
                           {new Date(cls.scheduledAt).toLocaleDateString(
                             "en-US",
@@ -413,7 +413,7 @@ export function DashboardView() {
                         size="sm"
                         variant="outline"
                         onClick={() => router.push(`/class/${cls.id}`)}
-                        className="gap-1 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                        className="gap-1 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                       >
                         Join
                       </Button>
@@ -508,8 +508,8 @@ function EmptyCourses({ onBrowse }: { onBrowse: () => void }) {
   const t = useT();
   return (
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-        <BookOpen className="h-7 w-7 text-indigo-600" />
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+        <BookOpen className="h-7 w-7 text-emerald-600" />
       </div>
       <p className="mb-1 text-sm font-semibold text-foreground">
         {t("dashboardView.emptyTitle")}
@@ -519,7 +519,7 @@ function EmptyCourses({ onBrowse }: { onBrowse: () => void }) {
       </p>
       <Button
         onClick={onBrowse}
-        className="gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+        className="gap-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
       >
         {t("dashboardView.browseCourses")}
         <ArrowRight className="h-4 w-4" />

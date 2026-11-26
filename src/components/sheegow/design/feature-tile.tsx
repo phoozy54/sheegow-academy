@@ -7,7 +7,7 @@ export function FeatureTile({
   icon: Icon,
   title,
   desc,
-  tone = "indigo",
+  tone = "emerald",
 }: {
   icon: LucideIcon;
   title: string;

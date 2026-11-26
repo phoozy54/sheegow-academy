@@ -62,14 +62,14 @@ export function LeaderboardView() {
 
       {/* Your rank callout */}
       {loading ? null : currentUser ? (
-        <Card className="mb-6 border-indigo-200 bg-gradient-to-br from-indigo-50 to-white p-4 sm:p-5">
+        <Card className="mb-6 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md">
                 <Star className="h-5 w-5 fill-white" />
               </span>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
                   {t("leaderboard.yourRank")}
                 </p>
                 <p className="text-lg font-extrabold text-foreground">
@@ -161,7 +161,7 @@ export function LeaderboardView() {
                           key={entry.studentId}
                           className={
                             isMe
-                              ? "bg-indigo-50/70 hover:bg-indigo-50"
+                              ? "bg-emerald-50/70 hover:bg-emerald-50"
                               : "hover:bg-muted/30"
                           }
                         >
@@ -172,7 +172,7 @@ export function LeaderboardView() {
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8 border">
                                 <AvatarImage src={entry.profilePicture || undefined} />
-                                <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
+                                <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
                                   {entry.fullName.slice(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
@@ -182,7 +182,7 @@ export function LeaderboardView() {
                                   {isMe && (
                                     <UiBadge
                                       variant="outline"
-                                      className="ml-2 border-indigo-200 bg-indigo-50 text-[10px] text-indigo-700"
+                                      className="ml-2 border-emerald-200 bg-emerald-50 text-[10px] text-emerald-700"
                                     >
                                       {t("leaderboard.you")}
                                     </UiBadge>
@@ -223,7 +223,7 @@ export function LeaderboardView() {
       <Card className="mt-6 p-4 sm:p-6">
         <CardHeader className="p-0">
           <CardTitle className="flex items-center gap-2 text-base">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
               <Award className="h-4 w-4" />
             </span>
             {t("leaderboard.howToEarn")}
@@ -266,7 +266,7 @@ export function LeaderboardView() {
             asChild
             size="sm"
             variant="outline"
-            className="mt-3 gap-1.5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+            className="mt-3 gap-1.5 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
           >
             <a href="/dashboard">{t("leaderboard.goToDashboard")}</a>
           </Button>
@@ -290,13 +290,13 @@ function LeaderboardRow({
   return (
     <li
       className={`flex items-center gap-3 p-4 ${
-        isCurrentUser ? "bg-indigo-50/70" : ""
+        isCurrentUser ? "bg-emerald-50/70" : ""
       }`}
     >
       <RankPill rank={entry.rank} />
       <Avatar className="h-10 w-10 border">
         <AvatarImage src={entry.profilePicture || undefined} />
-        <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
+        <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
           {entry.fullName.slice(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
@@ -306,7 +306,7 @@ function LeaderboardRow({
           {isCurrentUser && (
             <UiBadge
               variant="outline"
-              className="ml-2 border-indigo-200 bg-indigo-50 text-[10px] text-indigo-700"
+              className="ml-2 border-emerald-200 bg-emerald-50 text-[10px] text-emerald-700"
             >
               {t("leaderboard.you")}
             </UiBadge>

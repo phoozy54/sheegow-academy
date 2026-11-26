@@ -102,7 +102,7 @@ export function GamificationWidget() {
           asChild
           size="sm"
           variant="ghost"
-          className="gap-1 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+          className="gap-1 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
         >
           <Link href="/leaderboard">
             {t("gamification.leaderboard")}

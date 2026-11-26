@@ -16,17 +16,17 @@ export function ComparisonPanel({
       className={cn(
         "relative overflow-hidden rounded-2xl p-6",
         highlighted
-          ? "border-indigo-200 bg-card shadow-lg shadow-indigo-500/10"
+          ? "border-emerald-200 bg-card shadow-lg shadow-emerald-500/10"
           : "bg-muted/40"
       )}
     >
       {highlighted ? (
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-400" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-violet-500 to-amber-400" />
       ) : null}
       <h3
         className={cn(
           "text-lg font-bold",
-          highlighted ? "text-indigo-600" : "text-foreground"
+          highlighted ? "text-emerald-600" : "text-foreground"
         )}
       >
         {title}

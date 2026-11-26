@@ -127,7 +127,7 @@ export function AuthModal() {
     >
       <DialogContent className="max-h-[92vh] max-w-md overflow-hidden p-0" showCloseButton={false}>
         {/* Header banner */}
-        <div className="relative shrink-0 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 px-6 py-7 text-white">
+        <div className="relative shrink-0 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 px-6 py-7 text-white">
           <div className="hero-mesh absolute inset-0 opacity-60" />
           <DialogClose asChild>
             <button
@@ -146,7 +146,7 @@ export function AuthModal() {
               <p className="text-lg font-extrabold leading-tight">
                 {isLogin ? "Welcome Back" : "Join SHEEGOW ACADEMY"}
               </p>
-              <p className="text-xs text-indigo-200">
+              <p className="text-xs text-emerald-200">
                 {isLogin
                   ? "Log in to continue learning English"
                   : "Start learning English with LIVE classes today"}
@@ -321,7 +321,7 @@ export function AuthModal() {
                 </label>
                 <button
                   type="button"
-                  className="text-sm font-medium text-indigo-600 hover:underline"
+                  className="text-sm font-medium text-emerald-600 hover:underline"
                   onClick={() => toast.info("Password reset link sent (demo).")}
                 >
                   Forgot password?
@@ -336,11 +336,11 @@ export function AuthModal() {
                 />
                 <span className="text-muted-foreground">
                   I agree to the{" "}
-                  <span className="font-medium text-indigo-600">
+                  <span className="font-medium text-emerald-600">
                     Terms of Service
                   </span>{" "}
                   and{" "}
-                  <span className="font-medium text-indigo-600">
+                  <span className="font-medium text-emerald-600">
                     Privacy Policy
                   </span>
                 </span>
@@ -350,7 +350,7 @@ export function AuthModal() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+              className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
             >
               {loading
                 ? "Please wait..."
@@ -371,7 +371,7 @@ export function AuthModal() {
             <button
               type="button"
               onClick={() => openAuthModal(isLogin ? "register" : "login")}
-              className="font-semibold text-indigo-600 hover:underline"
+              className="font-semibold text-emerald-600 hover:underline"
             >
               {isLogin ? "Sign up" : "Log in"}
             </button>

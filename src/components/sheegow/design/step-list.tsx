@@ -17,7 +17,7 @@ export function StepList({
               <span
                 className={cn(
                   "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-sm font-bold text-white shadow-md",
-                  ICON_TONES[step.tone ?? "indigo"]
+                  ICON_TONES[step.tone ?? "emerald"]
                 )}
               >
                 {index + 1}

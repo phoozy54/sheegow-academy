@@ -135,7 +135,7 @@ export default function InvoicePage() {
           {invoice && (
             <Button
               onClick={handlePrint}
-              className="gap-2 bg-indigo-600 hover:bg-indigo-700"
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700"
             >
               <Download className="h-4 w-4" /> Download PDF
             </Button>
@@ -149,7 +149,7 @@ export default function InvoicePage() {
         <Card className="p-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
             {errorCode === 401 ? (
-              <LogIn className="h-7 w-7 text-indigo-600" />
+              <LogIn className="h-7 w-7 text-emerald-600" />
             ) : errorCode === 403 ? (
               <ShieldAlert className="h-7 w-7 text-amber-600" />
             ) : (
@@ -177,7 +177,7 @@ export default function InvoicePage() {
           {errorCode === 401 && (
             <Link
               href="/"
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
             >
               <LogIn className="h-4 w-4" /> Go to login
             </Link>
@@ -186,9 +186,9 @@ export default function InvoicePage() {
       ) : showInvoice && invoice ? (
         <Card className="print-area mx-auto w-full max-w-3xl overflow-hidden border border-border bg-white p-0 shadow-xl">
           {/* Header */}
-          <header className="print-avoid-break flex flex-col gap-4 border-b border-indigo-100 bg-gradient-to-br from-indigo-50/70 to-white p-6 sm:flex-row sm:items-start sm:justify-between sm:p-8">
+          <header className="print-avoid-break flex flex-col gap-4 border-b border-emerald-100 bg-gradient-to-br from-emerald-50/70 to-white p-6 sm:flex-row sm:items-start sm:justify-between sm:p-8">
             <div className="flex items-start gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-lg shadow-indigo-500/30">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-500/30">
                 <BrandMark className="h-7 w-7" />
               </span>
               <div>
@@ -204,7 +204,7 @@ export default function InvoicePage() {
               </div>
             </div>
             <div className="text-left sm:text-right">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-600">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">
                 Payment Receipt
               </p>
               <p className="mt-1 text-xl font-extrabold tracking-tight text-foreground">
@@ -291,7 +291,7 @@ export default function InvoicePage() {
                   )}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-indigo-100 bg-indigo-50/40">
+                  <tr className="border-t-2 border-emerald-100 bg-emerald-50/40">
                     <td className="px-4 py-3 text-sm font-bold uppercase tracking-wide text-foreground">
                       Total paid
                     </td>

@@ -87,7 +87,7 @@ const BENEFITS = [
     icon: Clock,
     titleKey: "teach.benefitFlexibleTitle",
     descKey: "teach.benefitFlexibleDesc",
-    color: "from-indigo-500 to-indigo-600",
+    color: "from-emerald-500 to-emerald-600",
   },
   {
     icon: DollarSign,
@@ -179,7 +179,7 @@ function statusBadge(status: TeacherApplicationStatus, t: (k: string) => string)
       );
     case "under_review":
       return (
-        <Badge className="gap-1 border-indigo-200 bg-indigo-50 text-indigo-700">
+        <Badge className="gap-1 border-emerald-200 bg-emerald-50 text-emerald-700">
           <Loader2 className="h-3 w-3 animate-spin" />{" "}
           {t("teach.statusUnderReview")}
         </Badge>
@@ -214,7 +214,7 @@ function StatusTracker({
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="border-b bg-gradient-to-r from-indigo-50/60 to-amber-50/40">
+      <CardHeader className="border-b bg-gradient-to-r from-emerald-50/60 to-amber-50/40">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <CardTitle className="text-lg">{t("teach.trackerTitle")}</CardTitle>
@@ -359,7 +359,7 @@ function TimelineStep({
           done
             ? "border-emerald-500 bg-emerald-500 text-white"
             : active
-            ? "border-indigo-500 text-indigo-600"
+            ? "border-emerald-500 text-emerald-600"
             : "border-border text-muted-foreground"
         )}
       >
@@ -418,7 +418,7 @@ function ApplicationForm({
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
               <UserIcon className="h-4 w-4" />
             </span>
             <div>
@@ -642,7 +642,7 @@ function ApplicationForm({
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
               <Globe className="h-4 w-4" />
             </span>
             <div>
@@ -783,7 +783,7 @@ function ApplicationForm({
         <Button
           type="submit"
           disabled={submitting}
-          className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+          className="gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -867,7 +867,7 @@ export function TeachView() {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-md items-center justify-center px-4">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
           <p className="text-sm">{t("common.loading")}</p>
         </div>
       </div>
@@ -881,8 +881,8 @@ export function TeachView() {
         <Hero t={t} showCta={false} />
         <section className="mx-auto max-w-md px-4 py-12 sm:px-6 lg:px-8">
           <Card className="p-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-              <LogIn className="h-7 w-7 text-indigo-600" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+              <LogIn className="h-7 w-7 text-emerald-600" />
             </div>
             <h2 className="mb-2 text-xl font-bold">
               {t("teach.mustLoginTitle")}
@@ -892,7 +892,7 @@ export function TeachView() {
             </p>
             <Button
               onClick={() => openAuthModal("login")}
-              className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
+              className="gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
             >
               <LogIn className="h-4 w-4" />
               {t("nav.login")}
@@ -927,7 +927,7 @@ export function TeachView() {
             </p>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition-colors hover:from-indigo-600 hover:to-indigo-700"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition-colors hover:from-emerald-600 hover:to-emerald-700"
             >
               {t("teach.goDashboard")}
               <ArrowRight className="h-4 w-4" />
@@ -1041,11 +1041,11 @@ function Hero({
   showCta: boolean;
 }) {
   return (
-    <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/70 to-background">
+    <section className="relative overflow-hidden border-b bg-gradient-to-b from-emerald-50/70 to-background">
       <div className="hero-mesh absolute inset-0 opacity-60" />
       <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">
             {t("teach.eyebrow")}
           </p>
           <h1 className="text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
@@ -1058,13 +1058,13 @@ function Hero({
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <a
                 href="#apply"
-                className="inline-flex min-h-11 items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-700"
+                className="inline-flex min-h-11 items-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-colors hover:bg-emerald-700"
               >
                 {t("teach.heroCta")}
               </a>
               <a
                 href="#requirements"
-                className="inline-flex min-h-11 items-center rounded-xl border border-indigo-300 bg-background px-6 py-3 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-50"
+                className="inline-flex min-h-11 items-center rounded-xl border border-emerald-300 bg-background px-6 py-3 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"
               >
                 {t("teach.heroCtaSecondary")}
               </a>
@@ -1138,7 +1138,7 @@ function Requirements({ t }: { t: (k: string) => string }) {
               key={r.key}
               className="flex items-start gap-3 rounded-xl border bg-card p-4 text-sm leading-relaxed text-foreground"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
                 <r.icon className="h-4 w-4" />
               </span>
               <span className="pt-1.5 font-medium">{t(r.key)}</span>

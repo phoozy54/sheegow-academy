@@ -42,12 +42,12 @@ export function SeoHero({
   imageAlt?: string;
 }) {
   return (
-    <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/70 to-background">
+    <section className="relative overflow-hidden border-b bg-gradient-to-b from-emerald-50/70 to-background">
       <div className="hero-mesh absolute inset-0 opacity-60" />
       <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
         <div className={imageSrc ? "grid items-center gap-10 lg:grid-cols-[1fr_420px]" : "mx-auto max-w-4xl text-center"}>
           <div className={imageSrc ? "" : ""}>
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">
               {eyebrow}
             </p>
             <h1 className="text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
@@ -59,7 +59,7 @@ export function SeoHero({
             <div className={`mt-8 flex flex-wrap items-center gap-3 ${imageSrc ? "" : "justify-center"}`}>
               <Link
                 href="#course-list"
-                className="inline-flex min-h-11 items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-700"
+                className="inline-flex min-h-11 items-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-colors hover:bg-emerald-700"
               >
                 Browse live courses
               </Link>
@@ -84,8 +84,8 @@ export function SeoHero({
           </div>
           {imageSrc ? (
             <div className="relative mx-auto w-full max-w-[420px]">
-              <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-indigo-200/60 via-white to-amber-100/60 blur-sm" />
-              <div className="relative overflow-hidden rounded-[1.75rem] border bg-card shadow-2xl shadow-indigo-500/10">
+              <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-emerald-200/60 via-white to-amber-100/60 blur-sm" />
+              <div className="relative overflow-hidden rounded-[1.75rem] border bg-card shadow-2xl shadow-emerald-500/10">
                 <img
                   src={imageSrc}
                   alt={imageAlt || title}
@@ -130,7 +130,7 @@ export function SeoSection({
     >
       <div className="mb-8 max-w-2xl">
         {eyebrow ? (
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">{eyebrow}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">{eyebrow}</p>
         ) : null}
         <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {title}
@@ -152,7 +152,7 @@ export function BulkList({ items }: { items: string[] }) {
           key={item}
           className="flex items-start gap-3 rounded-xl border bg-card p-4 text-sm leading-relaxed text-muted-foreground"
         >
-          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500" />
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
           <span>{item}</span>
         </li>
       ))}
@@ -200,14 +200,14 @@ export function SeoContact() {
         </h2>
         <ul className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
           <li className="flex items-center gap-2">
-            <Mail className="h-4 w-4 shrink-0 text-indigo-500" />
-            <a href={`mailto:${NAP.email}`} className="hover:text-indigo-600">
+            <Mail className="h-4 w-4 shrink-0 text-emerald-500" />
+            <a href={`mailto:${NAP.email}`} className="hover:text-emerald-600">
               {NAP.email}
             </a>
           </li>
           <li className="flex items-center gap-2">
-            <Phone className="h-4 w-4 shrink-0 text-indigo-500" />
-            <a href={NAP.phoneHref} className="hover:text-indigo-600">
+            <Phone className="h-4 w-4 shrink-0 text-emerald-500" />
+            <a href={NAP.phoneHref} className="hover:text-emerald-600">
               {NAP.phone}
             </a>
           </li>
@@ -218,7 +218,7 @@ export function SeoContact() {
             </a>
           </li>
           <li className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 shrink-0 text-indigo-500" />
+            <MapPin className="h-4 w-4 shrink-0 text-emerald-500" />
             <span>{NAP.address}</span>
           </li>
         </ul>

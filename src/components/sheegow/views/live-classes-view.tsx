@@ -209,8 +209,8 @@ export function LiveClassesView() {
   if (classes.length === 0) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
-          <Video className="h-8 w-8 text-indigo-500" />
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+          <Video className="h-8 w-8 text-emerald-500" />
         </div>
         <h2 className="text-2xl font-bold text-foreground">
           {isManager ? t("live.noClassesYet") : t("live.noClasses")}
@@ -233,7 +233,7 @@ export function LiveClassesView() {
   return (
     <div className="bg-background">
       {/* ─── HEADER ───────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/60 to-background">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-emerald-50/60 to-background">
         <div className="hero-mesh absolute inset-0 opacity-70" />
         <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Badge
@@ -263,8 +263,8 @@ export function LiveClassesView() {
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-xl border bg-card px-4 py-2.5 shadow-sm">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/15">
-                <Video className="h-5 w-5 text-indigo-600" />
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15">
+                <Video className="h-5 w-5 text-emerald-600" />
               </span>
               <div>
                 <p className="text-lg font-extrabold leading-none text-foreground">
@@ -282,9 +282,9 @@ export function LiveClassesView() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Calendar CTA — every visitor can see the monthly schedule */}
         {!loading && !error && classes.length > 0 && (
-          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 to-white p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50/80 to-white p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                 <Calendar className="h-5 w-5" />
               </span>
               <div>
@@ -300,7 +300,7 @@ export function LiveClassesView() {
               onClick={() => router.push("/calendar")}
               variant="outline"
               size="sm"
-              className="self-start gap-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 sm:self-auto"
+              className="self-start gap-1.5 border-emerald-200 text-emerald-700 hover:bg-emerald-50 sm:self-auto"
             >
               <Calendar className="h-3.5 w-3.5" /> {t("live.viewCalendar")}
             </Button>
@@ -309,7 +309,7 @@ export function LiveClassesView() {
 
         {/* Manager banner — admins see all statuses plus the management tools */}
         {isManager && (
-          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-bold text-foreground">
                 {t("live.adminViewAll")} {classes.length} {t("live.classesVisible")}
@@ -320,7 +320,7 @@ export function LiveClassesView() {
             </div>
             <Button
               onClick={() => router.push("/dashboard?section=live")}
-              className="self-start gap-1.5 bg-indigo-600 hover:bg-indigo-700 sm:self-auto"
+              className="self-start gap-1.5 bg-emerald-600 hover:bg-emerald-700 sm:self-auto"
               size="sm"
             >
               <Pencil className="h-3.5 w-3.5" /> {t("live.manageAllClasses")}
@@ -362,7 +362,7 @@ export function LiveClassesView() {
           <section>
             <div className="mb-5 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-indigo-600" />
+                <Calendar className="h-5 w-5 text-emerald-600" />
                 <h2 className="text-xl font-bold text-foreground">
                   {isManager ? t("live.allClasses") : t("live.upcoming")}
                 </h2>
@@ -420,7 +420,7 @@ function LiveNowCard({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-700 text-white">
               <Video className="h-12 w-12" />
             </div>
           )}
@@ -446,7 +446,7 @@ function LiveNowCard({
               <div className="flex items-center gap-1.5">
                 <Avatar className="h-5 w-5">
                   <AvatarImage src={liveClass.teacher.profilePicture || undefined} />
-                  <AvatarFallback className="bg-indigo-100 text-[8px] font-bold text-indigo-700">
+                  <AvatarFallback className="bg-emerald-100 text-[8px] font-bold text-emerald-700">
                     {liveClass.teacher.fullName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -512,8 +512,8 @@ function LiveClassCard({
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
-            <PlayCircle className="h-10 w-10 text-indigo-400" />
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
+            <PlayCircle className="h-10 w-10 text-emerald-400" />
           </div>
         )}
         {/* Status badge */}
@@ -550,7 +550,7 @@ function LiveClassCard({
           <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
             <Avatar className="h-6 w-6">
               <AvatarImage src={liveClass.teacher.profilePicture || undefined} />
-              <AvatarFallback className="bg-indigo-100 text-[9px] font-bold text-indigo-700">
+              <AvatarFallback className="bg-emerald-100 text-[9px] font-bold text-emerald-700">
                 {liveClass.teacher.fullName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -572,7 +572,7 @@ function LiveClassCard({
           size="sm"
           className={cn(
             "mt-auto w-full gap-1.5",
-            !ended && "bg-indigo-600 hover:bg-indigo-700"
+            !ended && "bg-emerald-600 hover:bg-emerald-700"
           )}
         >
           {ended ? t("live.classEnded") : isManager ? (
@@ -655,7 +655,7 @@ function StatusBadge({ liveClass }: { liveClass: LiveClass }) {
     );
   }
   return (
-    <span className="absolute left-3 top-3 rounded-full bg-indigo-500/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg backdrop-blur">
+    <span className="absolute left-3 top-3 rounded-full bg-emerald-500/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg backdrop-blur">
       Scheduled
     </span>
   );

@@ -39,12 +39,12 @@ export function LibraryView() {
   }, [user]);
 
   if (authLoading) {
-    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>;
+    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-500" /></div>;
   }
   if (!user) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <LogIn className="mx-auto mb-3 h-8 w-8 text-indigo-500" />
+        <LogIn className="mx-auto mb-3 h-8 w-8 text-emerald-500" />
         <h1 className="text-xl font-bold">{t("library.loginToOpen")}</h1>
         <Button className="mt-4" onClick={() => openAuthModal("login")}>{t("auth.logIn")}</Button>
       </div>
@@ -58,7 +58,7 @@ export function LibraryView() {
           {t("library.dashboard")}
         </Button>
         <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-          <Library className="h-7 w-7 text-indigo-500" /> {t("library.myLibrary")}
+          <Library className="h-7 w-7 text-emerald-500" /> {t("library.myLibrary")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("library.desc")}
@@ -71,7 +71,7 @@ export function LibraryView() {
         </div>
       ) : !data?.courses.length ? (
         <Card className="p-12 text-center">
-          <BookOpen className="mx-auto mb-3 h-10 w-10 text-indigo-400" />
+          <BookOpen className="mx-auto mb-3 h-10 w-10 text-emerald-400" />
           <h2 className="font-bold">{t("library.empty")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t("library.emptyDesc")}</p>
           <Button className="mt-4" onClick={() => router.push("/courses")}>{t("library.browseCourses")}</Button>
@@ -89,8 +89,8 @@ export function LibraryView() {
                       {course.image ? (
                         <img src={course.image} alt="" className="h-12 w-12 rounded-lg object-cover" />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100">
-                          <BookOpen className="h-5 w-5 text-indigo-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100">
+                          <BookOpen className="h-5 w-5 text-emerald-600" />
                         </div>
                       )}
                       <div className="min-w-0">
@@ -106,18 +106,18 @@ export function LibraryView() {
                     </div>
                   </summary>
                   <div className="border-t p-5">
-                    <Button size="sm" className="mb-4 gap-2 bg-indigo-600" onClick={() => router.push(`/learn/${course.courseId}`)}>
+                    <Button size="sm" className="mb-4 gap-2 bg-emerald-600" onClick={() => router.push(`/learn/${course.courseId}`)}>
                       <BookOpen className="h-4 w-4" /> {t("library.continueCourse")}
                     </Button>
                     <div className="space-y-5">
                       {course.modules.map((module) => (
                         <div key={module.id}>
-                          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-indigo-500">{module.title}</p>
+                          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-emerald-500">{module.title}</p>
                           <div className="space-y-2">
                             {module.lessons.map((lesson) => (
                               <div key={lesson.id} className="rounded-lg border p-3">
                                 <button
-                                  className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:text-indigo-700"
+                                  className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:text-emerald-700"
                                   onClick={() => router.push(`/learn/${course.courseId}`)}
                                 >
                                   <span>{lesson.title}</span>
@@ -134,7 +134,7 @@ export function LibraryView() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         download
-                                        className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-indigo-700"
+                                        className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1.5 text-xs font-medium hover:bg-emerald-50 hover:text-emerald-700"
                                       >
                                         <FileText className="h-3.5 w-3.5" /> {m.name} <Download className="h-3 w-3" />
                                       </a>

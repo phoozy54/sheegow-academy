@@ -38,7 +38,7 @@ const VALUES = [
     icon: Globe2,
     title: "Accessible to all",
     desc: "Quality English education should reach every learner around the world who wants to learn English — no matter where you start.",
-    color: "from-indigo-500 to-indigo-600",
+    color: "from-emerald-500 to-emerald-600",
   },
   {
     icon: GraduationCap,
@@ -88,7 +88,7 @@ export function AboutView() {
           <div className="mx-auto max-w-3xl text-center">
             <Badge
               variant="outline"
-              className="mb-5 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+              className="mb-5 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
             >
               <Sparkles className="h-3 w-3" /> {t("about.eyebrow")}
             </Badge>
@@ -103,7 +103,7 @@ export function AboutView() {
               <Button
                 size="lg"
                 onClick={() => router.push("/courses")}
-                className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
+                className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700 sm:w-auto"
               >
                 {t("about.exploreCourses")}
                 <ArrowRight className="h-4 w-4" />
@@ -125,7 +125,7 @@ export function AboutView() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="card-lift relative overflow-hidden p-8">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30">
+            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30">
               <Target className="h-6 w-6" />
             </div>
             <h2 className="mb-3 text-xl font-bold text-foreground">{t("about.mission")}</h2>
@@ -147,7 +147,7 @@ export function AboutView() {
       </section>
 
       {/* ─── STORY ─────────────────────────────────────── */}
-      <section className="bg-gradient-to-b from-indigo-50/40 to-background py-16 lg:py-24">
+      <section className="bg-gradient-to-b from-emerald-50/40 to-background py-16 lg:py-24">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <Badge
             variant="outline"
@@ -227,7 +227,7 @@ export function AboutView() {
       </section>
 
       {/* ─── FOUNDER / GENERAL MANAGER ──────────────────── */}
-      <section className="bg-gradient-to-b from-indigo-50/40 to-background py-16 lg:py-24">
+      <section className="bg-gradient-to-b from-emerald-50/40 to-background py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <Badge
@@ -244,21 +244,21 @@ export function AboutView() {
             </p>
           </div>
 
-          <Card className="card-lift overflow-hidden border-indigo-100 bg-gradient-to-br from-white via-indigo-50/40 to-amber-50/50 p-0">
+          <Card className="card-lift overflow-hidden border-emerald-100 bg-gradient-to-br from-white via-emerald-50/40 to-amber-50/50 p-0">
             <div className="grid gap-0 lg:grid-cols-[auto,1fr]">
-              <div className="flex items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 p-10 lg:p-14">
+              <div className="flex items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-700 p-10 lg:p-14">
                 <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white/30 text-3xl font-extrabold text-white sm:h-36 sm:w-36 sm:text-4xl">
                   CS
                 </div>
               </div>
               <div className="p-6 sm:p-10">
-                <Badge className="mb-3 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                <Badge className="mb-3 bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
                   {t("about.founderBadge")}
                 </Badge>
                 <h3 className="text-2xl font-extrabold tracking-tight text-foreground">
                   Ciise Mohamed Sheeq (SHEEGOW)
                 </h3>
-                <p className="mt-1 text-sm font-semibold text-indigo-600">
+                <p className="mt-1 text-sm font-semibold text-emerald-600">
                   {t("about.founderSpecialty")}
                 </p>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -285,9 +285,9 @@ export function AboutView() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-center gap-2 rounded-xl border border-indigo-100 bg-white/80 px-3 py-2.5 text-xs font-semibold text-foreground"
+                      className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-white/80 px-3 py-2.5 text-xs font-semibold text-foreground"
                     >
-                      <item.icon className="h-4 w-4 shrink-0 text-indigo-600" />
+                      <item.icon className="h-4 w-4 shrink-0 text-emerald-600" />
                       {item.label}
                     </div>
                   ))}
@@ -299,12 +299,12 @@ export function AboutView() {
       </section>
 
       {/* ─── TEACHERS ───────────────────────────────────── */}
-      <section className="bg-gradient-to-b from-background to-indigo-50/40 py-16 lg:py-24">
+      <section className="bg-gradient-to-b from-background to-emerald-50/40 py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <Badge
               variant="outline"
-              className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+              className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
             >
               <GraduationCap className="h-3 w-3" /> {t("about.teacherEyebrow")}
             </Badge>
@@ -318,7 +318,7 @@ export function AboutView() {
 
           <div className="mx-auto max-w-2xl">
             <Card className="card-lift flex flex-col overflow-hidden p-0 sm:flex-row">
-              <div className="flex min-h-40 items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 sm:w-56">
+              <div className="flex min-h-40 items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-700 sm:w-56">
                 <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white/30 text-2xl font-extrabold text-white">
                   CS
                 </div>
@@ -326,12 +326,12 @@ export function AboutView() {
               <div className="flex flex-1 flex-col p-6">
                 <Badge
                   variant="outline"
-                  className="mb-3 w-fit border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700"
+                  className="mb-3 w-fit border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-700"
                 >
                   {t("about.founderTeacherBadge")}
                 </Badge>
                 <h3 className="text-lg font-bold text-foreground">{TEACHER.name}</h3>
-                <p className="mt-1 text-xs font-semibold text-indigo-600">
+                <p className="mt-1 text-xs font-semibold text-emerald-600">
                   {TEACHER.specialty}
                 </p>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
@@ -353,7 +353,7 @@ export function AboutView() {
 
       {/* ─── CTA ──────────────────────────────────────── */}
       <section className="px-4 pb-16 sm:px-6 lg:px-8 lg:pb-24">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 p-8 text-center shadow-2xl shadow-indigo-500/30 sm:p-12 lg:p-16">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 p-8 text-center shadow-2xl shadow-emerald-500/30 sm:p-12 lg:p-16">
           <div className="hero-mesh absolute inset-0 opacity-40" />
           <div className="relative">
             <Badge
@@ -365,7 +365,7 @@ export function AboutView() {
             <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
               {t("about.ctaTitle")}
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-indigo-100">
+            <p className="mx-auto mt-4 max-w-xl text-emerald-100">
               {t("about.ctaDesc")}
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -374,7 +374,7 @@ export function AboutView() {
                 onClick={() =>
                   user ? router.push("/courses") : openAuthModal("register")
                 }
-                className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
+                className="w-full gap-2 bg-white text-emerald-700 shadow-lg hover:bg-emerald-50 sm:w-auto"
               >
                 {user ? t("cta.browseCourses") : t("cta.createAccount")}
                 <ArrowRight className="h-4 w-4" />
@@ -397,7 +397,7 @@ export function AboutView() {
         <div className="text-center">
           <Badge
             variant="outline"
-            className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+            className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
           >
             <ShieldCheck className="h-3 w-3" /> {t("about.privacyEyebrow")}
           </Badge>
@@ -465,7 +465,7 @@ export function AboutView() {
               personal data at any time by contacting us at{" "}
               <a
                 href="mailto:info@sheegowacademy.com"
-                className="font-medium text-indigo-600 hover:underline"
+                className="font-medium text-emerald-600 hover:underline"
               >
                 info@sheegowacademy.com
               </a>

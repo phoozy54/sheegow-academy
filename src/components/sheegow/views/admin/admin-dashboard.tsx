@@ -48,7 +48,7 @@ import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
 const PIE_COLORS = [
-  "#6366f1",
+  "#10b981",
   "#f59e0b",
   "#10b981",
   "#8b5cf6",
@@ -70,7 +70,7 @@ const STAT_CARDS: {
     key: "totalStudents",
     labelKey: "admin.dashboard.totalStudents",
     icon: Users,
-    gradient: "from-indigo-500 to-indigo-600",
+    gradient: "from-emerald-500 to-emerald-600",
   },
   {
     key: "totalCourses",
@@ -221,7 +221,7 @@ export function AdminDashboard() {
             </div>
             <Badge
               variant="outline"
-              className="shrink-0 border-indigo-200 bg-indigo-50 text-indigo-700"
+              className="shrink-0 border-emerald-200 bg-emerald-50 text-emerald-700"
             >
               <DollarSign className="h-3 w-3" />
               {formatPrice(stats.totalRevenue)}
@@ -238,7 +238,7 @@ export function AdminDashboard() {
                 >
                   <defs>
                     <linearGradient id="barIndigo" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="0%" stopColor="#10b981" />
                       <stop offset="100%" stopColor="#4338ca" />
                     </linearGradient>
                   </defs>
@@ -445,7 +445,7 @@ export function AdminDashboard() {
                       ? "border-red-200 bg-red-50 text-red-700"
                       : lc.status === "ended"
                         ? "border-muted bg-muted text-muted-foreground"
-                        : "border-indigo-200 bg-indigo-50 text-indigo-700"
+                        : "border-emerald-200 bg-emerald-50 text-emerald-700"
                   )}
                 >
                   {lc.status}

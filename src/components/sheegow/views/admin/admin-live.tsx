@@ -232,7 +232,7 @@ export function AdminLive() {
         </p>
         <Button
           onClick={openCreate}
-          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
+          className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           {t("admin.live.scheduleLiveClass")}
@@ -414,7 +414,7 @@ export function AdminLive() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
               >
                 {saving
                   ? editingId
@@ -484,7 +484,7 @@ function LiveClassCard({
 
       <div className="mb-4 grid grid-cols-2 gap-3 text-xs">
         <div className="flex items-center gap-2">
-          <Calendar className="h-3.5 w-3.5 text-indigo-500" />
+          <Calendar className="h-3.5 w-3.5 text-emerald-500" />
           <div>
             <p className="font-medium text-foreground">
               {formatDateTime(c.scheduledAt)}
@@ -506,7 +506,7 @@ function LiveClassCard({
           <div className="flex min-w-0 items-center gap-2">
             <Avatar className="h-7 w-7">
               <AvatarImage src={c.teacher.profilePicture || undefined} />
-              <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
+              <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
                 {c.teacher.fullName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -612,7 +612,7 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <Badge
       variant="outline"
-      className="border-indigo-200 bg-indigo-50 text-indigo-700"
+      className="border-emerald-200 bg-emerald-50 text-emerald-700"
     >
       <Radio className="h-3 w-3" />
       {t("admin.live.scheduledBadge")}

@@ -49,7 +49,7 @@ export function WishlistView() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
           <p className="text-sm">{t("wishlist.loading")}</p>
         </div>
       </div>
@@ -60,8 +60,8 @@ export function WishlistView() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
-            <LogIn className="h-7 w-7 text-indigo-600" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+            <LogIn className="h-7 w-7 text-emerald-600" />
           </div>
           <h2 className="mb-2 text-xl font-bold">{t("wishlist.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
@@ -69,7 +69,7 @@ export function WishlistView() {
           </p>
           <Button
             onClick={() => openAuthModal("login")}
-            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
           >
             Log in
           </Button>
@@ -165,7 +165,7 @@ function EmptyWishlist({ onBrowse }: { onBrowse: () => void }) {
       </p>
       <Button
         onClick={onBrowse}
-        className="gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+        className="gap-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
       >
         <Sparkles className="h-4 w-4" />
         {t("cta.browseCourses")}

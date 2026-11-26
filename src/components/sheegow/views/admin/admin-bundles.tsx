@@ -277,7 +277,7 @@ export function AdminBundles() {
         </Card>
         <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 sm:h-10 sm:w-10">
               <Check className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
@@ -352,7 +352,7 @@ export function AdminBundles() {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-indigo-200">
+                              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-emerald-200">
                                 <Package className="h-4 w-4 text-amber-500" />
                               </div>
                             )}

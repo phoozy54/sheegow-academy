@@ -66,7 +66,7 @@ export function ReferralBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="relative z-30 border-b border-indigo-200 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white"
+      className="relative z-30 border-b border-emerald-200 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white"
     >
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 py-3 sm:flex-row sm:justify-center sm:py-2.5 sm:pr-12">
         <div className="flex items-center gap-2.5 text-center sm:text-left">
@@ -81,7 +81,7 @@ export function ReferralBanner() {
           <Button
             size="sm"
             onClick={() => openAuthModal("register")}
-            className="gap-1.5 bg-white text-indigo-700 shadow-sm hover:bg-indigo-50"
+            className="gap-1.5 bg-white text-emerald-700 shadow-sm hover:bg-emerald-50"
           >
             <Sparkles className="h-3.5 w-3.5" />
             {t("referral.bannerCta")}

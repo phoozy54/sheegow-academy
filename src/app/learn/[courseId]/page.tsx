@@ -16,7 +16,7 @@ const CoursePlayerView = dynamic(
   {
     loading: () => (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <span className="h-7 w-7 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" />
+        <span className="h-7 w-7 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
       </div>
     ),
     ssr: false,
@@ -40,7 +40,7 @@ export default function LearnPage() {
     <AppShell showFooter={false}>
       {authLoading ? (
         <div className="flex min-h-[60vh] items-center justify-center">
-          <span className="h-7 w-7 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" />
+          <span className="h-7 w-7 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
         </div>
       ) : user ? (
         <CoursePlayerView courseId={courseId} />

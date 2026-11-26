@@ -50,7 +50,7 @@ export function KeywordLanding({
         <p className="mt-6 text-sm text-muted-foreground">
           <Link
             href="/courses"
-            className="font-semibold text-indigo-600 hover:underline"
+            className="font-semibold text-emerald-600 hover:underline"
           >
             See every live English course →
           </Link>

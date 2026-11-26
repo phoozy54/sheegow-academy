@@ -133,7 +133,7 @@ export function AdminTrialRequests() {
             variant={filter === f ? "default" : "outline"}
             size="sm"
             onClick={() => setFilter(f)}
-            className={cn(filter === f && "bg-indigo-600 hover:bg-indigo-700")}
+            className={cn(filter === f && "bg-emerald-600 hover:bg-emerald-700")}
           >
             {f === "pending" ? t("admin.trial.filterPending", { count: pendingCount }) : t("admin.trial.filterAll")}
           </Button>
@@ -173,7 +173,7 @@ export function AdminTrialRequests() {
                   <div className="flex min-w-0 items-start gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={student?.profilePicture || undefined} />
-                      <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
+                      <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
                         {(student?.fullName || "ST")
                           .slice(0, 2)
                           .toUpperCase()}
@@ -199,7 +199,7 @@ export function AdminTrialRequests() {
 
                 {/* Class info */}
                 <div className="mt-3 flex items-start gap-2 rounded-lg border bg-muted/30 p-3">
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                   <div>
                     <p className="text-sm font-medium text-foreground">
                       {r.liveClass?.title || t("admin.trial.liveClass")}
