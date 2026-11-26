@@ -264,7 +264,7 @@ export function AdminBundles() {
         </Card>
         <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 sm:h-10 sm:w-10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10">
               <PackageCheck className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
@@ -277,7 +277,7 @@ export function AdminBundles() {
         </Card>
         <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 sm:h-10 sm:w-10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10">
               <Check className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
@@ -352,7 +352,7 @@ export function AdminBundles() {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-emerald-200">
+                              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-indigo-200">
                                 <Package className="h-4 w-4 text-amber-500" />
                               </div>
                             )}
@@ -383,7 +383,7 @@ export function AdminBundles() {
                       </TableCell>
                       <TableCell className="hidden text-xs md:table-cell">
                         {hasDiscount ? (
-                          <span className="font-semibold text-emerald-700">
+                          <span className="font-semibold text-indigo-700">
                             -{formatPrice(b.savings)}
                           </span>
                         ) : (
@@ -398,7 +398,7 @@ export function AdminBundles() {
                           variant="outline"
                           className={
                             b.isActive
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                               : "border-muted-foreground/30 bg-muted text-muted-foreground"
                           }
                         >
@@ -672,7 +672,7 @@ export function AdminBundles() {
                   <span className="text-muted-foreground">{t("admin.bundles.bundlePrice")}</span>
                   <span className="font-medium">{formatPrice(form.price)}</span>
                 </div>
-                <div className="mt-1 flex justify-between text-emerald-700">
+                <div className="mt-1 flex justify-between text-indigo-700">
                   <span className="inline-flex items-center gap-1">
                     <PackageCheck className="h-3.5 w-3.5" />
                     {t("admin.bundles.studentSavings")}

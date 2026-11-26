@@ -67,11 +67,11 @@ function roleBadgeClass(role: string): string {
     case "super_admin":
       return "bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-500/20 dark:text-violet-300 dark:border-violet-500/30";
     case "admin":
-      return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30";
+      return "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30";
     case "teacher":
       return "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30";
     default:
-      return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30";
+      return "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30";
   }
 }
 
@@ -84,7 +84,7 @@ function CourseResultCard({ course }: { course: SearchCourseResult }) {
   return (
     <Link
       href={course.href}
-      className="group flex gap-3 rounded-xl border bg-card p-3 transition-all hover:border-emerald-300 hover:shadow-sm sm:p-4"
+      className="group flex gap-3 rounded-xl border bg-card p-3 transition-all hover:border-indigo-300 hover:shadow-sm sm:p-4"
     >
       <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-20 sm:w-32">
         {course.image ? (
@@ -95,14 +95,14 @@ function CourseResultCard({ course }: { course: SearchCourseResult }) {
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-500">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-500">
             <BookOpen className="h-6 w-6" />
           </div>
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="mb-1 flex items-start justify-between gap-2">
-          <h3 className="line-clamp-2 text-sm font-semibold leading-tight transition-colors group-hover:text-emerald-600 sm:text-base">
+          <h3 className="line-clamp-2 text-sm font-semibold leading-tight transition-colors group-hover:text-indigo-600 sm:text-base">
             {course.title}
           </h3>
           <Badge
@@ -118,7 +118,7 @@ function CourseResultCard({ course }: { course: SearchCourseResult }) {
         <p className="line-clamp-2 text-xs text-muted-foreground sm:text-sm">
           {course.description}
         </p>
-        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-medium text-emerald-600">
+        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-medium text-indigo-600">
           {t("search.viewCourse")}
         </span>
       </div>
@@ -161,7 +161,7 @@ function UserResultCard({ user }: { user: SearchUserResult }) {
     >
       <Avatar className="h-12 w-12 shrink-0 sm:h-14 sm:w-14">
         <AvatarImage src={user.profilePicture || undefined} />
-        <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
+        <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
           {user.fullName.slice(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
@@ -339,7 +339,7 @@ export function SearchView() {
             <Button
               type="submit"
               size="sm"
-              className="h-8 rounded-full bg-emerald-600 px-4 hover:bg-emerald-700"
+              className="h-8 rounded-full bg-indigo-600 px-4 hover:bg-indigo-700"
             >
               Search
             </Button>
@@ -422,7 +422,7 @@ function EmptyHint() {
   const t = useT();
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed bg-muted/30 p-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-emerald-500 shadow-sm">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-indigo-500 shadow-sm">
         <SearchIcon className="h-5 w-5" />
       </div>
       <div>

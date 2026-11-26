@@ -164,8 +164,8 @@ export function CourseCard({
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
-            <Play className="h-10 w-10 text-emerald-400" />
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
+            <Play className="h-10 w-10 text-indigo-400" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -221,7 +221,7 @@ export function CourseCard({
 
         <Link
           href={href}
-          className="mb-2 line-clamp-2 text-left text-base font-bold leading-snug transition-colors hover:text-emerald-600"
+          className="mb-2 line-clamp-2 text-left text-base font-bold leading-snug transition-colors hover:text-indigo-600"
         >
           {course.title}
         </Link>
@@ -236,7 +236,7 @@ export function CourseCard({
             <div className="flex items-center gap-2">
               <Avatar className="h-7 w-7">
                 <AvatarImage src={course.teacher.profilePicture || undefined} />
-                <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
+                <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
                   {course.teacher.fullName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -266,7 +266,7 @@ export function CourseCard({
           </div>
         )}
         {isManager && (
-          <p className="mb-3 text-xs font-medium text-emerald-600">
+          <p className="mb-3 text-xs font-medium text-indigo-600">
             Admin/teacher access — no enrollment required
           </p>
         )}
@@ -304,8 +304,8 @@ export function CourseCard({
               className={
                 "flex h-8 items-center gap-1 rounded-md border px-2 text-[11px] font-semibold transition-colors " +
                 (inCompare
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  : "border-border bg-background text-muted-foreground hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700")
+                  ? "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                  : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700")
               }
             >
               <GitCompare className="h-3.5 w-3.5" />
@@ -320,7 +320,7 @@ export function CourseCard({
                     ? () => router.push(`/learn/${course.id}`)
                     : handleEnroll
               }
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-indigo-600 hover:bg-indigo-700"
             >
               {isManager ? "Open course" : canContinue ? "Continue" : "Enroll"}
             </Button>

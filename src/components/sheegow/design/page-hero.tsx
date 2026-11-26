@@ -10,7 +10,7 @@ export function PageHero({
   title,
   lead,
   icon: Icon,
-  tone = "emerald",
+  tone = "indigo",
   children,
 }: {
   eyebrow?: string;
@@ -21,7 +21,7 @@ export function PageHero({
   children?: ReactNode;
 }) {
   return (
-    <section className="relative overflow-hidden border-b bg-gradient-to-b from-emerald-50/70 to-background dark:from-emerald-950/30">
+    <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/70 to-background dark:from-indigo-950/30">
       <div className="hero-mesh absolute inset-0 opacity-70" />
       <div className="relative mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         {eyebrow ? (

@@ -37,13 +37,13 @@ export default function VerifyCertificatePage() {
   }, [code]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/40 to-amber-50/30 px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-amber-50/30 px-4 py-10">
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-lg">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg">
             <GraduationCap className="h-7 w-7" />
           </div>
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-600">
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-indigo-600">
             SHEEGOW ACADEMY
           </p>
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
@@ -62,16 +62,16 @@ export default function VerifyCertificatePage() {
             </p>
           </Card>
         ) : (
-          <Card className="overflow-hidden border-2 border-emerald-100 shadow-xl">
-            <div className="border-b bg-gradient-to-br from-white via-emerald-50 to-amber-50 px-8 py-10 text-center">
+          <Card className="overflow-hidden border-2 border-indigo-100 shadow-xl">
+            <div className="border-b bg-gradient-to-br from-white via-indigo-50 to-amber-50 px-8 py-10 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg">
                 <Award className="h-8 w-8" />
               </div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-emerald-500">
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-indigo-500">
                 Certificate of Completion
               </p>
               <p className="mt-4 text-sm text-muted-foreground">This certifies that</p>
-              <p className="mt-1 text-2xl font-extrabold text-emerald-800">{data.holderName}</p>
+              <p className="mt-1 text-2xl font-extrabold text-indigo-800">{data.holderName}</p>
               <p className="mt-4 text-sm text-muted-foreground">
                 has successfully completed the course
               </p>
@@ -99,7 +99,7 @@ export default function VerifyCertificatePage() {
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Status</p>
                 <div className="mt-1">
                   {data.valid ? (
-                    <Badge className="gap-1 bg-emerald-600 text-white">
+                    <Badge className="gap-1 bg-indigo-600 text-white">
                       <CheckCircle2 className="h-3.5 w-3.5" /> Valid
                     </Badge>
                   ) : (

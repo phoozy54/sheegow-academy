@@ -356,7 +356,7 @@ export function DiscussionPanel({
             <Button
               onClick={() => void submit()}
               disabled={submitting || !title.trim() || !body.trim()}
-              className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+              className="gap-2 bg-indigo-600 hover:bg-indigo-700"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -495,7 +495,7 @@ function ThreadCard({
       className={cn(
         "overflow-hidden border-l-4 p-0",
         thread.isResolved
-          ? "border-l-emerald-400"
+          ? "border-l-indigo-400"
           : "border-l-amber-400"
       )}
     >
@@ -513,7 +513,7 @@ function ThreadCard({
               {thread.isResolved ? (
                 <Badge
                   variant="outline"
-                  className="gap-1 border-emerald-200 bg-emerald-50 text-emerald-700"
+                  className="gap-1 border-indigo-200 bg-indigo-50 text-indigo-700"
                 >
                   <CheckCircle2 className="h-3 w-3" /> Resolved
                 </Badge>
@@ -553,7 +553,7 @@ function ThreadCard({
             <>
               <Avatar className="h-6 w-6">
                 <AvatarImage src={thread.author.profilePicture || undefined} />
-                <AvatarFallback className="bg-emerald-100 text-[9px] font-bold text-emerald-700">
+                <AvatarFallback className="bg-indigo-100 text-[9px] font-bold text-indigo-700">
                   {thread.author.fullName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -618,7 +618,7 @@ function ThreadCard({
                     size="sm"
                     onClick={onSendReply}
                     disabled={replying || !replyDraft.trim()}
-                    className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                    className="gap-2 bg-indigo-600 hover:bg-indigo-700"
                   >
                     {replying ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -652,7 +652,7 @@ function ReplyRow({ reply }: { reply: DiscussionReply }) {
             "text-[10px] font-bold",
             isStaff
               ? "bg-amber-100 text-amber-700"
-              : "bg-emerald-100 text-emerald-700"
+              : "bg-indigo-100 text-indigo-700"
           )}
         >
           {(reply.author?.fullName || "?").slice(0, 2).toUpperCase()}

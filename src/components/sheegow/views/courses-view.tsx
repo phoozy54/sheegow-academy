@@ -107,12 +107,12 @@ export function CoursesView() {
   return (
     <div className="bg-background">
       {/* ─── HEADER ───────────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-emerald-50/60 to-background">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/60 to-background">
         <div className="hero-mesh absolute inset-0 opacity-70" />
         <div className={`relative mx-auto max-w-7xl py-12 lg:py-16 ${padClass}`}>
           <Badge
             variant="outline"
-            className="mb-4 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+            className="mb-4 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
           >
             {mode === "overview" ? (
               <LayoutDashboard className="h-3 w-3" />
@@ -150,7 +150,7 @@ export function CoursesView() {
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
                 mode === "overview"
-                  ? "bg-emerald-600 text-white shadow-sm"
+                  ? "bg-indigo-600 text-white shadow-sm"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
@@ -162,7 +162,7 @@ export function CoursesView() {
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
                 mode === "catalog"
-                  ? "bg-emerald-600 text-white shadow-sm"
+                  ? "bg-indigo-600 text-white shadow-sm"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
@@ -224,8 +224,8 @@ export function CoursesView() {
                   className={cn(
                     "rounded-full border px-4 py-1.5 text-sm font-medium transition-all",
                     active
-                      ? "border-transparent bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/30"
-                      : "border-border bg-background text-muted-foreground hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                      ? "border-transparent bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/30"
+                      : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
                   )}
                 >
                   {label}
@@ -250,12 +250,12 @@ export function CoursesView() {
                 {total === 1 ? t("courses.courseSingular") : t("courses.coursePlural")} {t("courses.found")}
                 {level !== "All" && (
                   <>
-                    {" "}{t("courses.inLabel")} <span className="font-semibold text-emerald-600">{level}</span>
+                    {" "}{t("courses.inLabel")} <span className="font-semibold text-indigo-600">{level}</span>
                   </>
                 )}
                 {debouncedSearch && (
                   <>
-                    {" "}{t("courses.matching")} &ldquo;<span className="font-semibold text-emerald-600">{debouncedSearch}</span>&rdquo;
+                    {" "}{t("courses.matching")} &ldquo;<span className="font-semibold text-indigo-600">{debouncedSearch}</span>&rdquo;
                   </>
                 )}
               </span>
@@ -317,8 +317,8 @@ export function CoursesView() {
                     className={cn(
                       "h-9 min-w-9 rounded-lg px-3 text-sm font-semibold transition-colors",
                       active
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/30"
-                        : "border border-border bg-background text-muted-foreground hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
+                        : "border border-border bg-background text-muted-foreground hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
                     )}
                   >
                     {pageNum}
@@ -344,7 +344,7 @@ export function CoursesView() {
 
       {/* ─── CTA ──────────────────────────────────────────── */}
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-3xl border bg-gradient-to-br from-emerald-50 to-amber-50/50 p-6 text-center sm:p-10">
+        <div className="mx-auto max-w-7xl rounded-3xl border bg-gradient-to-br from-indigo-50 to-amber-50/50 p-6 text-center sm:p-10">
           <h3 className="text-xl font-bold text-foreground sm:text-2xl">
             {t("courses.cantFindTitle")}
           </h3>
@@ -353,7 +353,7 @@ export function CoursesView() {
           </p>
           <Button
             onClick={() => router.push("/contact")}
-            className="mt-5 gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            className="mt-5 gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
           >
             {t("courses.talkToAdvisor")}
           </Button>
@@ -390,8 +390,8 @@ function EmptyState({ onReset }: { onReset: () => void }) {
   const t = useT();
   return (
     <div className="rounded-2xl border border-dashed bg-muted/30 p-12 text-center">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-        <Search className="h-8 w-8 text-emerald-400" />
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
+        <Search className="h-8 w-8 text-indigo-400" />
       </div>
       <h3 className="text-lg font-bold text-foreground">{t("courses.noCoursesTitle")}</h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">

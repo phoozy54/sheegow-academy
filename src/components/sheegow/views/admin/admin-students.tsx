@@ -315,8 +315,8 @@ export function AdminStudents() {
                                 : u.role === "admin"
                                   ? "bg-amber-100 text-amber-700"
                                   : u.role === "teacher"
-                                    ? "bg-emerald-100 text-emerald-700"
-                                    : "bg-emerald-100 text-emerald-700"
+                                    ? "bg-indigo-100 text-indigo-700"
+                                    : "bg-indigo-100 text-indigo-700"
                             )}
                           >
                             {u.fullName.slice(0, 2).toUpperCase()}
@@ -326,7 +326,7 @@ export function AdminStudents() {
                           <p className="truncate font-semibold text-foreground">
                             {u.fullName}
                             {isSelf && (
-                              <span className="ml-2 text-xs font-medium text-emerald-600">
+                              <span className="ml-2 text-xs font-medium text-indigo-600">
                                 {t("admin.students.you")}
                               </span>
                             )}
@@ -335,7 +335,7 @@ export function AdminStudents() {
                             {u.email}
                           </p>
                           {u.username && (
-                            <p className="truncate text-xs font-medium text-emerald-600">
+                            <p className="truncate text-xs font-medium text-indigo-600">
                               @{u.username}
                             </p>
                           )}
@@ -355,7 +355,7 @@ export function AdminStudents() {
                             : u.role === "admin"
                               ? "border-amber-200 bg-amber-50 text-amber-700"
                               : u.role === "teacher"
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                                 : "border-muted bg-muted text-muted-foreground"
                         )}
                       >
@@ -378,14 +378,14 @@ export function AdminStudents() {
                         variant="outline"
                         className={
                           u.isActive
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                             : "border-red-200 bg-red-50 text-red-700"
                         }
                       >
                         <span
                           className={cn(
                             "mr-1 h-1.5 w-1.5 rounded-full",
-                            u.isActive ? "bg-emerald-500" : "bg-red-500"
+                            u.isActive ? "bg-indigo-500" : "bg-red-500"
                           )}
                         />
                         {u.isActive ? t("admin.students.active") : t("admin.students.inactive")}
@@ -543,7 +543,7 @@ export function AdminStudents() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
               >
                 {saving ? t("admin.students.saving") : t("admin.students.saveChanges")}
               </Button>

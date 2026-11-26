@@ -212,7 +212,7 @@ export function AdminTeachers() {
         </p>
         <Button
           onClick={openAdd}
-          className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700 sm:w-auto"
+          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           {t("admin.teachers.addTeacher")}
@@ -247,7 +247,7 @@ export function AdminTeachers() {
                 <div className="mb-3 flex items-start gap-3">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={teacher.profilePicture || undefined} />
-                    <AvatarFallback className="bg-emerald-100 text-sm font-bold text-emerald-700">
+                    <AvatarFallback className="bg-indigo-100 text-sm font-bold text-indigo-700">
                       {teacher.fullName.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -266,7 +266,7 @@ export function AdminTeachers() {
                     variant="outline"
                     className={
                       teacher.isActive
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                         : "border-muted bg-muted text-muted-foreground"
                     }
                   >
@@ -299,8 +299,8 @@ export function AdminTeachers() {
 
                 <div className="mb-4 flex items-center justify-between border-t pt-3">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
-                      <BookOpen className="h-4 w-4 text-emerald-600" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50">
+                      <BookOpen className="h-4 w-4 text-indigo-600" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">
@@ -313,7 +313,7 @@ export function AdminTeachers() {
                   </div>
                   <button
                     onClick={() => setViewing(teacher)}
-                    className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:underline"
+                    className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline"
                   >
                     <UserCircle className="h-3.5 w-3.5" />
                     {t("admin.teachers.viewProfile")}
@@ -443,7 +443,7 @@ export function AdminTeachers() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
               >
                 {saving ? t("admin.teachers.saving") : t("admin.teachers.saveChanges")}
               </Button>
@@ -466,7 +466,7 @@ export function AdminTeachers() {
               {t("admin.teachers.addDesc")}
             </DialogDescription>
           </DialogHeader>
-          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+          <div className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-800">
             {t("admin.teachers.addInfoNote")}
           </div>
           <form onSubmit={handleAddSubmit} className="space-y-3 sm:space-y-4">
@@ -578,7 +578,7 @@ export function AdminTeachers() {
               <Button
                 type="submit"
                 disabled={adding}
-                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
               >
                 {adding ? t("admin.teachers.creating") : t("admin.teachers.createTeacher")}
               </Button>
@@ -603,7 +603,7 @@ export function AdminTeachers() {
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={viewing.profilePicture || undefined} />
-                  <AvatarFallback className="bg-emerald-100 text-lg font-bold text-emerald-700">
+                  <AvatarFallback className="bg-indigo-100 text-lg font-bold text-indigo-700">
                     {viewing.fullName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>

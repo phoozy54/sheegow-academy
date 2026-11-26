@@ -22,7 +22,7 @@ import { useT } from "@/lib/i18n";
 function statusBadge(status: string, t: (key: string) => string) {
   if (status === "approved") {
     return (
-      <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
+      <Badge className="border-indigo-200 bg-indigo-50 text-indigo-700">
         <CheckCircle2 className="mr-1 h-3 w-3" /> {t("refunds.approvedBadge")}
       </Badge>
     );
@@ -99,7 +99,7 @@ export function StudentRefunds() {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <Card className="p-3 sm:p-4">
-          <RotateCcw className="mb-2 h-5 w-5 text-emerald-600" />
+          <RotateCcw className="mb-2 h-5 w-5 text-indigo-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary.total}
           </p>
@@ -113,7 +113,7 @@ export function StudentRefunds() {
           <p className="mt-1 text-xs text-muted-foreground">{t("refunds.pending")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
-          <CheckCircle2 className="mb-2 h-5 w-5 text-emerald-600" />
+          <CheckCircle2 className="mb-2 h-5 w-5 text-indigo-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {summary.approved}
           </p>
@@ -220,7 +220,7 @@ export function StudentRefunds() {
                             className={cn(
                               "mt-1 line-clamp-2 text-[11px] italic",
                               r.status === "approved"
-                                ? "text-emerald-700"
+                                ? "text-indigo-700"
                                 : "text-rose-700"
                             )}
                           >

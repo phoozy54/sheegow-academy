@@ -127,7 +127,7 @@ export function AnnouncementsPanel({
         <span
           className={cn(
             "flex h-9 w-9 items-center justify-center rounded-lg",
-            "bg-emerald-100 text-emerald-600"
+            "bg-indigo-100 text-indigo-600"
           )}
         >
           <Megaphone className="h-4 w-4" />
@@ -188,7 +188,7 @@ export function AnnouncementsPanel({
         {header}
 
         {canManage && showForm && (
-          <div className="mt-4 space-y-3 rounded-lg border border-emerald-100 bg-emerald-50/40 p-4">
+          <div className="mt-4 space-y-3 rounded-lg border border-indigo-100 bg-indigo-50/40 p-4">
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -210,7 +210,7 @@ export function AnnouncementsPanel({
               <Button
                 onClick={() => void submit()}
                 disabled={submitting || !title.trim() || !body.trim()}
-                className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                className="gap-2 bg-indigo-600 hover:bg-indigo-700"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -279,7 +279,7 @@ function AnnouncementCard({
   const t = useT();
   const author = announcement.author;
   return (
-    <Card className="overflow-hidden border-l-4 border-l-emerald-300 p-0">
+    <Card className="overflow-hidden border-l-4 border-l-indigo-300 p-0">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -307,7 +307,7 @@ function AnnouncementCard({
             <>
               <Avatar className="h-6 w-6">
                 <AvatarImage src={author.profilePicture || undefined} />
-                <AvatarFallback className="bg-emerald-100 text-[9px] font-bold text-emerald-700">
+                <AvatarFallback className="bg-indigo-100 text-[9px] font-bold text-indigo-700">
                   {author.fullName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>

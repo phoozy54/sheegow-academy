@@ -134,14 +134,14 @@ export function Navbar() {
                     isTablet ? "px-2.5 text-[13px]" : "px-4 text-sm"
                   } ${
                     active
-                      ? "text-emerald-600"
+                      ? "text-indigo-600"
                       : "text-muted-foreground hover:text-foreground"
                   }`
                 }
                 >
                   {t(link.labelKey)}
                   {active && (
-                    <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-emerald-500" />
+                    <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-indigo-500" />
                   )}
                 </Link>
               );
@@ -169,7 +169,7 @@ export function Navbar() {
                   >
                     <Avatar className="h-8 w-8 border border-border">
                       <AvatarImage src={user.profilePicture || undefined} />
-                      <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
+                      <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
                         {user.fullName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -230,7 +230,7 @@ export function Navbar() {
                 </Button>
                 <Button
                   onClick={() => openAuthModal("register")}
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-sm shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-sm shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
                 >
                   {t("nav.getStarted")}
                 </Button>
@@ -265,7 +265,7 @@ export function Navbar() {
                         aria-current={active ? "page" : undefined}
                         className={`rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
                           active
-                            ? "bg-emerald-50 text-emerald-600"
+                            ? "bg-indigo-50 text-indigo-600"
                             : "text-foreground hover:bg-muted"
                         }`}
                       >
@@ -290,7 +290,7 @@ export function Navbar() {
                     <div className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={user.profilePicture || undefined} />
-                        <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
+                        <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
                           {user.fullName.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -368,7 +368,7 @@ export function Navbar() {
                     </SheetClose>
                     <SheetClose asChild>
                       <Button
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600"
+                        className="bg-gradient-to-r from-indigo-500 to-indigo-600"
                         onClick={() => openAuthModal("register")}
                       >
                         {t("nav.getStarted")}

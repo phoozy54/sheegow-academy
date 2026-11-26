@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
   <defs>
-    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981"/>
-      <stop offset="100%" stop-color="#059669"/>
+    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
     </linearGradient>
   </defs>
-  <!-- Rounded square background with emerald gradient -->
-  <rect x="1" y="1" width="28" height="28" rx="7" fill="url(#emeraldGrad)"/>
-  <!-- Graduation cap (mortar board) -->
+  <rect x="1" y="1" width="28" height="28" rx="7" fill="url(#indigoGrad)"/>
   <g fill="#ffffff">
-    <!-- Cap top (diamond shape) -->
     <polygon points="15,8 24,12 15,16 6,12"/>
-    <!-- Cap base -->
     <path d="M10.5,14.2 L10.5,18.5 C10.5,19.5 12.4,20.5 15,20.5 C17.6,20.5 19.5,19.5 19.5,18.5 L19.5,14.2 L15,16.5 Z"/>
-    <!-- Tassel -->
     <line x1="24" y1="12" x2="24" y2="16" stroke="#ffffff" stroke-width="0.8"/>
     <circle cx="24" cy="16.5" r="1" fill="#f59e0b"/>
   </g>

@@ -150,8 +150,8 @@ export default function NotificationsPage() {
     return (
       <AppShell showFooter={false}>
         <div className="mx-auto max-w-md py-16 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-            <LogIn className="h-7 w-7 text-emerald-600" />
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
+            <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
           <h1 className="text-xl font-bold">Log in to see your notifications</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -159,7 +159,7 @@ export default function NotificationsPage() {
             in.
           </p>
           <Button
-            className="mt-4 gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600"
+            className="mt-4 gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600"
             onClick={() => {
               openAuthModal("login");
               router.replace("/");
@@ -299,7 +299,7 @@ function NotificationCard({
       <Card
         className={cn(
           "flex items-start gap-3 p-3 transition-colors sm:p-4",
-          unread ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-500/30 dark:bg-emerald-500/5" : ""
+          unread ? "border-indigo-200 bg-indigo-50/40 dark:border-indigo-500/30 dark:bg-indigo-500/5" : ""
         )}
       >
         <button
@@ -332,7 +332,7 @@ function NotificationCard({
               {unread && (
                 <span
                   aria-hidden
-                  className="h-2 w-2 shrink-0 rounded-full bg-emerald-600"
+                  className="h-2 w-2 shrink-0 rounded-full bg-indigo-600"
                 />
               )}
             </div>
@@ -342,7 +342,7 @@ function NotificationCard({
             <p className="mt-1.5 text-[11px] text-muted-foreground/80">
               {timeAgo(notification.createdAt)}
               {notification.link && (
-                <span className="ml-1 text-emerald-600 dark:text-emerald-400">
+                <span className="ml-1 text-indigo-600 dark:text-indigo-400">
                   · Open
                 </span>
               )}

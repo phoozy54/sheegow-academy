@@ -30,12 +30,12 @@ export function CourseSeoGrid({
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 via-white to-amber-100">
-                  <Sparkles className="h-10 w-10 text-emerald-400" />
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-amber-100">
+                  <Sparkles className="h-10 w-10 text-indigo-400" />
                 </div>
               )}
               <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3">
-                <span className="rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 shadow-sm backdrop-blur">
+                <span className="rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 shadow-sm backdrop-blur">
                   {readable(course.level)}
                 </span>
                 <span className="rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
@@ -49,7 +49,7 @@ export function CourseSeoGrid({
                 <span className="inline-flex items-center gap-1.5"><UserRound className="h-3.5 w-3.5" /> {readable(course.teacher?.fullName) || "Expert teacher"}</span>
               </p>
               <h3 className="mt-3 text-lg font-bold leading-snug text-foreground">
-                <Link href={path} className="hover:text-emerald-600 hover:underline">
+                <Link href={path} className="hover:text-indigo-600 hover:underline">
                   {readable(course.title)}
                 </Link>
               </h3>
@@ -62,7 +62,7 @@ export function CourseSeoGrid({
                 </div>
                 <Link
                   href={path}
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-700"
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
                 >
                   View course <ArrowRight className="h-3.5 w-3.5" />
                 </Link>

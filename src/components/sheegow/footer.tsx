@@ -41,7 +41,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="mt-auto border-t bg-gradient-to-b from-background to-emerald-50/40">
+    <footer className="mt-auto border-t bg-gradient-to-b from-background to-indigo-50/40">
       {/* Newsletter CTA strip */}
       <div className="border-b">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row lg:px-8">
@@ -92,7 +92,7 @@ export function Footer() {
             />
             <Button
               type="submit"
-              className="gap-1.5 bg-emerald-700 text-white hover:bg-emerald-800"
+              className="gap-1.5 bg-indigo-700 text-white hover:bg-indigo-800"
             >
               <Send className="h-4 w-4" /> {t("footer.subscribe")}
             </Button>
@@ -134,14 +134,14 @@ export function Footer() {
                   {l.href ? (
                     <Link
                       href={l.href}
-                      className="text-muted-foreground transition-colors hover:text-emerald-600"
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
                     >
                       {t(l.labelKey)}
                     </Link>
                   ) : (
                     <button
                       onClick={() => openAuthModal("register")}
-                      className="text-muted-foreground transition-colors hover:text-emerald-600"
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
                     >
                       {t(l.labelKey)}
                     </button>
@@ -162,14 +162,14 @@ export function Footer() {
                   {l.href ? (
                     <Link
                       href={l.href}
-                      className="text-muted-foreground transition-colors hover:text-emerald-600"
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
                     >
                       {t(l.labelKey)}
                     </Link>
                   ) : (
                     <button
                       onClick={() => openAuthModal("register")}
-                      className="text-muted-foreground transition-colors hover:text-emerald-600"
+                      className="text-muted-foreground transition-colors hover:text-indigo-600"
                     >
                       {t(l.labelKey)}
                     </button>
@@ -186,36 +186,36 @@ export function Footer() {
             </h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2.5 text-muted-foreground">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
                 <a
                   href="mailto:info@sheegowacademy.com"
-                  className="hover:text-emerald-600"
+                  className="hover:text-indigo-600"
                 >
                   info@sheegowacademy.com
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
                 <a
                   href="tel:+252634085151"
-                  className="hover:text-emerald-600"
+                  className="hover:text-indigo-600"
                 >
                   +252 63 4085151
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
-                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
                 <a
                   href="https://wa.me/252634085151"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-emerald-600"
+                  className="hover:text-indigo-600"
                 >
                   {t("footer.whatsapp")}
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-muted-foreground">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
                 <span>{t("footer.location")}</span>
               </li>
             </ul>
@@ -230,7 +230,7 @@ export function Footer() {
             {t("footer.rights")} {new Date().getFullYear()} SHEEGOW ACADEMY. {t("footer.builtWith")}
           </p>
           <p className="text-xs text-muted-foreground">
-            {t("footer.madeWith")} <span className="text-emerald-700">{t("footer.liveClasses")}</span>, {t("footer.notRecorded")}.
+            {t("footer.madeWith")} <span className="text-indigo-700">{t("footer.liveClasses")}</span>, {t("footer.notRecorded")}.
           </p>
         </div>
       </div>

@@ -229,7 +229,7 @@ export function AdminCourseOverview() {
                     {s.label}
                   </p>
                 </div>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                   <Icon className="h-4 w-4" />
                 </span>
               </div>
@@ -247,7 +247,7 @@ export function AdminCourseOverview() {
               <h3 className="text-base font-bold text-foreground sm:text-lg">
                 Live classes
               </h3>
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+              <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
                 {data.summary.liveClasses} total
               </Badge>
             </div>
@@ -274,8 +274,8 @@ export function AdminCourseOverview() {
               className={cn(
                 "rounded-full border px-3 py-1 text-xs font-semibold capitalize transition-colors",
                 liveFilter === f
-                  ? "border-transparent bg-emerald-600 text-white"
-                  : "border-border bg-background text-muted-foreground hover:border-emerald-300 hover:text-emerald-600"
+                  ? "border-transparent bg-indigo-600 text-white"
+                  : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:text-indigo-600"
               )}
             >
               {f === "all" ? "All" : f}
@@ -327,7 +327,7 @@ export function AdminCourseOverview() {
 
         {courses.length === 0 ? (
           <Card className="p-10 text-center">
-            <BookOpen className="mx-auto mb-3 h-10 w-10 text-emerald-300" />
+            <BookOpen className="mx-auto mb-3 h-10 w-10 text-indigo-300" />
             <p className="font-semibold text-foreground">No courses found</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {search ? "Try a different search." : "Create a course to get started."}
@@ -390,7 +390,7 @@ function LiveRow({
               ? "bg-red-50 text-red-600"
               : ended
                 ? "bg-muted text-muted-foreground"
-                : "bg-emerald-50 text-emerald-600"
+                : "bg-indigo-50 text-indigo-600"
           )}
         >
           {live ? (
@@ -413,7 +413,7 @@ function LiveRow({
                   ? "bg-red-500 text-white"
                   : ended
                     ? "bg-muted text-muted-foreground"
-                    : "bg-emerald-100 text-emerald-700"
+                    : "bg-indigo-100 text-indigo-700"
               )}
             >
               {live ? "Live" : liveClass.status}
@@ -443,7 +443,7 @@ function LiveRow({
           <Button
             size="sm"
             onClick={onJoin}
-            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+            className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
           >
             <Video className="h-3.5 w-3.5" /> Teach
           </Button>
@@ -497,8 +497,8 @@ function CourseOverviewCard({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
-              <Play className="h-7 w-7 text-emerald-400" />
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
+              <Play className="h-7 w-7 text-indigo-400" />
             </div>
           )}
         </div>
@@ -513,7 +513,7 @@ function CourseOverviewCard({
               variant="outline"
               className={
                 course.isActive
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                   : "border-muted bg-muted text-muted-foreground"
               }
             >
@@ -580,9 +580,9 @@ function CourseOverviewCard({
           <button
             onClick={onToggleWork}
             aria-expanded={workExpanded}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-emerald-600"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-indigo-600"
           >
-            <ClipboardList className="h-4 w-4 text-emerald-600" />
+            <ClipboardList className="h-4 w-4 text-indigo-600" />
             Work plan ({course.workItems.length})
             {workExpanded ? (
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -593,9 +593,9 @@ function CourseOverviewCard({
           <button
             onClick={onToggle}
             aria-expanded={expanded}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-emerald-600"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-indigo-600"
           >
-            <GraduationCap className="h-4 w-4 text-emerald-600" />
+            <GraduationCap className="h-4 w-4 text-indigo-600" />
             Enrolled students ({course.enrolledCount})
             {expanded ? (
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -675,7 +675,7 @@ function Metric({
   return (
     <div className="bg-card px-3 py-3 sm:px-4">
       <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-        <Icon className="h-3.5 w-3.5 text-emerald-500" /> {label}
+        <Icon className="h-3.5 w-3.5 text-indigo-500" /> {label}
       </p>
       <p className="mt-1 text-lg font-extrabold leading-none text-foreground">
         {value.toLocaleString()}
@@ -695,7 +695,7 @@ function WorkItemRow({ item }: { item: CourseWorkItem }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 px-3 py-2">
       <div className="flex min-w-0 items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0 text-emerald-500" />
+        <Icon className="h-4 w-4 shrink-0 text-indigo-500" />
         <div className="min-w-0">
           <p className="truncate text-xs font-semibold text-foreground">
             {item.title}
@@ -712,7 +712,7 @@ function WorkItemRow({ item }: { item: CourseWorkItem }) {
         className={cn(
           "shrink-0 text-[10px]",
           item.isPublished
-            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+            ? "border-indigo-200 bg-indigo-50 text-indigo-700"
             : "border-muted bg-muted text-muted-foreground"
         )}
       >
@@ -730,7 +730,7 @@ function StudentRow({ student }: { student: CourseStudentRow }) {
         <div className="flex items-center gap-2">
           <Avatar className="h-7 w-7">
             <AvatarImage src={student.profilePicture || undefined} />
-            <AvatarFallback className="bg-emerald-100 text-[9px] font-bold text-emerald-700">
+            <AvatarFallback className="bg-indigo-100 text-[9px] font-bold text-indigo-700">
               {student.fullName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -749,8 +749,8 @@ function StudentRow({ student }: { student: CourseStudentRow }) {
           variant="outline"
           className={cn(
             completed
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
+              ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+              : "border-indigo-200 bg-indigo-50 text-indigo-700"
           )}
         >
           {completed ? "Completed" : "Active"}
@@ -773,7 +773,7 @@ function StudentRow({ student }: { student: CourseStudentRow }) {
       </TableCell>
       <TableCell className="text-xs">
         {student.certificateIssuedAt ? (
-          <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
+          <span className="inline-flex items-center gap-1 font-medium text-indigo-700">
             <CheckCircle2 className="h-3.5 w-3.5" />
             {formatDate(student.certificateIssuedAt)}
           </span>

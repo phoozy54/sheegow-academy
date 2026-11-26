@@ -173,9 +173,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_BADGE_STYLES: Record<string, string> = {
-  student: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  student: "border-indigo-200 bg-indigo-50 text-indigo-700",
   teacher: "border-amber-200 bg-amber-50 text-amber-700",
-  admin: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  admin: "border-indigo-200 bg-indigo-50 text-indigo-700",
   super_admin: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700",
 };
 
@@ -208,7 +208,7 @@ export function UnifiedDashboard() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
           <p className="text-sm">{t("dashboard.loadingDashboard")}</p>
         </div>
       </div>
@@ -219,8 +219,8 @@ export function UnifiedDashboard() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-            <LogIn className="h-7 w-7 text-emerald-600" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
+            <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
           <h2 className="mb-2 text-xl font-bold">{t("dashboard.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
@@ -228,7 +228,7 @@ export function UnifiedDashboard() {
           </p>
           <Button
             onClick={() => openAuthModal("login")}
-            className="gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
+            className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
           >
             <LogIn className="h-4 w-4" />
             Log in
@@ -279,7 +279,7 @@ export function UnifiedDashboard() {
                   className={cn(
                     "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
                     active
-                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/30"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   )}
                 >
@@ -349,7 +349,7 @@ export function UnifiedDashboard() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.profilePicture || undefined} />
-                    <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-bold text-white">
+                    <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-bold text-white">
                       {user.fullName.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -396,7 +396,7 @@ export function UnifiedDashboard() {
                   className={cn(
                     "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
                     active
-                      ? "border-emerald-500 bg-emerald-600 text-white shadow-sm"
+                      ? "border-indigo-500 bg-indigo-600 text-white shadow-sm"
                       : "border-border bg-card text-muted-foreground hover:bg-accent"
                   )}
                 >
@@ -466,7 +466,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       {/* Logo / brand */}
       <div className="flex items-center gap-2 border-b px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md">
           <GraduationCap className="h-5 w-5" />
         </div>
         <div>
@@ -493,7 +493,7 @@ function SidebarContent({
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium transition-colors",
                 active
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                  ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
@@ -518,7 +518,7 @@ function SidebarContent({
         <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
           <Avatar className="h-9 w-9">
             <AvatarImage src={user.profilePicture || undefined} />
-            <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-bold text-white">
+            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-bold text-white">
               {user.fullName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -566,7 +566,7 @@ function AdminCoursesSection() {
           onClick={() => setTab("overview")}
           className={cn(
             "gap-1.5",
-            tab === "overview" && "bg-emerald-600 hover:bg-emerald-700"
+            tab === "overview" && "bg-indigo-600 hover:bg-indigo-700"
           )}
         >
           <LayoutDashboard className="h-4 w-4" /> {t("dashboard.overviewTab")}
@@ -578,7 +578,7 @@ function AdminCoursesSection() {
           onClick={() => setTab("manage")}
           className={cn(
             "gap-1.5",
-            tab === "manage" && "bg-emerald-600 hover:bg-emerald-700"
+            tab === "manage" && "bg-indigo-600 hover:bg-indigo-700"
           )}
         >
           <BookOpen className="h-4 w-4" /> {t("dashboard.manageCoursesTab")}
@@ -817,15 +817,15 @@ function StudentOverview() {
           </p>
         </div>
         <Button onClick={() => router.push("/courses")} variant="outline" className="w-full gap-2 sm:w-auto">
-          <Sparkles className="h-4 w-4 text-emerald-600" />
+          <Sparkles className="h-4 w-4 text-indigo-600" />
           {t("dashboard.exploreCourses")}
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-5">
-        <StatCard icon={BookOpen} label={t("dashboard.activeCourses")} value={stats.activeCourses} color="bg-emerald-100 text-emerald-600" />
-        <StatCard icon={CheckCircle2} label={t("dashboard.completedLessons")} value={stats.completedLessons} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={BookOpen} label={t("dashboard.activeCourses")} value={stats.activeCourses} color="bg-indigo-100 text-indigo-600" />
+        <StatCard icon={CheckCircle2} label={t("dashboard.completedLessons")} value={stats.completedLessons} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={Clock} label={t("dashboard.learningHours")} value={`${stats.learningHours}h`} color="bg-amber-100 text-amber-600" />
         <StatCard icon={Award} label={t("dashboard.certificates")} value={stats.certificates} color="bg-violet-100 text-violet-600" />
         <button
@@ -872,8 +872,8 @@ function StudentOverview() {
                 </div>
               ) : enrollments.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-12 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
-                    <BookOpen className="h-6 w-6 text-emerald-500" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50">
+                    <BookOpen className="h-6 w-6 text-indigo-500" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold">No courses yet</p>
@@ -881,7 +881,7 @@ function StudentOverview() {
                       {t("dashboard.browseCatalog")}
                     </p>
                   </div>
-                  <Button size="sm" onClick={() => router.push("/courses")} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700">
+                  <Button size="sm" onClick={() => router.push("/courses")} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
                     Browse Courses <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -906,15 +906,15 @@ function StudentOverview() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-emerald-100">
-                              <PlayCircle className="h-6 w-6 text-emerald-400" />
+                            <div className="flex h-full w-full items-center justify-center bg-indigo-100">
+                              <PlayCircle className="h-6 w-6 text-indigo-400" />
                             </div>
                           )}
                         </button>
                         <div className="min-w-0 flex-1">
                           <button
                             onClick={() => router.push(`/learn/${course.id}`)}
-                            className="block truncate text-left text-sm font-bold hover:text-emerald-600"
+                            className="block truncate text-left text-sm font-bold hover:text-indigo-600"
                           >
                             {course.title}
                           </button>
@@ -960,8 +960,8 @@ function StudentOverview() {
             <CardContent className="p-0">
               {upcoming.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
-                    <Calendar className="h-5 w-5 text-emerald-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
+                    <Calendar className="h-5 w-5 text-indigo-500" />
                   </div>
                   <p className="text-xs font-medium text-foreground">
                     No upcoming classes
@@ -978,7 +978,7 @@ function StudentOverview() {
                         onClick={() => router.push(`/class/${lc.id}`)}
                         className="block w-full text-left"
                       >
-                        <p className="truncate text-sm font-semibold hover:text-emerald-600">
+                        <p className="truncate text-sm font-semibold hover:text-indigo-600">
                           {lc.title}
                         </p>
                         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
@@ -1000,7 +1000,7 @@ function StudentOverview() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full gap-1 text-emerald-600"
+                  className="w-full gap-1 text-indigo-600"
                   onClick={() => router.push("/live-classes")}
                 >
                   View all classes <ArrowRight className="h-3.5 w-3.5" />
@@ -1058,7 +1058,7 @@ function StudentOverview() {
                               />
                             ) : null}
                           </div>
-                          <p className="min-w-0 flex-1 truncate text-sm font-medium hover:text-emerald-600">
+                          <p className="min-w-0 flex-1 truncate text-sm font-medium hover:text-indigo-600">
                             {course.title}
                           </p>
                         </button>
@@ -1144,9 +1144,9 @@ function TeacherOverview() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-        <StatCard icon={BookOpen} label={t("dashboard.myCourses")} value={stats?.courses ?? myCourses.length} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={BookOpen} label={t("dashboard.myCourses")} value={stats?.courses ?? myCourses.length} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={Video} label={t("dashboard.upcomingClasses")} value={stats?.upcoming ?? upcoming.length} color="bg-rose-100 text-rose-600" />
-        <StatCard icon={Users} label={t("dashboard.totalEnrollments")} value={stats?.enrollments ?? 0} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={Users} label={t("dashboard.totalEnrollments")} value={stats?.enrollments ?? 0} color="bg-indigo-100 text-indigo-600" />
         <StatCard icon={Award} label={t("dashboard.avgRating")} value={stats?.averageRating != null ? stats.averageRating.toFixed(1) : "—"} color="bg-amber-100 text-amber-600" />
       </div>
 
@@ -1194,7 +1194,7 @@ function TeacherOverview() {
                         onClick={() => router.push(`/course/${c.id}`)}
                         className="min-w-0 flex-1 text-left"
                       >
-                        <p className="truncate text-sm font-semibold hover:text-emerald-600">
+                        <p className="truncate text-sm font-semibold hover:text-indigo-600">
                           {c.title}
                         </p>
                         <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -1223,8 +1223,8 @@ function TeacherOverview() {
             <CardContent className="p-0">
               {upcoming.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
-                    <Calendar className="h-5 w-5 text-emerald-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
+                    <Calendar className="h-5 w-5 text-indigo-500" />
                   </div>
                   <p className="text-xs font-medium text-foreground">
                     No upcoming classes
@@ -1241,7 +1241,7 @@ function TeacherOverview() {
                         onClick={() => router.push(`/class/${lc.id}`)}
                         className="block w-full text-left"
                       >
-                        <p className="truncate text-sm font-semibold hover:text-emerald-600">
+                        <p className="truncate text-sm font-semibold hover:text-indigo-600">
                           {lc.title}
                         </p>
                         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
@@ -1307,7 +1307,7 @@ function StudentMyCourses() {
         </p>
         <Button
           onClick={() => router.push("/courses")}
-          className="mt-4 gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+          className="mt-4 gap-1.5 bg-indigo-600 hover:bg-indigo-700"
         >
           <BookOpen className="h-4 w-4" /> {t("dashboard.browseCourses")}
         </Button>
@@ -1326,8 +1326,8 @@ function StudentMyCourses() {
               {c.image ? (
                 <img loading="lazy" decoding="async" src={c.image} alt={c.title} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-emerald-100">
-                  <PlayCircle className="h-8 w-8 text-emerald-400" />
+                <div className="flex h-full w-full items-center justify-center bg-indigo-100">
+                  <PlayCircle className="h-8 w-8 text-indigo-400" />
                 </div>
               )}
             </div>
@@ -1337,12 +1337,12 @@ function StudentMyCourses() {
                   {c.level}
                 </Badge>
                 {enr.status === "completed" && (
-                  <Badge className="bg-emerald-100 text-emerald-700">{t("dashboard.completedBadge")}</Badge>
+                  <Badge className="bg-indigo-100 text-indigo-700">{t("dashboard.completedBadge")}</Badge>
                 )}
               </div>
               <button
                 onClick={() => router.push(`/learn/${c.id}`)}
-                className="block text-left font-bold hover:text-emerald-600"
+                className="block text-left font-bold hover:text-indigo-600"
               >
                 {c.title}
               </button>
@@ -1354,7 +1354,7 @@ function StudentMyCourses() {
               </div>
               <Button
                 size="sm"
-                className="mt-3 w-full gap-1 bg-emerald-600 hover:bg-emerald-700"
+                className="mt-3 w-full gap-1 bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => router.push(`/learn/${c.id}`)}
               >
                 {t("dashboard.continueLearning")} <ArrowRight className="h-3.5 w-3.5" />
@@ -1423,7 +1423,7 @@ function TeacherStudents() {
                 {c.level}
               </p>
             </div>
-            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+            <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
               {c.reviewCount} {t("dashboard.students")}
             </Badge>
           </div>
@@ -1517,7 +1517,7 @@ function StudentPayments() {
     if (!r) return null;
     if (r.status === "approved") {
       return (
-        <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
+        <Badge className="border-indigo-200 bg-indigo-50 text-indigo-700">
           {t("dashboard.refundApproved")}
         </Badge>
       );
@@ -1575,14 +1575,14 @@ function StudentPayments() {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
         <Card className="p-3 sm:p-4">
-          <DollarSign className="mb-2 h-5 w-5 text-emerald-600" />
+          <DollarSign className="mb-2 h-5 w-5 text-indigo-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {formatPrice(totalPaid)}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{t("dashboard.totalPaid")}</p>
         </Card>
         <Card className="p-3 sm:p-4">
-          <CheckCircle2 className="mb-2 h-5 w-5 text-emerald-600" />
+          <CheckCircle2 className="mb-2 h-5 w-5 text-indigo-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {payments.filter((p) => p.status === "completed").length}
           </p>
@@ -1642,7 +1642,7 @@ function StudentPayments() {
                       href={`/invoice/${p.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-700"
+                      className="inline-flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-700"
                     >
                       <Download className="h-3.5 w-3.5" /> {t("dashboard.invoice")}
                     </a>
@@ -1696,7 +1696,7 @@ function StudentPayments() {
                           href={`/invoice/${p.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                         >
                           <Download className="h-3.5 w-3.5" /> {t("dashboard.download")}
                         </a>
@@ -1783,7 +1783,7 @@ function StudentPayments() {
 function studentStatusClass(status: string) {
   switch (status) {
     case "completed":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+      return "border-indigo-200 bg-indigo-50 text-indigo-700";
     case "pending":
       return "border-amber-200 bg-amber-50 text-amber-700";
     case "refunded":

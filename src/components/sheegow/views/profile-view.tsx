@@ -102,7 +102,7 @@ export function ProfileView() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
           <p className="text-sm">{t("profile.loading")}</p>
         </div>
       </div>
@@ -113,8 +113,8 @@ export function ProfileView() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-            <LogIn className="h-7 w-7 text-emerald-600" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
+            <LogIn className="h-7 w-7 text-indigo-600" />
           </div>
           <h2 className="mb-2 text-xl font-bold">{t("profile.pleaseLogin")}</h2>
           <p className="mb-5 text-sm text-muted-foreground">
@@ -122,7 +122,7 @@ export function ProfileView() {
           </p>
           <Button
             onClick={() => openAuthModal("login")}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
           >
             Log in
           </Button>
@@ -224,14 +224,14 @@ export function ProfileView() {
             <div className="relative">
               <Avatar className="h-28 w-28 border-4 border-white shadow-lg">
                 <AvatarImage src={user.profilePicture || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-700 text-2xl font-extrabold text-white">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-indigo-700 text-2xl font-extrabold text-white">
                   {user.fullName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <button
                 onClick={handlePhotoUpload}
                 aria-label={t("profile.changePhoto")}
-                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-emerald-600 text-white shadow-md transition-transform hover:scale-110 hover:bg-emerald-700"
+                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-indigo-600 text-white shadow-md transition-transform hover:scale-110 hover:bg-indigo-700"
               >
                 <Camera className="h-4 w-4" />
               </button>
@@ -243,7 +243,7 @@ export function ProfileView() {
             <p className="text-sm text-muted-foreground">{user.email}</p>
 
             <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-              <Badge className="bg-emerald-100 capitalize text-emerald-700">
+              <Badge className="bg-indigo-100 capitalize text-indigo-700">
                 {user.role}
               </Badge>
               {/* Learning level badge — only for students */}
@@ -305,19 +305,19 @@ export function ProfileView() {
               <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b bg-transparent p-2">
                 <TabsTrigger
                   value="account"
-                  className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700"
+                  className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
                 >
                   {t("profile.account")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="password"
-                  className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700"
+                  className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
                 >
                   {t("profile.password")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="notifications"
-                  className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700"
+                  className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
                 >
                   {t("profile.notifications")}
                 </TabsTrigger>
@@ -408,7 +408,7 @@ export function ProfileView() {
                 <Button
                   onClick={handleSaveAccount}
                   disabled={savingAccount}
-                  className="gap-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                  className="gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
                 >
                   {savingAccount ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -481,7 +481,7 @@ export function ProfileView() {
                   <Button
                     onClick={handleUpdatePassword}
                     disabled={savingPassword}
-                    className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+                    className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
                   >
                     {savingPassword ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

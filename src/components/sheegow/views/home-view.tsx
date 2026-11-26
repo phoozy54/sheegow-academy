@@ -54,7 +54,7 @@ const FEATURES: Array<{
     icon: Users,
     title: "Small Group Learning",
     desc: "Learn in small batches so every student gets personal attention and speaking practice.",
-    tone: "emerald",
+    tone: "indigo",
   },
   {
     icon: GraduationCap,
@@ -66,13 +66,13 @@ const FEATURES: Array<{
     icon: MessageSquare,
     title: "Real-time Chat",
     desc: "Ask questions instantly during class with live chat support alongside your video lesson.",
-    tone: "emerald",
+    tone: "indigo",
   },
   {
     icon: Award,
     title: "Certificates & Progress",
     desc: "Track your progress and earn a certificate when you complete each course.",
-    tone: "emerald",
+    tone: "indigo",
   },
   {
     icon: Globe2,
@@ -114,7 +114,7 @@ export function HomeView() {
             <div className="text-center md:text-left lg:text-left">
               <Badge
                 variant="outline"
-                className="mb-5 inline-flex items-center gap-1.5 rounded-full border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                className="mb-5 inline-flex items-center gap-1.5 rounded-full border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
               >
                 <Video className="h-3 w-3" />
                 {t("home.heroBadge")}
@@ -133,7 +133,7 @@ export function HomeView() {
                 <Button
                   asChild
                   size="lg"
-                  className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-base shadow-lg shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700 sm:w-auto"
+                  className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-base shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
                 >
                   <Link
                     href="/courses"
@@ -158,8 +158,8 @@ export function HomeView() {
 
             {/* Hero image card */}
             <div className="relative">
-              <div className="absolute -inset-4 animate-float-slow rounded-[2rem] bg-gradient-to-tr from-emerald-300/40 via-amber-200/30 to-transparent blur-2xl" />
-              <div className="relative overflow-hidden rounded-3xl border bg-card shadow-2xl shadow-emerald-500/20">
+              <div className="absolute -inset-4 animate-float-slow rounded-[2rem] bg-gradient-to-tr from-indigo-300/40 via-amber-200/30 to-transparent blur-2xl" />
+              <div className="relative overflow-hidden rounded-3xl border bg-card shadow-2xl shadow-indigo-500/20">
                 <img
                   loading="eager"
                   fetchPriority="high"
@@ -184,7 +184,7 @@ export function HomeView() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-sm font-semibold text-emerald-600">
+                  <div className="flex items-center gap-1 text-sm font-semibold text-indigo-600">
                     <Users className="h-4 w-4" /> {t("home.smallGroup")}
                   </div>
                 </div>
@@ -210,7 +210,7 @@ export function HomeView() {
               icon: UserRoundCheck,
               label: t("home.proofFeedback"),
               detail: t("home.proofFeedbackDetail"),
-              tone: "emerald",
+              tone: "indigo",
             },
             {
               icon: Award,
@@ -229,7 +229,7 @@ export function HomeView() {
             <div>
               <Badge
                 variant="outline"
-                className="mb-3 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                className="mb-3 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
               >
                 <BookOpen className="h-3 w-3" /> {t("home.continueLearning")}
               </Badge>
@@ -248,7 +248,7 @@ export function HomeView() {
           <div className="grid gap-4 md:grid-cols-3">
             {enrollments.slice(0, 3).map((enrollment) => (
               <Card key={enrollment.id} className="card-lift flex flex-col p-5">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-500">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-indigo-500">
                   {enrollment.course?.level || t("dashboard.sectionCourses")}
                 </p>
                 <h3 className="mt-1 line-clamp-2 text-base font-bold text-foreground">
@@ -260,7 +260,7 @@ export function HomeView() {
                 </div>
                 <Progress value={enrollment.progress} className="h-1.5" />
                 <Button
-                  className="mt-4 w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+                  className="mt-4 w-full gap-1.5 bg-indigo-600 hover:bg-indigo-700"
                   onClick={() => router.push(`/learn/${enrollment.courseId}`)}
                 >
                   {t("home.continueLesson")} <ArrowRight className="h-4 w-4" />
@@ -276,7 +276,7 @@ export function HomeView() {
         <SectionHeading
           eyebrow={t("home.featuresEyebrow")}
           icon={Sparkles}
-          tone="emerald"
+          tone="indigo"
           title={t("home.featuresTitle")}
           description={t("home.featuresDesc")}
         />
@@ -294,15 +294,14 @@ export function HomeView() {
       </section>
 
       {/* ─── POPULAR COURSES ──────────────────────── */}
-      <section className="bg-gradient-to-b from-emerald-50/50 to-background py-16 lg:py-24">
+      <section className="bg-gradient-to-b from-indigo-50/50 to-background py-16 lg:py-24">
         <div className={`mx-auto max-w-7xl ${padClass}`}>
           <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
             <SectionHeading
               eyebrow={t("home.popularCoursesEyebrow")}
               icon={GraduationCap}
               tone="amber"
-              align="left"
-              className="mb-0"
+              
               title={t("home.popularCoursesTitle")}
             />
             <Button asChild variant="outline" className="gap-1.5">
@@ -334,12 +333,12 @@ export function HomeView() {
       </section>
 
       {/* ─── HOW IT WORKS ─────────────────────────── */}
-      <section id="how-it-works" className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
+      <section  className={`mx-auto max-w-7xl py-16 lg:py-24 ${padClass}`}>
         <SectionHeading
-          id="how-it-works"
+          
           eyebrow={t("home.howItWorksEyebrow")}
           icon={CheckCircle2}
-          tone="emerald"
+          tone="indigo"
           title={t("home.howItWorksTitle")}
           description={t("home.howItWorksDesc")}
         />
@@ -363,7 +362,7 @@ export function HomeView() {
             },
           ].map((step) => (
             <Card key={step.n} className="card-lift flex flex-col p-6">
-              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-lg font-extrabold text-white shadow-lg shadow-emerald-500/30">
+              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-lg font-extrabold text-white shadow-lg shadow-indigo-500/30">
                 {step.n}
               </span>
               <h3 className="text-lg font-bold text-foreground">{step.title}</h3>
@@ -422,7 +421,7 @@ export function HomeView() {
           {([
             {
               icon: GraduationCap,
-              tone: "emerald",
+              tone: "indigo",
               title: t("home.pathwayLearners"),
               desc: t("home.pathwayLearnersDesc"),
               cta: t("home.pathwayLearnersCta"),
@@ -473,7 +472,7 @@ export function HomeView() {
           <Link
             href="/contact"
             onClick={() => trackConversion("trial_enquiry")}
-            className="font-semibold text-emerald-600 underline"
+            className="font-semibold text-indigo-600 underline"
           >
             {t("home.askFreeTrial")}
           </Link>
@@ -491,7 +490,7 @@ export function HomeView() {
           <Button
             asChild
             size="lg"
-            className="w-full gap-2 bg-white text-emerald-700 shadow-lg hover:bg-emerald-50 sm:w-auto"
+            className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
           >
             <Link href="/courses">
               {t("cta.browseCourses")}
@@ -502,7 +501,7 @@ export function HomeView() {
           <Button
             size="lg"
             onClick={() => openAuthModal("register")}
-            className="w-full gap-2 bg-white text-emerald-700 shadow-lg hover:bg-emerald-50 sm:w-auto"
+            className="w-full gap-2 bg-white text-indigo-700 shadow-lg hover:bg-indigo-50 sm:w-auto"
           >
             {t("cta.createAccount")}
             <ArrowRight className="h-4 w-4" />

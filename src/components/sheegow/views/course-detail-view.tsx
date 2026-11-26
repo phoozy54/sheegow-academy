@@ -423,8 +423,8 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                     className="aspect-[16/9] w-full object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[16/9] w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
-                    <PlayCircle className="h-16 w-16 text-emerald-400" />
+                  <div className="flex aspect-[16/9] w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
+                    <PlayCircle className="h-16 w-16 text-indigo-400" />
                   </div>
                 )}
                 {/* LIVE + level badges */}
@@ -460,11 +460,11 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                     </span>
                   </span>
                   <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Clock className="h-4 w-4 text-emerald-500" />
+                    <Clock className="h-4 w-4 text-indigo-500" />
                     {course.duration} {t("courseDetail.weeks")}
                   </span>
                   <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar className="h-4 w-4 text-emerald-500" />
+                    <Calendar className="h-4 w-4 text-indigo-500" />
                     {t("courseDetail.added")} {formatDate(course.createdAt)}
                   </span>
                   {/* Share button */}
@@ -480,7 +480,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                         toast.success("Course link copied to clipboard!");
                       }
                     }}
-                    className="flex items-center gap-1.5 text-emerald-600 transition-colors hover:text-emerald-700"
+                    className="flex items-center gap-1.5 text-indigo-600 transition-colors hover:text-indigo-700"
                   >
                     <Share2 className="h-4 w-4" />
                     {t("courseDetail.share")}
@@ -491,11 +491,11 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                 {course.teacher && (
                   <button
                     onClick={() => router.push("/courses")}
-                    className="mt-5 inline-flex items-center gap-3 rounded-xl border bg-card p-2 pr-4 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50/50"
+                    className="mt-5 inline-flex items-center gap-3 rounded-xl border bg-card p-2 pr-4 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50/50"
                   >
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={course.teacher.profilePicture || undefined} />
-                      <AvatarFallback className="bg-emerald-100 text-sm font-bold text-emerald-700">
+                      <AvatarFallback className="bg-indigo-100 text-sm font-bold text-indigo-700">
                         {course.teacher.fullName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -517,13 +517,13 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                   <div
                     className={`rounded-xl border p-4 text-sm ${
                       prereqCompleted
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                        ? "border-indigo-200 bg-indigo-50 text-indigo-900"
                         : "border-amber-200 bg-amber-50 text-amber-900"
                     }`}
                   >
                     <div className="flex items-start gap-2.5">
                       {prereqCompleted ? (
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
                       ) : (
                         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                       )}
@@ -587,21 +587,21 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
               <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-xl bg-muted p-1">
                 <TabsTrigger
                   value="overview"
-                  className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
+                  className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
                 >
                   <BookOpen className="h-4 w-4" />
                   {t("course.overview")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="outcomes"
-                  className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
+                  className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
                 >
                   <ListChecks className="h-4 w-4" />
                   {t("courseDetail.outcomes")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="certification"
-                  className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
+                  className="flex flex-col items-center gap-1 py-2 text-xs data-[state=active]:bg-background data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm sm:flex-row sm:gap-2 sm:text-sm"
                 >
                   <Award className="h-4 w-4" />
                   {t("course.certification")}
@@ -630,7 +630,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                   <Card className="card-lift flex flex-col gap-4 p-6 sm:flex-row sm:items-start">
                     <Avatar className="h-16 w-16 shrink-0 border">
                       <AvatarImage src={course.teacher.profilePicture || undefined} />
-                      <AvatarFallback className="bg-emerald-100 text-lg font-bold text-emerald-700">
+                      <AvatarFallback className="bg-indigo-100 text-lg font-bold text-indigo-700">
                         {course.teacher.fullName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -639,7 +639,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                         <h3 className="text-lg font-bold text-foreground">
                           {course.teacher.fullName}
                         </h3>
-                        <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                        <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-700">
                           {t("courseDetail.englishTeacher")}
                         </Badge>
                       </div>
@@ -718,7 +718,7 @@ export function CourseDetailView({ courseId }: { courseId: string }) {
                   { icon: ShieldCheck, label: t("courseDetail.moneyBack7") },
                 ].map(({ icon: Icon, label }, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <span className="pt-1 text-foreground">{label}</span>
@@ -752,20 +752,20 @@ function ManagerCourseCard({
   const isAdmin = role === "admin" || role === "super_admin";
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
-      <div className="bg-gradient-to-br from-fuchsia-600 to-emerald-800 p-6 text-white">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-100">
+      <div className="bg-gradient-to-br from-fuchsia-600 to-indigo-800 p-6 text-white">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-100">
           <LayoutDashboard className="h-4 w-4" /> {isAdmin ? t("courseDetail.managerAccess") : t("courseDetail.teacherControls")}
         </div>
         <p className="mt-2 text-lg font-extrabold leading-tight">
           {isAdmin ? t("courseDetail.openDirectly") : t("courseDetail.youManage")}
         </p>
-        <p className="mt-1 text-xs text-emerald-100">
+        <p className="mt-1 text-xs text-indigo-100">
           {isAdmin ? t("courseDetail.adminCanEdit") : t("courseDetail.teacherCanEdit")}
         </p>
       </div>
 
       <div className="space-y-2.5 p-6">
-        <Button onClick={onOpen} size="lg" className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700">
+        <Button onClick={onOpen} size="lg" className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700">
           <BookOpen className="h-4 w-4" /> {t("courseDetail.openCourse")}
         </Button>
         <Button onClick={onContent} size="lg" variant="outline" className="w-full gap-2">
@@ -798,15 +798,15 @@ function EnrolledCourseCard({
 
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
-      <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-6 text-white">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-100">
+      <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-100">
           <CheckCircle2 className="h-4 w-4" />
           {complete ? t("courseDetail.courseComplete") : t("courseDetail.youreEnrolled")}
         </div>
         <p className="mt-2 text-lg font-extrabold leading-tight">
           {complete ? t("courseDetail.reviewAnytime") : t("courseDetail.pickUpLeft")}
         </p>
-        <p className="mt-1 text-xs text-emerald-100">
+        <p className="mt-1 text-xs text-indigo-100">
           {t("courseDetail.lessonsReady")}
         </p>
       </div>
@@ -820,7 +820,7 @@ function EnrolledCourseCard({
         <Button
           onClick={onContinue}
           size="lg"
-          className="mt-5 w-full gap-2 bg-emerald-600 shadow-lg shadow-emerald-500/30 hover:bg-emerald-700"
+          className="mt-5 w-full gap-2 bg-indigo-600 shadow-lg shadow-indigo-500/30 hover:bg-indigo-700"
         >
           <BookOpen className="h-4 w-4" />
           {complete ? t("courseDetail.openCourse") : t("courseDetail.continueLearning")}
@@ -854,11 +854,11 @@ function EnrollmentCard({
       : t("course.enrollNow");
   return (
     <Card className="card-lift overflow-hidden p-0 shadow-xl">
-      <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-6 text-white">
-        <p className="text-sm font-semibold text-emerald-100">
+      <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
+        <p className="text-sm font-semibold text-indigo-100">
           {course.duration}-{t("courseDetail.weekLiveCourse")}
         </p>
-        <p className="mt-1 text-xs text-emerald-200">
+        <p className="mt-1 text-xs text-indigo-200">
           Full price and payment options are shown at checkout.
         </p>
       </div>
@@ -868,7 +868,7 @@ function EnrollmentCard({
           onClick={onEnroll}
           size="lg"
           disabled={prereqBlocksEnroll}
-          className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {prereqBlocksEnroll ? (
             <Lock className="h-4 w-4" />
@@ -904,7 +904,7 @@ function EnrollmentCard({
             { icon: Users, label: "Access to student community" },
           ].map(({ icon: Icon, label }, i) => (
             <div key={i} className="flex items-center gap-2.5 text-sm">
-              <Icon className="h-4 w-4 shrink-0 text-emerald-500" />
+              <Icon className="h-4 w-4 shrink-0 text-indigo-500" />
               <span className="text-foreground">{label}</span>
             </div>
           ))}
@@ -1054,7 +1054,7 @@ function ReviewsSection({
             <Button
               type="submit"
               disabled={submitting}
-              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+              className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1098,7 +1098,7 @@ function ReviewItem({ review }: { review: Review }) {
       <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10">
           <AvatarImage src={avatar || undefined} />
-          <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
+          <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
             {name.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
@@ -1176,7 +1176,7 @@ function CourseOverviewTab({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {highlights.map(({ icon: Icon, title, desc }, i) => (
             <Card key={i} className="card-lift gap-0 p-4">
-              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                 <Icon className="h-4 w-4" />
               </div>
               <p className="text-sm font-bold text-foreground">{title}</p>
@@ -1190,7 +1190,7 @@ function CourseOverviewTab({
       {bullets.length > 0 && (
         <div>
           <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
-            <BookOpen className="h-5 w-5 text-emerald-500" /> {t('courseDetail.whatsCovered')}
+            <BookOpen className="h-5 w-5 text-indigo-500" /> {t('courseDetail.whatsCovered')}
           </h3>
           <div className="grid gap-2 sm:grid-cols-2">
             {bullets.map((b, i) => (
@@ -1198,7 +1198,7 @@ function CourseOverviewTab({
                 key={i}
                 className="flex items-start gap-2.5 rounded-lg border bg-card p-3"
               >
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700">
                   {i + 1}
                 </span>
                 <span className="text-sm font-medium text-foreground">{b}</span>
@@ -1216,7 +1216,7 @@ function CourseOverviewTab({
         <div className="grid gap-2.5 sm:grid-cols-2">
           {audience.map((a, i) => (
             <div key={i} className="flex items-start gap-2.5">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500" />
               <span className="text-sm text-muted-foreground">{a}</span>
             </div>
           ))}
@@ -1257,7 +1257,7 @@ function LearningOutcomesTab({
               key={i}
               className="flex items-start gap-2.5 rounded-lg border bg-card p-3"
             >
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500" />
               <span className="text-sm font-medium text-foreground">{b}</span>
             </div>
           ))}
@@ -1278,7 +1278,7 @@ function LearningOutcomesTab({
             <Badge
               key={i}
               variant="outline"
-              className="border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+              className="border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
             >
               {s}
             </Badge>
@@ -1320,7 +1320,7 @@ function CertificationTab({ course }: { course: Course }) {
     <div className="space-y-8 rounded-xl border bg-card p-4 sm:p-6">
       <div>
         <h2 className="mb-3 flex items-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
-          <GraduationCap className="h-6 w-6 text-emerald-600" />
+          <GraduationCap className="h-6 w-6 text-indigo-600" />
           {t("courseDetail.earnCertificate")}
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -1343,7 +1343,7 @@ function CertificationTab({ course }: { course: Course }) {
           <ul className="space-y-2">
             {includes.map((item, i) => (
               <li key={i} className="flex items-center gap-2.5 text-sm">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-500" />
                 <span className="text-foreground">{item}</span>
               </li>
             ))}
@@ -1352,12 +1352,12 @@ function CertificationTab({ course }: { course: Course }) {
 
         <div>
           <h3 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
-            <ListChecks className="h-5 w-5 text-emerald-500" /> {t("courseDetail.howToEarn")}
+            <ListChecks className="h-5 w-5 text-indigo-500" /> {t("courseDetail.howToEarn")}
           </h3>
           <ol className="space-y-3">
             {steps.map((s, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
                   {i + 1}
                 </span>
                 <div>

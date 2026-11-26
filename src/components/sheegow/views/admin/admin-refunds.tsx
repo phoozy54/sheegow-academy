@@ -38,7 +38,7 @@ function isPending(r: RefundRequest) {
 function statusBadge(status: string, t: (key: string) => string) {
   if (status === "approved") {
     return (
-      <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
+      <Badge className="border-indigo-200 bg-indigo-50 text-indigo-700">
         {t("admin.refunds.approved")}
       </Badge>
     );
@@ -166,7 +166,7 @@ export function AdminRefunds() {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
         <Card className="p-3 sm:p-4">
-          <RotateCcw className="mb-2 h-5 w-5 text-emerald-600" />
+          <RotateCcw className="mb-2 h-5 w-5 text-indigo-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {requests.length}
           </p>
@@ -180,7 +180,7 @@ export function AdminRefunds() {
           <p className="mt-1 text-xs text-muted-foreground">{t("admin.refunds.pendingReview")}</p>
         </Card>
         <Card className="col-span-2 p-3 sm:p-4 md:col-span-1">
-          <DollarSign className="mb-2 h-5 w-5 text-emerald-600" />
+          <DollarSign className="mb-2 h-5 w-5 text-indigo-600" />
           <p className="text-xl font-extrabold leading-none sm:text-2xl">
             {formatPrice(totalRefunded)}
           </p>
@@ -196,7 +196,7 @@ export function AdminRefunds() {
             variant={filter === f ? "default" : "outline"}
             size="sm"
             onClick={() => setFilter(f)}
-            className={cn(filter === f && "bg-emerald-600 hover:bg-emerald-700")}
+            className={cn(filter === f && "bg-indigo-600 hover:bg-indigo-700")}
           >
             {f === "pending" ? t("admin.refunds.filterPending", { count: pendingCount }) : t("admin.refunds.filterAll")}
           </Button>
@@ -237,7 +237,7 @@ export function AdminRefunds() {
                   <div className="flex min-w-0 items-start gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={student?.profilePicture || undefined} />
-                      <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
+                      <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
                         {(student?.fullName || "ST")
                           .slice(0, 2)
                           .toUpperCase()}
@@ -263,7 +263,7 @@ export function AdminRefunds() {
 
                 {/* Payment info */}
                 <div className="mt-3 flex items-start gap-2 rounded-lg border bg-muted/30 p-3">
-                  <DollarSign className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                  <DollarSign className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground">
                       {payment?.course?.title || t("admin.refunds.payment")}
@@ -279,7 +279,7 @@ export function AdminRefunds() {
                       href={`/invoice/${payment.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                     >
                       {t("admin.refunds.invoice")}
                     </a>
@@ -320,7 +320,7 @@ export function AdminRefunds() {
                       size="sm"
                       disabled={busy}
                       onClick={() => openReview(r, "approved")}
-                      className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+                      className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" /> {t("admin.refunds.approve")}
                     </Button>
@@ -419,7 +419,7 @@ export function AdminRefunds() {
               className={cn(
                 "gap-1.5",
                 decision === "approved"
-                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  ? "bg-indigo-600 hover:bg-indigo-700"
                   : "bg-rose-600 hover:bg-rose-700"
               )}
             >

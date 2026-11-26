@@ -214,7 +214,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
         <SummaryTile
           icon={TrendingUp}
-          color="emerald"
+          color="indigo"
           label="Class average score"
           value={
             summary.averageQuizScore == null
@@ -224,7 +224,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
         />
         <SummaryTile
           icon={CheckCircle2}
-          color="emerald"
+          color="indigo"
           label="Quiz pass rate"
           value={
             summary.passRate == null ? "—" : `${summary.passRate}%`
@@ -289,7 +289,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8 shrink-0">
                         <AvatarImage src={row.profilePicture || undefined} />
-                        <AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-700">
+                        <AvatarFallback className="bg-indigo-100 text-[10px] font-bold text-indigo-700">
                           {row.fullName.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -309,7 +309,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
                         className={cn(
                           "text-sm font-bold",
                           row.enrollmentProgress >= 100
-                            ? "text-emerald-600"
+                            ? "text-indigo-600"
                             : "text-foreground"
                         )}
                       >
@@ -320,8 +320,8 @@ function GradebookContent({ data }: { data: GradebookData }) {
                         className={cn(
                           "text-[10px]",
                           row.enrollmentStatus === "completed"
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                            : "border-indigo-200 bg-indigo-50 text-indigo-700"
                         )}
                       >
                         {row.enrollmentStatus}
@@ -353,7 +353,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
                               className={cn(
                                 "text-sm font-bold",
                                 best != null && best >= q.passScore
-                                  ? "text-emerald-600"
+                                  ? "text-indigo-600"
                                   : "text-amber-600"
                               )}
                             >
@@ -391,7 +391,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
                               className={cn(
                                 "text-sm font-bold",
                                 (sub.grade ?? 0) >= a.maxPoints * 0.6
-                                  ? "text-emerald-600"
+                                  ? "text-indigo-600"
                                   : "text-amber-600"
                               )}
                             >
@@ -429,7 +429,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9 shrink-0">
                 <AvatarImage src={row.profilePicture || undefined} />
-                <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-700">
+                <AvatarFallback className="bg-indigo-100 text-xs font-bold text-indigo-700">
                   {row.fullName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -446,8 +446,8 @@ function GradebookContent({ data }: { data: GradebookData }) {
                 className={cn(
                   "text-[10px]",
                   row.enrollmentStatus === "completed"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                    : "border-indigo-200 bg-indigo-50 text-indigo-700"
                 )}
               >
                 {row.enrollmentProgress}%
@@ -484,7 +484,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
                             best == null
                               ? "text-muted-foreground"
                               : best >= q.passScore
-                              ? "text-emerald-600"
+                              ? "text-indigo-600"
                               : "text-amber-600"
                           )}
                         >
@@ -520,7 +520,7 @@ function GradebookContent({ data }: { data: GradebookData }) {
                               : sub.status !== "graded"
                               ? "text-amber-600"
                               : (sub.grade ?? 0) >= a.maxPoints * 0.6
-                              ? "text-emerald-600"
+                              ? "text-indigo-600"
                               : "text-amber-600"
                           )}
                         >
@@ -557,12 +557,12 @@ function SummaryTile({
   value,
 }: {
   icon: typeof TrendingUp;
-  color: "emerald" | "amber" | "violet";
+  color: "indigo" | "amber" | "violet";
   label: string;
   value: string;
 }) {
   const palette: Record<typeof color, string> = {
-    emerald: "bg-emerald-50 text-emerald-600",
+    indigo: "bg-indigo-50 text-indigo-600",
     amber: "bg-amber-50 text-amber-600",
     violet: "bg-violet-50 text-violet-600",
   };

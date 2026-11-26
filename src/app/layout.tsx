@@ -95,8 +95,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5, // allow zoom for accessibility
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#10b981" },
-    { media: "(prefers-color-scheme: dark)", color: "#059669" },
+    { media: "(prefers-color-scheme: light)", color: "#6366f1" },
+    { media: "(prefers-color-scheme: dark)", color: "#4f46e5" },
   ],
   colorScheme: "light dark",
 };
@@ -134,7 +134,7 @@ export default async function RootLayout({
         {/* Skip-to-content link for keyboard/screen-reader users */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-emerald-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-indigo-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
         >
           Skip to content
         </a>

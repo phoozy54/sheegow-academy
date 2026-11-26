@@ -45,7 +45,7 @@ const CONTACT_INFO = [
     value: "info@sheegowacademy.com",
     href: "mailto:info@sheegowacademy.com",
     hint: "We reply within 24 hours",
-    color: "from-emerald-500 to-emerald-600",
+    color: "from-indigo-500 to-indigo-600",
   },
   {
     icon: Phone,
@@ -53,7 +53,7 @@ const CONTACT_INFO = [
     value: "+252 63 4085151",
     href: "tel:+252634085151",
     hint: "Sat – Thu, 8AM – 10PM EAT",
-    color: "from-emerald-500 to-teal-600",
+    color: "from-indigo-500 to-teal-600",
   },
   {
     icon: MessageCircle,
@@ -61,7 +61,7 @@ const CONTACT_INFO = [
     value: "Chat with us",
     href: "https://wa.me/252634085151",
     hint: "Fastest response — same number",
-    color: "from-green-500 to-emerald-600",
+    color: "from-green-500 to-indigo-600",
   },
   {
     icon: MapPin,
@@ -148,12 +148,12 @@ export function ContactView() {
   return (
     <div className="bg-background">
       {/* ─── HEADER ─────────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-emerald-50/60 to-background">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/60 to-background">
         <div className="hero-mesh absolute inset-0 opacity-70" />
         <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Badge
             variant="outline"
-            className="mb-4 inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+            className="mb-4 inline-flex items-center gap-1.5 border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
           >
             <MessageSquare className="h-3 w-3" /> {t("contact.eyebrow")}
           </Badge>
@@ -176,9 +176,9 @@ export function ContactView() {
             </p>
 
             {submitted ? (
-              <Card className="border-emerald-200 bg-emerald-50/50 p-8 text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-                  <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+              <Card className="border-indigo-200 bg-indigo-50/50 p-8 text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
+                  <CheckCircle2 className="h-7 w-7 text-indigo-600" />
                 </div>
                 <h3 className="text-lg font-bold text-foreground">{t("contact.messageSent")}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -270,7 +270,7 @@ export function ContactView() {
                     type="submit"
                     disabled={submitting}
                     size="lg"
-                    className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
+                    className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
                   >
                     {submitting ? (
                       <>
@@ -314,7 +314,7 @@ export function ContactView() {
                           ? "noopener noreferrer"
                           : undefined
                       }
-                      className="mt-0.5 block text-sm font-bold text-foreground hover:text-emerald-600"
+                      className="mt-0.5 block text-sm font-bold text-foreground hover:text-indigo-600"
                     >
                       {info.value}
                     </a>
@@ -330,7 +330,7 @@ export function ContactView() {
 
             {/* Map embed */}
             <Card id="map" className="overflow-hidden p-0">
-              <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-emerald-100 to-amber-50">
+              <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-indigo-100 to-amber-50">
                 <iframe
                   title="SHEEGOW ACADEMY location — Hargeisa, Somaliland"
                   src="https://www.google.com/maps?q=Hargeisa,Somaliland&output=embed"
@@ -341,7 +341,7 @@ export function ContactView() {
                 />
               </div>
               <div className="flex items-center gap-2 p-4 text-sm">
-                <MapPin className="h-4 w-4 text-emerald-600" />
+                <MapPin className="h-4 w-4 text-indigo-600" />
                 <span className="font-medium text-foreground">
                   Hargeisa, Somaliland
                 </span>
@@ -398,7 +398,7 @@ export function ContactView() {
                   key={label}
                   className="flex items-center gap-2.5 rounded-xl border bg-card p-3"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="text-sm font-medium text-foreground">
@@ -409,7 +409,7 @@ export function ContactView() {
             </div>
 
             {/* Still need help CTA */}
-            <div className="mt-8 rounded-2xl border bg-gradient-to-r from-emerald-50 to-amber-50/50 p-6 text-center">
+            <div className="mt-8 rounded-2xl border bg-gradient-to-r from-indigo-50 to-amber-50/50 p-6 text-center">
               <Sparkles className="mx-auto mb-2 h-6 w-6 text-amber-500" />
               <p className="text-sm font-semibold text-foreground">
                 {t("contact.stillNeedHelp")}

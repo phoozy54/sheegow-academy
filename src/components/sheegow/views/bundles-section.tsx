@@ -118,8 +118,8 @@ export function BundlesSection() {
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-emerald-200">
-                    <Package className="h-10 w-10 text-emerald-400" />
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-indigo-200">
+                    <Package className="h-10 w-10 text-indigo-400" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -128,7 +128,7 @@ export function BundlesSection() {
                   Bundle
                 </span>
                 {hasDiscount && (
-                  <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg">
+                  <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-indigo-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-lg">
                     <Tag className="h-3 w-3" />
                     {t("bundles.save")} {savingsPercent}%
                   </span>
@@ -158,14 +158,14 @@ export function BundlesSection() {
                       key={c.id}
                       className="flex items-start gap-2 text-foreground"
                     >
-                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                         <Check className="h-2.5 w-2.5" />
                       </span>
                       <span className="line-clamp-1">{c.title}</span>
                     </li>
                   ))}
                   {courseCount > 4 && (
-                    <li className="pl-6 text-xs font-medium text-emerald-600">
+                    <li className="pl-6 text-xs font-medium text-indigo-600">
                       +{courseCount - 4} {t("bundles.more")}
                     </li>
                   )}
@@ -175,7 +175,7 @@ export function BundlesSection() {
                 <div className="mt-auto space-y-3 border-t pt-3">
                   <div className="flex items-baseline justify-between gap-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-extrabold text-emerald-700">
+                      <span className="text-xl font-extrabold text-indigo-700">
                         {formatPrice(bundle.price)}
                       </span>
                       {hasDiscount && (
@@ -185,7 +185,7 @@ export function BundlesSection() {
                       )}
                     </div>
                     {hasDiscount && (
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                      <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
                         {t("bundles.save")} {formatPrice(bundle.savings)}
                       </span>
                     )}

@@ -120,7 +120,7 @@ export function AdminPanel() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
           <p className="text-sm">{t("admin.panel.loading")}</p>
         </div>
       </div>
@@ -131,8 +131,8 @@ export function AdminPanel() {
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
-            <LogIn className="h-6 w-6 text-emerald-600" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50">
+            <LogIn className="h-6 w-6 text-indigo-600" />
           </div>
           <h2 className="mb-2 text-lg font-bold text-foreground">
             {t("admin.panel.pleaseLogin")}
@@ -142,7 +142,7 @@ export function AdminPanel() {
           </p>
           <Button
             onClick={() => openAuthModal("login")}
-            className="gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-700"
+            className="gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-indigo-700"
           >
             <LogIn className="h-4 w-4" />
             {t("admin.panel.login")}
@@ -254,7 +254,7 @@ export function AdminPanel() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.profilePicture || undefined} />
-                    <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-bold text-white">
+                    <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-bold text-white">
                       {user.fullName.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -319,7 +319,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       {/* Logo / brand */}
       <div className="flex items-center gap-2 border-b px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md">
           <GraduationCap className="h-5 w-5" />
         </div>
         <div>
@@ -346,7 +346,7 @@ function SidebarContent({
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                  ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
@@ -373,7 +373,7 @@ function SidebarContent({
             <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
               <Avatar className="h-9 w-9">
                 <AvatarImage src={user.profilePicture || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-bold text-white">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-bold text-white">
                   {user.fullName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -387,7 +387,7 @@ function SidebarContent({
               </div>
               <Badge
                 variant="outline"
-                className="border-emerald-200 bg-emerald-50 text-[10px] text-emerald-700"
+                className="border-indigo-200 bg-indigo-50 text-[10px] text-indigo-700"
               >
                 {user.role}
               </Badge>
@@ -456,7 +456,7 @@ export function AdminMessages() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
         <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 sm:h-10 sm:w-10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10">
               <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
@@ -482,7 +482,7 @@ export function AdminMessages() {
         </Card>
         <Card className="p-3 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 sm:h-10 sm:w-10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10">
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
@@ -566,7 +566,7 @@ export function AdminMessages() {
                       variant="outline"
                       className={
                         m.resolved
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                           : "border-amber-200 bg-amber-50 text-amber-700"
                       }
                     >
@@ -694,7 +694,7 @@ function ReadMessageDialog({
             variant="outline"
             className={
               message.resolved
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                 : "border-amber-200 bg-amber-50 text-amber-700"
             }
           >
@@ -734,7 +734,7 @@ function ReadMessageDialog({
             onClick={() =>
               onReply(message.email, message.subject, message.name)
             }
-            className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 sm:w-auto"
+            className="w-full gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 sm:w-auto"
           >
             <Mail className="h-4 w-4" />
             {t("admin.messages.reply")}

@@ -7,7 +7,7 @@ import { ICON_TONES, type DesignTone } from "./section-heading";
 export function ContactCard({
   icon: Icon,
   title,
-  tone = "emerald",
+  tone = "indigo",
   children,
 }: {
   icon: LucideIcon;

@@ -40,14 +40,14 @@ export function CertificateView() {
   if (authLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
   if (!user) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <LogIn className="mx-auto mb-3 h-8 w-8 text-emerald-500" />
+        <LogIn className="mx-auto mb-3 h-8 w-8 text-indigo-500" />
         <h1 className="text-xl font-bold">{t("certificate.loginToView")}</h1>
         <Button className="mt-4" onClick={() => openAuthModal("login")}>
           Log in
@@ -112,7 +112,7 @@ export function CertificateView() {
                 href={`/verify/${cert.verificationCode}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-700 hover:underline"
               >
                 {t("certificate.viewVerify")} <ExternalLink className="h-3.5 w-3.5" />
               </a>

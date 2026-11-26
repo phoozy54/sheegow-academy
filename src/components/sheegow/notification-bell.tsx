@@ -37,8 +37,8 @@ export const NOTIFICATION_META: Record<
 > = {
   announcement: {
     icon: Megaphone,
-    tint: "text-emerald-600",
-    bg: "bg-emerald-100 dark:bg-emerald-500/15",
+    tint: "text-indigo-600",
+    bg: "bg-indigo-100 dark:bg-indigo-500/15",
   },
   reply: {
     icon: MessageSquareReply,
@@ -47,8 +47,8 @@ export const NOTIFICATION_META: Record<
   },
   message: {
     icon: Mail,
-    tint: "text-emerald-600",
-    bg: "bg-emerald-100 dark:bg-emerald-500/15",
+    tint: "text-indigo-600",
+    bg: "bg-indigo-100 dark:bg-indigo-500/15",
   },
   class: {
     icon: Video,
@@ -260,7 +260,7 @@ export function NotificationBell() {
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-center gap-1.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-500/10"
+            className="w-full justify-center gap-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-500/10"
             onClick={() => {
               setOpen(false);
               router.push("/notifications");
@@ -307,7 +307,7 @@ function NotificationRow({
         onClick={onClick}
         className={cn(
           "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
-          unread ? "bg-emerald-50/60 hover:bg-emerald-50 dark:bg-emerald-500/5 dark:hover:bg-emerald-500/10" : "hover:bg-accent"
+          unread ? "bg-indigo-50/60 hover:bg-indigo-50 dark:bg-indigo-500/5 dark:hover:bg-indigo-500/10" : "hover:bg-accent"
         )}
       >
         <span
@@ -332,7 +332,7 @@ function NotificationRow({
             {unread && (
               <span
                 aria-hidden
-                className="ml-auto h-2 w-2 shrink-0 rounded-full bg-emerald-600"
+                className="ml-auto h-2 w-2 shrink-0 rounded-full bg-indigo-600"
               />
             )}
           </div>

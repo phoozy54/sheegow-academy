@@ -63,14 +63,14 @@ const METHODS: {
     name: "Card",
     desc: "Visa, Mastercard, Amex — instant enrollment",
     icon: CreditCard,
-    accent: "bg-emerald-100 text-emerald-600",
+    accent: "bg-indigo-100 text-indigo-600",
   },
   {
     id: "zaad",
     name: "Zaad Service",
     desc: "Pay with TELESOM Zaad mobile wallet",
     icon: Wallet,
-    accent: "bg-emerald-100 text-emerald-600",
+    accent: "bg-indigo-100 text-indigo-600",
   },
   {
     id: "edahab",
@@ -331,9 +331,9 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
 
       {/* ─── Success state — shown after a completed payment ─── */}
       {paidPaymentId ? (
-        <Card className="mx-auto max-w-xl border-emerald-200 bg-emerald-50/60 p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+        <Card className="mx-auto max-w-xl border-indigo-200 bg-indigo-50/60 p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100">
+            <CheckCircle2 className="h-8 w-8 text-indigo-600" />
           </div>
           <h2 className="mb-2 text-2xl font-extrabold text-foreground">
             {t("bundleCheckout.paymentSuccess")}
@@ -427,8 +427,8 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
-                            <BookOpen className="h-4 w-4 text-emerald-400" />
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200">
+                            <BookOpen className="h-4 w-4 text-indigo-400" />
                           </div>
                         )}
                       </div>
@@ -632,14 +632,14 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
               </CardHeader>
               <CardContent className="p-4">
                 {coupon ? (
-                  <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      <CheckCircle2 className="h-5 w-5 text-indigo-600" />
                       <div>
-                        <p className="text-sm font-bold text-emerald-800">
+                        <p className="text-sm font-bold text-indigo-800">
                           {coupon.code} {t("checkout.applied")}
                         </p>
-                        <p className="text-xs text-emerald-700">
+                        <p className="text-xs text-indigo-700">
                           {coupon.discount}% {t("checkout.discount")}
                         </p>
                       </div>
@@ -651,7 +651,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                         setCoupon(null);
                         setCouponCode("");
                       }}
-                      className="text-emerald-700 hover:bg-emerald-100"
+                      className="text-indigo-700 hover:bg-indigo-100"
                     >
                       Remove
                     </Button>
@@ -694,15 +694,15 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
             {/* Trust badges */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
                 {t("checkout.secureCheckout")}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-indigo-500" />
                 {t("checkout.instantEnrollment")}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-emerald-500" />
+                <Clock className="h-3.5 w-3.5 text-indigo-500" />
                 Lifetime access
               </span>
             </div>
@@ -755,7 +755,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                     </span>
                   </div>
                   {pricing.savings > 0 && (
-                    <div className="flex justify-between text-emerald-700">
+                    <div className="flex justify-between text-indigo-700">
                       <span className="inline-flex items-center gap-1">
                         <Tag className="h-3.5 w-3.5" />
                         {t("bundleCheckout.bundleDiscount")}
@@ -772,7 +772,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                     </span>
                   </div>
                   {pricing.hasCoupon && (
-                    <div className="flex justify-between text-emerald-700">
+                    <div className="flex justify-between text-indigo-700">
                       <span className="inline-flex items-center gap-1">
                         <Tag className="h-3.5 w-3.5" />
                         {t("bundleCheckout.coupon")} ({coupon?.discount}%)
@@ -817,7 +817,7 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
                         key={item.label}
                         className="flex items-center gap-2 text-sm text-foreground"
                       >
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                           <item.icon className="h-3 w-3" />
                         </span>
                         {item.label}

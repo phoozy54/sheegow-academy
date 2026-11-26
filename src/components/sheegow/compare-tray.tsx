@@ -86,12 +86,12 @@ export function CompareTray() {
       role="region"
       aria-label={t("compare.title")}
     >
-      <div className="mx-auto max-w-5xl rounded-2xl border bg-card/95 p-3 shadow-2xl shadow-emerald-500/10 backdrop-blur sm:p-4">
+      <div className="mx-auto max-w-5xl rounded-2xl border bg-card/95 p-3 shadow-2xl shadow-indigo-500/10 backdrop-blur sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Header + count */}
           <div className="flex shrink-0 items-center gap-2 sm:flex-col sm:items-start">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
                 <GitCompare className="h-4 w-4" />
               </span>
               <span className="text-sm font-bold text-foreground">
@@ -159,7 +159,7 @@ export function CompareTray() {
             <Button
               asChild
               size="sm"
-              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+              className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
             >
               <Link href="/compare">
                 {t("compare.compareNow")}
