@@ -1,19 +1,23 @@
 // SHEEGOW ACADEMY — Service Worker for PWA
-// Enables offline caching and push notifications
+// Enables offline caching, push notifications, and installability
 
-const CACHE_NAME = "sheegow-v1";
+const CACHE_NAME = "sheegow-v2";
 const OFFLINE_URL = "/";
+
+// Core assets to cache on install
+const CORE_ASSETS = [
+  "/",
+  "/manifest.json",
+  "/icon.svg",
+  "/icon-192.png",
+  "/icon-512.png",
+];
 
 // Cache core assets on install
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        "/",
-        "/manifest.json",
-        "/icon.svg",
-        "/icon-app.png",
-      ]).catch(() => undefined);
+      return cache.addAll(CORE_ASSETS).catch(() => undefined);
     })
   );
   self.skipWaiting();
@@ -35,20 +39,36 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
-  // Skip non-GET requests and API calls
-  if (request.method !== "GET" || request.url.includes("/api/")) {
+  // Skip non-GET requests
+  if (request.method !== "GET") return;
+
+  // Skip API calls and WebSocket
+  const url = new URL(request.url);
+  if (url.pathname.startsWith("/api/") || url.hostname.includes("sheegow-chat") || url.hostname.includes("cloudinary")) {
     return;
   }
 
-  // Skip WebSocket/Socket.io
-  if (request.url.includes("socket.io") || request.url.includes("sheegow-chat")) {
+  // Cache-first for static assets (images, fonts, CSS, JS)
+  if (url.pathname.match(/\.(png|jpg|jpeg|svg|gif|webp|ico|woff2?|css|js)$/)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      })
+    );
     return;
   }
 
+  // Network-first for pages
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Clone and cache successful responses
         if (response.status === 200 && response.type === "basic") {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
@@ -56,7 +76,6 @@ self.addEventListener("fetch", (event) => {
         return response;
       })
       .catch(() => {
-        // Fall back to cache when offline
         return caches.match(request).then((cached) => {
           return cached || caches.match(OFFLINE_URL);
         });
@@ -80,6 +99,8 @@ self.addEventListener("push", (event) => {
       badge: "/icon-192.png",
       vibrate: [200, 100, 200],
       data: { url: data.url || "/" },
+      tag: "sheegow-notification",
+      renotify: true,
     })
   );
 });
@@ -100,4 +121,17 @@ self.addEventListener("notificationclick", (event) => {
       }
     })
   );
+});
+
+// Handle background sync (for offline form submissions)
+self.addEventListener("sync", (event) => {
+  if (event.tag === "sheegow-sync") {
+    event.waitUntil(
+      clients.matchAll().then((clientList) => {
+        clientList.forEach((client) => {
+          client.postMessage({ type: "BACKGROUND_SYNC" });
+        });
+      })
+    );
+  }
 });
