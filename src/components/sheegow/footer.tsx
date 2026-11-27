@@ -109,6 +109,11 @@ export function Footer() {
               href="/"
               aria-label="SHEEGOW ACADEMY — home"
               className="mb-4 inline-flex"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.location.pathname === "/") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
             >
               <BrandLockup />
             </Link>

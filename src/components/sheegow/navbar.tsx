@@ -116,6 +116,12 @@ export function Navbar() {
             href="/"
             aria-label="SHEEGOW ACADEMY — home"
             className="shrink-0 transition-transform hover:scale-[1.02]"
+            onClick={() => {
+              // If already on home, scroll to top instead of reloading
+              if (window.location.pathname === "/") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
           >
             <BrandLockup />
           </Link>
@@ -253,7 +259,9 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[85vw] max-w-sm overflow-y-auto p-0">
               <SheetTitle className="mb-6">
-                <BrandLockup className="scale-95 origin-left" />
+                <Link href="/" aria-label="SHEEGOW ACADEMY — home">
+                  <BrandLockup className="scale-95 origin-left" />
+                </Link>
               </SheetTitle>
               <nav className="flex flex-col gap-1">
                 {NAV_LINKS.map((link) => {
