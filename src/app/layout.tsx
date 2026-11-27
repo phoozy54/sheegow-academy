@@ -54,9 +54,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/logo.jpeg", type: "image/jpeg" },
     ],
-    apple: "/logo.svg",
+    apple: "/logo.jpeg",
   },
   manifest: "/manifest.json",
   openGraph: {
@@ -127,7 +127,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="SHEEGOW" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/logo.jpeg" />
         <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
         {/* Service worker registration */}
         <script

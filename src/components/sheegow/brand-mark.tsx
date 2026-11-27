@@ -5,44 +5,16 @@ type BrandMarkProps = {
   decorative?: boolean;
 };
 
-function paths() {
-  return (
-    <>
-      <path d="M24 46 L24 66 C24 74 38 80 50 80 C62 80 76 74 76 66 L76 46 L50 58 Z" fill="var(--sg-cap)" />
-      <polygon
-        points="50,14 96,34 50,54 4,34"
-        fill="var(--sg-cap)"
-        stroke="var(--sg-sep)"
-        strokeWidth="4"
-        strokeLinejoin="round"
-      />
-      <polygon points="45,27 45,41 57,34" fill="var(--sg-play)" />
-      <path d="M90 37 L90 62" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-      <circle cx="90" cy="67" r="5" fill="#F59E0B" />
-    </>
-  );
-}
-
-/** Icon-only mark. */
+/** Icon-only mark — uses the uploaded logo image. */
 export function BrandMark({ className, decorative = true }: BrandMarkProps) {
   return (
-    <svg
-      viewBox="0 8 100 76"
+    <img
+      src="/logo.jpeg"
+      alt={decorative ? "" : "SHEEGOW ACADEMY"}
       aria-hidden={decorative}
-      aria-label={decorative ? undefined : "SHEEGOW ACADEMY"}
       role={decorative ? "presentation" : "img"}
-      focusable="false"
-      className={cn("h-10 w-auto shrink-0", className)}
-      style={
-        {
-          "--sg-cap": "#ffffff",
-          "--sg-sep": "#4F46E5",
-          "--sg-play": "#4F46E5",
-        } as React.CSSProperties
-      }
-    >
-      {paths()}
-    </svg>
+      className={cn("h-10 w-auto shrink-0 object-contain", className)}
+    />
   );
 }
 
@@ -57,15 +29,17 @@ export function BrandLockup({
     <span className={cn("flex items-center gap-2.5", className)}>
       <span
         className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-xl shadow-lg",
+          "flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-lg",
           onDark
             ? "bg-white/10 ring-1 ring-white/15 shadow-none"
             : "bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-indigo-500/30"
         )}
       >
-        <BrandMark
-          className="h-[1.55rem] w-[1.55rem]"
-          decorative
+        <img
+          src="/logo.jpeg"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full object-cover"
         />
       </span>
       <span className="flex flex-col leading-none">
