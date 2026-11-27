@@ -1,8 +1,9 @@
 {
   "name": "SHEEGOW ACADEMY",
   "short_name": "SHEEGOW",
-  "description": "Live English Learning Platform — Learn English through LIVE interactive classes with expert teachers. Open to learners everywhere.",
+  "description": "Live English Learning Platform — Learn English through LIVE interactive classes with expert teachers. Built for Somali-speaking students worldwide.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
@@ -12,10 +13,30 @@
   "dir": "ltr",
   "icons": [
     {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/splash.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "form_factor": "wide"
     }
   ]
 }
