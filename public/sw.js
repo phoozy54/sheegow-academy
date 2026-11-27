@@ -12,8 +12,7 @@ self.addEventListener("install", (event) => {
         "/",
         "/manifest.json",
         "/logo.jpeg",
-        "/icon-192.png",
-        "/icon-512.png",
+        "/icon-app.png",
       ]).catch(() => undefined);
     })
   );
