@@ -40,44 +40,44 @@ import {
 
 const FEATURES: Array<{
   icon: typeof Video;
-  title: string;
-  desc: string;
+  titleKey: string;
+  descKey: string;
   tone: DesignTone;
 }> = [
   {
     icon: Video,
-    title: "LIVE Video Classes",
-    desc: "Real-time interactive English classes — no recorded videos. Speak with teachers and classmates every session.",
+    titleKey: "feature.liveVideo",
+    descKey: "feature.liveVideoDesc",
     tone: "rose",
   },
   {
     icon: Users,
-    title: "Small Group Learning",
-    desc: "Learn in small batches so every student gets personal attention and speaking practice.",
+    titleKey: "feature.smallGroup",
+    descKey: "feature.smallGroupDesc",
     tone: "indigo",
   },
   {
     icon: GraduationCap,
-    title: "Expert Teacher",
-    desc: "Learn with Ciise Mohamed Sheeq (SHEEGOW) — English expert with a university degree and 15 years of teaching experience.",
+    titleKey: "feature.expertTeachers",
+    descKey: "feature.expertTeachersDesc",
     tone: "amber",
   },
   {
     icon: MessageSquare,
-    title: "Real-time Chat",
-    desc: "Ask questions instantly during class with live chat support alongside your video lesson.",
+    titleKey: "feature.realTimeChat",
+    descKey: "feature.realTimeChatDesc",
     tone: "indigo",
   },
   {
     icon: Award,
-    title: "Certificates & Progress",
-    desc: "Track your progress and earn a certificate when you complete each course.",
+    titleKey: "feature.certificates",
+    descKey: "feature.certificatesDesc",
     tone: "indigo",
   },
   {
     icon: Globe2,
-    title: "Learn From Anywhere",
-    desc: "Join from anywhere in the world. Payment details are shown clearly at checkout.",
+    titleKey: "feature.anywhere",
+    descKey: "feature.anywhereDesc",
     tone: "sky",
   },
 ];
@@ -283,10 +283,10 @@ export function HomeView() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
             <FeatureTile
-              key={f.title}
+              key={f.titleKey}
               icon={f.icon}
-              title={f.title}
-              desc={f.desc}
+              title={t(f.titleKey)}
+              desc={t(f.descKey)}
               tone={f.tone}
             />
           ))}
