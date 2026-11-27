@@ -5,15 +5,15 @@ type BrandMarkProps = {
   decorative?: boolean;
 };
 
-/** Icon-only mark — uses the uploaded app icon (graduation cap + play button). */
+/** Icon-only mark — graduation cap + play button + amber tassel. */
 export function BrandMark({ className, decorative = true }: BrandMarkProps) {
   return (
     <img
-      src="/icon-app.png"
+      src="/icon.svg"
       alt={decorative ? "" : "SHEEGOW ACADEMY"}
       aria-hidden={decorative}
       role={decorative ? "presentation" : "img"}
-      className={cn("h-10 w-10 shrink-0 rounded-lg object-cover", className)}
+      className={cn("h-10 w-10 shrink-0 rounded-xl object-cover", className)}
     />
   );
 }
@@ -28,7 +28,7 @@ export function BrandLockup({
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
       <img
-        src="/icon-app.png"
+        src="/icon.svg"
         alt=""
         aria-hidden="true"
         className="h-10 w-10 shrink-0 rounded-xl shadow-lg object-cover"
