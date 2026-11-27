@@ -5,15 +5,15 @@ type BrandMarkProps = {
   decorative?: boolean;
 };
 
-/** Icon-only mark — uses the uploaded logo image. */
+/** Icon-only mark — graduation cap + play button + amber tassel. */
 export function BrandMark({ className, decorative = true }: BrandMarkProps) {
   return (
     <img
-      src="/logo.jpeg"
+      src="/icon.svg"
       alt={decorative ? "" : "SHEEGOW ACADEMY"}
       aria-hidden={decorative}
       role={decorative ? "presentation" : "img"}
-      className={cn("h-10 w-auto shrink-0 object-contain", className)}
+      className={cn("h-10 w-10 shrink-0 rounded-xl object-cover", className)}
     />
   );
 }
@@ -27,21 +27,12 @@ export function BrandLockup({
 }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
-      <span
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-lg",
-          onDark
-            ? "bg-white/10 ring-1 ring-white/15 shadow-none"
-            : "bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-indigo-500/30"
-        )}
-      >
-        <img
-          src="/logo.jpeg"
-          alt=""
-          aria-hidden="true"
-          className="h-full w-full object-cover"
-        />
-      </span>
+      <img
+        src="/icon.svg"
+        alt=""
+        aria-hidden="true"
+        className="h-10 w-10 shrink-0 rounded-xl shadow-lg object-cover"
+      />
       <span className="flex flex-col leading-none">
         <span
           className={cn(

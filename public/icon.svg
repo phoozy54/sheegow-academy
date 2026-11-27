@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
+  <defs>
+    <!-- Indigo gradient for the cap -->
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6a5cf5"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+    <!-- White tile gradient -->
+    <linearGradient id="tileGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e8e8e8"/>
+    </linearGradient>
+    <!-- Amber tassel gradient -->
+    <linearGradient id="tasselGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background (white tile) -->
+  <rect x="2" y="2" width="96" height="96" rx="22" fill="url(#tileGrad)" />
+
+  <!-- Soft purple glow behind cap -->
+  <ellipse cx="50" cy="50" rx="30" ry="28" fill="#6a5cf5" opacity="0.08" />
+
+  <!-- Cap board (diamond/rhombus) — wider than tall -->
+  <polygon points="50,22 82,38 50,54 18,38" fill="url(#capGrad)" />
+
+  <!-- White play button triangle (centered in diamond) -->
+  <polygon points="44,31 44,45 58,38" fill="#ffffff" />
+
+  <!-- Cap base (rounded trapezoid below diamond) -->
+  <path d="M30,44 L30,58 C30,66 38,70 50,70 C62,70 70,66 70,58 L70,44 L50,54 Z" fill="url(#capGrad)" />
+
+  <!-- White chevron notch between diamond and base -->
+  <polygon points="50,54 42,48 50,52 58,48" fill="#ffffff" opacity="0.9" />
+
+  <!-- Tassel cord (from right corner of diamond, dropping down) -->
+  <line x1="82" y1="38" x2="82" y2="55" stroke="url(#tasselGrad)" stroke-width="2.5" stroke-linecap="round" />
+
+  <!-- Tassel ball (circle at end of cord) -->
+  <circle cx="82" cy="59" r="3.5" fill="url(#tasselGrad)" />
+</svg>

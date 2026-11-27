@@ -11,9 +11,8 @@ self.addEventListener("install", (event) => {
       return cache.addAll([
         "/",
         "/manifest.json",
-        "/logo.jpeg",
-        "/icon-192.png",
-        "/icon-512.png",
+        "/icon.svg",
+        "/icon-app.png",
       ]).catch(() => undefined);
     })
   );
