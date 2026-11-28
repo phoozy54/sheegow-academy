@@ -246,6 +246,31 @@ export async function POST(req: Request, { params }: RouteContext) {
     // ── Create payments + enrollments atomically ──
     try {
       const result = await db.$transaction(async (tx) => {
+        // PAY-1: re-check and deactivate the coupon inside the same
+        // transaction as the payments. Coupons are one-time-use by contract;
+        // a rollback (e.g. PK replay below) also rolls back the deactivation.
+        if (appliedCouponCode) {
+          const fresh = await tx.coupon.findUnique({
+            where: { code: appliedCouponCode },
+          });
+          if (
+            !fresh ||
+            !fresh.active ||
+            (fresh.expiresAt && fresh.expiresAt.getTime() < Date.now())
+          ) {
+            return { kind: "coupon_invalid" as const };
+          }
+          // Atomic one-time claim — a concurrent transaction re-checks
+          // active:true after the row lock and affects 0 rows.
+          const claimed = await tx.coupon.updateMany({
+            where: { id: fresh.id, active: true },
+            data: { active: false },
+          });
+          if (claimed.count !== 1) {
+            return { kind: "coupon_invalid" as const };
+          }
+        }
+
         const payments: Payment[] = [];
         const alreadyEnrolledCourseIds: string[] = [];
 
@@ -319,9 +344,21 @@ export async function POST(req: Request, { params }: RouteContext) {
           });
         }
 
-        return { payments, alreadyEnrolledCourseIds };
+        return {
+          kind: "created" as const,
+          payments,
+          alreadyEnrolledCourseIds,
+        };
       });
-      return await buildResponse(result.payments, false, result.alreadyEnrolledCourseIds, 201);
+      if (result.kind === "coupon_invalid") {
+        return jsonError("Coupon is invalid or expired", 400);
+      }
+      return await buildResponse(
+        result.payments,
+        false,
+        result.alreadyEnrolledCourseIds,
+        201
+      );
     } catch (e) {
       // A concurrent request won the primary-key race. Return its purchase;
       // our own transaction rolled back, so no duplicate charge exists.

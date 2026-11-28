@@ -4,6 +4,17 @@ import { cookies } from "next/headers";
 import { randomBytes } from "crypto";
 import { db } from "@/lib/db";
 import { ensureUsernameSchema } from "@/lib/username";
+import {
+  isCurrentSession,
+  nextSessionVersion,
+  sessionVersionOf,
+} from "@/lib/session";
+
+export {
+  isCurrentSession,
+  nextSessionVersion,
+  sessionVersionOf,
+} from "@/lib/session";
 
 /**
  * Secrets are resolved lazily so `next build` doesn't require them, but any
@@ -41,8 +52,33 @@ export interface TokenPayload {
   email: string;
   /** Distinguishes access tokens from socket-scoped tokens. */
   purpose?: "access" | "socket";
+  /**
+   * Session epoch (User.updatedAt in ms) captured when the token was issued.
+   * Refresh and getCurrentUser compare it with the current DB value so that
+   * logout / password change invalidate every token issued before them.
+   * Uses an existing column — no schema or migration change.
+   */
+  sessionVersion?: number;
   iat?: number;
   exp?: number;
+}
+
+/**
+ * Invalidate all tokens issued before now for this user by advancing their
+ * session epoch. Called by logout and change-password. Fail closed: a bad
+ * userId bubbles up to the route's normal error handler.
+ */
+export async function revokeUserSessions(userId: string): Promise<void> {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { updatedAt: true },
+  });
+  if (!user) return;
+  // Strictly greater than the previous epoch, even within one millisecond.
+  await db.user.update({
+    where: { id: userId },
+    data: { updatedAt: new Date(nextSessionVersion(user.updatedAt.getTime())) },
+  });
 }
 
 export function signAccessToken(payload: TokenPayload): string {
@@ -174,10 +210,14 @@ export async function getCurrentUser() {
         level: true,
         isActive: true,
         createdAt: true,
+        updatedAt: true,
       },
     });
 
     if (!user || !user.isActive) return null;
+    // Session revocation (logout / password change) advances updatedAt.
+    // Reject stale access tokens immediately instead of waiting for expiry.
+    if (!isCurrentSession(payload, user)) return null;
     return user;
   } catch {
     return null;

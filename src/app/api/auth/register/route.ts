@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { hashPassword, setAuthCookies } from "@/lib/auth";
+import { hashPassword, sessionVersionOf, setAuthCookies } from "@/lib/auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
@@ -196,6 +196,7 @@ export async function POST(req: Request) {
       userId: user.id,
       role: user.role,
       email: user.email,
+      sessionVersion: sessionVersionOf(user),
     });
 
     // Send a welcome email. Best-effort: failures are logged but never

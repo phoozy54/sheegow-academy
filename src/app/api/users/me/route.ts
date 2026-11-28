@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, sessionVersionOf, setAuthCookies } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 import { allocateUsername, usernameErrorResponse } from "@/lib/username";
@@ -18,6 +18,7 @@ const profileSelect = {
   level: true,
   isActive: true,
   createdAt: true,
+  updatedAt: true,
 } as const;
 
 interface UpdateProfileBody {
@@ -118,6 +119,16 @@ export async function PATCH(req: Request) {
       where: { id: user.id },
       data,
       select: profileSelect,
+    });
+
+    // @updatedAt advances the session epoch. Reissue cookies for the acting
+    // device so a profile edit does not immediately log the user out; other
+    // devices remain revoked (same semantics as change-password).
+    await setAuthCookies({
+      userId: updated.id,
+      role: updated.role,
+      email: updated.email,
+      sessionVersion: sessionVersionOf(updated),
     });
 
     return NextResponse.json({ user: updated });

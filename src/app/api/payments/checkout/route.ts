@@ -1,9 +1,15 @@
-import { randomUUID } from "crypto";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { requireAuth } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import {
+  courseGeneration,
+  coursePaymentId,
+  coursePaymentPrefix,
+  replayablePayment,
+} from "@/lib/course-checkout";
 
 interface CheckoutBody {
   courseId?: string;
@@ -24,7 +30,8 @@ const DEMO_MODE =
 
 /**
  * Validate a coupon by code. Returns the coupon when valid + active + not
- * expired, otherwise null.
+ * expired, otherwise null. This is a fast pre-check; the authoritative check
+ * and the one-time deactivation happen inside the checkout transaction.
  */
 async function findValidCoupon(code: string) {
   const coupon = await db.coupon.findUnique({ where: { code } });
@@ -35,11 +42,50 @@ async function findValidCoupon(code: string) {
 }
 
 /**
+ * Only a violation of Payment.id (the deterministic PK we use as the
+ * idempotency lock) means "another request already bought this". Enrollment
+ * unique violations are a different condition and must not be replayed.
+ */
+function isPaymentPrimaryKeyConflict(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+  const target = (error.meta as { target?: unknown } | undefined)?.target;
+  const values = Array.isArray(target) ? target : [target];
+  return values.some(
+    (value) =>
+      typeof value === "string" &&
+      (value === "id" || /payment\.id/i.test(value) || /pkey$/i.test(value)),
+  );
+}
+
+const paymentInclude = {
+  course: { select: { id: true, title: true, level: true, image: true } },
+} as const;
+
+const enrollmentInclude = {
+  course: {
+    include: {
+      teacher: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          profilePicture: true,
+        },
+      },
+    },
+  },
+  payment: { select: { id: true, method: true, amount: true, status: true } },
+} as const;
+
+/**
  * POST /api/payments/checkout
  * Mock checkout flow:
  *  - Validates the optional coupon
- *  - Creates a Payment record with status "completed"
- *  - Auto-enrolls the student (links the payment to the enrollment)
+ *  - Creates a completed Payment with a DETERMINISTIC id (PAY-1 idempotency)
+ *  - Deactivates the coupon inside the same transaction (PAY-1 one-time use)
+ *  - Auto-enrolls the student (enrollment.upsert, never a duplicate)
  *  - Returns { payment, enrollment, finalAmount }
  */
 export async function POST(req: Request) {
@@ -101,7 +147,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── Coupon validation (optional) ──
+    // ── Coupon pre-validation (optional) ──
     let discount = 0;
     let appliedCouponCode: string | null = null;
     if (couponCode) {
@@ -112,98 +158,164 @@ export async function POST(req: Request) {
       appliedCouponCode = coupon.code;
     }
 
+    // Server-side price only — client-supplied price/amount are ignored.
     const finalAmount = Math.max(
       0,
       Math.round(course.price * (1 - discount / 100) * 100) / 100
     );
 
-    // ── Create payment (mock: always completed) ──
-    const payment = await db.payment.create({
-      data: {
+    // ── PAY-1: deterministic identity for this purchase attempt ──
+    const prefix = coursePaymentPrefix(user.id, courseId);
+    const history = await db.payment.findMany({
+      where: {
         studentId: user.id,
         courseId,
-        amount: finalAmount,
-        method,
-        status: "completed",
-        transactionId: `demo_${randomUUID()}`,
-        couponCode: appliedCouponCode,
+        transactionId: { startsWith: prefix },
       },
-      include: {
-        course: { select: { id: true, title: true, level: true, image: true } },
-      },
+      include: paymentInclude,
+      orderBy: { createdAt: "asc" },
     });
+    const generation = courseGeneration(history, prefix);
 
-    // ── Auto-enroll (idempotent: link payment to existing enrollment) ──
-    let enrollment = await db.enrollment.findUnique({
+    // Sequential retries (double-click seconds apart, client retry after a
+    // timeout) replay the completed purchase instead of charging again.
+    // A refunded/failed row is not replayable, so a real repurchase still
+    // advances the generation and creates a fresh payment.
+    const replay = replayablePayment(history, prefix, generation);
+    if (replay) {
+      const existingEnrollment = await db.enrollment.findUnique({
+        where: {
+          studentId_courseId: { studentId: user.id, courseId },
+        },
+        include: enrollmentInclude,
+      });
+      return NextResponse.json(
+        {
+          payment: replay,
+          enrollment: existingEnrollment,
+          finalAmount: replay.amount,
+          alreadyPurchased: true,
+        },
+        { status: 200 }
+      );
+    }
+
+    const paymentId = coursePaymentId(prefix, generation);
+    const transactionId = `${prefix}${generation}`;
+    const existingEnrollment = await db.enrollment.findUnique({
       where: {
         studentId_courseId: { studentId: user.id, courseId },
       },
-      include: {
-        course: {
-          include: {
-            teacher: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-                profilePicture: true,
-              },
-            },
-          },
-        },
-        payment: { select: { id: true, method: true, amount: true, status: true } },
-      },
+      select: { paymentId: true },
     });
 
-    if (enrollment) {
-      // Already enrolled — link the new payment record.
-      enrollment = await db.enrollment.update({
-        where: { id: enrollment.id },
-        data: { paymentId: payment.id },
-        include: {
-          course: {
-            include: {
-              teacher: {
-                select: {
-                  id: true,
-                  fullName: true,
-                  email: true,
-                  profilePicture: true,
-                },
-              },
-            },
+    // ── Payment + coupon + enrollment in ONE transaction ──
+    // A concurrent duplicate collides on Payment.id; the whole transaction
+    // (including the coupon deactivation) rolls back, then we replay the
+    // winner's payment below.
+    let outcome:
+      | { kind: "coupon_invalid" }
+      | {
+          kind: "created";
+          payment: Prisma.PaymentGetPayload<{ include: typeof paymentInclude }>;
+          enrollment: Prisma.EnrollmentGetPayload<{ include: typeof enrollmentInclude }>;
+        };
+
+    try {
+      outcome = await db.$transaction(async (tx) => {
+        if (appliedCouponCode) {
+          const fresh = await tx.coupon.findUnique({
+            where: { code: appliedCouponCode },
+          });
+          if (
+            !fresh ||
+            !fresh.active ||
+            (fresh.expiresAt && fresh.expiresAt.getTime() < Date.now())
+          ) {
+            return { kind: "coupon_invalid" as const };
+          }
+          // Coupons are one-time-use by contract (register/seed). The
+          // conditional UPDATE is the atomic claim: under Postgres READ
+          // COMMITTED a second transaction blocks on this row, re-checks
+          // active:true, and affects 0 rows → its purchase is rejected.
+          const claimed = await tx.coupon.updateMany({
+            where: { id: fresh.id, active: true },
+            data: { active: false },
+          });
+          if (claimed.count !== 1) {
+            return { kind: "coupon_invalid" as const };
+          }
+        }
+
+        const payment = await tx.payment.create({
+          data: {
+            id: paymentId,
+            studentId: user.id,
+            courseId,
+            amount: finalAmount,
+            method,
+            status: "completed",
+            transactionId,
+            couponCode: appliedCouponCode,
           },
-          payment: { select: { id: true, method: true, amount: true, status: true } },
-        },
-      });
-    } else {
-      enrollment = await db.enrollment.create({
-        data: {
-          studentId: user.id,
-          courseId,
-          paymentId: payment.id,
-          progress: 0,
-        },
-        include: {
-          course: {
-            include: {
-              teacher: {
-                select: {
-                  id: true,
-                  fullName: true,
-                  email: true,
-                  profilePicture: true,
-                },
-              },
-            },
+          include: paymentInclude,
+        });
+
+        const enrollment = await tx.enrollment.upsert({
+          where: {
+            studentId_courseId: { studentId: user.id, courseId },
           },
-          payment: { select: { id: true, method: true, amount: true, status: true } },
-        },
+          create: {
+            studentId: user.id,
+            courseId,
+            paymentId: payment.id,
+            progress: 0,
+          },
+          // Never detach an existing receipt (bundle or earlier payment).
+          update: existingEnrollment?.paymentId ? {} : { paymentId: payment.id },
+          include: enrollmentInclude,
+        });
+
+        return { kind: "created" as const, payment, enrollment };
       });
+    } catch (e) {
+      if (isPaymentPrimaryKeyConflict(e)) {
+        // A concurrent request won the PK race. Return its purchase; our own
+        // transaction rolled back, so no duplicate charge and no coupon loss.
+        const winner = await db.payment.findUnique({
+          where: { id: paymentId },
+          include: paymentInclude,
+        });
+        if (winner && winner.studentId === user.id) {
+          const enrollment = await db.enrollment.findUnique({
+            where: {
+              studentId_courseId: { studentId: user.id, courseId },
+            },
+            include: enrollmentInclude,
+          });
+          return NextResponse.json(
+            {
+              payment: winner,
+              enrollment,
+              finalAmount: winner.amount,
+              alreadyPurchased: true,
+            },
+            { status: 200 }
+          );
+        }
+      }
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+        return jsonError("Enrollment details changed during checkout. Please retry.", 409);
+      }
+      throw e;
+    }
+
+    if (outcome.kind === "coupon_invalid") {
+      return jsonError("Coupon is invalid or expired", 400);
     }
 
     return NextResponse.json(
-      { payment, enrollment, finalAmount },
+      { payment: outcome.payment, enrollment: outcome.enrollment, finalAmount },
       { status: 201 }
     );
   } catch (e) {

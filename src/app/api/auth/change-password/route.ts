@@ -4,7 +4,10 @@ import { logger } from "@/lib/logger";
 import {
   comparePassword,
   hashPassword,
+  nextSessionVersion,
   requireAuth,
+  sessionVersionOf,
+  setAuthCookies,
 } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
 
@@ -39,17 +42,38 @@ export async function POST(req: Request) {
 
     const dbUser = await db.user.findUnique({
       where: { id: user.id },
-      select: { id: true, password: true },
+      select: { id: true, password: true, updatedAt: true },
     });
     if (!dbUser) return jsonError("Unauthorized", 401);
 
     const valid = await comparePassword(currentPassword, dbUser.password);
     if (!valid) return jsonError("Current password is incorrect", 400);
 
+    // Advancing updatedAt revokes every token issued with the old epoch
+    // (all other sessions). Explicit here so the guarantee does not depend
+    // on the @updatedAt annotation surviving a future schema edit.
     await db.user.update({
       where: { id: user.id },
-      data: { password: await hashPassword(newPassword) },
+      data: {
+        password: await hashPassword(newPassword),
+        updatedAt: new Date(nextSessionVersion(dbUser.updatedAt.getTime())),
+      },
     });
+
+    // Keep the current browser signed in with a fresh token at the new epoch.
+    // A stolen old refresh token no longer matches and gets 401 at /refresh.
+    const renewed = await db.user.findUnique({
+      where: { id: user.id },
+      select: { id: true, role: true, email: true, updatedAt: true },
+    });
+    if (renewed) {
+      await setAuthCookies({
+        userId: renewed.id,
+        role: renewed.role,
+        email: renewed.email,
+        sessionVersion: sessionVersionOf(renewed),
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (e) {

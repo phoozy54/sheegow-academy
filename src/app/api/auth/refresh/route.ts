@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { logger } from "@/lib/logger"
 import { db } from "@/lib/db";
-import { setAuthCookies, verifyRefreshToken } from "@/lib/auth";
+import {
+  isCurrentSession,
+  sessionVersionOf,
+  setAuthCookies,
+  verifyRefreshToken,
+} from "@/lib/auth";
 import { jsonError, handleAuthError, limitRequest } from "@/lib/api-helpers";
 import { clientIp } from "@/lib/rate-limit";
 
@@ -44,12 +49,17 @@ export async function POST(req: Request) {
 
     if (!user) return jsonError("User not found", 404);
     if (!user.isActive) return jsonError("Account is deactivated", 403);
+    // Reject refresh tokens issued before a logout or password change.
+    if (!isCurrentSession(payload, user))
+      return jsonError("Session has been revoked", 401);
 
-    // Issue a fresh pair of cookies (rotates the access token)
+    // Issue a fresh pair of cookies (rotates the access token) with the
+    // current session epoch — the revoked older token stays invalid.
     await setAuthCookies({
       userId: user.id,
       role: user.role,
       email: user.email,
+      sessionVersion: sessionVersionOf(user),
     });
 
     return NextResponse.json({ user });

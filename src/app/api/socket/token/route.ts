@@ -89,7 +89,14 @@ export async function GET(req: Request) {
           );
         }
       }
-    } else if (!canBroadcast && !isTeachingRole(user.role)) {
+    } else if (
+      !trialApproved &&
+      !canBroadcast &&
+      !isTeachingRole(user.role)
+    ) {
+      // An admin-approved trial is already authorised above — it must not be
+      // rejected here just because a viewer-mode student cannot broadcast.
+      // The token below still carries canBroadcast: false for students.
       return jsonError("Forbidden", 403);
     }
 

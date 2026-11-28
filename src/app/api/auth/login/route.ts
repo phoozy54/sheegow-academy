@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { comparePassword, setAuthCookies } from "@/lib/auth";
+import { comparePassword, sessionVersionOf, setAuthCookies } from "@/lib/auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 import {
@@ -122,6 +122,7 @@ export async function POST(req: Request) {
       userId: user.id,
       role: user.role,
       email: user.email,
+      sessionVersion: sessionVersionOf(user),
     });
 
     return NextResponse.json({
