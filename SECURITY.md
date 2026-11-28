@@ -223,15 +223,15 @@ Boundary kasta waa inuu leeyahay: **authenticate → authorize → validate → 
 
 ## 10. Diiwaanka daciifnimada (laga helay dib-u-eegis 2026-11-28)
 
-**Status:** `QG-1`, `BL-1`, `CSP-1` = `FIXED — VERIFIED` (dib-u-eegis madax-bannaan); `DEP-1` = `FIXED — pending independent review`; inta kale waa `OPEN`.  
-**Ma jiro commit, push, ama deploy la sameeyay.**
+**Status:** `QG-1`, `BL-1`, `CSP-1`, `DEP-1` = `FIXED — VERIFIED` (dib-u-eegis madax-bannaan); inta kale waa `OPEN`.
+**Wave 1 waa la deploy gareeyay** (ogolaansho cad): commit `5608526` + `1366bbd`, Vercel auto-deploy `success`, `/api/health` 200, HTML 27/27 scripts nonced. Ma jiro Wave 2/3 oo la bilaabay.
 
 | ID | Daciifnimada | Sev | Gate | Status |
 |---|---|---|---|---|
 | `QG-1` | Quiz grading: hal jawaab → 100%, progress/certificate | S0 | P0 | `FIXED — VERIFIED` |
 | `BL-1` | Bundle: `courseId:null` + `paymentId @unique` → paid balse locked / P2002 | S0 | P0 | `FIXED — VERIFIED` |
 | `CSP-1` | Nonce request-ka ma gaarayo; SW/SeoShell scripts unnonced; Maps iframe blocked | S0 | P0 | `FIXED — VERIFIED` |
-| `DEP-1` | Saddex architecture oo is-diid ah; SQLite vs postgres provider; health la'aan | S0 | P0 | `FIXED — pending review` |
+| `DEP-1` | Saddex architecture oo is-diid ah; SQLite vs postgres provider; health la'aan | S0 | P0 | `FIXED — VERIFIED` |
 | `SES-1` | Refresh token 30d ma la burinayo logout/password kadib; rotation la'aan | S1 | P1 | `OPEN` |
 | `ACL-1` | Trial-approved student socket token 403; REST chat/polls/attendance access leak | S1 | P1 | `OPEN` |
 | `PAY-1` | Checkout non-atomic; coupon/referral unlimited; `Float` money | S1 | P1 | `OPEN` |
@@ -279,4 +279,4 @@ Faahfaahinta buuxda iyo reproduction/checklist: `docs/SECURITY-PLAYBOOK.md`.
 
 ---
 
-**Gabagabo:** Dastuurkani ma aha decoration. Waa shuruudda aan ku ilaalinayno tacabka, ardayda, macallimiinta, iyo kalsoonida `sheegowacademy.com`. Marka aad ogolaato, waxaan ku bilaabaynaa `QG-1` (quiz grading) anagoo raacaya Section 5 Gate G0→G4 — **ogolaansho deploy la'aan, waxna si toos ah production uguma dhicin.**
+**Gabagabo:** Dastuurkani ma aha decoration. Waa shuruudda aan ku ilaalinayno tacabka, ardayda, macallimiinta, iyo kalsoonida `sheegowacademy.com`. Wave 1 (`QG-1`, `BL-1`, `CSP-1`, `DEP-1`) wuxuu dhamaystirmay G0→G5, waxaana la deploy gareeyay ogolaansho cad ka dib. **Wave 2 (`SES-1`, `ACL-1`, `PAY-1`, `RT-1`, `OPS-1`) ma bilaabayo ilaa ogolaansho cusub laga helo.**

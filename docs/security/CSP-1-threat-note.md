@@ -53,6 +53,6 @@ Rollback / kill switch:
 - `src/components/sheegow/seo/seo-shell.tsx` — server component async ah; JSON-LD script wuxuu helay `nonce={nonce}`.
 - `tests/csp.test.ts` — 8 tests: builder + "script tag kasta nonce ayuu leeyahay" + ThemeProvider nonce + proxy request-header propagation.
 
-**Post-deploy check:** `/` HTML-da 27 `<script>` ayay lahayd; markii `ThemeProvider` nonce helay, dhammaantood waa nonced. `Content-Security-Policy`: `script-src` nonce + strict-dynamic, `unsafe-inline` ma jiro, `frame-src` Maps wuu jiraa. `/api/health` → `200 {"status":"ok","checks":{"db":"ok"}}`.
+**Post-deploy check (G5, `1366bbd`):** `/` HTML-da 27 `<script>` ayay lahayd; **27/27 nonced, 0 missing**. `Content-Security-Policy`: `script-src` nonce + strict-dynamic, `unsafe-inline` ma jiro, `frame-src` Maps wuu jiraa. `/api/health` → `200 {"status":"ok","checks":{"db":"ok"}}`.
 
 **Xusuusin:** Ma jiro schema/env/migration/package change; deploy waa la ogolaaday oo la sameeyay (commit `5608526` + nonce follow-up).
