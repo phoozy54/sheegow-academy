@@ -46,4 +46,6 @@ Rollback / kill switch:
 
 **Dib-u-eegis #2 (M-1):** `spawnSync` raw output (`stdio: "inherit"`) waa la saaray; hadda waa `["ignore","pipe","pipe"]`, stdout/stderr waa la qabtaa oo la tuuraa, fariin guud keliya ayaa la daabacaa — P1001/host/connection-string fragment ma gudbayo terminal/CI log. Test-ku wuxuu caddeynayaa `shell: false` iyo in `result.stdout`/`result.stderr` aan la isticmaalin.
 
+**Dib-u-eegis #3 (staging, 2026-11-28):** Markii `db:push` si dhab ah loo wacay Windows-ka, `spawnSync("npx", ..., shell:false)` wuxuu ku fashilmay `ENOENT` (`npx.cmd`). Waxaa lagu beddelay `spawnSync(process.execPath, [prismaCli, "db", "push"], { shell:false, stdio:["ignore","pipe","pipe"] })` — cross-platform, shell-free, raw output-ka waa la tuurayaa. Test-ka deployment-ka waa la cusboonaysiiyay (`shell: false`, `stdout/stderr` aan la gudbin, `npx` ma jiro). `bun test` → 37/37 (190 expect). Schema waxaa lagu pushed staging DB oo madhan; production lama taaban.
+
 **Xusuusin:** Ma jiro schema/migration/env value/auth/bin/dependency change; ma jiro deploy ama production touch. `db:push` waa empty-DB bootstrap keliya; xog dhab ah → snapshot + migrations la eegay. `db:deploy` weli ma abuuro schema ilaa `prisma/migrations/` la keeno.

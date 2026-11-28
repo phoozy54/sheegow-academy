@@ -43,9 +43,11 @@ describe("DEP-1 — canonical Vercel + Neon + Render(chat) architecture", () => 
     expect(bootstrap).not.toContain("config({");
     expect(bootstrap).not.toContain("override:true");
     expect(bootstrap).toContain("pg_catalog.pg_tables");
-    expect(bootstrap).toContain('spawnSync("npx", ["prisma", "db", "push"]');
+    expect(bootstrap).toContain('spawnSync(process.execPath, [prismaCli, "db", "push"]');
+    expect(bootstrap).toContain('"prisma",\n  "build",\n  "index.js"');
     expect(bootstrap).toContain("shell: false");
     expect(bootstrap).toContain('stdio: ["ignore", "pipe", "pipe"]');
+    expect(bootstrap).not.toContain('spawnSync("npx"');
     expect(bootstrap).not.toContain('stdio: "inherit"');
     expect(bootstrap).not.toContain("result.stdout");
     expect(bootstrap).not.toContain("result.stderr");

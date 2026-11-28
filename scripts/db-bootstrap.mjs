@@ -10,6 +10,8 @@
 import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 config();
 
@@ -48,7 +50,18 @@ if (tableCount !== 0) {
   process.exit(1);
 }
 
-const result = spawnSync("npx", ["prisma", "db", "push"], {
+// Invoke Prisma's CLI with the current Node executable. `npx` with
+// shell:false fails on Windows (ENOENT: npx.cmd), and shell:true would
+// reintroduce command injection. The JS entrypoint works on every platform.
+const prismaCli = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "node_modules",
+  "prisma",
+  "build",
+  "index.js",
+);
+const result = spawnSync(process.execPath, [prismaCli, "db", "push"], {
   shell: false,
   stdio: ["ignore", "pipe", "pipe"],
   encoding: "utf8",

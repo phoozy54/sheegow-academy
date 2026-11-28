@@ -240,6 +240,8 @@ Postmortem due: +48h | Link: ...
 | 1.10 | 2026-11-28 | Dib-u-eegis #2: bootstrap `spawnSync` raw output la qabtay/la tuuray (`stdio` pipe, ma aha `inherit`); fariin guud keliya; test-ku wuxuu xaqiijiyaa `shell: false` iyo in `stdout/stderr` aan la gudbin. 36/36 Bun tests (186 expect). |
 | 1.11 | 2026-11-28 | Push + deploy la ogolaaday: `5608526` Vercel auto-deploy wuu guuleystay, `/api/health` 200. Post-deploy HTML check wuxuu helay `next-themes` script nonce la'aan → `ThemeProvider nonce={nonce}` + regression test. 37/37 Bun tests (188 expect); dib u deploy. |
 | 1.12 | 2026-11-28 | `1366bbd` deploy `success`. G5 verification: `/` HTML 27/27 `<script>` nonced (0 missing), CSP nonce + strict-dynamic + no unsafe-inline + Maps frame-src, `/api/health` 200 db ok. `SECURITY.md` status rows la cusboonaysiiyay: Wave 1 `VERIFIED` + deployed, Wave 2 opens only on new approval. |
+| 1.13 | 2026-11-28 | Wave 2 active-scan G0 + rules of engagement qoran (`docs/security/WAVE2-active-scan-rules.md`): staging preview keliya, synthetic `.test` accounts, sandbox payment, ≤60 requests, kill switch. Docker/Vercel CLI/Neon CLI lama isticmaalayo; secrets lama akhriyo. `NO-GO` ilaa preview URL iyo DB/payment xaqiijin laga helo. |
+| 1.14 | 2026-11-28 | Mulkiilaha wuxuu oggolaaday **container Docker oo cusub** (kuwa jira lama taaban). Staging localhost la dhisay: `sheegow-staging-db` + 8 synthetic courses + superadmin. Active scan: 25/60 requests → `SES-1` (2), `ACL-1` (1), `PAY-1` (2) la xaqiijiyay; server-side price OK; 1 filasho khaldan (403 vs 402, diidmo sax ah). `WAVE2-scan-results.md` la qoray. DEP-1 follow-up: `db-bootstrap.mjs` Windows `npx` ENOENT → `process.execPath` + Prisma CLI; 37/37 tests (190 expect). |
 
 ---
 

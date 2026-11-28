@@ -224,7 +224,8 @@ Boundary kasta waa inuu leeyahay: **authenticate → authorize → validate → 
 ## 10. Diiwaanka daciifnimada (laga helay dib-u-eegis 2026-11-28)
 
 **Status:** `QG-1`, `BL-1`, `CSP-1`, `DEP-1` = `FIXED — VERIFIED` (dib-u-eegis madax-bannaan); inta kale waa `OPEN`.
-**Wave 1 waa la deploy gareeyay** (ogolaansho cad): commit `5608526` + `1366bbd`, Vercel auto-deploy `success`, `/api/health` 200, HTML 27/27 scripts nonced. Ma jiro Wave 2/3 oo la bilaabay.
+**Wave 1 waa la deploy gareeyay** (ogolaansho cad): commit `5608526` + `1366bbd`, Vercel auto-deploy `success`, `/api/health` 200, HTML 27/27 scripts nonced.
+**Wave 2 active scan (staging localhost keliya, 2026-11-28):** `SES-1`, `ACL-1`, `PAY-1` waa la xaqiijiyay — eeg `docs/security/WAVE2-scan-results.md`. Hagaajin weli lama sameyn; Wave 3 ma bilaabayo.
 
 | ID | Daciifnimada | Sev | Gate | Status |
 |---|---|---|---|---|
