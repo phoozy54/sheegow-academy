@@ -238,6 +238,7 @@ Postmortem due: +48h | Link: ...
 | 1.8 | 2026-11-28 | `DEP-1` hagaajin la dhammeeyay (pending review): go'aanka `Vercel + Neon` docs ku jira; `/api/health`; `db:push` badbaado leh + `db:deploy`; self-host toolchain `ARCHIVED`; 8 deployment tests. 35/35 Bun tests. Ma jiro migration/deploy/env value change. |
 | 1.9 | 2026-11-28 | Dib-u-eegis DEP-1: 3 MED + 4 LOW la hagaajiyay — `DATABASE_URL` override laga saaray; bootstrap diidaya DB aan madhnayn; health 10s cache + `GET()` tests dhab ah; Railway/3003 iyo calaamadaha archived la saxay. 36/36 Bun tests (9 deployment). |
 | 1.10 | 2026-11-28 | Dib-u-eegis #2: bootstrap `spawnSync` raw output la qabtay/la tuuray (`stdio` pipe, ma aha `inherit`); fariin guud keliya; test-ku wuxuu xaqiijiyaa `shell: false` iyo in `stdout/stderr` aan la gudbin. 36/36 Bun tests (186 expect). |
+| 1.11 | 2026-11-28 | Push + deploy la ogolaaday: `5608526` Vercel auto-deploy wuu guuleystay, `/api/health` 200. Post-deploy HTML check wuxuu helay `next-themes` script nonce la'aan → `ThemeProvider nonce={nonce}` + regression test. 37/37 Bun tests (188 expect); dib u deploy. |
 
 ---
 

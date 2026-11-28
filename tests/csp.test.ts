@@ -72,12 +72,13 @@ describe("CSP-1 — strict CSP builder", () => {
 describe("CSP-1 — every inline script must carry the nonce", () => {
   const read = (path: string) => Bun.file(new URL(path, import.meta.url)).text();
 
-  it("layout.tsx: script tags == nonce props", async () => {
+  it("layout.tsx: every literal script tag carries the nonce", async () => {
     const source = await read("../src/app/layout.tsx");
-    const scripts = (source.match(/<script\b/g) ?? []).length;
-    const nonces = (source.match(/nonce=/g) ?? []).length;
-    expect(scripts).toBeGreaterThan(0);
-    expect(nonces).toBe(scripts);
+    const scripts = source.match(/<script\b[^>]*>/g) ?? [];
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const tag of scripts) {
+      expect(tag).toContain("nonce={nonce}");
+    }
   });
 
   it("seo-shell.tsx: JSON-LD script has the nonce", async () => {
@@ -86,6 +87,11 @@ describe("CSP-1 — every inline script must carry the nonce", () => {
     const nonces = (source.match(/nonce=/g) ?? []).length;
     expect(scripts).toBeGreaterThan(0);
     expect(nonces).toBe(scripts);
+  });
+
+  it("layout.tsx: next-themes inline theme script receives the nonce", async () => {
+    const source = await read("../src/app/layout.tsx");
+    expect(source).toMatch(/<ThemeProvider[\s\S]*?nonce=\{nonce\}/);
   });
 
   it("proxy.ts forwards the nonce on REQUEST headers, not just the response", async () => {

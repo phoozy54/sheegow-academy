@@ -49,8 +49,10 @@ Rollback / kill switch:
 **G1 ee la sameeyay:**
 - `src/lib/csp.ts` — builder saafi ah: nonce + strict-dynamic, `frame-src` Google Maps, `'unsafe-eval'` gudaha `script-src` (dev keliya), `style-src 'unsafe-inline'` waa ula kac.
 - `src/proxy.ts` — nonce waa la dhigay **request headers** (`new Headers` + `requestHeaders.set`), ma aha response kaliya; `Buffer` waa la saaray (Edge-safe).
-- `src/app/layout.tsx` — SW registration script wuxuu helay `nonce={nonce}`.
+- `src/app/layout.tsx` — SW registration script wuxuu helay `nonce={nonce}`; `ThemeProvider` (next-themes) sidoo kale wuxuu helay `nonce={nonce}` si uu inline theme script-ku u noqdo mid CSP-valid ah.
 - `src/components/sheegow/seo/seo-shell.tsx` — server component async ah; JSON-LD script wuxuu helay `nonce={nonce}`.
-- `tests/csp.test.ts` — 7 tests: builder + "script tag kasta nonce ayuu leeyahay" + proxy request-header propagation.
+- `tests/csp.test.ts` — 8 tests: builder + "script tag kasta nonce ayuu leeyahay" + ThemeProvider nonce + proxy request-header propagation.
 
-**Xusuusin:** Ma jiro schema/env/migration/deploy/package change; ma jiro wax production ah oo la taabtay.
+**Post-deploy check:** `/` HTML-da 27 `<script>` ayay lahayd; markii `ThemeProvider` nonce helay, dhammaantood waa nonced. `Content-Security-Policy`: `script-src` nonce + strict-dynamic, `unsafe-inline` ma jiro, `frame-src` Maps wuu jiraa. `/api/health` → `200 {"status":"ok","checks":{"db":"ok"}}`.
+
+**Xusuusin:** Ma jiro schema/env/migration/package change; deploy waa la ogolaaday oo la sameeyay (commit `5608526` + nonce follow-up).
