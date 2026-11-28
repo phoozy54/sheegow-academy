@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { DeviceProvider } from "@/lib/device";
 import { I18nProvider } from "@/lib/i18n";
+import { DEFAULT_LOCALE, LOCALE_META, type Locale } from "@/lib/i18n/translations";
 import { CompareTray } from "@/components/sheegow/compare-tray";
 import {
   OG_IMAGE,
@@ -25,6 +26,15 @@ const poppins = Poppins({
   // Preconnect for faster font loading on mobile
   adjustFontFallback: true,
 });
+
+const LOCALE_COOKIE = "sheegow_locale";
+
+/** Only the three supported locales are trusted from the cookie. */
+function readLocaleCookie(value: string | undefined): Locale {
+  return value === "en" || value === "so" || value === "ar"
+    ? value
+    : DEFAULT_LOCALE;
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -94,6 +104,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5, // allow zoom for accessibility
+  viewportFit: "cover", // enables env(safe-area-inset-*) on notched devices
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#6366f1" },
     { media: "(prefers-color-scheme: dark)", color: "#4f46e5" },
@@ -109,9 +120,18 @@ export default async function RootLayout({
   // Read the per-request nonce set by src/proxy.ts so Next.js can apply it
   // to its own inline scripts and so ours are allowed by the strict CSP.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  // G1 / i18n: the locale cookie is the server-side source of truth, so the
+  // HTML is rendered in the stored language from the very first byte.
+  const initialLocale = readLocaleCookie(
+    (await cookies()).get(LOCALE_COOKIE)?.value,
+  );
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang={initialLocale}
+      dir={LOCALE_META[initialLocale].dir}
+      suppressHydrationWarning
+    >
       <head>
         <script
           type="application/ld+json"
@@ -120,6 +140,15 @@ export default async function RootLayout({
             organizationJsonLd(),
             websiteJsonLd(),
           ])}
+        />
+        {/* G1 / i18n: keep lang/dir/data-locale in sync with the cookie before
+            first paint. The server already rendered in this locale, so there
+            is no English flash and no RTL layout flip. CSP requires the nonce. */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `try{var m=document.cookie.match(/(?:^|; )sheegow_locale=(en|so|ar)(?:;|$)/);if(m){var l=m[1],d=document.documentElement;d.lang=l;d.setAttribute('dir',l==='ar'?'rtl':'ltr');d.setAttribute('data-locale',l)}}catch(e){}`,
+          }}
         />
         {/* PWA / iOS web app capabilities */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -153,7 +182,7 @@ export default async function RootLayout({
           disableTransitionOnChange
           nonce={nonce}
         >
-          <I18nProvider>
+          <I18nProvider initialLocale={initialLocale}>
             <DeviceProvider>
               {children}
               <CompareTray />

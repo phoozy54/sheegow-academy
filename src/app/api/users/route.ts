@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { requireAdmin, hashPassword } from "@/lib/auth";
+import { validatePassword } from "@/lib/password";
 import { jsonError, handleAuthError, nonEmpty } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 import { allocateUsername, usernameErrorResponse } from "@/lib/username";
@@ -104,14 +105,17 @@ export async function POST(req: Request) {
         "Enter a valid Somali phone number starting with 61, 63 or 65",
         400
       );
-    if (password.length < 12)
-      return jsonError("Password must be at least 12 characters", 400);
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.ok) return jsonError(passwordCheck.error, 400);
     if (!CREATABLE_ROLES.has(role)) return jsonError("Invalid role", 400);
     if (!VALID_LEVELS.has(level)) return jsonError("Invalid level", 400);
-    // This app has a single admin; admins can create privileged accounts.
-    if (role !== "student" && !["admin", "super_admin"].includes(actor.role)) {
+    // G2/AUTH-2: only a super admin may create admin/super_admin accounts.
+    if (
+      ["admin", "super_admin"].includes(role) &&
+      actor.role !== "super_admin"
+    ) {
       return jsonError(
-        "Only an admin can create teacher and admin accounts",
+        "Only a super admin can create admin accounts",
         403
       );
     }

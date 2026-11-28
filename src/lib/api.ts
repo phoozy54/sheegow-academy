@@ -88,6 +88,44 @@ function refreshSession(): Promise<boolean> {
   return refreshPromise;
 }
 
+/**
+ * G1 / SW-1: after logout or password change, remove every cached page so a
+ * private screen cannot be reopened offline on a shared device. The worker
+ * also receives a message so an already-active registration drops its caches.
+ * Never throws — cache cleanup must not break the auth flow.
+ */
+async function purgeAppCaches(): Promise<void> {
+  if (typeof window === "undefined") return;
+  try {
+    if ("caches" in window) {
+      const keys = await window.caches.keys();
+      await Promise.all(
+        keys
+          .filter((key) => key.startsWith("sheegow-"))
+          .map((key) => window.caches.delete(key)),
+      );
+    }
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      registration?.active?.postMessage({ type: "CACHE_PURGE" });
+    }
+  } catch {
+    /* Private mode / disabled storage — nothing to purge. */
+  }
+}
+
+async function authChanging<T>(work: () => Promise<T>): Promise<T> {
+  try {
+    const result = await work();
+    await purgeAppCaches();
+    return result;
+  } catch (error) {
+    // Even a failed server logout should leave this device with no stale data.
+    await purgeAppCaches();
+    throw error;
+  }
+}
+
 async function request<T>(
   url: string,
   options?: RequestInit,
@@ -155,17 +193,22 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  logout: () => request<{ success: boolean }>("/api/auth/logout", { method: "POST" }),
+  logout: () =>
+    authChanging(() =>
+      request<{ success: boolean }>("/api/auth/logout", { method: "POST" }),
+    ),
 
   me: () => request<{ user: User | null }>("/api/auth/me"),
 
   refresh: () => request<{ user: User }>("/api/auth/refresh", { method: "POST" }),
 
   changePassword: (body: { currentPassword: string; newPassword: string }) =>
-    request<{ success: boolean }>("/api/auth/change-password", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
+    authChanging(() =>
+      request<{ success: boolean }>("/api/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    ),
 
   // COURSES
   courses: (params: {

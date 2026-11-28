@@ -46,9 +46,25 @@ export async function POST(req: Request) {
       );
     }
 
+    // G2/UPL-1: a lessonId is only usable if that lesson really belongs to
+    // this course. The old code interpolated any string into the signed public
+    // id (path traversal / cross-course confusion). If no lessonId is given,
+    // the upload is a generic course asset.
+    const requestedLessonId = body?.lessonId?.trim();
+    let lessonSegment = "general";
+    if (requestedLessonId) {
+      const lesson = await db.lesson.findFirst({
+        where: { id: requestedLessonId, module: { courseId } },
+        select: { id: true },
+      });
+      if (!lesson) return jsonError("Lesson not found in this course", 403);
+      // The value is now a verified cuid, safe to place in the public id.
+      lessonSegment = lesson.id;
+    }
+
     const folder = `sheegow/courses/${courseId}`;
     // Keep public ids predictable and collision-free; never trust a raw file name.
-    const publicId = `${folder}/${body?.lessonId?.trim() || "general"}-${randomUUID()}`;
+    const publicId = `${folder}/${lessonSegment}-${randomUUID()}`;
     const timestamp = Math.floor(Date.now() / 1000);
     const toSign = `folder=${folder}&public_id=${publicId}&timestamp=${timestamp}`;
     const signature = createHmac("sha1", apiSecret).update(toSign).digest("hex");

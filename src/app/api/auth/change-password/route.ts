@@ -10,6 +10,7 @@ import {
   setAuthCookies,
 } from "@/lib/auth";
 import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import { validateNewPassword } from "@/lib/password";
 
 interface ChangePasswordBody {
   currentPassword?: string;
@@ -33,12 +34,8 @@ export async function POST(req: Request) {
     const newPassword = body.newPassword || "";
 
     if (!currentPassword) return jsonError("Current password is required", 400);
-    if (newPassword.length < 12) {
-      return jsonError("New password must be at least 12 characters", 400);
-    }
-    if (newPassword === currentPassword) {
-      return jsonError("New password must be different from the current one", 400);
-    }
+    const passwordCheck = validateNewPassword(currentPassword, newPassword);
+    if (!passwordCheck.ok) return jsonError(passwordCheck.error, 400);
 
     const dbUser = await db.user.findUnique({
       where: { id: user.id },

@@ -47,20 +47,26 @@ function shouldLog(level: LogLevel): boolean {
   return LEVEL_PRIORITY[level] >= LEVEL_PRIORITY[MIN_LEVEL]
 }
 
-/** Redact sensitive keys from context before logging. */
+/**
+ * G2/OPS-2: keys are compared LOWERCASE. The old entries 'apiKey',
+ * 'refreshToken' and 'accessToken' never matched because they were stored with
+ * capitals, so real credentials leaked into logs. PII keys are included too.
+ */
 const SENSITIVE_KEYS = new Set([
-  'password',
-  'token',
-  'secret',
-  'authorization',
-  'cookie',
-  'apiKey',
-  'refreshToken',
-  'accessToken',
+  'password', 'passwordhash', 'currentpassword', 'newpassword',
+  'token', 'accesstoken', 'refreshtoken', 'sockettoken', 'jti',
+  'secret', 'apisecret', 'apikey', 'authorization', 'cookie', 'setcookie',
+  'signature', 'privatekey', 'connectionstring', 'databaseurl',
+  // Personal data must not be written to structured application logs.
+  'email', 'emailaddress', 'studentemail', 'useremail', 'recipient',
+  'phone', 'fullname', 'username', 'name', 'identifier',
+  'to', 'from', 'subject', 'ip', 'clientip', 'address',
 ])
 
 function redactValue(value: unknown, depth: number): unknown {
-  if (value instanceof Error) return { message: value.message, name: value.name }
+  if (value instanceof Error) {
+    return { name: value.name, message: safeErrorMessage(value) }
+  }
   if (value instanceof Date) return value.toISOString()
   if (Array.isArray(value)) {
     return depth > 4 ? '[TRUNCATED]' : value.map((item) => redactValue(item, depth + 1))
@@ -82,6 +88,23 @@ function redact(ctx: LogContext, depth = 0): LogContext {
   return safe
 }
 
+/**
+ * Strip credential-looking substrings from free-form error text. Third-party
+ * libraries sometimes put URLs with embedded credentials or bearer tokens in
+ * error messages, which bypass key-based redaction.
+ */
+function sanitizeText(value: string): string {
+  return value
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]')
+    .replace(/\beyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[REDACTED]')
+    .replace(/([a-z][a-z0-9+.-]*:\/\/)[^\s/@]+:[^\s/@]+@/gi, '$1[REDACTED]@')
+}
+
+function safeErrorMessage(error: unknown): string {
+  if (error instanceof Error) return sanitizeText(error.message)
+  return sanitizeText(String(error))
+}
+
 function log(level: LogLevel, scope: string, message: string, ctx?: LogContext, error?: unknown) {
   if (!shouldLog(level)) return
 
@@ -93,19 +116,20 @@ function log(level: LogLevel, scope: string, message: string, ctx?: LogContext, 
       ts: timestamp,
       level,
       scope,
-      msg: message,
+      msg: sanitizeText(message),
     }
     if (ctx) {
       payload.ctx = redact(ctx)
     }
     if (error instanceof Error) {
+      // G2/OPS-2: stacks frequently contain absolute paths, query strings and
+      // values from thrown errors. Log name + sanitized message only.
       payload.err = {
         name: error.name,
-        message: error.message,
-        stack: error.stack,
+        message: safeErrorMessage(error),
       }
     } else if (error) {
-      payload.err = String(error)
+      payload.err = safeErrorMessage(error)
     }
     // Use stderr for errors, stdout otherwise
     const out = JSON.stringify(payload)
@@ -121,13 +145,9 @@ function log(level: LogLevel, scope: string, message: string, ctx?: LogContext, 
     const ctxStr = ctx && Object.keys(ctx).length > 0
       ? ' ' + JSON.stringify(redact(ctx))
       : ''
-    const errStr = error instanceof Error
-      ? ` ${error.message}`
-      : error
-        ? ` ${String(error)}`
-        : ''
+    const errStr = error ? ` ${safeErrorMessage(error)}` : ''
     console.log(
-      `${color}${emoji} [${scope}]${RESET} ${message}${ctxStr}${errStr}`
+      `${color}${emoji} [${scope}]${RESET} ${sanitizeText(message)}${ctxStr}${errStr}`
     )
   }
 }

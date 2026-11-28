@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { handleAuthError, jsonError, limitRequest, safeBody } from "@/lib/api-helpers";
+import { handleAuthError, jsonError, limitRequest, safeBodyChecked } from "@/lib/api-helpers";
 import { clientIp } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email";
 
@@ -22,8 +22,15 @@ export async function POST(req: Request) {
     const limited = limitRequest(`newsletter:${clientIp(req)}`, 3, 60 * 60_000);
     if (limited) return limited;
 
-    const body = await safeBody<SubscribeBody>(req);
-    if (!body || !body.email?.trim()) {
+    const parsed = await safeBodyChecked<SubscribeBody>(req);
+    if (!parsed.ok) {
+      return jsonError(
+        parsed.status === 413 ? "Request body too large" : "Invalid request body",
+        parsed.status,
+      );
+    }
+    const body = parsed.value;
+    if (!body.email?.trim()) {
       return jsonError("Email is required", 400);
     }
 
@@ -45,7 +52,7 @@ export async function POST(req: Request) {
 
     // Send welcome email automatically
     try {
-      await sendEmail(
+      const emailResult = await sendEmail(
         email,
         "Welcome to SHEEGOW ACADEMY — Live Class Schedule",
         `<div style="font-family:Poppins,sans-serif;max-width:600px;margin:0 auto">
@@ -89,13 +96,19 @@ Visit: https://www.sheegowacademy.com/courses
 
 © SHEEGOW ACADEMY — Hargeisa, Somaliland</div>`
       );
-      logger.info("newsletter", "welcome email sent", { email });
+      // G2/OPS-3: surface a failed send without logging the subscriber's
+      // email address or the email subject.
+      if (emailResult.ok) {
+        logger.info("newsletter", "welcome email sent");
+      } else {
+        logger.warn("newsletter", "welcome email unavailable");
+      }
     } catch (emailErr) {
       logger.error("newsletter", "welcome email failed", emailErr);
       // Don't fail the subscription if email fails
     }
 
-    logger.info("newsletter", "new subscriber", { email, source });
+    logger.info("newsletter", "new subscriber", { source });
     return NextResponse.json({ success: true, subscribed: true });
   } catch (e) {
     const authErr = handleAuthError(e);

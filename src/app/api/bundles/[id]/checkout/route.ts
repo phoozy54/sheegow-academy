@@ -28,11 +28,17 @@ interface CheckoutBody {
 
 const VALID_METHODS = new Set(["card", "zaad", "edahab"]);
 
-/** Demo mode mirrors the single-course checkout — only enabled when
- *  DEMO_MODE=true (or NODE_ENV !== production). A real deployment must
- *  integrate a payment provider + signed webhook before going live. */
-const DEMO_MODE =
-  process.env.DEMO_MODE === "true" || process.env.NODE_ENV !== "production";
+/** G2/PAY-2: production ALWAYS fails closed, even if DEMO_MODE=true is set.
+ *  A real deployment must integrate a payment provider + signed webhook. */
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const DEMO_MODE = !IS_PRODUCTION;
+
+if (IS_PRODUCTION && process.env.DEMO_MODE === "true") {
+  logger.error(
+    "[payments/bundle-checkout]",
+    "DEMO_MODE is set in production — mock checkout is disabled (fail closed)"
+  );
+}
 
 /** Validate a coupon by code. Returns the coupon when valid + active + not
  *  expired, otherwise null. */

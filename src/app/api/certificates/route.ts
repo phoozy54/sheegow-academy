@@ -139,12 +139,16 @@ export async function POST(req: Request) {
           process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
           "https://www.sheegowacademy.com";
         const certUrl = `${appUrl}/certificate/${certificate.id}`;
-        await sendCertificateEmail(
+        const delivered = await sendCertificateEmail(
           user.email,
           user.fullName,
           course?.title ?? "your course",
           certUrl
         );
+        if (!delivered.ok)
+          logger.warn("[certificates/issue]", "certificate email not delivered", {
+            certificateId: certificate.id,
+          });
       } catch (emailErr) {
         logger.error(
           "[certificates/issue]",

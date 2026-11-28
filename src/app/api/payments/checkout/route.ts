@@ -21,12 +21,19 @@ const VALID_METHODS = new Set(["card", "zaad", "edahab"]);
 
 /**
  * The mock checkout marks payments as completed without any provider charge.
- * It is ONLY allowed when DEMO_MODE=true is explicitly configured. A real
- * deployment must integrate a payment provider + signed webhook before
- * enabling paid enrollment.
+ * G2/PAY-2: production ALWAYS fails closed, even if DEMO_MODE=true is accidentally
+ * set in the environment. A real deployment must integrate a payment provider
+ * + signed webhook before enabling paid enrollment.
  */
-const DEMO_MODE =
-  process.env.DEMO_MODE === "true" || process.env.NODE_ENV !== "production";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const DEMO_MODE = !IS_PRODUCTION;
+
+if (IS_PRODUCTION && process.env.DEMO_MODE === "true") {
+  logger.error(
+    "[payments/checkout]",
+    "DEMO_MODE is set in production — mock checkout is disabled (fail closed)"
+  );
+}
 
 /**
  * Validate a coupon by code. Returns the coupon when valid + active + not

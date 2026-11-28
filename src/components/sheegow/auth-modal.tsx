@@ -311,7 +311,9 @@ export function AuthModal() {
             </div>
 
             {isLogin ? (
-              <div className="flex items-center justify-between">
+              // G2/AUTH-4: the fake password-reset button is removed.
+              // No reset backend exists, so the UI must not promise one.
+              <div className="flex items-center">
                 <label className="flex cursor-pointer items-center gap-2 text-sm">
                   <Checkbox
                     checked={remember}
@@ -319,13 +321,6 @@ export function AuthModal() {
                   />
                   Remember me
                 </label>
-                <button
-                  type="button"
-                  className="text-sm font-medium text-indigo-600 hover:underline"
-                  onClick={() => toast.info("Password reset link sent (demo).")}
-                >
-                  Forgot password?
-                </button>
               </div>
             ) : (
               <label className="flex cursor-pointer items-start gap-2 text-sm">

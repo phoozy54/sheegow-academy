@@ -5,6 +5,7 @@ import { api, ApiError } from "@/lib/api";
 import type { Course, User } from "@/lib/types";
 import { cn, levelBadgeClass } from "@/lib/ui";
 import { normalizeSomaliPhone } from "@/lib/phone";
+import { validatePassword } from "@/lib/password";
 import { PhoneInput } from "../../phone-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -175,7 +176,8 @@ export function AdminTeachers() {
       toast.error(t("admin.teachers.nameEmailRequired"));
       return;
     }
-    if (addForm.password.length < 6) {
+    // G2/PW-1: same policy as the server. The old client guard allowed 6 chars.
+    if (!validatePassword(addForm.password).ok) {
       toast.error(t("admin.teachers.passwordMin"));
       return;
     }

@@ -1868,7 +1868,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.teachers.close": "Close",
     "admin.teachers.nameEmailRequired": "Name and email are required",
     "admin.teachers.passwordMin":
-      "Password must be at least 6 characters",
+      "Password must be at least 12 characters and include 3 of: uppercase, lowercase, numbers, special characters",
     "admin.teachers.teacherUpdatedToast": "Teacher updated",
     "admin.teachers.updateFailed": "Failed to update teacher",
     "admin.teachers.teacherCreatedToast": "Teacher account created",
@@ -3770,7 +3770,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.teachers.close": "Xidh",
     "admin.teachers.nameEmailRequired": "Magaca iyo email-ka waa loo baahan yahay",
     "admin.teachers.passwordMin":
-      "Erey-sirka waa inuu ahaadaa ugu yaraan 6 xaraf",
+      "Erey-sirka waa inuu ahaadaa ugu yaraan 12 xaraf oo uu ku jiro 3 nooc: xaraf waaweyn, xaraf yaryar, tiro, iyo calaamad gaar ah",
     "admin.teachers.teacherUpdatedToast": "Macallinka waa la cusboonaysiiyay",
     "admin.teachers.updateFailed": "Lama cusboonaysiin karo macallinka",
     "admin.teachers.teacherCreatedToast": "Akoonka macallinka waa la abuuray",
@@ -5660,7 +5660,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "admin.teachers.bioLabel": "النبذة",
     "admin.teachers.close": "إغلاق",
     "admin.teachers.nameEmailRequired": "الاسم والبريد الإلكتروني مطلوبان",
-    "admin.teachers.passwordMin": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "admin.teachers.passwordMin": "يجب أن تكون كلمة المرور 12 حرفًا على الأقل وتحتوي على 3 من: أحرف كبيرة، أحرف صغيرة، أرقام، رموز خاصة",
     "admin.teachers.teacherUpdatedToast": "تم تحديث المعلم",
     "admin.teachers.updateFailed": "تعذّر تحديث المعلم",
     "admin.teachers.teacherCreatedToast": "تم إنشاء حساب المعلم",

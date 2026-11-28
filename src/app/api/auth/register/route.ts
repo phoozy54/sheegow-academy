@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
 import { hashPassword, sessionVersionOf, setAuthCookies } from "@/lib/auth";
+import { validatePassword } from "@/lib/password";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { jsonError, safeBody, handleAuthError } from "@/lib/api-helpers";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
@@ -130,21 +131,10 @@ export async function POST(req: Request) {
         "Enter a valid Somali phone number starting with 61, 63 or 65",
         400
       );
-    if (!password || password.length < 12)
-      return jsonError("Password must be at least 12 characters", 400);
-
-    // Password complexity — require at least 3 of: uppercase, lowercase,
-    // number, special character. This stops trivially weak passwords.
-    let complexity = 0;
-    if (/[A-Z]/.test(password)) complexity++;
-    if (/[a-z]/.test(password)) complexity++;
-    if (/[0-9]/.test(password)) complexity++;
-    if (/[^A-Za-z0-9]/.test(password)) complexity++;
-    if (complexity < 3)
-      return jsonError(
-        "Password must include at least 3 of: uppercase, lowercase, numbers, and special characters",
-        400
-      );
+    // G2/PW-1: one shared policy for registration, staff creation and
+    // password changes. Previously this route was the only one enforcing it.
+    const passwordCheck = validatePassword(password ?? "");
+    if (!passwordCheck.ok) return jsonError(passwordCheck.error, 400);
 
     // ── Reject duplicate emails ──
     const existing = await db.user.findUnique({ where: { email } });
@@ -165,7 +155,8 @@ export async function POST(req: Request) {
       throw e;
     }
 
-    const hashed = await hashPassword(password);
+    // validatePassword above guarantees a non-empty string at this point.
+    const hashed = await hashPassword(password!);
 
     const user = await db.user.create({
       data: {
@@ -202,7 +193,12 @@ export async function POST(req: Request) {
     // Send a welcome email. Best-effort: failures are logged but never
     // crash the registration flow (the user is already created + signed in).
     try {
-      await sendWelcomeEmail(user.email, user.fullName);
+      const delivered = await sendWelcomeEmail(user.email, user.fullName);
+      // G2/OPS-3: a swallowed failure was invisible. Surface it without PII.
+      if (!delivered.ok)
+        logger.warn("[auth/register]", "welcome email not delivered", {
+          userId: user.id,
+        });
     } catch (e) {
       logger.error("[auth/register]", "welcome email failed", e, {
         userId: user.id,

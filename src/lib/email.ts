@@ -38,10 +38,19 @@ function getClient(): Resend | null {
   if (!apiKey) {
     if (!_warnedMissingKey) {
       _warnedMissingKey = true;
-      logger.warn(
-        "[email]",
-        "RESEND_API_KEY not set — emails will be skipped (dev no-op)"
-      );
+      // G2/OPS-3: in production this is a monitored failure, not a quiet
+      // dev no-op. No email is sent — fail closed and make it visible.
+      if (process.env.NODE_ENV === "production") {
+        logger.error(
+          "[email]",
+          "RESEND_API_KEY is not set in production — no emails can be sent"
+        );
+      } else {
+        logger.warn(
+          "[email]",
+          "RESEND_API_KEY not set — emails will be skipped (dev no-op)"
+        );
+      }
     }
     return null;
   }
@@ -72,8 +81,8 @@ export async function sendEmail(
 ): Promise<SendEmailResult> {
   const client = getClient();
   if (!client) {
-    // Dev no-op. Log so devs can see what would have been sent.
-    logger.debug("[email]", "skipped (no API key)", { to, subject });
+    // G2/OPS-2: never log the recipient address or subject.
+    logger.debug("[email]", "skipped (no API key)");
     return { ok: false, error: "RESEND_API_KEY not configured" };
   }
 
@@ -87,15 +96,13 @@ export async function sendEmail(
     });
     if (error) {
       logger.error("[email]", "Resend returned error", undefined, {
-        to,
-        subject,
         error: error.message,
       });
       return { ok: false, error: error.message };
     }
     return { ok: true, id: data?.id };
   } catch (e) {
-    logger.error("[email]", "failed to send email", e, { to, subject });
+    logger.error("[email]", "failed to send email", e);
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
 }
@@ -106,9 +113,9 @@ export async function sendEmail(
 export async function sendWelcomeEmail(
   userEmail: string,
   userName: string
-): Promise<void> {
+): Promise<SendEmailResult> {
   const { html, text } = welcomeTemplate(userName);
-  await sendEmail(userEmail, "Welcome to SHEEGOW ACADEMY", html, text);
+  return sendEmail(userEmail, "Welcome to SHEEGOW ACADEMY", html, text);
 }
 
 /** Live class reminder — 15 minutes before start. */
@@ -118,14 +125,14 @@ export async function sendClassReminderEmail(
   classTitle: string,
   classTime: string,
   classUrl: string
-): Promise<void> {
+): Promise<SendEmailResult> {
   const { html, text } = classReminderTemplate(
     userName,
     classTitle,
     classTime,
     classUrl
   );
-  await sendEmail(
+  return sendEmail(
     userEmail,
     `Your live class "${classTitle}" starts in 15 minutes`,
     html,
@@ -139,7 +146,7 @@ export async function sendTeacherApplicationEmail(
   userName: string,
   status: "approved" | "rejected" | "under_review",
   adminNote?: string | null
-): Promise<void> {
+): Promise<SendEmailResult> {
   const { html, text } = teacherApplicationTemplate(
     userName,
     status,
@@ -151,7 +158,7 @@ export async function sendTeacherApplicationEmail(
       : status === "rejected"
         ? "An update on your SHEEGOW teacher application"
         : "Your SHEEGOW teacher application is under review";
-  await sendEmail(userEmail, subject, html, text);
+  return sendEmail(userEmail, subject, html, text);
 }
 
 /** Refund decision — approved / rejected. */
@@ -162,7 +169,7 @@ export async function sendRefundEmail(
   amount: string,
   courseTitle: string,
   adminNote?: string | null
-): Promise<void> {
+): Promise<SendEmailResult> {
   const { html, text } = refundTemplate(
     userName,
     status,
@@ -174,7 +181,7 @@ export async function sendRefundEmail(
     status === "approved"
       ? `Your refund for "${courseTitle}" has been approved`
       : `An update on your refund for "${courseTitle}"`;
-  await sendEmail(userEmail, subject, html, text);
+  return sendEmail(userEmail, subject, html, text);
 }
 
 /** New announcement in a course — sent to each enrolled student. */
@@ -184,14 +191,14 @@ export async function sendAnnouncementEmail(
   courseTitle: string,
   announcementTitle: string,
   announcementBody: string
-): Promise<void> {
+): Promise<SendEmailResult> {
   const { html, text } = announcementTemplate(
     userName,
     courseTitle,
     announcementTitle,
     announcementBody
   );
-  await sendEmail(
+  return sendEmail(
     userEmail,
     `New announcement in ${courseTitle}: ${announcementTitle}`,
     html,
@@ -205,13 +212,13 @@ export async function sendCertificateEmail(
   userName: string,
   courseTitle: string,
   certificateUrl: string
-): Promise<void> {
+): Promise<SendEmailResult> {
   const { html, text } = certificateTemplate(
     userName,
     courseTitle,
     certificateUrl
   );
-  await sendEmail(
+  return sendEmail(
     userEmail,
     `You completed ${courseTitle} — certificate inside`,
     html,

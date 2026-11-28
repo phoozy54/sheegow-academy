@@ -9,6 +9,20 @@ import {
   nextSessionVersion,
   sessionVersionOf,
 } from "@/lib/session";
+import {
+  API_AUDIENCE,
+  CHAT_AUDIENCE,
+  TOKEN_ISSUER,
+  claimAllowsLegacy,
+  newFamilyId,
+  newJti,
+} from "@/lib/token-security";
+import {
+  ROTATION_COOKIE,
+  ROTATION_MAX_AGE,
+  issueRotation,
+  readRotation,
+} from "@/lib/refresh-rotation";
 
 export {
   isCurrentSession,
@@ -50,8 +64,8 @@ export interface TokenPayload {
   userId: string;
   role: string;
   email: string;
-  /** Distinguishes access tokens from socket-scoped tokens. */
-  purpose?: "access" | "socket";
+  /** Distinguishes access, refresh and socket-scoped tokens. */
+  purpose?: "access" | "refresh" | "socket";
   /**
    * Session epoch (User.updatedAt in ms) captured when the token was issued.
    * Refresh and getCurrentUser compare it with the current DB value so that
@@ -59,6 +73,12 @@ export interface TokenPayload {
    * Uses an existing column — no schema or migration change.
    */
   sessionVersion?: number;
+  /** G2/JWT-1: unique token id — single-use refresh + reuse detection. */
+  jti?: string;
+  /** G2/JWT-1: all refresh tokens from one login share a family id. */
+  familyId?: string;
+  iss?: string;
+  aud?: string;
   iat?: number;
   exp?: number;
 }
@@ -82,15 +102,33 @@ export async function revokeUserSessions(userId: string): Promise<void> {
 }
 
 export function signAccessToken(payload: TokenPayload): string {
-  return jwt.sign({ ...payload, purpose: "access" }, getSecret("JWT_SECRET"), {
-    expiresIn: "15m",
-  });
+  return jwt.sign(
+    {
+      ...payload,
+      purpose: "access",
+      iss: TOKEN_ISSUER,
+      aud: API_AUDIENCE,
+    },
+    getSecret("JWT_SECRET"),
+    { expiresIn: "15m", algorithm: "HS256" }
+  );
 }
 
 export function signRefreshToken(payload: TokenPayload): string {
-  return jwt.sign(payload, getSecret("JWT_REFRESH_SECRET"), {
-    expiresIn: "30d",
-  });
+  const jti = payload.jti ?? newJti();
+  const familyId = payload.familyId ?? newFamilyId();
+  return jwt.sign(
+    {
+      ...payload,
+      jti,
+      familyId,
+      purpose: "refresh",
+      iss: TOKEN_ISSUER,
+      aud: API_AUDIENCE,
+    },
+    getSecret("JWT_REFRESH_SECRET"),
+    { expiresIn: "30d", algorithm: "HS256" }
+  );
 }
 
 /**
@@ -106,6 +144,7 @@ export function createSocketToken(user: {
   classId: string;
   canBroadcast: boolean;
   canShareScreen: boolean;
+  sessionVersion: number;
 }): string {
   return jwt.sign(
     {
@@ -116,16 +155,28 @@ export function createSocketToken(user: {
       canBroadcast: user.canBroadcast,
       canShareScreen: user.canShareScreen,
       purpose: "socket",
+      // G2/SOCK-1: ties the short-lived socket credential to the login epoch
+      // and gives it a unique id. The chat service enforces exp and audience;
+      // jti/sessionVersion are carried for later server-side revocation.
+      sessionVersion: user.sessionVersion,
+      jti: newJti(),
+      iss: TOKEN_ISSUER,
+      aud: CHAT_AUDIENCE,
     },
     getSecret("JWT_SECRET"),
-    { expiresIn: "5m" }
+    { expiresIn: "5m", algorithm: "HS256" }
   );
 }
 
 export function verifyAccessToken(token: string): TokenPayload | null {
   try {
-    const payload = jwt.verify(token, getSecret("JWT_SECRET")) as TokenPayload;
-    if (payload.purpose && payload.purpose !== "access") return null;
+    // Algorithm is pinned — an attacker must never be able to select "none".
+    const payload = jwt.verify(token, getSecret("JWT_SECRET"), {
+      algorithms: ["HS256"],
+    }) as TokenPayload;
+    if (payload.purpose !== "access") return null;
+    if (!claimAllowsLegacy(payload, "iss", TOKEN_ISSUER)) return null;
+    if (!claimAllowsLegacy(payload, "aud", API_AUDIENCE)) return null;
     return payload;
   } catch {
     return null;
@@ -134,47 +185,93 @@ export function verifyAccessToken(token: string): TokenPayload | null {
 
 export function verifyRefreshToken(token: string): TokenPayload | null {
   try {
-    const payload = jwt.verify(
-      token,
-      getSecret("JWT_REFRESH_SECRET")
-    ) as TokenPayload;
-    // A socket token must never be usable as a refresh credential.
-    if (payload.purpose === "socket") return null;
+    const payload = jwt.verify(token, getSecret("JWT_REFRESH_SECRET"), {
+      algorithms: ["HS256"],
+    }) as TokenPayload;
+    // A socket token or access token must never be a refresh credential.
+    // Tokens without `purpose` are pre-G2 legacy tokens, accepted once so the
+    // next rotation can issue a hardened replacement.
+    if (payload.purpose && payload.purpose !== "refresh") return null;
+    if (!claimAllowsLegacy(payload, "iss", TOKEN_ISSUER)) return null;
+    if (!claimAllowsLegacy(payload, "aud", API_AUDIENCE)) return null;
     return payload;
   } catch {
     return null;
   }
 }
 
-/** Set auth cookies (access + refresh) on the response */
+/** Set auth cookies (access + refresh + signed rotation cursor). */
 export async function setAuthCookies(payload: TokenPayload) {
   const cookieStore = await cookies();
-  const accessToken = signAccessToken(payload);
-  const refreshToken = signRefreshToken(payload);
+
+  // Every call mints a brand-new refresh jti (single-use token). The family id
+  // is carried forward so a refresh chain remains traceable. Reading the prior
+  // state BEFORE overwriting it lets all callers (login, register, refresh,
+  // change-password, profile edit) rotate automatically.
+  //
+  // The refresh cookie is scoped to /api/auth, but the signed cursor is scoped
+  // to "/" so setAuthCookies() can also read it from routes such as
+  // /api/users/me. That preserves the family across a profile edit.
+  const priorToken = cookieStore.get("sheegow_refresh")?.value;
+  const prior = priorToken ? verifyRefreshToken(priorToken) : null;
+  const priorRotation = readRotation(cookieStore.get(ROTATION_COOKIE)?.value);
+  // Never carry a rotation family across accounts. A prior cookie can belong
+  // to a different user when one browser switches accounts; treating it as
+  // "previous" would let that stale token be accepted in the new account's
+  // family. Restrict continuity to the same authenticated user.
+  const sameUser = prior?.userId === payload.userId;
+  const sameRotationUser = priorRotation?.userId === payload.userId;
+  const familyId =
+    payload.familyId ??
+    (sameUser ? prior?.familyId : undefined) ??
+    (sameRotationUser && priorRotation ? priorRotation.familyId : undefined) ??
+    newFamilyId();
+  const previousJti =
+    (sameUser ? prior?.jti : undefined) ??
+    (sameRotationUser && priorRotation ? priorRotation.current : null);
+  const jti = newJti();
+  const next: TokenPayload = { ...payload, familyId, jti };
+
+  const accessToken = signAccessToken(next);
+  const refreshToken = signRefreshToken(next);
+  const secure = process.env.NODE_ENV === "production";
 
   cookieStore.set("sheegow_access", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure,
     sameSite: "lax",
     path: "/",
     maxAge: ACCESS_TOKEN_MAX_AGE,
   });
   cookieStore.set("sheegow_refresh", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure,
     sameSite: "strict",
     path: "/api/auth",
     maxAge: REFRESH_TOKEN_MAX_AGE,
   });
+  // Signed cursor for reuse detection. HttpOnly, opaque and scoped to "/" so
+  // every route that calls setAuthCookies() can read and rotate it.
+  cookieStore.set(
+    ROTATION_COOKIE,
+    issueRotation(jti, previousJti, payload.userId, familyId),
+    {
+      httpOnly: true,
+      secure,
+      sameSite: "strict",
+      path: "/",
+      maxAge: ROTATION_MAX_AGE,
+    }
+  );
 }
 
-/** Clear auth cookies (logout). The refresh cookie must be deleted with the
- * exact path it was set with, otherwise it survives logout and can be replayed
- * at /api/auth/refresh. */
+/** Clear auth cookies (logout). Each cookie must be deleted with the exact
+ * path it was set with, otherwise it survives logout and can be replayed. */
 export async function clearAuthCookies() {
   const cookieStore = await cookies();
   cookieStore.delete("sheegow_access");
   cookieStore.delete({ name: "sheegow_refresh", path: "/api/auth" });
+  cookieStore.delete({ name: ROTATION_COOKIE, path: "/" });
 }
 
 /**
@@ -273,11 +370,14 @@ export async function requireTeacherOrAdmin() {
   return user;
 }
 
-/** Highest-privilege actions. This app runs with a single admin; admins
- * receive super-admin capabilities. */
+/**
+ * Highest-privilege actions. G2/AUTH-2: a normal admin is NOT a super admin.
+ * Previously this check was identical to requireAdmin(), so any admin could
+ * reach super-admin-only routes and promote themselves to super_admin.
+ */
 export async function requireSuperAdmin() {
   const user = await requireAuth();
-  if (!isAdminRole(user.role)) {
+  if (user.role !== "super_admin") {
     throw new Error("FORBIDDEN");
   }
   return user;

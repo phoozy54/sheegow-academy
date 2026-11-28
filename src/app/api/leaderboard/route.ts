@@ -30,7 +30,7 @@ export async function GET() {
             id: true,
             fullName: true,
             username: true,
-            profilePicture: true,
+            // G2/PII-1: no avatar URL or durable id in a public response.
             isActive: true,
           },
         },
@@ -49,17 +49,22 @@ export async function GET() {
       streakRows.map((s) => [s.studentId, s.currentStreak])
     );
 
-    const entries: LeaderboardEntry[] = topStudents
-      .filter((row) => row.student?.isActive !== false)
-      .map((row, idx) => ({
-        rank: idx + 1,
-        studentId: row.studentId,
-        fullName: row.student?.fullName ?? "Unknown student",
-        username: row.student?.username ?? null,
-        points: row.points,
-        currentStreak: streakByStudent.get(row.studentId) ?? 0,
-        profilePicture: row.student?.profilePicture ?? null,
-      }));
+    const eligible = topStudents.filter((row) => row.student?.isActive !== false);
+    // Rank-scoped pseudonyms keep the UI keys and "your rank" highlighting
+    // working without publishing a durable internal student id.
+    const pseudonymByStudent = new Map(
+      eligible.map((row, idx) => [row.studentId, `rank-${idx + 1}`] as const)
+    );
+
+    const entries: LeaderboardEntry[] = eligible.map((row, idx) => ({
+      rank: idx + 1,
+      studentId: `rank-${idx + 1}`,
+      fullName: row.student?.fullName ?? "Unknown student",
+      username: row.student?.username ?? null,
+      points: row.points,
+      currentStreak: streakByStudent.get(row.studentId) ?? 0,
+      profilePicture: null,
+    }));
 
     // Current viewer's rank — computed by counting students with strictly
     // more points. Same logic as a SQL rank() over (ORDER BY points DESC).
@@ -84,12 +89,13 @@ export async function GET() {
         currentUserRank = higherCount + 1;
         currentUser = {
           rank: currentUserRank,
-          studentId: viewer.id,
+          studentId:
+            pseudonymByStudent.get(viewer.id) ?? `rank-${currentUserRank}`,
           fullName: viewer.fullName,
           username: viewer.username ?? null,
           points,
           currentStreak: streakRow?.currentStreak ?? 0,
-          profilePicture: viewer.profilePicture ?? null,
+          profilePicture: null,
         };
       }
     }

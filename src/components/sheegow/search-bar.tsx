@@ -163,10 +163,17 @@ function firstHref(results: SearchResponse | null): string | null {
 /*  Result rows                                                        */
 /* ------------------------------------------------------------------ */
 
-function CourseRow({ course }: { course: SearchCourseResult }) {
+function CourseRow({
+  course,
+  onNavigate,
+}: {
+  course: SearchCourseResult;
+  onNavigate?: () => void;
+}) {
   return (
     <Link
       href={course.href}
+      onClick={onNavigate}
       className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent focus:bg-accent focus:outline-none"
     >
       <div className="h-10 w-14 shrink-0 overflow-hidden rounded-md bg-muted">
@@ -199,12 +206,19 @@ function CourseRow({ course }: { course: SearchCourseResult }) {
   );
 }
 
-function LiveClassRow({ liveClass }: { liveClass: SearchLiveClassResult }) {
+function LiveClassRow({
+  liveClass,
+  onNavigate,
+}: {
+  liveClass: SearchLiveClassResult;
+  onNavigate?: () => void;
+}) {
   const t = useT();
   const status = liveStatusBadge(liveClass.status);
   return (
     <Link
       href={liveClass.href}
+      onClick={onNavigate}
       className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent focus:bg-accent focus:outline-none"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-amber-100 to-amber-200 text-amber-600">
@@ -223,11 +237,18 @@ function LiveClassRow({ liveClass }: { liveClass: SearchLiveClassResult }) {
   );
 }
 
-function UserRow({ user }: { user: SearchUserResult }) {
+function UserRow({
+  user,
+  onNavigate,
+}: {
+  user: SearchUserResult;
+  onNavigate?: () => void;
+}) {
   // Per the task spec: clicking a user just goes to /dashboard for now.
   return (
     <Link
       href="/dashboard"
+      onClick={onNavigate}
       className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent focus:bg-accent focus:outline-none"
     >
       <Avatar className="h-9 w-9 shrink-0">
@@ -342,9 +363,7 @@ function ResultsList({
             {t("search.courses")}
           </header>
           {results.courses.map((c) => (
-            <div key={c.id} onClick={onPick}>
-              <CourseRow course={c} />
-            </div>
+            <CourseRow key={c.id} course={c} onNavigate={onPick} />
           ))}
         </section>
       )}
@@ -356,9 +375,7 @@ function ResultsList({
             {t("search.liveClasses")}
           </header>
           {results.liveClasses.map((lc) => (
-            <div key={lc.id} onClick={onPick}>
-              <LiveClassRow liveClass={lc} />
-            </div>
+            <LiveClassRow key={lc.id} liveClass={lc} onNavigate={onPick} />
           ))}
         </section>
       )}
@@ -370,9 +387,7 @@ function ResultsList({
             {t("search.users")}
           </header>
           {results.users!.map((u) => (
-            <div key={u.id} onClick={onPick}>
-              <UserRow user={u} />
-            </div>
+            <UserRow key={u.id} user={u} onNavigate={onPick} />
           ))}
         </section>
       )}

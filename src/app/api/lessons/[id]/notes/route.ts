@@ -6,6 +6,7 @@ import {
   jsonOk,
   handleAuthError,
   safeBody,
+  CONTENT_BODY_BYTES,
   limitRequest,
 } from "@/lib/api-helpers";
 import { canManageCourse, decideCourseContentAccess } from "@/lib/content-access";
@@ -103,7 +104,7 @@ export async function POST(req: Request, { params }: RouteContext) {
       return jsonError(decision.reason || "You do not have access to this lesson", decision.status);
     }
 
-    const body = await safeBody<SaveNoteBody>(req);
+    const body = await safeBody<SaveNoteBody>(req, CONTENT_BODY_BYTES);
     if (!body || typeof body.content !== "string") {
       return jsonError("content (string) is required", 400);
     }

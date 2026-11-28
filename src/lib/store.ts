@@ -29,6 +29,25 @@ interface AppState {
   setCookieConsent: (consent: "accepted" | "rejected") => void;
 }
 
+/**
+ * G1 / CONSENT-1: mirror the UI choice into a signed, HttpOnly cookie so the
+ * analytics endpoint can enforce consent server-side. Fire-and-forget — a
+ * network failure must never block the banner.
+ */
+function syncConsentCookie(consent: "accepted" | "rejected") {
+  if (typeof window === "undefined") return;
+  try {
+    void fetch("/api/consent", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ consent }),
+      credentials: "same-origin",
+    }).catch(() => undefined);
+  } catch {
+    /* offline / restricted environment */
+  }
+}
+
 export const useStore = create<AppState>((set) => ({
   user: null,
   authLoading: true,
@@ -49,6 +68,7 @@ export const useStore = create<AppState>((set) => ({
     } catch {
       /* localStorage unavailable */
     }
+    syncConsentCookie(consent);
   },
 }));
 
@@ -59,6 +79,8 @@ export function initCookieConsent() {
     const stored = localStorage.getItem("sheegow-cookie-consent");
     if (stored === "accepted" || stored === "rejected") {
       useStore.setState({ cookieConsent: stored });
+      // Returning users chose before the signed cookie existed — re-issue it.
+      syncConsentCookie(stored);
     }
   } catch {
     /* ignore */

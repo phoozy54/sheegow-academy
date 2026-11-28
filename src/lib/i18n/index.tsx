@@ -9,14 +9,16 @@
  *   expose a simple `t(key)` helper via Context. next-intl is installed but
  *   unused for routing — we only use the React Context pattern.
  *
- * SSR safety:
- *   - On the server we always render with the default locale ("en") and
- *     default dir ("ltr"); we render the same on the first client render to
- *     avoid hydration mismatches, then switch after `useEffect` reads
- *     localStorage.
- *   - The non-React `t` helper below reads from a module-level variable
- *     (`currentLocale`) that the provider keeps in sync on the client. On
- *     the server it always returns the English (or key) string.
+ * SSR safety (G1):
+ *   - layout.tsx reads the `sheegow_locale` cookie and renders the whole tree
+ *     in that locale, so there is no English flash and no RTL layout flip.
+ *   - A nonce'd inline script keeps <html lang/dir/data-locale> in sync before
+ *     first paint.
+ *   - The provider uses useSyncExternalStore with the cookie-derived locale
+ *     as BOTH the server and initial client snapshot — hydration matches.
+ *   - The non-React `t` helper reads a module-level `currentLocale` that is
+ *     initialised from the cookie on the client only (never on the server,
+ *     where a module-level value would leak across requests).
  */
 
 import * as React from "react";
@@ -101,6 +103,9 @@ interface I18nContextValue {
 const I18nContext = React.createContext<I18nContextValue | null>(null);
 
 const STORAGE_KEY = "sheegow.locale";
+const COOKIE_KEY = "sheegow_locale";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+const LOCALE_EVENT = "sheegow:locale";
 
 function isLocale(value: unknown): value is Locale {
   return (
@@ -121,54 +126,133 @@ function readStoredLocale(): Locale {
   return DEFAULT_LOCALE;
 }
 
-/** Persist locale and update <html lang> + <html dir>. */
+/**
+ * The inline bootstrap script in layout.tsx sets data-locale from the cookie
+ * before first paint. useSyncExternalStore uses that attribute as the client
+ * snapshot; the server snapshot is the same cookie-derived locale.
+ */
+function getClientLocale(): Locale {
+  if (typeof document === "undefined") return DEFAULT_LOCALE;
+  const fromDom = document.documentElement.getAttribute("data-locale");
+  if (isLocale(fromDom)) return fromDom;
+  // Fallback when the bootstrap script was blocked: read the cookie directly.
+  try {
+    const part = document.cookie
+      .split(";")
+      .map((entry) => entry.trim())
+      .find((entry) => entry.startsWith(`${COOKIE_KEY}=`));
+    const fromCookie = part?.slice(COOKIE_KEY.length + 1);
+    if (isLocale(fromCookie)) return fromCookie;
+  } catch {
+    /* cookie access disabled */
+  }
+  // Deliberately NO localStorage fallback: SSR used the cookie (or English),
+  // so the client snapshot must match it. Legacy localStorage preferences are
+  // migrated to the cookie after hydration in the provider's mount effect.
+  return DEFAULT_LOCALE;
+}
+
+function subscribeLocale(onChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const onStorage = (event: StorageEvent) => {
+    // Another tab changed the preference. The DOM attribute is our store's
+    // snapshot — update it BEFORE notifying React so the value actually changes.
+    if (event.key === STORAGE_KEY && isLocale(event.newValue)) {
+      document.documentElement.setAttribute("data-locale", event.newValue);
+    }
+    onChange();
+  };
+  window.addEventListener(LOCALE_EVENT, onChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(LOCALE_EVENT, onChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+/** Persist locale and update <html lang> + <html dir> + data-locale. */
 function applyLocale(locale: Locale) {
   currentLocale = locale;
   if (typeof document === "undefined") return;
   const meta = LOCALE_META[locale];
   document.documentElement.lang = locale;
   document.documentElement.dir = meta.dir;
+  document.documentElement.setAttribute("data-locale", locale);
+}
+
+function publishLocale() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(LOCALE_EVENT));
+  }
 }
 
 /* ------------------------------------------------------------------ */
 /*  Provider                                                           */
 /* ------------------------------------------------------------------ */
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  // Always render the default locale on the server and on the first client
-  // render to avoid hydration mismatches; we switch to the stored locale
-  // inside useEffect below.
-  const [locale, setLocaleState] = React.useState<Locale>(DEFAULT_LOCALE);
+export function I18nProvider({
+  children,
+  initialLocale = DEFAULT_LOCALE,
+}: {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+}) {
+  // Both snapshots start from the cookie-derived locale supplied by the
+  // server, so hydration renders identical markup and strings.
+  const locale = React.useSyncExternalStore(
+    subscribeLocale,
+    getClientLocale,
+    () => initialLocale,
+  );
   const [hydrated, setHydrated] = React.useState(false);
 
-  // On mount (client only), read the stored preference and apply it.
-  React.useEffect(() => {
-    const stored = readStoredLocale();
-    if (stored !== DEFAULT_LOCALE) {
-      setLocaleState(stored);
-    }
-    applyLocale(stored);
-    setHydrated(true);
-  }, []);
-
-  // Keep <html lang/dir> + module-level `currentLocale` in sync whenever
-  // locale changes after hydration.
-  React.useEffect(() => {
-    if (!hydrated) return;
-    applyLocale(locale);
-  }, [locale, hydrated]);
+  // Client-only initialisation of the standalone t() mirror. Never do this
+  // on the server: a module-level value would leak across requests.
+  const initialised = React.useRef(false);
+  if (!initialised.current && typeof window !== "undefined") {
+    initialised.current = true;
+    currentLocale = initialLocale;
+  }
 
   const setLocale = React.useCallback((next: Locale) => {
-    setLocaleState(next);
+    applyLocale(next);
     try {
       if (typeof window !== "undefined") {
         window.localStorage.setItem(STORAGE_KEY, next);
+        // The cookie is what the server reads on the next request. Non-sensitive
+        // preference only — no HttpOnly needed here.
+        const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+        document.cookie = `${COOKIE_KEY}=${next}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
       }
     } catch {
       /* ignore quota / privacy errors */
     }
-    applyLocale(next);
+    publishLocale();
   }, []);
+
+  React.useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
+    // Safe to apply unconditionally: the inline script already set the same
+    // lang/dir, and this also keeps the standalone t() mirror in sync.
+    applyLocale(locale);
+  }, [locale]);
+
+  React.useEffect(() => {
+    // One-time migration for users who chose a locale before the cookie
+    // existed. Doing this AFTER hydration avoids a mismatch: SSR rendered
+    // English, the first client render matches English, then we switch.
+    if (typeof window === "undefined") return;
+    const hasCookie = document.cookie
+      .split(";")
+      .map((entry) => entry.trim())
+      .some((entry) => entry.startsWith(`${COOKIE_KEY}=`));
+    if (hasCookie) return;
+    const stored = readStoredLocale();
+    if (stored !== DEFAULT_LOCALE) setLocale(stored);
+  }, [setLocale]);
 
   const value = React.useMemo<I18nContextValue>(
     () => ({

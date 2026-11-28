@@ -10,6 +10,7 @@ import {
   jsonOk,
   handleAuthError,
   safeBody,
+  CONTENT_BODY_BYTES,
   limitRequest,
 } from "@/lib/api-helpers";
 import { canManageCourse } from "@/lib/content-access";
@@ -116,7 +117,7 @@ export async function POST(req: Request, { params }: RouteContext) {
     if (!course) return jsonError("Course not found", 404);
     if (!canManageCourse(actor, course)) return jsonError("Forbidden", 403);
 
-    const body = await safeBody<CreateAnnouncementBody>(req);
+    const body = await safeBody<CreateAnnouncementBody>(req, CONTENT_BODY_BYTES);
     const title = body?.title?.trim();
     const text = body?.body?.trim();
     if (!title) return jsonError("Title is required", 400);
@@ -173,14 +174,24 @@ export async function POST(req: Request, { params }: RouteContext) {
             courseTitle,
             title,
             emailBody
-          ).catch((err) => {
-            logger.error(
-              "[announcements/create]",
-              "announcement email failed",
-              err,
-              { courseId, studentId: e.student.id }
-            );
-          })
+          )
+            .then((result) => {
+              // G2/OPS-3: failed deliveries are now visible in monitoring.
+              if (!result.ok)
+                logger.warn(
+                  "[announcements/create]",
+                  "announcement email not delivered",
+                  { courseId, studentId: e.student.id }
+                );
+            })
+            .catch((err) => {
+              logger.error(
+                "[announcements/create]",
+                "announcement email failed",
+                err,
+                { courseId, studentId: e.student.id }
+              );
+            })
         )
       );
     } catch (fanErr) {

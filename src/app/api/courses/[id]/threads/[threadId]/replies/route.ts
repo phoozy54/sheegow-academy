@@ -9,6 +9,7 @@ import {
   jsonOk,
   handleAuthError,
   safeBody,
+  CONTENT_BODY_BYTES,
   limitRequest,
 } from "@/lib/api-helpers";
 import { notify } from "@/lib/notify";
@@ -82,7 +83,7 @@ export async function POST(req: Request, { params }: RouteContext) {
       return jsonError("Enroll in this course to reply", 403);
     }
 
-    const body = await safeBody<CreateReplyBody>(req);
+    const body = await safeBody<CreateReplyBody>(req, CONTENT_BODY_BYTES);
     const text = body?.body?.trim();
     if (!text) return jsonError("Reply body is required", 400);
 

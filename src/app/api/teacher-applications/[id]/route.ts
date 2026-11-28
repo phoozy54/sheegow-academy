@@ -306,12 +306,18 @@ export async function PATCH(req: Request, { params }: RouteContext) {
     // `sendTeacherApplicationEmail` is a no-op when RESEND_API_KEY is missing
     // and never throws — but we wrap in try/catch as an extra safety net.
     try {
-      await sendTeacherApplicationEmail(
+      const delivered = await sendTeacherApplicationEmail(
         app.email,
         app.fullName,
         status as "approved" | "rejected" | "under_review",
         adminNote || null
       );
+      if (!delivered.ok)
+        logger.warn(
+          "[teacher-applications/decide]",
+          "decision email not delivered",
+          { applicationId: app.id }
+        );
     } catch (emailErr) {
       logger.error(
         "[teacher-applications/decide]",

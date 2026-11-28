@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { requireTeacherOrAdmin } from "@/lib/auth";
-import { jsonError, handleAuthError, limitRequest, safeBody } from "@/lib/api-helpers";
+import {
+  jsonError,
+  handleAuthError,
+  limitRequest,
+  safeBody,
+  CONTENT_BODY_BYTES,
+} from "@/lib/api-helpers";
 import { canManageCourse } from "@/lib/content-access";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -29,7 +35,7 @@ export async function POST(req: Request, { params }: RouteContext) {
     if (!course) return jsonError("Course not found", 404);
     if (!canManageCourse(user, course)) return jsonError("Forbidden", 403);
 
-    const body = await safeBody<CreateAssignmentBody>(req);
+    const body = await safeBody<CreateAssignmentBody>(req, CONTENT_BODY_BYTES);
     const title = body?.title?.trim();
     const instructions = body?.instructions?.trim();
     if (!title || !instructions) {

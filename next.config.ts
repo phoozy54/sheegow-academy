@@ -8,6 +8,8 @@ const appOrigin = "https://www.sheegowacademy.com";
 // The other security headers below are static and stay here.
 const securityHeaders = [
   { key: "Access-Control-Allow-Origin", value: appOrigin },
+  // Vary: Origin is appended in src/proxy.ts so Next's own RSC Vary values
+  // are preserved instead of being overwritten by a static header.
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -15,10 +17,8 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(self), microphone=(self), display-capture=(self), geolocation=(), interest-cohort=()",
   },
-  {
-    key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains; preload",
-  },
+  // HSTS is intentionally NOT here: it must never be sent over local HTTP.
+  // src/proxy.ts adds it only for production HTTPS requests.
 ];
 
 const nextConfig: NextConfig = {

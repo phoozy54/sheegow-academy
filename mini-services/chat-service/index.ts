@@ -41,6 +41,10 @@ const APP_ORIGINS = [
 // ----------------------------------------------------------------------------
 // Token verification (HS256, no extra dependency)
 // ----------------------------------------------------------------------------
+// Keep in sync with src/lib/token-security.ts in the Next.js app.
+const TOKEN_ISSUER = 'sheegow-academy'
+const CHAT_AUDIENCE = 'sheegow-academy-chat'
+
 interface SocketIdentity {
   userId: string
   userName: string
@@ -48,6 +52,10 @@ interface SocketIdentity {
   classId: string
   canBroadcast: boolean
   canShareScreen: boolean
+  /** G2/SOCK-1: token expiry, enforced for open sockets too. */
+  exp: number
+  jti?: string
+  sessionVersion?: number
 }
 
 function verifySocketToken(token: unknown): SocketIdentity | null {
@@ -71,6 +79,10 @@ function verifySocketToken(token: unknown): SocketIdentity | null {
     if (payload.purpose !== 'socket') return null
     if (typeof payload.exp !== 'number' || payload.exp * 1000 <= Date.now()) return null
     if (!payload.userId || !payload.userName || !payload.classId) return null
+    // A present-but-wrong issuer/audience is always rejected. Missing claims
+    // are pre-G2 tokens, accepted during the transition window only.
+    if (payload.iss && payload.iss !== TOKEN_ISSUER) return null
+    if (payload.aud && payload.aud !== CHAT_AUDIENCE) return null
 
     return {
       userId: String(payload.userId),
@@ -79,6 +91,9 @@ function verifySocketToken(token: unknown): SocketIdentity | null {
       classId: String(payload.classId),
       canBroadcast: payload.canBroadcast === true,
       canShareScreen: payload.canShareScreen === true,
+      exp: payload.exp,
+      jti: typeof payload.jti === 'string' ? payload.jti : undefined,
+      sessionVersion: typeof payload.sessionVersion === 'number' ? payload.sessionVersion : undefined,
     }
   } catch {
     return null
@@ -306,11 +321,21 @@ const identityOf = (socket: any): SocketIdentity => {
     classId: '',
     canBroadcast: true,
     canShareScreen: true,
+    exp: Number.MAX_SAFE_INTEGER,
   }
 }
 
 /** Every state-changing event must come from a socket that joined THIS class. */
 const membership = (socket: any, classId: string) => {
+  // G2/SOCK-1: an already-open socket must not keep acting after its token
+  // expires. The handshake check alone was not enough. This applies in dev too;
+  // the dev identity uses Number.MAX_SAFE_INTEGER and therefore never expires.
+  const identity = socket.data.identity as SocketIdentity | null
+  if (identity && typeof identity.exp === 'number' && identity.exp * 1000 <= Date.now()) {
+    socket.emit('error', { message: 'Session expired' })
+    socket.disconnect(true)
+    return null
+  }
   const entry = socketIndex.get(socket.id)
   if (!entry || entry.classId !== classId) {
     socket.emit('error', { message: 'Join the class first' })
@@ -326,6 +351,17 @@ io.on('connection', (socket) => {
   const identity = identityOf(socket)
   if (process.env.LOG_LEVEL !== 'quiet') {
     console.log(`[chat] connect: ${socket.id} (${identity.userName})`)
+  }
+
+  // Proactively disconnect when the 5-minute token expires. Clearing the
+  // timer on disconnect prevents a lingering handle after normal logout.
+  if (isProduction && Number.isFinite(identity.exp)) {
+    const remaining = identity.exp * 1000 - Date.now()
+    const expiryTimer = setTimeout(
+      () => socket.disconnect(true),
+      Math.max(0, remaining)
+    )
+    socket.once('disconnect', () => clearTimeout(expiryTimer))
   }
 
   // ------------------------------------------------------------------
@@ -515,9 +551,12 @@ io.on('connection', (socket) => {
   })
 
   socket.on('broadcast-stop', (payload: { classId: string }) => {
-    const host = classHosts.get(payload?.classId)
+    if (!payload?.classId) return
+    const entry = membership(socket, payload.classId)
+    if (!entry) return
+    const host = classHosts.get(entry.classId)
     if (!host || host.socketId !== socket.id) return
-    stopHost(payload.classId)
+    stopHost(entry.classId)
   })
 
   // ------------------------------------------------------------------
@@ -661,7 +700,14 @@ io.on('connection', (socket) => {
   const relaySignal = (event: 'webrtc-offer' | 'webrtc-answer' | 'webrtc-ice') => {
     return (payload: RtcSignalPayload) => {
       if (payloadTooLarge(payload) || !payload?.toUserId) return
-      const entry = socketIndex.get(socket.id)
+      // G2/SOCK-1: use membership() so an expired token cannot keep signaling
+      // through a socket that is still open. Signaling payloads carry only
+      // toUserId; the class comes from the signed identity (dev falls back to
+      // the joined room).
+      const current = socketIndex.get(socket.id)
+      const classId = identity.classId || current?.classId
+      if (!classId) return
+      const entry = membership(socket, classId)
       if (!entry) return
       if (!allowEvent(socket.id, event, 200, 10_000)) return
 

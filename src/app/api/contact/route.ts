@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger"
-import { jsonError, safeBody, handleAuthError, limitRequest } from "@/lib/api-helpers";
+import { jsonError, safeBodyChecked, handleAuthError, limitRequest } from "@/lib/api-helpers";
 import { clientIp } from "@/lib/rate-limit";
 import { isValidSomaliPhone, normalizeSomaliPhone } from "@/lib/phone";
 
@@ -22,8 +22,14 @@ export async function POST(req: Request) {
     const limited = limitRequest(`contact:${clientIp(req)}`, 5, 60 * 60_000);
     if (limited) return limited;
 
-    const body = await safeBody<ContactBody>(req);
-    if (!body) return jsonError("Invalid request body", 400);
+    const parsed = await safeBodyChecked<ContactBody>(req);
+    if (!parsed.ok) {
+      return jsonError(
+        parsed.status === 413 ? "Request body too large" : "Invalid request body",
+        parsed.status,
+      );
+    }
+    const body = parsed.value;
 
     const name = body.name?.trim();
     const email = body.email?.trim().toLowerCase();
@@ -43,14 +49,13 @@ export async function POST(req: Request) {
     if (!subject) return jsonError("Subject is required", 400);
     if (!message) return jsonError("Message is required", 400);
 
-    const contactMessage = await db.contactMessage.create({
+    // G2/PII-1: persist the message, but never echo the submitted name, email,
+    // phone or message back to a public caller. The client only needs success.
+    await db.contactMessage.create({
       data: { name, email, phone, subject, message },
     });
 
-    return NextResponse.json(
-      { success: true, contactMessage },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;

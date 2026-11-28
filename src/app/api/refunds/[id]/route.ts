@@ -147,6 +147,8 @@ export async function PATCH(req: Request, { params }: RouteContext) {
         studentId: true,
         reason: true,
         status: true,
+        // Needed to revoke the exact enrollment + certificate on approval.
+        payment: { select: { courseId: true } },
       },
     });
     if (!refund) return jsonError("Refund request not found", 404);
@@ -158,17 +160,55 @@ export async function PATCH(req: Request, { params }: RouteContext) {
     }
 
     const approved = status === "approved";
+    // A free-only bundle has a zero-amount receipt payment with no courseId.
+    // There is no paid enrollment to revoke, so do not approve a refund
+    // against it (rejection remains allowed).
+    if (approved && !refund.payment?.courseId) {
+      return jsonError("This payment has no refundable enrollment", 400);
+    }
     const reviewedAt = new Date();
 
     const updated = await db.$transaction(async (tx) => {
-      const row = await tx.refundRequest.update({
-        where: { id: refund.id },
+      // G2/PAY-3: atomic claim. The pre-read status check above is outside the
+      // transaction, so two concurrent approvals must be stopped here.
+      const claimed = await tx.refundRequest.updateMany({
+        where: { id: refund.id, status: "pending" },
         data: {
           status: approved ? "approved" : "rejected",
           adminNote,
           reviewedBy: admin.id,
           reviewedAt,
         },
+      });
+      if (claimed.count !== 1) {
+        throw new Error("REFUND_ALREADY_REVIEWED");
+      }
+
+      if (approved) {
+        await tx.payment.update({
+          where: { id: refund.paymentId },
+          data: { status: "refunded" },
+        });
+
+        // Revocation is part of the SAME transaction. Enrollment status
+        // "revoked" is not in content-access's allow-list, so course content
+        // is immediately unavailable; public certificate verification reads
+        // revokedAt and now reports the certificate as invalid.
+        const courseId = refund.payment?.courseId;
+        if (courseId) {
+          await tx.enrollment.updateMany({
+            where: { studentId: refund.studentId, courseId },
+            data: { status: "revoked" },
+          });
+          await tx.certificate.updateMany({
+            where: { studentId: refund.studentId, courseId },
+            data: { revokedAt: reviewedAt },
+          });
+        }
+      }
+
+      return tx.refundRequest.findUniqueOrThrow({
+        where: { id: refund.id },
         include: {
           payment: {
             select: {
@@ -193,15 +233,6 @@ export async function PATCH(req: Request, { params }: RouteContext) {
           },
         },
       });
-
-      if (approved) {
-        await tx.payment.update({
-          where: { id: refund.paymentId },
-          data: { status: "refunded" },
-        });
-      }
-
-      return row;
     });
 
     // Notify the student. Best-effort: notify() swallows its own errors so a
@@ -238,7 +269,7 @@ export async function PATCH(req: Request, { params }: RouteContext) {
     // throws — but we wrap in try/catch as an extra safety net.
     if (studentEmail) {
       try {
-        await sendRefundEmail(
+        const delivered = await sendRefundEmail(
           studentEmail,
           studentName,
           approved ? "approved" : "rejected",
@@ -246,6 +277,10 @@ export async function PATCH(req: Request, { params }: RouteContext) {
           courseTitle,
           adminNote
         );
+        if (!delivered.ok)
+          logger.warn("[refunds/decide]", "refund email not delivered", {
+            refundId: refund.id,
+          });
       } catch (emailErr) {
         logger.error("[refunds/decide]", "refund email failed", emailErr, {
           refundId: refund.id,
@@ -261,6 +296,9 @@ export async function PATCH(req: Request, { params }: RouteContext) {
 
     return NextResponse.json({ refund: serialize(updated) });
   } catch (e) {
+    if (e instanceof Error && e.message === "REFUND_ALREADY_REVIEWED") {
+      return jsonError("This refund request has already been reviewed", 409);
+    }
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
     logger.error("[refunds/decide]", "failed", e);

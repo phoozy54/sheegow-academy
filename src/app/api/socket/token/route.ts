@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { createSocketToken, isAdminRole, isTeachingRole, requireAuth } from "@/lib/auth";
+import {
+  createSocketToken,
+  isAdminRole,
+  isTeachingRole,
+  requireAuth,
+  sessionVersionOf,
+} from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { handleAuthError, jsonError } from "@/lib/api-helpers";
 import { hasApprovedTrial } from "@/lib/trial-access";
@@ -57,9 +63,9 @@ export async function GET(req: Request) {
             courseId: liveClass.courseId,
           },
         },
-        select: { id: true },
+        select: { id: true, status: true },
       });
-      if (!enrollment) {
+      if (!enrollment || !["active", "completed"].includes(enrollment.status)) {
         return jsonError(
           "Enroll in this course and complete payment before joining the class",
           403
@@ -109,6 +115,8 @@ export async function GET(req: Request) {
       // Screen sharing is a host-only capability. The chat service enforces
       // this claim; the client merely shows/hides the button.
       canShareScreen: canBroadcast,
+      // G2/SOCK-1: bind this short-lived credential to the login epoch.
+      sessionVersion: sessionVersionOf(user),
     });
 
     return NextResponse.json(

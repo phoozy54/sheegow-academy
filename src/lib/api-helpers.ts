@@ -46,18 +46,16 @@ export function handleAuthError(e: unknown) {
 }
 
 /**
- * Safely parse a JSON request body. Returns null when the body is not
- * valid JSON or when the request has no body.
+ * G1 — body-size limiting lives in a framework-free module so it is testable.
+ * Re-exported here for backwards compatibility with all existing routes.
  */
-export async function safeBody<T = unknown>(req: Request): Promise<T | null> {
-  try {
-    const text = await req.text();
-    if (!text) return null;
-    return JSON.parse(text) as T;
-  } catch {
-    return null;
-  }
-}
+export {
+  CONTENT_BODY_BYTES,
+  MAX_BODY_BYTES,
+  readBodyWithLimit,
+  safeBody,
+  safeBodyChecked,
+} from "@/lib/body-limit";
 
 /**
  * Tiny helper that returns the value of `obj[key]` when it is a non-empty

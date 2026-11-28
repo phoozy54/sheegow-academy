@@ -58,6 +58,25 @@ export function proxy(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
+
+  // Append Origin to Next's existing Vary list instead of replacing it (a
+  // static next.config header could clobber RSC's own Vary values).
+  const vary = response.headers.get("vary");
+  if (!vary?.toLowerCase().split(",").map((v) => v.trim()).includes("origin")) {
+    response.headers.set("vary", vary ? `${vary}, Origin` : "Origin");
+  }
+
+  // G1 / WEB-1: HSTS only on production HTTPS. Local HTTP must never force
+  // HTTPS or advertise HSTS. Vercel terminates TLS and sets x-forwarded-proto.
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const isHttps =
+    forwardedProto === "https" || request.nextUrl.protocol === "https:";
+  if (process.env.NODE_ENV === "production" && isHttps) {
+    response.headers.set(
+      "Strict-Transport-Security",
+      "max-age=63072000; includeSubDomains; preload",
+    );
+  }
   return response;
 }
 
