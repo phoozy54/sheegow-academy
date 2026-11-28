@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ARCHIVED — NON-CANONICAL (DEP-1, 2026-11-28). Self-host dev bootstrap only.
+# Production is Vercel + Neon Postgres. Kept for reference only.
+
 set -euo pipefail
 
 # 获取脚本所在目录（.zscripts）

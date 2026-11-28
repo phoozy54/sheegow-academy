@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ARCHIVED — NON-CANONICAL (DEP-1, 2026-11-28). Copies/boots a SQLite file.
+# Production uses Neon Postgres. Kept for reference only; do not run in prod.
+
 set -euo pipefail
 
 PROJECT_DIR="${PROJECT_DIR:-/home/z/my-project}"

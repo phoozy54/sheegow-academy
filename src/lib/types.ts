@@ -792,11 +792,16 @@ export interface BundleWithCourses extends Omit<Bundle, "courses"> {
 
 /** POST /api/bundles/:id/checkout response. */
 export interface BundleCheckoutResult {
-  payment: Payment;
+  /** Backward-compatible: the first payment, used by the existing invoice link. */
+  payment: Payment | null;
+  /** BL-1: one completed payment per billable course, summing to finalAmount. */
+  payments: Payment[];
   enrollments: Enrollment[];
   bundle: Pick<Bundle, "id" | "title" | "price">;
   finalAmount: number;
   alreadyEnrolledCourseIds: string[];
+  /** True when a duplicate checkout returned the original purchase. */
+  alreadyPurchased?: boolean;
 }
 
 // ─── TEACHER APPLICATIONS ──────────────────────────────────

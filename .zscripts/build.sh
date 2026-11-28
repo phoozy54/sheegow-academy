@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ARCHIVED — NON-CANONICAL (DEP-1, 2026-11-28). Self-host/SQLite build path.
+# Production is Vercel + Neon Postgres; chat is Render. Kept for reference only.
+
 # 将 stderr 重定向到 stdout，避免 execute_command 因为 stderr 输出而报错
 exec 2>&1
 

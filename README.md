@@ -4,7 +4,9 @@
 
 Founded and led by **Ciise Mohamed Sheeq (SHEEGOW)** — an English language expert with a university degree, multiple language certifications and 15 years of teaching experience. He is the founder, general manager and super admin of the platform.
 
-Built with Next.js 16, TypeScript, Prisma (SQLite locally / PostgreSQL in production), Socket.io, and Tailwind CSS.
+Built with Next.js 16, TypeScript, Prisma/PostgreSQL (Neon), Socket.io, and Tailwind CSS.
+
+**Canonical architecture (DEP-1):** Vercel (Next.js app + API) · Neon Postgres (database) · Render (`sheegow-chat` only) · Cloudflare DNS. See [`DEPLOYMENT.md`](./DEPLOYMENT.md). The older self-host SQLite/Caddy toolchain (`.zscripts/`, `Caddyfile`) is **archived, non-canonical**. Health endpoint: `GET /api/health` (`no-store`, `503` if the DB check fails).
 
 ---
 
@@ -38,7 +40,7 @@ Built with Next.js 16, TypeScript, Prisma (SQLite locally / PostgreSQL in produc
 |-------|-----------|
 | Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, shadcn/ui |
 | Backend | Next.js API Routes (REST) |
-| Database | Prisma ORM (SQLite locally, PostgreSQL in production) |
+| Database | Prisma ORM with PostgreSQL (Neon) — canonical for all environments |
 | Real-time | Socket.io (separate mini-service on port 3003) + native WebRTC |
 | Auth | Short-lived JWT access + refresh tokens in httpOnly cookies, bcrypt |
 | Charts | Recharts |
@@ -48,7 +50,7 @@ Built with Next.js 16, TypeScript, Prisma (SQLite locally / PostgreSQL in produc
 
 ### Prerequisites
 - Node.js 18+ or Bun
-- SQLite locally (auto-created), or a PostgreSQL `DATABASE_URL` for production
+- A PostgreSQL `DATABASE_URL` (Neon for production; a local Postgres or Neon branch for development)
 
 ### Installation
 
@@ -61,7 +63,9 @@ cp .env.example .env
 # Edit .env — set JWT_SECRET and JWT_REFRESH_SECRET to strong random strings,
 # and SUPER_ADMIN_PASSWORD for the bootstrap account.
 
-# Create the database schema, then seed ONLY the super admin + starter coupons
+# Create the database schema on an EMPTY database, then seed ONLY the super admin + starter coupons
+# `db:push` deliberately has no --accept-data-loss flag. For an existing database
+# with real data, use reviewed migrations (`bun run db:deploy`) after a snapshot.
 bun run db:push
 bun prisma/seed.ts
 ```
@@ -264,8 +268,9 @@ Requirements / notes:
 ### Deploy
 - **Frontend**: Deploy to Vercel (`vercel deploy`)
 - **Database**: PostgreSQL via `DATABASE_URL` (see `DEPLOYMENT.md`)
-- **Chat service**: Deploy the `mini-services/chat-service` to Render/Railway on port 3003
-  (this also powers live video signaling)
+- **Chat service**: Deploy only `mini-services/chat-service` via the existing
+  Render Blueprint (`render.yaml`). Render supplies the port (`PORT=10000`); this
+  service also powers live video signaling. No Railway/second app deployment.
 
 ## License
 

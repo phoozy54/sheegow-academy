@@ -1,22 +1,26 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { CheckCircle2, MessageCircle, Phone, Mail, MapPin } from "lucide-react";
 import { Navbar } from "@/components/sheegow/navbar";
 import { Footer } from "@/components/sheegow/footer";
 import { CookieConsent } from "@/components/sheegow/cookie-consent";
 import { NAP, jsonLdScript } from "@/lib/seo";
 
-export function SeoShell({
+export async function SeoShell({
   children,
   jsonLd,
 }: {
   children: React.ReactNode;
   jsonLd?: unknown[];
 }) {
+  // CSP-1: this is a server component, so it reads the same per-request nonce.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <div className="flex min-h-screen flex-col">
       {jsonLd?.length ? (
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={jsonLdScript(jsonLd)}
         />
       ) : null}

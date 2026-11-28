@@ -106,9 +106,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Read the per-request nonce set by src/middleware.ts so Next.js can
-  // apply it to its inline scripts (hydration, boot, etc). This lets us
-  // drop 'unsafe-inline' from the CSP script-src directive.
+  // Read the per-request nonce set by src/proxy.ts so Next.js can apply it
+  // to its own inline scripts and so ours are allowed by the strict CSP.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
@@ -129,8 +128,9 @@ export default async function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/icon-app.png" />
         <link rel="apple-touch-icon" sizes="512x512" href="/icon-app.png" />
-        {/* Service worker registration */}
+        {/* Service worker registration — CSP-1: nonce is required */}
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`,
           }}

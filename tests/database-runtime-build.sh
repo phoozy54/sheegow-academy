@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# ARCHIVED — NON-CANONICAL (DEP-1). Test harness for the archived SQLite toolchain only.
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/../.zscripts" && pwd)"

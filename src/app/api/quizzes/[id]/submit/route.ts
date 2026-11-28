@@ -9,23 +9,17 @@ import {
   recomputeEnrollmentProgress,
 } from "@/lib/content-access";
 import { awardPoints, updateStreak, checkAndAwardBadges, POINTS } from "@/lib/gamification";
+import {
+  claimGradedSubmission,
+  gradeQuizSubmission,
+  type IncomingQuizAnswer,
+} from "@/lib/quiz-grading";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-interface IncomingAnswer {
-  questionId?: string;
-  choiceIds?: string[] | string;
-  textAnswer?: string;
-}
 interface SubmitBody {
   attemptId?: string;
-  answers?: IncomingAnswer[];
-}
-
-function asIds(value: string[] | string | undefined): string[] {
-  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === "string");
-  if (typeof value === "string" && value.length > 0) return [value];
-  return [];
+  answers?: IncomingQuizAnswer[];
 }
 
 /**
@@ -73,66 +67,23 @@ export async function POST(req: Request, { params }: RouteContext) {
     }
     if (attempt.submittedAt) return jsonError("This attempt was already submitted", 400);
 
-    const answers = Array.isArray(body?.answers) ? body.answers : [];
-    const questionMap = new Map(quiz.questions.map((q) => [q.id, q]));
-    const answerRows: {
-      attemptId: string;
-      questionId: string;
-      choiceIds: string | null;
-      textAnswer: string | null;
-      isCorrect: boolean | null;
-      pointsEarned: number;
-    }[] = [];
+    // QG-1: grading is server-authoritative. `total` is derived from every
+    // gradable question on the server, never from the submitted answer list.
+    const submittedAt = new Date();
+    const grade = gradeQuizSubmission(quiz.questions, body?.answers ?? [], {
+      timeLimitSec: quiz.timeLimitSec,
+      elapsedMs: submittedAt.getTime() - attempt.startedAt.getTime(),
+      passScore: quiz.passScore,
+    });
 
-    let earned = 0;
-    let total = 0;
-    let correctCount = 0;
+    // Atomic claim: a second concurrent submit affects 0 rows and gets no
+    // progress, points, streak or badge. Answers are written in the same tx.
+    const claimed = await db.$transaction((tx) =>
+      claimGradedSubmission(tx, { attemptId, grade, submittedAt }),
+    );
+    if (!claimed) return jsonError("This attempt was already submitted", 409);
 
-    for (const answer of answers) {
-      const questionId = answer.questionId?.trim();
-      if (!questionId) continue;
-      const question = questionMap.get(questionId);
-      if (!question || question.type === "short") continue;
-
-      const validIds = new Set(question.choices.map((c) => c.id));
-      const given = [...new Set(asIds(answer.choiceIds).filter((cid) => validIds.has(cid)))].sort();
-      const expected = question.choices
-        .filter((c) => c.isCorrect)
-        .map((c) => c.id)
-        .sort();
-      const isCorrect =
-        expected.length > 0 &&
-        given.length === expected.length &&
-        given.every((cid, i) => cid === expected[i]);
-      const pointsEarned = isCorrect ? question.points : 0;
-
-      total += question.points;
-      earned += pointsEarned;
-      if (isCorrect) correctCount += 1;
-
-      answerRows.push({
-        attemptId,
-        questionId,
-        choiceIds: JSON.stringify(given),
-        textAnswer: answer.textAnswer?.trim().slice(0, 4000) || null,
-        isCorrect,
-        pointsEarned,
-      });
-    }
-
-    const expired =
-      quiz.timeLimitSec !== null &&
-      Date.now() - attempt.startedAt.getTime() > quiz.timeLimitSec * 1000;
-    const score = total === 0 || expired ? 0 : Math.min(100, Math.round((earned / total) * 100));
-    const passed = !expired && total > 0 && score >= quiz.passScore;
-
-    await db.$transaction([
-      db.quizAnswer.createMany({ data: answerRows }),
-      db.quizAttempt.update({
-        where: { id: attemptId },
-        data: { submittedAt: new Date(), score, passed },
-      }),
-    ]);
+    const { score, passed, expired, correctCount } = grade;
 
     if (passed && quiz.lessonId) {
       await db.lessonProgress.upsert({
@@ -171,11 +122,13 @@ export async function POST(req: Request, { params }: RouteContext) {
         quizId: quiz.id,
         studentId: user.id,
         startedAt: attempt.startedAt,
-        submittedAt: new Date().toISOString(),
+        submittedAt: submittedAt.toISOString(),
         score,
         passed,
         correctCount,
-        questionCount: total === 0 ? quiz.questions.length : answerRows.length,
+        questionCount: grade.questionCount,
+        gradableCount: grade.gradableCount,
+        shortAnswerCount: grade.shortAnswerCount,
       },
       expired,
       newBadges,

@@ -1,3 +1,5 @@
+# Canonical role (DEP-1): this Blueprint contains ONLY the Render chat/WebRTC
+# signaling service. The Next.js app is deployed to Vercel; the database is Neon.
 services:
   - type: web
     name: sheegow-chat

@@ -2,6 +2,18 @@
 
 Deploy to production for free: **Vercel** (Next.js app) + **Neon** (Postgres database) + **Render** (chat service) + **Cloudflare** (DNS for sheegowacademy.com).
 
+> **Canonical target (DEP-1, owner decision 2026-11-28):** this is the *only*
+> supported production architecture. `render.yaml` defines **only** the
+> `sheegow-chat` service — never the Next.js app. The root `Caddyfile` and
+> `.zscripts/` (SQLite/self-host toolchain) are **ARCHIVED — NON-CANONICAL** and
+> must not be used for `sheegowacademy.com`.
+>
+> **Health check:** `GET /api/health` is public, read-only, `no-store`, and
+> returns `503` with `status: "degraded"` when the Neon DB check fails. It is the
+> single signal to connect to monitoring after deploy. The DB check is cached for
+> 10 seconds per instance, so configure probes at **30–60 second** intervals —
+> not every second.
+
 ---
 
 ## Step 1 — Create the Neon Postgres database (5 min)
@@ -55,7 +67,10 @@ The database needs tables and an initial super admin. **No demo users or demo
 courses are created** — students register themselves, the super admin creates
 teachers, and teachers create their own courses and live classes.
 
-Run this locally (or in any terminal with the repo):
+Run this locally (or in any terminal with the repo). **Only run schema setup
+against an empty Neon database.** `db:push` intentionally has no
+`--accept-data-loss` flag; for a database that already holds real data, take a
+snapshot and use reviewed migrations (`bun run db:deploy`) instead.
 
 ```bash
 cd sheegow-academy
@@ -63,8 +78,11 @@ cd sheegow-academy
 # Set the Neon connection string temporarily
 export DATABASE_URL="postgresql://neondb_owner:password@ep-xxx.us-east-2.aws.neon.tech/sheegow?sslmode=require"
 
-# Create all tables
+# Create all tables (empty DB only — no --accept-data-loss)
 bun run db:push
+
+# If reviewed migration files exist in prisma/migrations/, prefer:
+# bun run db:deploy
 
 # Seed the initial super admin (password comes from SUPER_ADMIN_PASSWORD)
 # Set SUPER_ADMIN_PASSWORD first — see .env.example
@@ -177,6 +195,7 @@ The Socket.io chat server needs its own host (Vercel can't run long-lived server
 ## Step 8 — Verify everything works
 
 Visit **https://www.sheegowacademy.com** and test:
+- [ ] `GET https://www.sheegowacademy.com/api/health` → `200`, `status: "ok"`, `Cache-Control: no-store` (a `503`/`degraded` means stop and investigate before continuing)
 - [ ] Home page loads with hero and real courses (no fake testimonials/stats)
 - [ ] Click "Log in" → sign in with `superadmin@sheegow.academy` and your
       `SUPER_ADMIN_PASSWORD` → lands in the dashboard
@@ -194,7 +213,8 @@ Visit **https://www.sheegowacademy.com** and test:
 
 ### "Database connection failed" on Vercel
 - Check `DATABASE_URL` env var is set correctly (starts with `postgresql://`, ends with `?sslmode=require`)
-- Make sure you ran `db:push` and `seed.ts` against the Neon database
+- Make sure you ran the safe `db:push` (empty DB only, no `--accept-data-loss`) or `db:deploy` with reviewed migrations, plus `seed.ts`, against the Neon database
+- Check `GET /api/health`; `503` means the app is up but the DB check failed
 
 ### Chat doesn't connect in production
 - Verify `NEXT_PUBLIC_CHAT_URL` is set to your Render URL (with `https://`)

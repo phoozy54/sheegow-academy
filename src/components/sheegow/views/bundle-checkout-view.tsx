@@ -293,7 +293,9 @@ export function BundleCheckoutView({ bundleId }: { bundleId: string }) {
         method: method as PaymentMethod,
         couponCode: coupon?.code,
       });
-      setPaidPaymentId(res.payment.id);
+      // BL-1 returns one payment per course; keep the first one for the
+      // existing single-invoice link without breaking older responses.
+      setPaidPaymentId(res.payments?.[0]?.id ?? res.payment?.id ?? null);
       setAlreadyEnrolledIds(res.alreadyEnrolledCourseIds ?? []);
       toast.success("Payment successful! You're enrolled.");
     } catch (err) {

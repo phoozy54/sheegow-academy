@@ -85,8 +85,8 @@ async function authenticateAndConnect(s: Socket, isProd: boolean) {
  *
  * - Production (Vercel + domain): connects directly to the Render chat
  *   service. This carries both chat AND WebRTC signaling for live video.
- * - Development (sandbox): connects through the Caddy gateway using the
- *   XTransformPort query so the local chat service on port 3003 is reachable.
+ * - Development (sandbox): connects directly to localhost:3003. The Caddy
+ *   gateway in .zscripts/ is ARCHIVED — NON-CANONICAL and is not used in prod.
  */
 export function getSocket(classId?: string, mode?: "host" | "viewer"): Socket {
   const requestedClassId = classId || null;

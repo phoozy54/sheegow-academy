@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { buildContentSecurityPolicy } from "@/lib/csp";
 
 /**
- * Proxy that generates a per-request nonce and injects it into the
- * Content-Security-Policy header so we can drop 'unsafe-inline' from
- * script-src. Next.js App Router automatically reads the `x-nonce` header
- * and applies the nonce to its inline scripts (hydration, boot, etc).
+ * CSP-1: generate a per-request nonce and put it on the FORWARDED REQUEST
+ * headers. Next.js App Router reads `x-nonce` from the request and applies it
+ * to its own inline scripts (hydration/boot); our own inline scripts read the
+ * same header in layout.tsx and SeoShell. Setting the nonce only on the
+ * response (the previous behaviour) left every inline script unnonced.
  *
- * Non-HTML responses (API routes, static assets, _next/static) skip the
- * proxy entirely to keep latency low.
- *
- * Note: Next.js 16 renamed `middleware` to `proxy` — this file uses the
- * new convention.
+ * Non-HTML responses (API routes, static assets) skip the proxy entirely.
+ * Next.js 16 renamed `middleware` to `proxy` — this file uses the new name.
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -26,14 +25,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Generate a fresh base64 nonce for this request.
-  // 16 bytes = 128 bits of entropy (OWASP recommendation).
-  const nonce = Buffer.from(crypto.randomUUID().replace(/-/g, ""), "hex").toString("base64");
+  // 16 random bytes → 32 hex chars = 128 bits, and valid CSP base64
+  // (a-f/0-9, length % 4 === 0). Web Crypto only: works in the Edge runtime.
+  const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
 
-  // Build the CSP with the nonce replacing 'unsafe-inline' in script-src.
-  // style-src keeps 'unsafe-inline' because Next.js injects inline styles
-  // that can't be nonced without a larger refactor (style-src 'unsafe-inline'
-  // is low-risk — it doesn't allow script execution).
   const chatOrigins = new Set<string>();
   for (const value of [
     process.env.NEXT_PUBLIC_CHAT_URL,
@@ -45,55 +42,27 @@ export function proxy(request: NextRequest) {
       chatOrigins.add(`${parsed.protocol}//${parsed.host}`);
       chatOrigins.add(`wss://${parsed.host}`);
     } catch {
-      /* ignore */
+      /* not a URL — ignore */
     }
   }
-  const connectSources = [
-    "'self'",
-    ...chatOrigins,
-    "https://api.cloudinary.com",
-  ].join(" ");
 
-  const csp = [
-    "default-src 'self'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "object-src 'none'",
-    "frame-ancestors 'none'",
-    `connect-src ${connectSources}`,
-    "img-src 'self' data: blob: https:",
-    "font-src 'self' data:",
-    "media-src 'self' blob:",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-    "style-src 'self' 'unsafe-inline'",
-    // Allow Next.js dev tools in development only.
-    ...(process.env.NODE_ENV === "development"
-      ? ["'unsafe-eval'"]
-      : []),
-  ].join("; ");
-
-  // Clone the request response so we can set headers.
-  const response = NextResponse.next({
-    request: {
-      headers: new Headers(request.headers),
-    },
+  const csp = buildContentSecurityPolicy({
+    nonce,
+    connectSources: [...chatOrigins, "https://api.cloudinary.com"],
+    isDevelopment: process.env.NODE_ENV === "development",
   });
 
-  // Set the nonce header so Next.js App Router applies it to inline scripts.
-  response.headers.set("x-nonce", nonce);
-  response.headers.set("Content-Security-Policy", csp);
+  // Critical: mutate a COPY of the request headers and pass them downstream.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
 
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("Content-Security-Policy", csp);
   return response;
 }
 
 export const config = {
-  // Run on all routes except static assets and API.
   matcher: [
-    // Match all paths except:
-    // - /api/ (API routes)
-    // - /_next/static/ (static files)
-    // - /_next/image/ (image optimization)
-    // - /favicon.ico, /logo.svg, /manifest.json, etc (files with extensions)
     "/((?!api|_next/static|_next/image|.*\\..*).*)",
   ],
 };

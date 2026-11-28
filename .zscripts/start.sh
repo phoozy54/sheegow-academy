@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# ARCHIVED — NON-CANONICAL (DEP-1, 2026-11-28). Self-host process supervisor.
+# Production is Vercel + Neon Postgres. Kept for reference only.
+
 set -e
 
 # 获取脚本所在目录

@@ -1,3 +1,7 @@
+# ARCHIVED — NON-CANONICAL (DEP-1, 2026-11-28)
+# Official production architecture: Vercel (Next.js app) + Neon Postgres +
+# Render (chat service only). This self-host reverse proxy is kept for reference
+# only and MUST NOT be used for sheegowacademy.com. Do not delete — archived.
 :81 {
         # Never proxy to an arbitrary port supplied by a caller — that would
         # expose any internal service listening on localhost (SSRF pivot).

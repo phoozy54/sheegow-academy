@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 /** Only the canonical site origin may read responses cross-origin. */
 const appOrigin = "https://www.sheegowacademy.com";
 
-// NOTE: Content-Security-Policy is now set by src/middleware.ts with a
+// NOTE: Content-Security-Policy is now set by src/proxy.ts with a
 // per-request nonce so we can drop 'unsafe-inline' from script-src.
 // The other security headers below are static and stay here.
 const securityHeaders = [

@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
+import { Prisma, type Payment } from "@prisma/client";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
@@ -9,6 +9,17 @@ import {
   handleAuthError,
   limitRequest,
 } from "@/lib/api-helpers";
+import {
+  allocateBundleAmount,
+  bundleGeneration,
+  bundleGenerationPrefix,
+  bundlePaymentId,
+  bundlePurchasePrefix,
+  clampDiscount,
+  isReplayEligiblePurchase,
+  moneyToCents,
+  sumPaymentCents,
+} from "@/lib/bundle-checkout";
 
 interface CheckoutBody {
   method?: string;
@@ -36,17 +47,56 @@ async function findValidCoupon(code: string) {
 type RouteContext = { params: Promise<{ id: string }> };
 
 /**
+ * Only a violation of `Payment.id` (the PK we use as the idempotency lock)
+ * means "another request already bought this". Enrollment unique violations
+ * are a different condition and must not be silently treated as a replay.
+ */
+function isPaymentPrimaryKeyConflict(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+  const target = (error.meta as { target?: unknown } | undefined)?.target;
+  const values = Array.isArray(target) ? target : [target];
+  return values.some(
+    (value) =>
+      typeof value === "string" &&
+      (value === "id" || /payment\.id/i.test(value) || /pkey$/i.test(value)),
+  );
+}
+
+const enrollmentInclude = {
+  course: {
+    include: {
+      teacher: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          profilePicture: true,
+        },
+      },
+    },
+  },
+  payment: {
+    select: { id: true, method: true, amount: true, status: true },
+  },
+} as const;
+
+/**
  * POST /api/bundles/:id/checkout
  * Authed: purchase a bundle. Body: { method, couponCode? }.
- *  - Validates the bundle is active and contains at least one course.
- *  - Validates the optional coupon against the bundle's price.
- *  - Creates ONE Payment row (no courseId — bundles pay for many courses).
- *  - Auto-enrolls the student in EVERY included course. Existing enrollments
- *    are kept and only re-linked to the new payment when they don't already
- *    have one. Already-enrolled courses are returned so the UI can show which
- *    ones the student already had.
- *  - All of this happens in a single Prisma transaction so a partial failure
- *    never leaves the student with some enrollments but no payment.
+ *
+ * BL-1: a bundle produces ONE completed Payment PER billable course, each with
+ * the real `courseId`, so courseId-based entitlement checks work and
+ * `Enrollment.paymentId @unique` is respected. The total is split in integer
+ * cents pro-rata by course price.
+ *
+ * Idempotency is enforced by deterministic `Payment.id` values derived from
+ * (student, bundle, generation, courseId) — deliberately time-independent, so
+ * there is no bucket-boundary race. Concurrent double-clicks collide on the
+ * primary key: the loser gets P2002 and returns the original purchase.
+ * A refund advances the generation, allowing exactly one legitimate repurchase.
+ * No schema change is required.
  */
 export async function POST(req: Request, { params }: RouteContext) {
   try {
@@ -104,151 +154,196 @@ export async function POST(req: Request, { params }: RouteContext) {
         400
       );
 
+    // ── Deterministic identity for this purchase attempt ──
+    // Generation is derived from existing rows: concurrent requests pick the
+    // same number and collide on Payment.id; a refund advances it so a real
+    // repurchase is possible. No clock-based bucket, no schema change.
+    const basePrefix = bundlePurchasePrefix(bundleId, user.id);
+    const history = await db.payment.findMany({
+      where: { studentId: user.id, transactionId: { startsWith: basePrefix } },
+      orderBy: { createdAt: "asc" },
+    });
+    const nextGeneration = bundleGeneration(history, basePrefix);
+    const activeGeneration = nextGeneration - 1;
+    const activePrefix =
+      activeGeneration >= 0 ? bundleGenerationPrefix(basePrefix, activeGeneration) : null;
+    const purchasePrefix = bundleGenerationPrefix(basePrefix, nextGeneration);
+    const purchasePaymentIds = [
+      ...includedCourses.map((course) => bundlePaymentId(purchasePrefix, course.id)),
+      bundlePaymentId(purchasePrefix, "receipt"),
+    ];
+    const courseIds = includedCourses.map((course) => course.id);
+
+    const buildResponse = async (
+      payments: Payment[],
+      alreadyPurchased: boolean,
+      priorEnrolledCourseIds?: string[],
+      status = 200,
+    ) => {
+      const enrollments = await db.enrollment.findMany({
+        where: { studentId: user.id, courseId: { in: courseIds } },
+        include: enrollmentInclude,
+      });
+      return NextResponse.json(
+        {
+          payment: payments[0] ?? null,
+          payments,
+          enrollments,
+          bundle: { id: bundle.id, title: bundle.title, price: bundle.price },
+          // Integer cents, never a Float reduce.
+          finalAmount: sumPaymentCents(payments) / 100,
+          alreadyEnrolledCourseIds:
+            priorEnrolledCourseIds ?? enrollments.map((enrollment) => enrollment.courseId),
+          alreadyPurchased,
+        },
+        { status },
+      );
+    };
+
+    // ── Replay only a CLEAN, COMPLETE purchase. A partially refunded
+    //    generation (one course refunded) must NOT be replayed: it would leave
+    //    that course locked forever. Such a generation advances the counter
+    //    and the student gets a fresh full purchase.
+    const activeRows = history.filter(
+      (payment) => !!activePrefix && payment.transactionId?.startsWith(activePrefix),
+    );
+    const billableCourseIds = includedCourses
+      .filter((course) => moneyToCents(course.price) > 0)
+      .map((course) => course.id);
+    if (isReplayEligiblePurchase(activeRows, billableCourseIds)) {
+      return await buildResponse(activeRows, true);
+    }
+
     // ── Coupon validation (optional) ──
     let discount = 0;
     let appliedCouponCode: string | null = null;
     if (couponCode) {
       const coupon = await findValidCoupon(couponCode);
       if (!coupon) return jsonError("Coupon is invalid or expired", 400);
-      discount = coupon.discount;
+      discount = clampDiscount(coupon.discount);
       appliedCouponCode = coupon.code;
     }
 
-    const finalAmount = Math.max(
+    // Money in integer cents, then allocated deterministically per course.
+    const bundlePriceCents = moneyToCents(bundle.price);
+    const finalAmountCents = Math.max(
       0,
-      Math.round(bundle.price * (1 - discount / 100) * 100) / 100
+      Math.round(bundlePriceCents * (1 - discount / 100)),
     );
+    const finalAmount = finalAmountCents / 100;
+    const allocations = allocateBundleAmount(includedCourses, finalAmount);
 
-    // ── Snapshot existing enrollments so we can avoid duplicate inserts and
-    //    report which courses the student already had access to.
+    // ── Snapshot existing enrollments so we can report which courses the
+    //    student already had and avoid overwriting an existing receipt link.
     const existingEnrollments = await db.enrollment.findMany({
-      where: {
-        studentId: user.id,
-        courseId: { in: includedCourses.map((c) => c.id) },
-      },
-      include: {
-        course: {
-          include: {
-            teacher: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-                profilePicture: true,
-              },
-            },
-          },
-        },
-        payment: {
-          select: { id: true, method: true, amount: true, status: true },
-        },
-      },
+      where: { studentId: user.id, courseId: { in: courseIds } },
+      include: enrollmentInclude,
     });
     const existingByCourse = new Map(
-      existingEnrollments.map((e) => [e.courseId, e])
+      existingEnrollments.map((enrollment) => [enrollment.courseId, enrollment]),
     );
 
-    // ── Create payment + enrollments atomically ──
-    const result = await db.$transaction(async (tx) => {
-      // One payment for the entire bundle (courseId left null — bundle pays
-      // for multiple courses, so a single courseId wouldn't make sense).
-      const payment = await tx.payment.create({
-        data: {
-          studentId: user.id,
-          courseId: null,
-          amount: finalAmount,
-          method,
-          status: "completed",
-          transactionId: `demo_bundle_${randomUUID()}`,
-          couponCode: appliedCouponCode,
-        },
-        include: {
-          course: { select: { id: true, title: true, level: true, image: true } },
-        },
-      });
+    // ── Create payments + enrollments atomically ──
+    try {
+      const result = await db.$transaction(async (tx) => {
+        const payments: Payment[] = [];
+        const alreadyEnrolledCourseIds: string[] = [];
 
-      const enrollments: Array<Record<string, unknown>> = [];
-      const alreadyEnrolledCourseIds: string[] = [];
-
-      for (const course of includedCourses) {
-        const existing = existingByCourse.get(course.id);
-        if (existing) {
-          // Already enrolled — only re-link the payment if the existing
-          // enrollment has no payment yet (so the receipt still works).
-          alreadyEnrolledCourseIds.push(course.id);
-          if (!existing.paymentId) {
-            const updated = await tx.enrollment.update({
-              where: { id: existing.id },
-              data: { paymentId: payment.id },
-              include: {
-                course: {
-                  include: {
-                    teacher: {
-                      select: {
-                        id: true,
-                        fullName: true,
-                        email: true,
-                        profilePicture: true,
-                      },
-                    },
-                  },
-                },
-                payment: {
-                  select: { id: true, method: true, amount: true, status: true },
-                },
+        // Every allocation (including a 0-cent one) gets a payment row, so
+        // paid courses are never locked out by content-access.
+        for (const allocation of allocations) {
+          payments.push(
+            await tx.payment.create({
+              data: {
+                id: bundlePaymentId(purchasePrefix, allocation.courseId),
+                studentId: user.id,
+                courseId: allocation.courseId,
+                amount: allocation.amount,
+                method,
+                status: "completed",
+                transactionId: `${purchasePrefix}${allocation.courseId}`,
+                couponCode: appliedCouponCode,
               },
-            });
-            enrollments.push(updated);
-          } else {
-            enrollments.push(existing);
-          }
-        } else {
-          const created = await tx.enrollment.create({
-            data: {
+            }),
+          );
+        }
+
+        // A bundle of only free courses still needs a receipt-shaped record so
+        // the existing response/UI contract stays intact.
+        if (payments.length === 0) {
+          payments.push(
+            await tx.payment.create({
+              data: {
+                id: bundlePaymentId(purchasePrefix, "receipt"),
+                studentId: user.id,
+                courseId: null,
+                amount: 0,
+                method,
+                status: "completed",
+                transactionId: `${purchasePrefix}receipt`,
+                couponCode: appliedCouponCode,
+              },
+            }),
+          );
+        }
+
+        const paymentByCourse = new Map(
+          payments
+            .filter((payment): payment is Payment & { courseId: string } => !!payment.courseId)
+            .map((payment) => [payment.courseId, payment]),
+        );
+
+        for (const course of includedCourses) {
+          const existing = existingByCourse.get(course.id);
+          const paymentForCourse = paymentByCourse.get(course.id) ?? null;
+
+          if (existing) alreadyEnrolledCourseIds.push(course.id);
+
+          // upsert avoids a P2002 race if an enrollment appeared after the
+          // snapshot above. Only link a payment when none was linked before.
+          await tx.enrollment.upsert({
+            where: {
+              studentId_courseId: { studentId: user.id, courseId: course.id },
+            },
+            create: {
               studentId: user.id,
               courseId: course.id,
-              paymentId: payment.id,
+              paymentId: paymentForCourse?.id ?? null,
               progress: 0,
             },
-            include: {
-              course: {
-                include: {
-                  teacher: {
-                    select: {
-                      id: true,
-                      fullName: true,
-                      email: true,
-                      profilePicture: true,
-                    },
-                  },
-                },
-              },
-              payment: {
-                select: { id: true, method: true, amount: true, status: true },
-              },
-            },
+            update:
+              paymentForCourse && !existing?.paymentId
+                ? { paymentId: paymentForCourse.id }
+                : {},
+            include: enrollmentInclude,
           });
-          enrollments.push(created);
+        }
+
+        return { payments, alreadyEnrolledCourseIds };
+      });
+      return await buildResponse(result.payments, false, result.alreadyEnrolledCourseIds, 201);
+    } catch (e) {
+      // A concurrent request won the primary-key race. Return its purchase;
+      // our own transaction rolled back, so no duplicate charge exists.
+      if (isPaymentPrimaryKeyConflict(e)) {
+        // Re-query: the winner may have committed after our history snapshot.
+        const winnerPayments = await db.payment.findMany({
+          where: {
+            id: { in: purchasePaymentIds },
+            studentId: user.id,
+            status: "completed",
+          },
+          orderBy: { createdAt: "asc" },
+        });
+        if (winnerPayments.length > 0) {
+          return await buildResponse(winnerPayments, true);
         }
       }
-
-      return { payment, enrollments, alreadyEnrolledCourseIds };
-    });
-
-    return NextResponse.json(
-      {
-        payment: result.payment,
-        enrollments: result.enrollments,
-        bundle: {
-          id: bundle.id,
-          title: bundle.title,
-          price: bundle.price,
-        },
-        finalAmount,
-        alreadyEnrolledCourseIds: result.alreadyEnrolledCourseIds,
-      },
-      { status: 201 }
-    );
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+        return jsonError("Enrollment details changed during checkout. Please retry.", 409);
+      }
+      throw e;
+    }
   } catch (e) {
     const authErr = handleAuthError(e);
     if (authErr) return authErr;
