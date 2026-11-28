@@ -1,6 +1,6 @@
 # Wave 2 — Hagaajinta & Xaqiijinta (staging keliya)
 
-**Taariikhda:** 2026-11-28 · **Nooca:** 1.2 (final) · **Gate:** G0 ✅ → G1 ✅ → G2 ✅ → **G3 ✅ (reviewer ≠ author; wareegga 2aad wuu dhammaystirmay)** → G4 (deploy, ogolaansho cusub) → G5
+**Taariikhda:** 2026-11-28 · **Nooca:** 1.3 (deployed) · **Gate:** G0 ✅ → G1 ✅ → G2 ✅ → **G3 ✅** → **G4 ✅ (push + deploy la ogolaaday)** → **G5 ✅ (post-deploy verification pass)**
 
 > Production `https://www.sheegowacademy.com/` **lama taaban**. Dhammaan tijaabooyinku waxay ka dhaceen `http://127.0.0.1:3002` (dev server) + `sheegow-staging-db` (container-ka cusub ee la oggolaaday). 9-da container ee jira lama eegin, lama taaban.
 
@@ -84,8 +84,13 @@
 
 ---
 
-## 5. G4 / G5
+## 5. G4 / G5 — push, deploy, G5 ✅
 
-- **G3 (dib-u-eegis madax-bannaan):** ✅ wareegga 1aad + wareegga 2aad (reviewer ≠ author). Dhammaan High/Medium iyo L2/L3/L4 waa `Resolved`; residual Low (L1 socket token, M2 source-strings, IP rate-limit) waa la diiwaangeliyay, deploy ma block gareynayo.
-- **G4 (deploy):** MA JIRO ogolaansho. Ma jiro push, PR, ama Vercel deploy. Code-ku waa local keliya.
-- **G5 (post-deploy verification):** ma bilaabayo ilaa G4 laga helo.
+- **G3 (dib-u-eegis madax-bannaan):** ✅ wareegga 1aad + wareegga 2aad (reviewer ≠ author). Dhammaan High/Medium iyo L2/L3/L4 waa `Resolved`; residual Low (L1 socket token, M2 source-strings, IP rate-limit) waa la diiwaangeliyay.
+- **G4 (deploy):** mulkiilaha ayaa si cad u oggolaaday push + deploy. `cbb72e8` waxaa lagu riixay `origin/main`; GitHub status `Vercel - sheegow-academy` → **success** (2026-11-28T01:42:47Z). Ma jiro rollback.
+- **G5 (post-deploy, GET keliya — production passive):**
+  - `https://www.sheegowacademy.com/api/health` → **200**, `checks.db=ok` (host/connection details ma jiraan).
+  - `https://www.sheegowacademy.com/` → **200**, 27/27 `<script>` tags nonced.
+  - `script-src`: nonce ✅, `strict-dynamic` ✅, **`unsafe-inline` ma laha** ✅; `frame-src` Google Maps ✅. (`style-src` wuxuu hore u lahaa `unsafe-inline`; ma aha isbeddel Wave 2.)
+  - Ma jiro POST, scan firfircoon, lacag dhab ah, PII dhab ah, ama isbeddel DB ah oo production laga sameeyay.
+- **Isbeddel la ogolaaday:** dhammaan isticmaalayaashu hal mar bay dib u login gareynayaan (tokens hore `sessionVersion` ma laha) — fail-closed ula kac ah.

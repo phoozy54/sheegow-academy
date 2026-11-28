@@ -226,7 +226,7 @@ Boundary kasta waa inuu leeyahay: **authenticate → authorize → validate → 
 **Status:** `QG-1`, `BL-1`, `CSP-1`, `DEP-1` = `FIXED — VERIFIED` (dib-u-eegis madax-bannaan); inta kale waa `OPEN`.
 **Wave 1 waa la deploy gareeyay** (ogolaansho cad): commit `5608526` + `1366bbd`, Vercel auto-deploy `success`, `/api/health` 200, HTML 27/27 scripts nonced.
 **Wave 2 active scan (staging localhost keliya, 2026-11-28):** `SES-1`, `ACL-1`, `PAY-1` waa la xaqiijiyay — eeg `docs/security/WAVE2-scan-results.md`.
-**Wave 2 hagaajin (staging, 2026-11-28):** `SES-1`, `ACL-1`, `PAY-1` waa la hagaajiyay; dib-u-eegis madax-bannaan (reviewer ≠ author) wareeggiisii labaad wuu dhammaystirmay, High/Medium dhammaan `Resolved`; staging re-scan 27/32 + coupon scan 8/8 (5 check ayaa 429 ka yimid `/register`, ma aha daciifnimo). 47/47 tests, `tsc --noEmit` clean (eeg `docs/security/WAVE2-fix-verification.md`). Ma jiro schema/env/dependency change. **G3 ✅; G4 deploy ma jiro ogolaansho cusub; Wave 3 ma bilaabayo.**
+**Wave 2 hagaajin + deploy (2026-11-28):** `SES-1`, `ACL-1`, `PAY-1` waa la hagaajiyay; dib-u-eegis madax-bannaan (reviewer ≠ author) wareeggiisii labaad wuu dhammaystirmay, High/Medium dhammaan `Resolved`; staging re-scan 27/32 + coupon scan 8/8 (5 check ayaa 429 ka yimid `/register`, ma aha daciifnimo). 47/47 tests, `tsc --noEmit` clean, `bun run build` success. `cbb72e8` waa la riixay oo Vercel production deploy wuu **success** noqday; G5 passive verification: health 200 `db=ok`, `/` 27/27 nonced, `script-src` nonce + strict-dynamic + `unsafe-inline` ma laha (eeg `docs/security/WAVE2-fix-verification.md`). Ma jiro schema/env/dependency change. **G0–G5 ✅ — Wave 2 VERIFIED & DEPLOYED; Wave 3 ma bilaabayo.**
 
 | ID | Daciifnimada | Sev | Gate | Status |
 |---|---|---|---|---|
@@ -281,4 +281,4 @@ Faahfaahinta buuxda iyo reproduction/checklist: `docs/SECURITY-PLAYBOOK.md`.
 
 ---
 
-**Gabagabo:** Dastuurkani ma aha decoration. Waa shuruudda aan ku ilaalinayno tacabka, ardayda, macallimiinta, iyo kalsoonida `sheegowacademy.com`. Wave 1 (`QG-1`, `BL-1`, `CSP-1`, `DEP-1`) wuxuu dhamaystirmay G0→G5, waxaana la deploy gareeyay ogolaansho cad ka dib. **Wave 2 (`SES-1`, `ACL-1`, `PAY-1`) waa la hagaajiyay waana la xaqiijiyay staging gudaheed; `RT-1`, `OPS-1` weli ma bilaaban. Deploy/Wave 3 ma bilaabayo ilaa ogolaansho cusub laga helo.**
+**Gabagabo:** Dastuurkani ma aha decoration. Waa shuruudda aan ku ilaalinayno tacabka, ardayda, macallimiinta, iyo kalsoonida `sheegowacademy.com`. Wave 1 (`QG-1`, `BL-1`, `CSP-1`, `DEP-1`) wuxuu dhamaystirmay G0→G5, waxaana la deploy gareeyay ogolaansho cad ka dib. **Wave 2 (`SES-1`, `ACL-1`, `PAY-1`) waa la hagaajiyay, la xaqiijiyay, oo la deploy gareeyay; `RT-1`, `OPS-1` weli ma bilaaban. Wave 3 ma bilaabayo ilaa ogolaansho cusub laga helo.**
